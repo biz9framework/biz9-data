@@ -130,8 +130,9 @@ Create and or update record in table database.
 ### Example
 ```node
 var db = db_open_connect_object; 
-var item = {tbl_id:0,,data_type:DT_BLANK,title:'my_title'};
-biz9data.update_item(db,DT_BLANK,item,function(error,data) {
+var data_type = "dt_blank";
+var item = {tbl_id:0,,data_type:data_type,title:'my_title'};
+biz9data.update_item(db,data_type,item,function(error,data) {
 });
 ```
 ## <a id="get_sql"></a>Get SQL
