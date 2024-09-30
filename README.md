@@ -3,7 +3,7 @@
 BiZ9-Data is a data-cache access library for web, service, and or mobile based applications, which utilizes [MongoDB](https://mongodb.com/) for database and [Redis](https://redis.com) for caching.
 
 ### Issue
-When MongoDB grows it get slower and slower. Store data in Cache and retrieve from memory will speed up your applications tremodulosly. This library distribute data in cache memory to improve performance. Update, modify, and retrieve data using popular Create, Read, Update, Delete (CRUD) calls.
+When MongoDB (No SQL) grows it gets slower and slower. Store data in Cache and retrieve from memory will speed up your applications tremodulosly. This library distribute data in cache memory to improve performance. Update, modify, and retrieve data using popular Create, Read, Update, Delete (CRUD) calls.
 
 ## Installation
 
