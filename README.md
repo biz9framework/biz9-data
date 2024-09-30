@@ -17,16 +17,18 @@ npm install biz9-data
 * [Open Database Connection](#get_connection)
 * [Close Database Connection](#close_connection)
 * [Update Item](#update_item)
-* [Get SQL](#get_item)
-* [Delete SQL](#delete_sql)
-* [Get SQL With Paging](#get_sql_with_paging)
 * [Get Item](#get_item)
+* [Get SQL](#get_item)
+* [Get SQL With Paging](#get_sql_with_paging)
 * [Delete Item](#delete_item)
+* [Delete SQL](#delete_sql)
 * [Update List](#update_list)
 * [Delete List](#delete_list) 
 * [Count](#count) 
 * [Drop](#drop) 
-## [Full Express.js Example](expressjsexample)
+* [Credit](#credit) 
+
+## <a id="expressjsexample"></a>Full Express.js Example
 ```node
 // index.js
  $ npm install express
@@ -68,8 +70,8 @@ router.post("/update/:data_type/:tbl_id", function(req, res) {
         });
 });
 ```
-
-## [Intialize Reference Object](#reference)
+## <a id="reference"></a>Intialize Reference Object
+Intialize biz9-data object to be used in application. 
 ```node
 // App.js
 var data_config={
@@ -84,8 +86,7 @@ var data_config={
 };
 var biz9data=require("biz9-data")(data_config);
 ```
-
-## [Open Database Connection](#get_connection)
+## <a id="get_connection"></a>Open Database Connection
 Establish and open connection with Mongo database.
 ### Params
 - db_name ( required )
@@ -103,7 +104,7 @@ biz9data.get_client_db(function(error,_client_db){
     db = client_db.db(db_name);
 });
 ```
-## [Close database connection](#close_connection)
+## <a id="close_connection"></a>Close database connection
 Close and dispose Mongo database connection.
 ### Params
 - client_db ( required )
@@ -119,7 +120,7 @@ biz9data.close_client_db(client_db,function(error){
     client_db = null;
 });
 ```
-## [Update Item](#update_item)
+## <a id="update_item"></a>Update Item
 Create and or update record in table database. 
 ### Params
 - client_db ( required )
@@ -145,7 +146,7 @@ var item = {tbl_id:0,,data_type:DT_BLANK,title:'my_title'};
 biz9data.update_item(db,DT_BLANK,item,function(error,data) {
 });
 ```
-## [Get SQL](#get_sql)
+## <a id="get_sql"></a>Get SQL
 Find records in table by filter.
 ### Params
 - client_db ( required )
@@ -174,7 +175,7 @@ var data_type = 'dt_blank';
 biz9data.get_sql(db,data_type,sql,sort,function(error,data_list) {
 });
 ```
-## [Delete SQL](#delete_sql)
+## <a id="delete_sql"></a>Delete SQL
 Delete records in table by filter.
 ### Params
 - filter_object ( required )
@@ -195,7 +196,7 @@ var data_type = 'blank_dt';
 biz9data.delete_sql(db,data_type,sql,function(error,data_list) {
 });
 ```
-## [Get SQL With Paging](#get_sql_with_paging)
+## <a id="get_sql_with_paging"></a>Get SQL With Paging
 Find records in table by filter with paging.
 ### Params
 - client_db ( required )
@@ -238,7 +239,7 @@ var page_size=12;
 biz9data.get_sql_paging(db,data_type,sql,sort,page_current,page_size,function(error,data_list,total_count,page_count){
 });
 ```
-## [Get Item](#get_item)
+## <a id="get_item"></a>Get Item
 Get record from table in database by primary key field.
 ### Params
 - client_db ( required )
@@ -265,7 +266,7 @@ let data_type = "dt_blank";
 biz9data.get_item(db,data_type,tbl_id,function(error,data) {
 });
 ```
-## [Delete Item](#delete_item)
+## <a id="delete_item"></a>Delete Item
 Delete Item from table in database by filter.
 ### Params
 - client_db ( required )
@@ -289,7 +290,7 @@ var data_type = 'dt_blank';
 biz9data.delete_item(db,data_type,tbl_id,function(error,data) {
 });
 ```
-## [Update List](#update_list)
+## <a id="update_list"></a>Update List
 Create and or update a list of records for a table in the database.
 ### Params
 - client_db ( required )
@@ -319,6 +320,7 @@ var item_list = [
 biz9data.update_list(db,item_list,function(error,data_list) {
 });
 ```
+## <a id="delete_list"></a>Delete List
 ## [Delete List](#delete_list)
 Delete a list of records from table in database by filter.
 ### Params
@@ -349,7 +351,7 @@ var item_list = [
 biz9data.delete_list(db,item_list,function(error,data_list) {
 });
 ```
-## [Count](#count)
+## <a id="count"></a>Count
 Count records in table from database.
 ### Params
 - client_db ( required )
@@ -380,7 +382,7 @@ var data_type = 'dt_blank';
 biz9data.count(db,data_type,function(error,data) {
 });
 ```
-## [Drop](#drop)
+## <a id="drop"></a>Drop
 Drop table from database.
 ### Params
 - client_db ( required )
@@ -399,12 +401,7 @@ var data_type = 'dt_blank';
 biz9data.drop(db,data_type,function(error,data) {
 });
 ```
-
-
-
-
-
-## Contributing
+## <a id="credit"></a>Credits
 
 ### Company
 - BoSS AppZ
