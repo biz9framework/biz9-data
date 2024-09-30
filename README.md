@@ -42,9 +42,10 @@ router.post("/update/:data_type/:tbl_id", function(req, res) {
     var db = {};
     async.series([
         function(call){
+            var db_name = 'db_one';
             biz9data.get_client_db(function(error,_client_db){
                 client_db=_client_db;
-                db = client_db.db(helper.app_title_id);
+                db = client_db.db(db_name);
                 call();
             });
         },
