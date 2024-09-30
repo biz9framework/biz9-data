@@ -2,6 +2,9 @@
 
 BiZ9-Data is a data-cache access library for web, service, and or mobile based applications, which utilizes [MongoDB](https://mongodb.com/) for database and [Redis](https://redis.com) for caching.
 
+### Issue
+When MongoDB grows it get slower and slower. Store data in Cache and retrieve from memory will speed up your applications tremodulosly. This library distribute data in cache memory to improve performance. Update, modify, and retrieve data using popular Create,Read,Update, Delete (CRUD) calls.
+
 ## Installation
 
 Use the [npm](https://npm.com) installer to install.
@@ -30,9 +33,11 @@ npm install biz9-data
 
 ## <a id="expressjsexample"></a>Full Express.js Example
 ```node
-// index.js
- $ npm install express
- $ npm i async
+// Expressjs index.js
+ How to use:
+ $ npm install [express](https://expressjs.com)
+ $ npm i  [async](https://www.npmjs.com/package/async)
+
 router.post("/update/:data_type/:tbl_id", function(req, res) {
     var db = {};
     async.series([
@@ -73,7 +78,7 @@ router.post("/update/:data_type/:tbl_id", function(req, res) {
 ## <a id="reference"></a>Intialize Reference Object
 Intialize biz9-data object to be used in application. 
 ```node
-// App.js
+// Expressjs App.js
 var data_config={
     mongo_server_user:"localhost",
     mongo_username_password:"ban:12345678",
