@@ -95,16 +95,13 @@ var biz9data=require("biz9-data")(data_config);
 ## <a id="get_connection"></a>Open Database Connection
 Establish and open connection with Mongo database.
 ### Params
-- db_name ( required )
--- Title: Database Name 
--- Type: string
+- db_name ( required ) / Database Name / string
 ### Returns
-- client_db
--- Title: Open client database connection
--- Type: database object
+- client_db / Open client database connection / database object
 ### Example
 ```node
-let db_name = "my_database_1";
+var db_name = "my_database_1";
+var db = {}:
 biz9data.get_client_db(function(error,_client_db){
     client_db=_client_db;
     db = client_db.db(db_name);
@@ -113,38 +110,23 @@ biz9data.get_client_db(function(error,_client_db){
 ## <a id="close_connection"></a>Close database connection
 Close and dispose Mongo database connection.
 ### Params
-- client_db ( required )
--- Title: Open client database connection
--- Type: database object
+- client_db ( required ) / Open client database connection / database object
 ### Returns
-- client_db 
--- Title: Closed client database connection.
--- Type: database object
+- client_db / Closed client database connection / database object
 ### Example
 ```node
 biz9data.close_client_db(client_db,function(error){
-    client_db = null;
 });
 ```
 ## <a id="update_item"></a>Update Item
 Create and or update record in table database. 
 ### Params
-- client_db ( required )
--- Title: Open client database connection
--- Type: database object
-- tbl_id ( required )
--- Title: Primary key  
--- Type: GUID
-- data_type ( required )
--- Title: Table Name  
--- Type: string
-- data_item ( required )
--- Title: Data item object to be saved.   
--- Type: object
+- client_db ( required ) / Open client database connection / database object
+- tbl_id ( required ) / Primary key / GUID
+- data_type ( required ) / Table Name / string
+- data_item ( required ) / Data item object to be saved / object
 ### Returns
-- data_item
--- Title: Data item of updated record. On create record, tbl_id field unique GUID is generated.
--- Type: object
+- data_item / Data item of updated record. On create record, tbl_id field unique GUID is generated / object
 ### Example
 ```node
 var db = db_open_connect_object; 
@@ -155,23 +137,12 @@ biz9data.update_item(db,DT_BLANK,item,function(error,data) {
 ## <a id="get_sql"></a>Get SQL
 Find records in table by filter.
 ### Params
-- client_db ( required )
--- Title: Open client database connection
--- Type: database object
-- data_type ( required )
--- Title: Table Name  
--- Type: string
-- filter_object ( required )
--- Title: Filter by properties object. 
--- Type: object
-- sort_by_object ( required )
--- Title: The order to sort the returned records. 
--- 1 = ascending order /  -1 = descending order.
--- Type: object
+- client_db ( required ) / Open client database connection / database object
+- data_type ( required ) / Table Name / string
+- filter_object ( required ) / Filter by properties object / object
+- sort_by_object ( required ) / The order to sort the returned records.  / 1 = ascending order /  -1 = descending order / object
 ### Returns
-- data_list 
--- Title: List of records from database table
--- Type: list of objects
+- data_list / List of records from database table / list of objects
 ### Example
 ```node
 var db = db_open_connect_object;
@@ -184,16 +155,10 @@ biz9data.get_sql(db,data_type,sql,sort,function(error,data_list) {
 ## <a id="delete_sql"></a>Delete SQL
 Delete records in table by filter.
 ### Params
-- filter_object ( required )
--- Title: Filter by properties object. 
--- Type: object
-- data_type ( required )
--- Title: Table Name  
--- Type: string
+- filter_object ( required ) / Filter by properties object / object
+- data_type ( required ) / Table Name / string
 ### Returns
-- data_list [];
--- Title: Empty data list
--- Type: list
+- data_list [] / Empty data list / list
 ### Example
 ```node
 var db = db_open_connect_object;
@@ -205,35 +170,17 @@ biz9data.delete_sql(db,data_type,sql,function(error,data_list) {
 ## <a id="get_sql_with_paging"></a>Get SQL With Paging
 Find records in table by filter with paging.
 ### Params
-- client_db ( required )
--- Title: Open client database connection
--- Type: database object
-- filter_object ( required )
--- Title: Filter by properties object. 
--- Type: object
-- data_type ( required )
-    -- Title: Table Name  
-    -- Type: string
-- sort_by_object ( required )
-    -- Title: The order to sort the returned records. 
-    -- 1 = ascending order /  -1 = descending order.
-    -- Type: object
-- page_current ( required )
-    -- Title: Current page of list  
-    -- Type: int
-- page_size ( required )
-    -- Title: Max size of list  
-    -- Type: int
+- client_db ( required ) / Open client database connection / database object
+- filter_object ( required ) / Filter by properties object / object
+- data_type ( required ) / Table Name / string
+- sort_by_object ( required ) / The order to sort the returned records /
+    1 = ascending order /  -1 = descending order / object
+- page_current ( required ) / Current page of list  / int
+- page_size ( required ) / Max size of list / int
 ### Returns
-- data_list
--- Title: List of records from database table
--- Type: list
-- total_count
--- Title: Count of records from database table
--- Type: int
-- page_count
--- Title: Page count per list of records from database table
--- Type: int
+- data_list / List of records from database table / list
+- total_count / Count of records from database table / int
+- page_count / Page count per list of records from database table / int
 ### Example
 ```node
 var db = db_open_connect_object;
@@ -248,22 +195,12 @@ biz9data.get_sql_paging(db,data_type,sql,sort,page_current,page_size,function(er
 ## <a id="get_item"></a>Get Item
 Get record from table in database by primary key field.
 ### Params
-- client_db ( required )
-    -- Title: Open client database connection
-    -- Type: database object
-- data_type ( required )
-    -- Title: Table Name  
-    -- Type: string
-- tbl_id ( optional, recommended )
-    -- Title: Primary key of record in table from database.  
-    -- Type: GUID
-- title_url ( optional )
-    -- Title: Title url of the title of the data item.
-    -- Type: string
+- client_db ( required ) / Open client database connection / database object
+- data_type ( required ) / Table Name / string
+- tbl_id ( optional, recommended ) / Primary key of record in table from database / GUID
+- title_url ( optional ) / Title url of the title of the data item / string
 ### Returns
-- data_item
--- Title: Record from table in database
--- Type: object
+- data_item / Record from table in database / object
 ### Example
 ```node
 var db = db_open_connect_object;
@@ -275,19 +212,11 @@ biz9data.get_item(db,data_type,tbl_id,function(error,data) {
 ## <a id="delete_item"></a>Delete Item
 Delete Item from table in database by filter.
 ### Params
-- client_db ( required )
-    -- Title: Open client database connection
-    -- Type: database object
-- data_type ( required )
-    -- Title: Table Name  
-    -- Type: string
-- tbl_id ( optional, recommended )
-    -- Title: Primary key of record in table from database.  
-    -- Type: GUID
+- client_db ( required ) / Open client database connection / database object
+- data_type ( required ) / Table Name / string
+- tbl_id ( optional, recommended ) / Primary key of record in table from database / GUID
 ### Returns
-- data_item 
--- Title: Empty Record from table in database
--- Type: object
+- data_item / Empty Record from table in database / object
 ### Example
 ```node
 var db = db_open_connect_object;
@@ -299,16 +228,10 @@ biz9data.delete_item(db,data_type,tbl_id,function(error,data) {
 ## <a id="update_list"></a>Update List
 Create and or update a list of records for a table in the database.
 ### Params
-- client_db ( required )
-    -- Title: Open client database connection
-    -- Type: database object
-- data_list ( required )
-    -- Title: List of records to be added or upated on the table in the database.  
-    -- Type: list
+- client_db ( required ) / Open client database connection / database object
+- data_list ( required ) / List of records to be added or upated on the table in the database / list
 ### Returns
-- data_list 
--- Title:  Data items of updated records. On create records, tbl_id field unique GUID is generated.
--- Type: list
+- data_list / Data items of updated records. On create records, tbl_id field unique GUID is generated / list
 ### Example
 ```node
 var db = db_open_connect_object;
@@ -330,16 +253,10 @@ biz9data.update_list(db,item_list,function(error,data_list) {
 ## [Delete List](#delete_list)
 Delete a list of records from table in database by filter.
 ### Params
-- client_db ( required )
-    -- Title: Open client database connection
-    -- Type: database object
-- data_list ( required )
-    -- Title: List of records to be added or upated on the table in the database.  
-    -- Type: list
+- client_db ( required ) / Open client database connection / database object
+- data_list ( required ) / List of records to be added or upated on the table in the database / list
 ### Returns
-- data_list 
--- Title:  Empty Data items of updated records. 
--- Type: list
+- data_list / Empty Data items of updated records / list
 ### Example
 ```node
 var db = db_open_connect_object;
@@ -360,16 +277,10 @@ biz9data.delete_list(db,item_list,function(error,data_list) {
 ## <a id="count"></a>Count
 Count records in table from database.
 ### Params
-- client_db ( required )
-    -- Title: Open client database connection
-    -- Type: database object
-- data_type ( required )
-    -- Title: Table Name  
-    -- Type: string 
+- client_db ( required ) / Open client database connection / database object
+- data_type ( required ) / Table Name / string 
 ### Returns
-- count 
--- Title:  Numbers of records. 
--- Type: int
+- count / Numbers of records / int
 ### Example
 ```node
 var db = db_open_connect_object;
@@ -391,16 +302,10 @@ biz9data.count(db,data_type,function(error,data) {
 ## <a id="drop"></a>Drop
 Drop table from database.
 ### Params
-- client_db ( required )
-    -- Title: Open client database connection
-    -- Type: database object
-- data_type ( required )
-    -- Title: Table Name  
-    -- Type: string 
+- client_db ( required ) / Open client database connection / database object
+- data_type ( required ) / Table Name  / string 
 ### Returns
-- null 
--- Title:  Success if complete. 
--- Type: string
+- null / Success if complete / string
 ### Example
 ```node
 var data_type = 'dt_blank';
