@@ -7,8 +7,8 @@ Use the [npm](https://npm.com) installer to install.
 npm install biz9-data
 ```
 ## Required
-* [MongoDB] (https://www.mongodb.com/docs/manual/installation/)
-* [Redis] (https://redis.io/docs/latest/operate/oss_and_stack/install/install-redis/)
+* [MongoDB](https://www.mongodb.com/docs/manual/installation/)
+* [Redis](https://redis.io/docs/latest/operate/oss_and_stack/install/install-redis/)
 ## Contents
 * [Example with Express.js](#expressjsexample)
 * [Initialize Reference Object](#reference)
