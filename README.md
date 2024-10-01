@@ -76,7 +76,7 @@ Intialize biz9-data object to be used in application.
 ```node
 // Expressjs App.js
 var data_config={
-    mongo_server_user:"localhost",
+    mongo_server_user:"admin",
     mongo_username_password:"ban:12345678",
     mongo_ip:"localhost",
     mongo_port:"27017",
