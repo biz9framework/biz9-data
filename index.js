@@ -8,6 +8,7 @@ const path = require('path')
 const biz9_config_file = require(path.join(__dirname, '../../biz9_config.js'));
 const dataz = require('./dataz/index.js');
 const get_client_db = async () => {
+    console.log('aaaaaaa');
     return [error,connect] = await dataz.get_db_connect();
 };
 module.exports = {

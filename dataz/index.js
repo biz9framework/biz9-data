@@ -6,7 +6,6 @@
  */
 const path = require('path')
 const biz9_config_file = require(path.join(__dirname, '../../../biz9_config.js'));
-
 const get_blank=()=>{
      return new Promise((resolve) =>{
     });
