@@ -10,6 +10,9 @@ const async = require("async");
 const redis = require('redis');
 const { get_title_url } = require(process.env.BIZ9_HOME + "/biz9-utility/src/code");
 const data_mon = require('./lib/mongo_db.js');
+const MONGO_FULL_URL="mongodb://"+biz9_config_file.MONGO_USERNAME_PASSWORD+biz9_config_file.MONGO_IP+":"+biz9_config_file.MONGO_PORT+"?retryWrites=true&w=majority&maxIdleTimeMS=60000&connectTimeoutMS=150000&socketTimeoutMS=90000&maxPoolSize=900000&maxConnecting=10000";
+const { MongoClient } = require("mongodb");
+const client_db = new MongoClient(MONGO_FULL_URL);
 /*
 const get_blank=()=>{
 	return new Promise((resolve) =>{
@@ -50,16 +53,14 @@ const update_blank=(data_type,data_item)=>{
 
 			const get_db_connect=()=>{
 				return new Promise((callback) =>{
-					let error=null;
-					client_db.connect().then((data)=> {
-						callback(data);
-					}).catch(err => handleError)
+					var error=null;
+			client_db.connect().then((data)=> {
+				callback([error,data]);
+					}).catch(err=>handleError(err))
 					function handleError(error) {
 						error = error;
 						console.error("--Error-Get-DB-Connect--"+error.message+"--Error--", error);
-						throw new Error(error);
 						var reset_cmd = "sudo mongod --fork --config "+biz9_config_file.mongo_config;
-						error=e;
 						if(data_config.mongo_ip!='0.0.0.0'){
 							if(!data_config.ssh_key){
 								data_config.ssh_key='';
@@ -71,22 +72,22 @@ const update_blank=(data_type,data_item)=>{
 						dir = exec(reset_cmd, function(error,stdout,stderr){
 						});
 						dir.on('exit', function (code) {
-							callback(null);
+							callback([error,null]);
 						});
 					}
 				});
 			}
-const close_db_connect=()=>{
-	return new Promise((resolve) =>{
+const close_db_connect=(db)=>{
+	return new Promise((callback) =>{
 		let error=null;
-		client_db.close().then((data)=> {
-			resolve(data);
+		db.close().then((data)=> {
+			callback([error,data]);
 		}).catch(err => handleError)
 		function handleError(error) {
 			error = error;
 			throw new Error(error);
 			console.error("--Error--"+error.message+"--Error--", error);
-			resolve(error);
+			callback([error,data]);
 		}
 	});
 }
@@ -107,7 +108,8 @@ const update_cache_item=(db,data_type,data_item)=>{
 					call();
 				}).catch(err => handleError)
 				function handleError(error) {
-					console.log('error1');
+					console.log('update_cache_item_error');
+					throw error;
 				}
 			},
 			function(call) {
