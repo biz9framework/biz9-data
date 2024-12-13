@@ -2,9 +2,19 @@
 Copyright 2023 Certified CoderZ
 Author: certifiedcoderz@gmail.com (Certified CoderZ)
 License GNU General Public License v3.0
-Description: BiZ9 Framework: Core-DataZ
+Description: BiZ9 Framework: Data-Mongo
 */
-module.exports = function(){
+const path = require('path')
+//const dataz = require(path.join(__dirname, '../../dataz/index.js'));
+const dataz = require('../../dataz/index.js');
+console.log(dataz);
+console.log(path.join(__dirname, '../../dataz/index.js'));
+console.log('rrrrrr');
+console.log(dataz);
+console.log('ddddddddddd');
+const { get_guid } = require(process.env.BIZ9_HOME + "/biz9-utility/src/code");
+const moment = require("moment");
+/*
     module.update =async function(db,data_type,item,callback){
         get_guid=function(){
             return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
@@ -42,131 +52,74 @@ module.exports = function(){
             run();
         }
     }
-    module.get=function(db,data_type,tbl_id,callback){
-        var error=null;
-        var data = {};
-        var collection = {};
-        async function run() {
-            if(dataz.db_client_connected(db)){
-                collection = db.collection(data_type);
-                data = await collection.find({tbl_id:tbl_id}).toArray();
-                callback(error,data);
-            }else{
-                callback('error_mongo_db_get',data);
-            }
-        }
-        run();
-    }
-    module.get_sql_tbl_id=function(db,data_type,sql_obj,sort_by,callback){
-        var error=null;
-        var data_list = []
-        var collection = {};
-        async function run() {
-            if(dataz.db_client_connected(db)){
-                collection = db.collection(data_type);
-                data_list = await collection.find(sql_obj).project({tbl_id:1,data_type:1}).sort(sort_by).collation({locale:"en_US",numericOrdering:true}).toArray();
-                callback(null,data_list);
-            }else{
-                callback('error_mongo_db_get_sql_tbl_id',data_list);
-            }
-        }
-        run();
-    }
-    module.delete=function(db,data_type,tbl_id,callback){
-        var error=null;
-        var collection={};
-        async function run() {
-            if(dataz.db_client_connected(db)){
-                collection = db.collection(data_type);
-                data = await collection.deleteMany({tbl_id:tbl_id});
-                callback(null,data);
-            }else{
-                callback('error_mongo_db_delete',data);
-            }
-        }
-        run();
-    }
-    module.delete_sql=function(db,data_type,sql_obj,callback){
-        var error=null;
-        var collection={};
-        async function run() {
-            if(dataz.db_client_connected(db)){
-                collection = db.collection(data_type);
-                data = await collection.deleteMany(sql_obj);
-                callback(null,data);
-            }else{
-                callback('error_mongo_db_delete_sql',data);
-            }
-        }
-        run();
-    }
-    module.get_paging_sql_tbl_id=function(db,data_type,sql_obj,sort_by,current_page,page_size,callback){
-        var total_count = 0;
-        var data_list = [];
-        var current_page=current_page?current_page:1;
-        var page_size=page_size?page_size:999;
-        var error=null;
-        async.series([
-            function(call){
-                const run = async function(a,b){
-                    if(dataz.db_client_connected(db)){
-                        total_count= await db.collection(data_type).countDocuments(sql_obj);
-                        call();
-                    }else{
-                        call();
+    */
+
+const update=(db,data_type,item)=>{
+    var error=null;
+    var collection = {};
+    return new Promise((callback) =>{
+        if(String(item.tbl_id)=='0') {//insert
+            item.tbl_id = get_guid();
+            item.date_create = new moment().toISOString();
+            item.date_save = new moment().toISOString();
+            async function run() {
+                //console.log('fff');
+                //console.log(check_db_connect);
+                /*
+                if(check_db_connect(db)){
+                    collection = db.collection(data_type);
+                    collection.insertOne(item).then((data)=> {
+                        callback(data);
+                    }).catch(err => handleError)
+                    function handleError(error) {
+                        error = error;
+                        console.error("--Mongo-DB-Error--"+error.message+"--Error--", error);
                     }
+                }else{
+                    callback(null);
                 }
-                run();
-            },
-            function(call){
-                async function run() {
-                    if(dataz.db_client_connected(db)){
-                        data_list = await db.collection(data_type).find(sql_obj,{tbl_id:1,data_type:1}).sort(sort_by).skip(current_page>0?((current_page-1)*page_size):0).limit(page_size).collation({locale:"en_US",numericOrdering:true}).toArray();
-                        call();
-                    }else{
-                        call();
-                    }
-                }
-                run();
-            },
-        ],
-            function(errors,result){
-                callback(error,total_count,data_list);
-            });
-    }
-    module.drop=function(db,title,callback){
-        var error=null;
-        var collection={};
-        async function run() {
-            if(dataz.db_client_connected(db)){
-                collection = db.collection(title);
-                data = await collection.drop();
-                callback(null,data);
-            }else{
-                callback('error_db_drop',data);
+                */
             }
-        }
-        run();
-    }
-    module.count=function(db,data_type,sql,callback){
-        var total_count=0;
-        var error=null;
-        async.series([
-            function(call){
-                const run = async function(a,b){
-                    if(dataz.db_client_connected(db)){
-                        total_count= await db.collection(data_type).countDocuments(sql);
-                        call();
-                    }else{
-                        call();
+            run();
+        }else{
+            /*
+            item.date_save = new moment().toISOString();
+            async function run() {
+                collection = db.collection(data_type);
+                    collection.updateOne({tbl_id:item.tbl_id},{$set: item}).then((data)=> {
+                        callback(data);
+                    }).catch(err => handleError)
+                    function handleError(error) {
+                        error = error;
+                        console.error("--Mongo-DB-Error--"+error.message+"--Error--", error);
                     }
-                }
-                run();
-            },
-        ],
-            function(errors,result){
-                callback(error,total_count);
-            });
-    }
-    return module;
+            }
+            run();
+            */
+
+        }
+    });
+
+
+    /*
+    return new Promise((resolve) =>{
+        console.log('2222222222');
+        let error=null;
+        data_mon.update(data_type,data_item).then((data)=> {
+            console.log('run_data_mon');
+            console.log('here');
+//resolve([null,data]);
+        }).catch(err => handleError)
+        function handleError(error) {
+            error = error;
+            console.error("--Error--"+error.message+"--Error--", error);
+        }
+    });
+
+*/
 }
+
+module.exports = {
+    update
+};
+

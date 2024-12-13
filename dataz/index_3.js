@@ -9,6 +9,8 @@ console.log('aaaaaaaaaa');
 console.log('aaaaaaaaaa');
 //const biz9_config_file=require("/home/think1/www/doqbox/biz9-framework/biz9-data/biz9_config.js");
 const biz9_config_file=require(__dirname+"/../../"+"biz9_config.js");
+const moment = require('moment');
+
 console.log('bbbbbbbb');
 console.log(biz9_config_file);
 
