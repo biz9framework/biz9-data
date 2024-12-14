@@ -8,11 +8,12 @@ const path = require('path')
 const biz9_config_file = require(path.join(__dirname, '../../../biz9_config.js'));
 const async = require("async");
 const redis = require('redis');
-const { get_title_url } = require(process.env.BIZ9_HOME + "/biz9-utility/src/code");
-const data_mon = require('./lib/mongo_db.js');
 const MONGO_FULL_URL="mongodb://"+biz9_config_file.MONGO_USERNAME_PASSWORD+biz9_config_file.MONGO_IP+":"+biz9_config_file.MONGO_PORT+"?retryWrites=true&w=majority&maxIdleTimeMS=60000&connectTimeoutMS=150000&socketTimeoutMS=90000&maxPoolSize=900000&maxConnecting=10000";
 const { MongoClient } = require("mongodb");
 const client_db = new MongoClient(MONGO_FULL_URL);
+const { get_title_url } = require(process.env.BIZ9_HOME + "/biz9-utility/src/code");
+const {update}  = require('../libz/mongo_db.js');
+
 /*
 const get_blank=()=>{
 	return new Promise((resolve) =>{
@@ -54,8 +55,12 @@ const update_blank=(data_type,data_item)=>{
 			const get_db_connect=()=>{
 				return new Promise((callback) =>{
 					var error=null;
-			client_db.connect().then((data)=> {
-				callback([error,data]);
+					client_db.connect().then((data)=> {
+						if(error){
+							throw 'GET_DB_CONNECT';
+						}else{
+							callback([error,data]);
+						}
 					}).catch(err=>handleError(err))
 					function handleError(error) {
 						error = error;
@@ -91,29 +96,33 @@ const close_db_connect=(db)=>{
 		}
 	});
 }
-const check_db_connect=(db)=>{
-	return !!db && !!db.topology && !!db.topology.isConnected()
+const check_db_connect=(db_connect)=>{
+	return !!db_connect && !!db_connect.topology && !!db_connect.topology.isConnected()
 }
 const update_cache_item=(db,data_type,data_item)=>{
-	console.log('update_cache_item_11111111111111');
 	return new Promise((resolve) =>{
 		let cache_string_str='';
 		let error=null;
 		let client_redis = redis.createClient(biz9_config_file.redis_port,biz9_config_file.redis_url);
+		let cache_connect = {};
 		let set_cache=false;
 		async.series([
 			function(call) {
-				console.log('update_cache_item_222222222');
+				console.log('11111111111111');
 				client_redis.connect().then((data)=> {
+					if(error){
+						throw 'UPDATE_CACHE_ITEM';
+					}
+					cache_connect=data;
 					call();
-				}).catch(err => handleError)
+				}).catch(err => handleError(err))
 				function handleError(error) {
-					console.log('update_cache_item_error');
-					throw error;
+			error = error;
+			console.error("--Error--UPDATE-CACHE-ITEM--"+error.message+"--Error--", error);
 				}
 			},
 			function(call) {
-				console.log('update_cache_item_333333333');
+				console.log('22222222222222222');
 				if(data_item.photo_obj){
 					delete data_item.photo_obj;
 				}
@@ -123,12 +132,13 @@ const update_cache_item=(db,data_type,data_item)=>{
 				if(data_item.title){
 					data_item.title_url=get_title_url(data_item.title);
 				}
-				console.log(data_item);
 				call();
 			},
 			function(call) {
-				console.log('update_cache_item_444444444');
-				data_mon.update(db,data_type,data_item).then((data)=> {
+				console.log('33333333333333333333333333');
+				//update(db_connect,data_type,data_item).then((data)=> {
+				update().then((data)=> {
+    			console.log('555555555555555');
 					console.log('rrrrrrr');
 					//resolve([null,data]);
 				}).catch(err => handleError)

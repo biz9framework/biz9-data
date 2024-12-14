@@ -10,13 +10,18 @@ const {get_db_connect,close_db_connect,check_db_connect,update_cache_item}  = re
 const get_client_db = async () => {
      return [error,data] = await get_db_connect();
 };
-const close_client_db = async (db) => {
-    return [error,data] = await close_db_connect(db);
+const close_client_db = async (db_connect) => {
+    return [error,data] = await close_db_connect(db_connect);
 };
-const check_client_db = async (db) => {
-    return await check_db_connect(db);
+const check_client_db = async (db_connect) => {
+    return check_db_connect(db_connect);
 };
-const update_item = async (db,data_type,data_item) => {
+const update_item = async (db_connect,data_type,data_item) => {
+     return [error,data] = await update_cache_item(db_connect,data_type,data_item);
+};
+
+
+const update_item_old = async (db,data_type,data_item) => {
     //return await dataz.update_cache_item(db,data_type,data_item);
     return await update_cache_item(db,data_type,data_item);
     console.log('here');

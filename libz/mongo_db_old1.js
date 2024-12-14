@@ -5,13 +5,15 @@ License GNU General Public License v3.0
 Description: BiZ9 Framework: Data-Mongo
 */
 const path = require('path')
-//const dataz = require(path.join(__dirname, '../../dataz/index.js'));
-const dataz = require('../../dataz/index.js');
-console.log(dataz);
-console.log(path.join(__dirname, '../../dataz/index.js'));
-console.log('rrrrrr');
-console.log(dataz);
-console.log('ddddddddddd');
+//const {check_client_db} = require(path.join(__dirname, '../../index.js'));
+//const {check_client_db} = require('/home/think2/www/doqbox/biz9-framework/biz9-data/src/code');
+
+//const {  } = require(process.env.BIZ9_HOME + "/biz9-data/src/code/dataz");
+//console.log(path.join(__dirname, '../../index.js'));
+console.log('dddddddddd');
+console.log('coooooooooooooooooolllllllllll');
+console.log('dddddddddd');
+console.log('dddddddddd');
 const { get_guid } = require(process.env.BIZ9_HOME + "/biz9-utility/src/code");
 const moment = require("moment");
 /*
@@ -54,7 +56,7 @@ const moment = require("moment");
     }
     */
 
-const update=(db,data_type,item)=>{
+const update=(db_connect,data_type,item)=>{
     var error=null;
     var collection = {};
     return new Promise((callback) =>{
@@ -62,6 +64,13 @@ const update=(db,data_type,item)=>{
             item.tbl_id = get_guid();
             item.date_create = new moment().toISOString();
             item.date_save = new moment().toISOString();
+            console.log('apple');
+          if(check_client_db(db_connect)){
+              console.log('aaaaaaaaaaa');
+            }else{
+                console.log('rrrrrrrrrrrrr');
+            }
+
             async function run() {
                 //console.log('fff');
                 //console.log(check_db_connect);
