@@ -21,7 +21,7 @@ const get_db_adapter = () => {
 const close_db_adapter = (db_connect) => {
     return new Promise((callback) => {
         let error=null;
-        close_db_main(db_connect).then((data)=> {
+        close_db_main(db_connect).then(([error,data])=> {
             callback([error,data]);
         }).catch(err => {
             console.error("--Error-Adapter-Close-DB-Adapter-Error--",err);
@@ -57,7 +57,7 @@ const update_item_adapter = (db_connect,data_type,data_item) => {
                 call();
             },
             function(call){
-                update_item_main(db_connect,data_type,data_item).then(([error,data]) => {
+                update_item_main(db_connect,data_type,item).then(([error,data]) => {
                     console.log('rrrr');
                     //cache_connect = data;
                     call();

@@ -39,17 +39,10 @@ const get_db_base = () => {
 const close_db_base = (db_connect) => {
     return new Promise((callback) => {
         let error = null;
-
-        console.log('aaaaaaaa');
         client_db.close().then((data)=> {
-
-            console.log(data);
-            console.log('bbbbbb');
-            //callback([error,'closed']);
+            callback([error,null]);
         }).catch(err => {
         });
-
-        console.log('over');
     });
 }
 const check_db_base = (db_connect) => {
