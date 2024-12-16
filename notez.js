@@ -1,3 +1,4 @@
+
 const get_blank = () => {
 	return new Promise((callback) => {
 		let error = null;
@@ -5,7 +6,7 @@ const get_blank = () => {
 		run.method().then((data) => {
 			callback([null,data]);
         }).catch(err => {
-            console.error("--Error-Get-Blank--"+err+"--Error--", err);
+            console.error("--Error-Notez-FileName-Get-Blank-Error--",err);
 		});
 	});
 }
@@ -13,16 +14,16 @@ const update_blank = (data_type,data_item) => {
 	return new Promise((callback) => {
 		let error = null;
 		async.series([
-			function(callback) {
-                callback();
+			function(call) {
+                call();
 			},
-			function(callback) {
-                callback();
+			function(call) {
+                call();
 			}
-		]).then(results => {
-			console.log(results);
+		]).then(result => {
+			console.log(result);
 		}).catch(err => {
-            console.error("--Error-Notez-Update-Blank--"+err+"--Error--", err);
+			console.error("--Error-Notez-FileName-Update-Blank-Error--",err);
 		});
 	});
 }

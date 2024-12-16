@@ -4,55 +4,22 @@
  * BiZ9 Framework
  * Data-Mongo
  */
-const path = require('path')
+const path = require('path');
 const biz9_config_file = require(path.join(__dirname, '../../../biz9_config.js'));
 const async = require("async");
-const MONGO_FULL_URL="mongodb://"+biz9_config_file.MONGO_USERNAME_PASSWORD+biz9_config_file.MONGO_IP+":"+biz9_config_file.MONGO_PORT+"?retryWrites=true&w=majority&maxIdleTimeMS=60000&connectTimeoutMS=150000&socketTimeoutMS=90000&maxPoolSize=900000&maxConnecting=10000";
-const { MongoClient } = require("mongodb");
-const client_db = new MongoClient(MONGO_FULL_URL);
 const { get_title_url } = require(process.env.BIZ9_HOME + "/biz9-utility/src/code");
-const {update}  = require('../libz/mongo_db.js');
-const get_db_base = () => {
-	return new Promise((callback) => {
-		var error=null;
-		client_db.connect().then((data)=> {
-			if(error){
-				throw 'GET_DB_CONNECT';
-			}else{
-				callback([error,data]);
-			}
-		}).catch(err => {
-			error = error;
-			console.error("--Error-Get-DB-Connect--"+error.message+"--Error--", error);
-			var reset_cmd = "sudo mongod --fork --config "+biz9_config_file.mongo_config;
-			if(data_config.mongo_ip!='0.0.0.0'){
-				if(!data_config.ssh_key){
-					data_config.ssh_key='';
-				}else{
-					biz9_config_file.ssh_key=' -i '+ biz9_config_file.ssh_key;
-				}
-				reset_cmd='ssh '+ biz9_config_file.ssh_key + " " +biz9_config_file.mongo_server_user +"@"+biz9_config_file.mongo_ip +" -- "+reset_cmd;
-			}
-			dir = exec(reset_cmd, function(error,stdout,stderr){
-			});
-			dir.on('exit', function (code) {
-				callback([error,null]);
-			});
-		});
-	});
+const { get_db_base, check_db_base, close_db_base, update_item_base } = require("./base.js");
+const get_db_main = async () => {
+    return [error,data] = await get_db_base();
 }
-const close_db_base = (db_connect) => {
-	return new Promise((callback) => {
-		let error = null;
-		client_db.close().then((data) => {
-			callback([null,data]);
-		}).catch(err => {
-			console.error("--Error-Close-DB-Base--"+err+"--Error--", err);
-		});
-	});
+const close_db_main = async (db_connect) => {
+    return [error,data] = await close_db_base(db_connect);
 }
-const check_db_base=(db_connect)=>{
-	return !!db_connect && !!db_connect.topology && !!db_connect.topology.isConnected()
+const check_db_main = async (db_connect) => {
+    return data = await check_db_base(db_connect);
+}
+const update_item_main = async (db_connect,data_type,data_item) => {
+    return [error,data] = await update_item_base(db_connect,data_type,data_item);
 }
 const update_item_base_old=(db_connect,data_type,data_item)=>{
 	return new Promise((resolve) =>{
@@ -62,15 +29,12 @@ const update_item_base_old=(db_connect,data_type,data_item)=>{
 		//let set_cache=false;
 		async.series([
 			function(call) {
-				console.log('11111111111111');
 				get_cache_base().then((data)=> {
 					if(error){
 						throw 'UPDATE_CACHE_ITEM';
 					}
 					cache_connect=data;
-					console.log(cache_connect);
-					console.log('rrrrrrrrrrr');
-					//call();
+					call();
 				}).catch(err => handleError(err))
 				function handleError(error) {
 					error = error;
@@ -189,9 +153,9 @@ module.update_cache_item=function(db,data_type,data_item,callback){
 	*/
 
 module.exports = {
-	get_db_base,
-	close_db_base,
-	check_db_base,
-	update_item_base
+	get_db_main,
+	close_db_main,
+	check_db_main,
+	update_item_main
 };
 
