@@ -62,77 +62,28 @@ const check_db_client_connected = (db_connect) => {
 const update_item_base = (db_connect,data_type,item) => {
     return new Promise((callback) => {
         let error = null;
-        let collection = {};
-
+        let collection = db_connect.collection(data_type);
         if (String(item.tbl_id)=='0') {//insert
             item.tbl_id = get_guid();
             item.date_create = new moment().toISOString();
             item.date_save = new moment().toISOString();
-            console.log('sssssss');
-            console.log(check_db_client_connected(db_connect));
-
-            collection = db_connect.collection(data_type);
-            console.log('ffffffff');
-            console.log(collection);
-
-            //if(check_db_client_connected(db_connect)){
-                /*
-                run.method().then((data) => {
-                    callback([null,data]);
+            if(check_db_base(db_connect)){
+                collection.insertOne(item).then((data) => {
+                    callback([null,item]);
                 }).catch(err => {
-                    console.error("--Error-Notez-FileName-Get-Blank-Error--",err);
+                    console.error("--Error-Notez-Base-Insert-Item-Base-Error--",err);
                 });
-                */
-
-            //}
-        }
-
-
-        /*
-        run.method().then((data) => {
-            callback([null,data]);
-        }).catch(err => {
-            console.error("--Error-Notez-FileName-Get-Blank-Error--",err);
-        });
-        */
-    });
-}
-
-
-/*
-  module.update =async function(db,data_type,item,callback){
-        var error=null;
-        var collection = {};
-        if (String(item.tbl_id)=='0') {//insert
-            item.tbl_id = utilityz.get_guid();
-            item.date_create = new moment().toISOString();
-            item.date_save = new moment().toISOString();
-            async function run() {
-                if(dataz.db_client_connected(db)){
-                    collection = db.collection(data_type);
-                    await collection.insertOne(item);
-                    callback(error,item);
-                }else{
-                    callback('error_mongo_db_update',item);
-                }
             }
-            run();
         }else{
             item.date_save = new moment().toISOString();
-            async function run() {
-                if(dataz.db_client_connected(db)){
-                    collection = db.collection(data_type);
-                    await collection.updateOne({tbl_id:item.tbl_id},{$set: item});
-                    callback(null,item);
-                }else{
-                    callback('error_mongo_db_update_2',item);
-                }
-            }
-            run();
+            collection.updateOne(item).then((data) => {
+                    callback([null,item]);
+                }).catch(err => {
+                    console.error("--Error-Notez-Base-Update-Item-Base-Error--",err);
+                });
         }
-    }
-    */
-
+    });
+}
 module.exports = {
     get_db_base,
     check_db_base,
