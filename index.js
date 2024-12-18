@@ -17,8 +17,8 @@ const check_db = async (db_connect) => {
 const update_item = async (db_connect,data_type,data_item) => {
      return [error,data] = await update_item_adapter(db_connect,data_type,data_item);
 };
-const get_item = async (db_connect,data_type,tbl_id) => {
-     return [error,data] = await get_item_adapter(db_connect,data_type,tbl_id);
+const get_item = async (db_connect,data_type,tbl_id,options) => {
+     return [error,data] = await get_item_adapter(db_connect,data_type,tbl_id,options);
 };
 const update_item_list = async (db_connect,data_item_list) => {
      return [error,data] = await update_item_list_adapter(db_connect,data_item_list);

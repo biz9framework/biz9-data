@@ -30,7 +30,7 @@ const delete_cache_string_base = (client_redis,key) => {
 		client_redis.del(key).then((data) => {
 			callback([error,data]);
         }).catch(err => {
-            console.error("--Error-Data-Redis-Base-Delete-Cache-String-Error--",err);
+            console.error("--Error-Data-Redis-Base-Delete-Cache-String-Base-Error--",err);
 		});
 	});
 }
@@ -40,13 +40,29 @@ const get_cache_string_base = (client_redis,key) => {
 		client_redis.get(key).then((data) => {
 			callback([error,data]);
         }).catch(err => {
-            console.error("--Error-Data-Redis-Base-Get-Cache-String-Error--",err);
+            console.error("--Error-Data-Redis-Base-Get-Cache-String-Base-Error--",err);
+		});
+	});
+}
+const set_cache_string_base = (client_redis,key,value) => {
+	return new Promise((callback) => {
+		let error = null;
+		let data = null;
+        if(!value||value==null||value==undefined){
+            value=" ";
+        }
+        value=String(value).trim();
+		client_redis.set(key,value).then((data) => {
+			callback([error,data]);
+        }).catch(err => {
+            console.error("--Error-Data-Redis-Base-Set-Cache-String-Base-Error--",err);
 		});
 	});
 }
 module.exports = {
 	get_cache_base,
 	get_cache_string_base,
+	set_cache_string_base,
 	close_cache_base,
 	delete_cache_string_base,
 };
