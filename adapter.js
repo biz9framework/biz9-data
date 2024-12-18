@@ -5,13 +5,12 @@ License GNU General Public License v3.0
 Description: BiZ9 Framework: Data - Mongo - Base
 */
 const async = require('async')
-
 const {get_title_url} = require(process.env.BIZ9_HOME+'/biz9-utility/src/code/index.js')
 const {get_new_item,set_biz_item} = require(process.env.BIZ9_HOME+'/biz9-app/src/code/index.js')
-const {get_db_main,check_db_main,close_db_main,update_item_main} = require('./mongo/index.js');
-
+const {get_db_main,check_db_main,close_db_main,update_item_main,get_item_main} = require('./mongo/index.js');
 const {get_cache_main,close_cache_main,get_cache_string_main,delete_cache_string_main} = require('./redis/index.js');
-
+const DB_TITLE='DB';
+const CACHE_TITLE='CACHE';
 const get_db_adapter = () => {
     return new Promise((callback) => {
         let error=null;
@@ -49,10 +48,18 @@ const blank = (data_type,data_item) => {
                 });
             },
             function(call) {
-                close_cache_main(cache_connect).then(([error,data]) => {
+                go().then(([error,data]) => {
+                    item = data;
                     call();
                 }).catch(err => {
                     console.error("--Error-Data-Adapter-Blank-2-Error--",err);
+                });
+            },
+            function(call) {
+                close_cache_main(cache_connect).then(([error,data]) => {
+                    call();
+                }).catch(err => {
+                    console.error("--Error-Data-Adapter-Blank-3-Error--",err);
                 });
             },
         ]).then(result => {
@@ -199,13 +206,15 @@ const get_item_adapter = (db_connect,data_type,tbl_id) => {
         let cache_key_list = null;
         let cache_connect = {};
         let data_item = get_new_item(data_type,tbl_id);
+        let item_attr_list_str = null;
+        let cache_found = false;
         async.series([
             function(call) {
                 get_cache_main().then(([error,data]) => {
                     cache_connect = data;
                     call();
                 }).catch(err => {
-                    console.error("--Error-Data-Adapter-Get-Item-DB-Adapter-Error--",err);
+                    console.error("--Error-Data-Adapter-Get-Item-Adapter-Error--",err);
                 });
             },
             function(call) {
@@ -213,7 +222,7 @@ const get_item_adapter = (db_connect,data_type,tbl_id) => {
                     cache_key_list = data;
                     call();
                 }).catch(err => {
-                    console.error("--Error-Data-Adapter-Get-Item-DB-Adapter-Error--",err);
+                    console.error("--Error-Data-Adapter-Get-Item-Adapter-2-Error--",err);
                 });
             },
             function(call) {
@@ -223,24 +232,39 @@ const get_item_adapter = (db_connect,data_type,tbl_id) => {
                 }
                 async.forEachOf(item_list_str,(item,key,go) => {
                     if(item){
-                        get_cache_string_main(cache_connect,get_cache_item_attr_key(data_type,tbl_id,item), function(error,data){
+                        get_cache_string_main(cache_connect,get_cache_item_attr_list_key(data_type,tbl_id)).then(([error,data]) => {
                             if(data){
                                 data_item[item] = data;
-                                cache_found = true;
+                                cache_found=true;
                             }else{
-                                data_item[item] = null;
+                                data_item[item] =null;
                             }
                             go();
+                        }).catch(err => {
+                            console.error("--Error-Data-Adapter-Get-Item-Adapter-3-Error--",err);
                         });
                     }else{
                         go();
                     }
                 }, error => {
                     if(cache_found){
-                        data_item.source = 'cache';
+                        data_item.source=CACHE_TITLE;
                     }
                     call();
                 });
+            },
+            function(call) {
+                if(!cache_found){
+                    get_item_main(db_connect,data_type,tbl_id).then(([error,data]) => {
+                        data_item=data;
+                        data_item.source=DB_TITLE;
+                        call();
+                    }).catch(err => {
+                        console.error("--Error-Data-Adapter-Get-Item-Adapter-4-Error--",err);
+                    });
+                }else{
+                    call();
+                }
             },
             function(call) {
                 close_cache_main(cache_connect).then(([error,data]) => {
@@ -250,7 +274,13 @@ const get_item_adapter = (db_connect,data_type,tbl_id) => {
                 });
             }
         ]).then(result => {
-            console.log(result);
+            set_biz_item(data_item).then((data) => {
+                console.log('rrrrrrrrr');
+                console.log(data);
+                //callback([error,data]);
+            }).catch(err => {
+                console.error("--Error-Data-Adapter-Update-DB-Adapter-4-Error--",err);
+            });
         }).catch(err => {
             console.error("--Error-Project-FileName-Update-Blank-Error--",err);
         });
@@ -262,46 +292,12 @@ const get_cache_item_attr_key = (data_type,tbl_id,key) => {
 const get_cache_item_attr_list_key = (data_type,tbl_id) => {
     return data_type+"_aik_"+String(tbl_id);
 }
-
-
-/*
- function(call){
-                if(data_item.photo_obj){
-                    delete data_item.photo_obj;
-                }
-                if(data_item.date_obj){
-                    delete data_item.date_obj;
-                }
-                if(data_item.title){
-                    data_item.title_url=biz9.get_title_url(data_item.title);
-                }
-                call();
-            },
-            function(call){
-               data_mon.update(db,data_type,data_item,function(error,data){
-                    call();
-                });
-            },
-            function(call){
-                cache_red.del_cache_string(client_redis,get_cache_item_attr_list_key(data_item.data_type,data_item.tbl_id),function(error,data)
-                    {
-                        call();
-                    });
-            },
-            function(call){
-                const run = async function(a,b){
-                    await client_redis.disconnect();
-                    call();
-                }
-                run();
-            },
-            */
-
 module.exports = {
     get_db_adapter,
     check_db_adapter,
     close_db_adapter,
     update_item_adapter,
-    update_item_list_adapter
+    update_item_list_adapter,
+    get_item_adapter
 };
 

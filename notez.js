@@ -1,4 +1,3 @@
-
 const get_blank = () => {
 	return new Promise((callback) => {
 		let error = null;

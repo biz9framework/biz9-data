@@ -4,7 +4,7 @@ Author: certifiedcoderz@gmail.com (Certified CoderZ)
 License GNU General Public License v3.0
 Description: BiZ9 Framework: Data
 */
-const {get_db_adapter,check_db_adapter,close_db_adapter,update_item_adapter,update_item_list_adapter}  = require('./adapter.js');
+const {get_db_adapter,check_db_adapter,close_db_adapter,update_item_adapter,update_item_list_adapter,get_item_adapter}  = require('./adapter.js');
 const get_db = async () => {
      return [error,data] = await get_db_adapter();
 };
