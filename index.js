@@ -4,34 +4,34 @@ Author: certifiedcoderz@gmail.com (Certified CoderZ)
 License GNU General Public License v3.0
 Description: BiZ9 Framework: Data
 */
-const {get_db_connect_adapter,check_db_adapter,close_db_adapter,update_item_adapter,update_item_list_adapter,get_item_adapter}  = require('./adapter.js');
+const {get_db_connect_adapter,check_db_connect_adapter,close_db_connect_adapter,update_item_adapter,update_item_list_adapter,get_item_adapter,delete_item_adapter,get_sql_paging_adapter}  = require('./adapter.js');
 const get_db_connect = async () => {
      return [error,data] = await get_db_connect_adapter();
 };
-const close_db_connect_ = async (db_connect) => {
-    return [error,data] = await close_db_adapter(db_connect);
+const close_db_connect = async (db_connect) => {
+    return [error,data] = await close_db_connect_adapter(db_connect);
 };
 const check_db_connect = async (db_connect) => {
     return check_db_connect_adapter(db_connect);
 };
-const update_item = async (db_connect,data_type,data_item) => {
-     return [error,data] = await update_item_adapter(db_connect,data_type,data_item);
+const update_item = async (db_connect,data_type,data_item,options) => {
+     return [error,data] = await update_item_adapter(db_connect,data_type,data_item,options);
 };
 const get_item = async (db_connect,data_type,tbl_id,options) => {
      return [error,data] = await get_item_adapter(db_connect,data_type,tbl_id,options);
 };
-const update_item_list = async (db_connect,data_item_list) => {
-     return [error,data] = await update_item_list_adapter(db_connect,data_item_list);
+const update_item_list = async (db_connect,data_item_list,options) => {
+     return [error,data] = await update_item_list_adapter(db_connect,data_item_list,options);
+};
+const delete_item = async (db_connect,data_type,tbl_id) => {
+     return [error,data] = await delete_item_adapter(db_connect,data_type,tbl_id);
+};
+const get_sql_paging = async (db_connect,data_type,sql,sort_by,page_current,page_size,options) => {
+     return [error,data] = await get_sql_paging_adapter(db_connect,data_type,sql,sort_by,page_current,page_size,options);
 };
 /*
 const get_sql = async (db_connect,data_type,sql_obj,sort_by) => {
      return [error,data] = await get_item_adapter(db_connect,data_type,sql,sort_by);
-};
-const get_sql_paging = async (db_connect,data_type,sql,sort_by,page_current,page_size) => {
-     return [error,data] = await get_item_adapter(db_connect,data_type,sql,sort_by,page_current,page_size);
-};
-const delete_item = async (db_connect,data_type,tbl_id) => {
-     return [error,data] = await get_item_adapter(db_connect,data_type,tbl_id);
 };
 const delete_sql = async (db_connect,data_type,sql_obj) => {
      return [error,data] = await get_item_adapter(db_connect,data_type,sql_obj);
@@ -52,15 +52,16 @@ const count = async (db_connect,data_type,sql_obj) => {
 
 module.exports = {
     get_db_connect,
-    close_db,
-    check_db,
+    close_db_connect,
+    check_db_connect,
     update_item,
     update_item_list,
     get_item,
+    delete_item,
+    get_sql_paging
     /*
     update_list,
     get_sql,
-    get_sql_paging,
     delete_item,
     delete_sql,
     delete_list,

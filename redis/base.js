@@ -8,8 +8,9 @@ const get_cache_connect_base = () => {
         let client_redis = redis.createClient(biz9_config_file.redis_port,biz9_config_file.redis_url);
 		client_redis.connect().then((data) => {
 			callback([null,data]);
-        }).catch(err => {
-            console.error("--Error-Data-Redis-Base-Get-Cache-Base-Error--",err);
+        }).catch(error => {
+            console.error("--Error-Data-Redis-Base-Get-Cache-Base-Error--",error);
+			callback([null,error]);
 		});
 	});
 }
@@ -19,8 +20,9 @@ const close_cache_connect_base = (cache_connect) => {
         let set_cache=false;
 		cache_connect.disconnect().then((data) => {
 			callback([null,data]);
-        }).catch(err => {
-            console.error("--Error-Data-Redis-Base-Close-Cache-Base-Error--",err);
+        }).catch(error => {
+            console.error("--Error-Data-Redis-Base-Close-Cache-Base-Error--",error);
+			callback([null,error]);
 		});
 	});
 }
@@ -29,8 +31,9 @@ const delete_cache_string_base = (client_redis,key) => {
 		let error = null;
 		client_redis.del(key).then((data) => {
 			callback([error,data]);
-        }).catch(err => {
-            console.error("--Error-Data-Redis-Base-Delete-Cache-String-Base-Error--",err);
+        }).catch(error => {
+            console.error("--Error-Data-Redis-Base-Delete-Cache-String-Base-Error--",error);
+			callback([null,error]);
 		});
 	});
 }
@@ -39,8 +42,9 @@ const get_cache_string_base = (client_redis,key) => {
 		let error = null;
 		client_redis.get(key).then((data) => {
 			callback([error,data]);
-        }).catch(err => {
-            console.error("--Error-Data-Redis-Base-Get-Cache-String-Base-Error--",err);
+        }).catch(error => {
+            console.error("--Error-Data-Redis-Base-Get-Cache-String-Base-Error--",error);
+			callback([null,error]);
 		});
 	});
 }
@@ -54,8 +58,9 @@ const set_cache_string_base = (client_redis,key,value) => {
         value=String(value).trim();
 		client_redis.set(key,value).then((data) => {
 			callback([error,data]);
-        }).catch(err => {
-            console.error("--Error-Data-Redis-Base-Set-Cache-String-Base-Error--",err);
+        }).catch(error => {
+            console.error("--Error-Data-Redis-Base-Set-Cache-String-Base-Error--",error);
+			callback([null,error]);
 		});
 	});
 }
