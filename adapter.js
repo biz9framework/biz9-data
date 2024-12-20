@@ -7,25 +7,25 @@ Description: BiZ9 Framework: Data - Mongo - Base
 const async = require('async')
 const {get_title_url} = require(process.env.BIZ9_HOME+'/biz9-utility/src/code/index.js')
 const {get_new_item,set_biz_item} = require(process.env.BIZ9_HOME+'/biz9-app/src/code/index.js')
-const {get_db_main,check_db_main,close_db_main,update_item_main,get_item_main} = require('./mongo/index.js');
-const {get_cache_main,close_cache_main,get_cache_string_main,delete_cache_string_main,set_cache_string_main} = require('./redis/index.js');
+const {get_db_connect_main,check_db_main,close_db_connect_main,update_item_main,get_item_main} = require('./mongo/index.js');
+const {get_cache_connect_main,close_cache_main,get_cache_string_main,delete_cache_string_main,set_cache_string_main} = require('./redis/index.js');
 const DB_TITLE='DB';
 const CACHE_TITLE='CACHE';
 const NOT_FOUND_TITLE='NOT-FOUND';
-const get_db_adapter = () => {
+const get_db_connect_adapter = () => {
     return new Promise((callback) => {
         let error=null;
-        get_db_main().then(([error,data]) => {
+        get_db_connect_main().then(([error,data]) => {
             callback([error,data]);
         }).catch(err => {
             console.error("--Error-Data-Adapter-Get-DB-Adapter-Error--",err);
         });
     });
 }
-const close_db_adapter = (db_connect) => {
+const close_db_connect_adapter = (db_connect) => {
     return new Promise((callback) => {
         let error=null;
-        close_db_main(db_connect).then(([error,data])=> {
+        close_db_connect_main(db_connect).then(([error,data])=> {
             callback([error,data]);
         }).catch(err => {
             console.error("--Error-Data-Adapter-Close-DB-Adapter-Error--",err);
@@ -41,7 +41,7 @@ const blank = (data_type,data_item) => {
         let cache_connect = {};
         async.series([
             function(call) {
-                get_cache_main().then(([error,data]) => {
+                get_cache_connect_main().then(([error,data]) => {
                     cache_connect = data;
                     call();
                 }).catch(err => {
@@ -77,7 +77,7 @@ const update_item_list_adapter = (db_connect,data_item_list) => {
         let cache_connect = {};
         async.series([
             function(call) {
-                get_cache_main().then(([error,data]) => {
+                get_cache_connect_main().then(([error,data]) => {
                     cache_connect = data;
                     call();
                 }).catch(err => {
@@ -150,7 +150,7 @@ const update_item_adapter = (db_connect,data_type,data_item) => {
         let cache_connect = {};
         async.series([
             function(call) {
-                get_cache_main().then(([error,data]) => {
+                get_cache_connect_main().then(([error,data]) => {
                     cache_connect = data;
                     call();
                 }).catch(err => {
@@ -213,7 +213,7 @@ const get_item_adapter = (db_connect,data_type,tbl_id,options) => {
         async.series([
             function(call) {
                 //1
-                get_cache_main().then(([error,data]) => {
+                get_cache_connect_main().then(([error,data]) => {
                     cache_connect = data;
                     call();
                 }).catch(err => {
@@ -222,7 +222,6 @@ const get_item_adapter = (db_connect,data_type,tbl_id,options) => {
             },
             function(call) {
                 //2
-                console.log('1111111');
                 get_cache_string_main(cache_connect,get_cache_item_attr_list_key(data_type,tbl_id)).then(([error,data]) => {
                     cache_key_list=data;
                     call();
@@ -234,11 +233,10 @@ const get_item_adapter = (db_connect,data_type,tbl_id,options) => {
             },
             async function(call) {
                 //3
-				if(cache_key_list!=null){
-					cache_string_list =cache_key_list.split(',');
-				}
+                if(cache_key_list!=null){
+                    cache_string_list =cache_key_list.split(',');
+                }
                 for(const item of cache_string_list) {
-                    //cache_string_str=cache_string_str+item.title+',';
                     const [error,val] = await get_cache_string_main(cache_connect,get_cache_item_attr_key(data_type,tbl_id,item));
                     if(val){
                         data_item[item] = val;
@@ -246,106 +244,50 @@ const get_item_adapter = (db_connect,data_type,tbl_id,options) => {
                     }else{
                         data_item[item] =null;
                     }
-
-                    console.log(data_item);
-                    //console.log(val);
                 }
             },
             function(call){
-                console.log('ddddd');
-            },
-            /*
-              function(call){
-                var item_list_str=[];
-                if(cache_key_list!=null){
-                    item_list_str =cache_key_list.split(',');
-                }
-                async.forEachOf(item_list_str,(item,key,go)=>{
-                    if(item){
-                        cache_red.get_cache_string(client_redis,get_cache_item_attr_key(data_type,tbl_id,item),function(error,data){
+                //4
+                if(!cache_found){
+                    get_item_main(db_connect,data_type,tbl_id).then(([error,data]) => {
+                        set_cache_item(cache_connect,data_type,tbl_id,data).then(([error,data]) => {
                             if(data){
-                                data_item[item] = data;
-                                cache_found=true;
+                                data_item == data;
+                                data_item.source=DB_TITLE;
                             }else{
-                                data_item[item] =null;
+                                data_item.source=NOT_FOUND_TITLE;
                             }
-                            go();
-                        });
-                    }
-                    else{
-                        go();
-                    }
-                }, error => {
-                    if(cache_found){
-                        data_item.source='cache';
-                    }
-                    call();
-                });
-            },
-            */
-
-            /*
-            function(call){
-                cache_red.get_cache_string(client_redis,get_cache_item_attr_list_key(data_type,tbl_id),function(error,data){
-                    if(data){
-                        cache_key_list=data;
-                    }
-                    call();
-                });
-            },
-            */
-            /*
-            function(call) {
-                console.log('2222222222');
-                get_cache_string_main(cache_connect,get_cache_item_attr_list_key(data_type,tbl_id)).then(([error,data]) => {
-                    cache_key_list = data;
-                    console.log('rrr');
-                    console.log(cache_key_list);
-            //call();
-                }).catch(err => {
-                    console.error("--Error-Data-Adapter-Get-Item-Adapter-2-Error--",err);
-                });
-            },
-            function(call) {
-                console.log('3333333333');
-                let item_list_str = [];
-                if(cache_key_list!=null){
-                    item_list_str = cache_key_list.split(',');
-                }
-                async.forEachOf(item_list_str,(item,key,go) => {
-                    if(item){
-                        get_cache_string_main(cache_connect,get_cache_item_attr_list_key(data_type,tbl_id)).then(([error,data]) => {
-                            if(data){
-                                data_item[item] = data;
-                                cache_found=true;
-                            }else{
-                                data_item[item] =null;
-                            }
-                            go();
+                            call();
                         }).catch(err => {
-                            console.error("--Error-Data-Adapter-Get-Item-Adapter-3-Error--",err);
+                            console.error("--Error-Project-FileName-Get-Blank-Error--",err);
+                            error = err;
+                            callback([error,null]);
                         });
-                    }else{
-                        go();
-                    }
-                }, error => {
-                    if(cache_found){
-                        data_item.source=CACHE_TITLE;
-                    }
-                    //call();
+                    }).catch(err => {
+                        console.error("--Error-Project-FileName-Get-Blank-Error--",err);
+                        error = err;
+                        callback([error,null]);
+                    });
+                }else{
+                    call();
+                }
+            },
+            function(call) {
+                close_cache_main(cache_connect).then(([error,data]) => {
+                    call();
+                }).catch(err => {
+                    console.error("--Error-Data-Adapter-Blank-3-Error--",err);
                 });
             },
-            */
-                ]).then(result => {
-                    set_biz_item(data_item,options).then((data) => {
-                        console.log(data);
-                        //callback([error,data]);
-                    }).catch(err => {
-                        console.error("--Error-Data-Adapter-Update-DB-Adapter-4-Error--",err);
-                    });
-                }).catch(err => {
-                    console.error("--Error-Project-FileName-Update-Blank-Error--",err);
-                });
+        ]).then(result => {
+            set_biz_item(data_item,options).then(([error,data]) => {
+                callback([error,data]);
+            }).catch(err => {
+                console.error("--Error-Data-Adapter-Update-DB-Adapter-4-Error--",err);
+            });
+        }).catch(err => {
+            console.error("--Error-Project-FileName-Update-Blank-Error--",err);
+        });
     });
 }
 const set_cache_item = (cache_connect,data_type,tbl_id,data_item) => {
@@ -381,8 +323,7 @@ const set_cache_item = (cache_connect,data_type,tbl_id,data_item) => {
                 call();
             }
         ]).then(result => {
-            console.log('done');
-            callback(error,data_item);
+            callback([error,data_item]);
         }).catch(err => {
             console.error("--Error-Project-FileName-Update-Blank-Error--",err);
             callback(error,null);
@@ -519,16 +460,16 @@ function set_cache_item(client_redis,data_type,tbl_id,data_item,callback){
 
 
 
-const get_cache_item_attr_key = (data_type,tbl_id,key) => {
-    return data_type + "_" + key + "_" + String(tbl_id);
-}
+                            const get_cache_item_attr_key = (data_type,tbl_id,key) => {
+                                return data_type + "_" + key + "_" + String(tbl_id);
+                            }
 const get_cache_item_attr_list_key = (data_type,tbl_id) => {
     return data_type+"_aik_"+String(tbl_id);
 }
 module.exports = {
-    get_db_adapter,
-    check_db_adapter,
-    close_db_adapter,
+    get_db_connect_adapter,
+    check_db_connect_adapter,
+    close_db_connect_adapter,
     update_item_adapter,
     update_item_list_adapter,
     get_item_adapter

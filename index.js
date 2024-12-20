@@ -4,15 +4,15 @@ Author: certifiedcoderz@gmail.com (Certified CoderZ)
 License GNU General Public License v3.0
 Description: BiZ9 Framework: Data
 */
-const {get_db_adapter,check_db_adapter,close_db_adapter,update_item_adapter,update_item_list_adapter,get_item_adapter}  = require('./adapter.js');
-const get_db = async () => {
-     return [error,data] = await get_db_adapter();
+const {get_db_connect_adapter,check_db_adapter,close_db_adapter,update_item_adapter,update_item_list_adapter,get_item_adapter}  = require('./adapter.js');
+const get_db_connect = async () => {
+     return [error,data] = await get_db_connect_adapter();
 };
-const close_db = async (db_connect) => {
+const close_db_connect_ = async (db_connect) => {
     return [error,data] = await close_db_adapter(db_connect);
 };
-const check_db = async (db_connect) => {
-    return check_db_adapter(db_connect);
+const check_db_connect = async (db_connect) => {
+    return check_db_connect_adapter(db_connect);
 };
 const update_item = async (db_connect,data_type,data_item) => {
      return [error,data] = await update_item_adapter(db_connect,data_type,data_item);
@@ -51,7 +51,7 @@ const count = async (db_connect,data_type,sql_obj) => {
 
 
 module.exports = {
-    get_db,
+    get_db_connect,
     close_db,
     check_db,
     update_item,

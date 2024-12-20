@@ -1,7 +1,7 @@
 const path = require('path')
 const biz9_config_file = require(path.join(__dirname, '../../../biz9_config.js'));
 const redis = require('redis');
-const get_cache_base = () => {
+const get_cache_connect_base = () => {
 	return new Promise((callback) => {
 		let error = null;
         let set_cache=false;
@@ -13,7 +13,7 @@ const get_cache_base = () => {
 		});
 	});
 }
-const close_cache_base = (cache_connect) => {
+const close_cache_connect_base = (cache_connect) => {
 	return new Promise((callback) => {
 		let error = null;
         let set_cache=false;
@@ -60,9 +60,9 @@ const set_cache_string_base = (client_redis,key,value) => {
 	});
 }
 module.exports = {
-	get_cache_base,
+	get_cache_connect_base,
 	get_cache_string_base,
 	set_cache_string_base,
-	close_cache_base,
+	close_cache_connect_base,
 	delete_cache_string_base,
 };

@@ -12,7 +12,7 @@ const biz9_config_file = require(path.join(__dirname, '../../../biz9_config.js')
 const MONGO_FULL_URL="mongodb://"+biz9_config_file.MONGO_USERNAME_PASSWORD+biz9_config_file.MONGO_IP+":"+biz9_config_file.MONGO_PORT+"?retryWrites=true&w=majority&maxIdleTimeMS=60000&connectTimeoutMS=150000&socketTimeoutMS=90000&maxPoolSize=900000&maxConnecting=10000";
 const { MongoClient } = require("mongodb");
 const client_db = new MongoClient(MONGO_FULL_URL);
-const get_db_base = () => {
+const get_db_connect_base = () => {
 	return new Promise((callback) => {
 		let error = null;
 		client_db.connect().then((data)=> {
@@ -37,7 +37,7 @@ const get_db_base = () => {
 		});
 	});
 }
-const close_db_base = (db_connect) => {
+const close_db_connect_base = (db_connect) => {
 	return new Promise((callback) => {
 		let error = null;
 		client_db.close().then((data)=> {
@@ -51,7 +51,7 @@ const get_item_base = (db_connect,data_type,tbl_id) => {
 		let error = null;
 		let data = {};
 		let collection = {};
-		if(check_db_base(db_connect)){
+		if(check_db_connect_base(db_connect)){
 			collection = db_connect.collection(data_type);
 			collection.findOne({tbl_id:tbl_id}).then((data) => {
 				callback([error,data]);
@@ -62,7 +62,7 @@ const get_item_base = (db_connect,data_type,tbl_id) => {
 		}
 	});
 }
-const check_db_base = (db_connect) => {
+const check_db_connect_base = (db_connect) => {
 	if(!db_connect.client){
 		return false;
 	}else if(!db_connect.client.topology){
@@ -103,9 +103,9 @@ const update_item_base = (db_connect,data_type,item) => {
 	});
 }
 module.exports = {
-	get_db_base,
-	check_db_base,
-	close_db_base,
+	get_db_connect_base,
+	check_db_connect_base,
+	close_db_connect_base,
 	update_item_base,
 	get_item_base
 };
