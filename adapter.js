@@ -204,14 +204,15 @@ const update_item_adapter = (db_connect,data_type,data_item) => {
 const get_item_adapter = (db_connect,data_type,tbl_id,options) => {
     return new Promise((callback) => {
         let error = null;
-        let cache_key_list = null;
         let cache_connect = {};
-        let data_item = get_new_item(data_type,tbl_id);
-        let item_attr_list_str = null;
         let cache_found = false;
+        let cache_key_list = null;
+        let data_item = get_new_item(data_type,tbl_id);
+        //let item_attr_list_str = null;
+        let cache_string_list = [];
         async.series([
             function(call) {
-                console.log('1111111');
+                //1
                 get_cache_main().then(([error,data]) => {
                     cache_connect = data;
                     call();
@@ -220,10 +221,87 @@ const get_item_adapter = (db_connect,data_type,tbl_id,options) => {
                 });
             },
             function(call) {
+                //2
+                console.log('1111111');
+                get_cache_string_main(cache_connect,get_cache_item_attr_list_key(data_type,tbl_id)).then(([error,data]) => {
+                    cache_key_list=data;
+                    call();
+                }).catch(err => {
+                    console.error("--Error-Project-FileName-Get-Blank-Error--",err);
+                    error = err;
+                    callback([error,null]);
+                });
+            },
+            async function(call) {
+                //3
+				if(cache_key_list!=null){
+					cache_string_list =cache_key_list.split(',');
+				}
+                for(const item of cache_string_list) {
+                    //cache_string_str=cache_string_str+item.title+',';
+                    const [error,val] = await get_cache_string_main(cache_connect,get_cache_item_attr_key(data_type,tbl_id,item));
+                    if(val){
+                        data_item[item] = val;
+                        cache_found=true;
+                    }else{
+                        data_item[item] =null;
+                    }
+
+                    console.log(data_item);
+                    //console.log(val);
+                }
+            },
+            function(call){
+                console.log('ddddd');
+            },
+            /*
+              function(call){
+                var item_list_str=[];
+                if(cache_key_list!=null){
+                    item_list_str =cache_key_list.split(',');
+                }
+                async.forEachOf(item_list_str,(item,key,go)=>{
+                    if(item){
+                        cache_red.get_cache_string(client_redis,get_cache_item_attr_key(data_type,tbl_id,item),function(error,data){
+                            if(data){
+                                data_item[item] = data;
+                                cache_found=true;
+                            }else{
+                                data_item[item] =null;
+                            }
+                            go();
+                        });
+                    }
+                    else{
+                        go();
+                    }
+                }, error => {
+                    if(cache_found){
+                        data_item.source='cache';
+                    }
+                    call();
+                });
+            },
+            */
+
+            /*
+            function(call){
+                cache_red.get_cache_string(client_redis,get_cache_item_attr_list_key(data_type,tbl_id),function(error,data){
+                    if(data){
+                        cache_key_list=data;
+                    }
+                    call();
+                });
+            },
+            */
+            /*
+            function(call) {
                 console.log('2222222222');
                 get_cache_string_main(cache_connect,get_cache_item_attr_list_key(data_type,tbl_id)).then(([error,data]) => {
                     cache_key_list = data;
-                    call();
+                    console.log('rrr');
+                    console.log(cache_key_list);
+            //call();
                 }).catch(err => {
                     console.error("--Error-Data-Adapter-Get-Item-Adapter-2-Error--",err);
                 });
@@ -236,7 +314,6 @@ const get_item_adapter = (db_connect,data_type,tbl_id,options) => {
                 }
                 async.forEachOf(item_list_str,(item,key,go) => {
                     if(item){
-                        /*
                         get_cache_string_main(cache_connect,get_cache_item_attr_list_key(data_type,tbl_id)).then(([error,data]) => {
                             if(data){
                                 data_item[item] = data;
@@ -248,7 +325,6 @@ const get_item_adapter = (db_connect,data_type,tbl_id,options) => {
                         }).catch(err => {
                             console.error("--Error-Data-Adapter-Get-Item-Adapter-3-Error--",err);
                         });
-                        */
                     }else{
                         go();
                     }
@@ -256,61 +332,91 @@ const get_item_adapter = (db_connect,data_type,tbl_id,options) => {
                     if(cache_found){
                         data_item.source=CACHE_TITLE;
                     }
-                    call();
-                });
-            },
-            function(call) {
-                console.log('1111111111');
-                if(!cache_found){
-                    console.log('2222222222');
-                    get_item_main(db_connect,data_type,tbl_id).then(([error,data]) => {
-                        console.log('33333333333');
-                        if(data){
-                            console.log('44444444444');
-                                new Promise((callback2) => {
-                                    console.log('555555555555');
-                                    let error = null;
-                                    set_cache_item(cache_connect,data_type,tbl_id,data).then(([error,data]) => {
-                                        console.log('66666666');
-                                        data_item.source=DB_TITLE;
-                                        callback2([error,data]);
-                                        call();
-                                    }).catch(err => {
-                                        console.error("--Error-Project-FileName-Get-Blank-Error--",err);
-                                        callback([err,null]);
-                                    });
-                                });
-                        }else{
-                            data_item.source=NOT_FOUND_TITLE;
-                            //call();
-                        }
-                    }).catch(err => {
-                        console.error("--Error-Data-Adapter-Get-Item-Adapter-4-Error--",err);
-                    });
-                }else{
                     //call();
-                }
-            },
-            function(call) {
-                close_cache_main(cache_connect).then(([error,data]) => {
-                    call();
-                }).catch(err => {
-                    console.error("--Error-Data-Adapter-Update-DB-Adapter-3-Error--",err);
                 });
-            }
-        ]).then(result => {
-            set_biz_item(data_item,options).then((data) => {
-                console.log(data);
-                //callback([error,data]);
-            }).catch(err => {
-                console.error("--Error-Data-Adapter-Update-DB-Adapter-4-Error--",err);
-            });
-        }).catch(err => {
-            console.error("--Error-Project-FileName-Update-Blank-Error--",err);
-        });
+            },
+            */
+                ]).then(result => {
+                    set_biz_item(data_item,options).then((data) => {
+                        console.log(data);
+                        //callback([error,data]);
+                    }).catch(err => {
+                        console.error("--Error-Data-Adapter-Update-DB-Adapter-4-Error--",err);
+                    });
+                }).catch(err => {
+                    console.error("--Error-Project-FileName-Update-Blank-Error--",err);
+                });
     });
 }
 const set_cache_item = (cache_connect,data_type,tbl_id,data_item) => {
+    return new Promise((callback) => {
+        let error = null;
+        let cache_string_str = '';
+        let prop_list = [];
+        async.series([
+            function(call) {
+                for (prop in data_item) {
+                    prop_list.push({title:prop,value:data_item[prop]});
+                }
+                call();
+            },
+            async function(call) {
+                for(const item of prop_list) {
+                    cache_string_str=cache_string_str+item.title+',';
+                    await set_cache_string_main(cache_connect,get_cache_item_attr_key(data_type,tbl_id,item.title), item.value);
+                }
+            },
+            function(call) {
+                new Promise((callback2) => {
+                    let error = null;
+                    set_cache_string_main(cache_connect,get_cache_item_attr_list_key(data_type,tbl_id),cache_string_str).then(([error,data]) => {
+                        call();
+                    }).catch(err => {
+                        console.error("--Error-Project-FileName-Get-Blank-Error--",err);
+                        call([err,null]);
+                    });
+                });
+            },
+            function(call) {
+                call();
+            }
+        ]).then(result => {
+            console.log('done');
+            callback(error,data_item);
+        }).catch(err => {
+            console.error("--Error-Project-FileName-Update-Blank-Error--",err);
+            callback(error,null);
+        });
+    });
+}
+
+/*
+function set_cache_item(client_redis,data_type,tbl_id,data_item,callback){
+        var cache_string_str='';
+        async.series([
+            function(call){
+                for (property in data_item) {
+                    if(String(property)){
+                        cache_red.set_cache_string(client_redis,get_cache_item_attr_key(data_type,tbl_id,property),data_item[property],function(error,data){
+                        });
+                        cache_string_str=cache_string_str+property+',';
+                    }
+                }
+                call();
+            },
+            function(call){
+                cache_red.set_cache_string(client_redis,get_cache_item_attr_list_key(data_type,tbl_id),cache_string_str,function(error,data){
+                    call();
+                });
+            },
+        ],
+            function(err, result){
+                callback(data_item);
+            });
+            */
+
+/*
+const set_cache_item_old = (cache_connect,data_type,tbl_id,data_item) => {
     return new Promise((callback) => {
         let error = null;
         let cache_string_str = '';
@@ -318,10 +424,38 @@ const set_cache_item = (cache_connect,data_type,tbl_id,data_item) => {
             function(call) {
                 for (property in data_item) {
                     if(String(property)){
-                        new Promise((callback2) => {
+                        //new Promise((callback2) => {
                             let error = null;
                             set_cache_string_main(cache_connect,get_cache_item_attr_key(data_type,tbl_id,property),data_item[property]).then(([error,data]) => {
-                                callback2([error,data]);
+
+                                console.log('start');
+                        //console.log(property);
+                        //console.log(data_item[property]);
+                                console.log(get_cache_item_attr_key(data_type,tbl_id,property));
+                                console.log('end');
+        //console.log(data);
+        //console.log(error);
+        //callback2([error,data]);
+        //callback2();
+        //}).catch(err => {
+        //console.error("--Error-Project-FileName-Get-Blank-Error--",err);
+        //callback2([err,null]);
+        //});
+        //});
+        //}
+                })
+    //call();
+            },
+             function(call) {
+                for (property in data_item) {
+                    if(String(property)){
+                        new Promise((callback2) => {
+                            let error = null;
+                            get_cache_string_main(cache_connect,get_cache_item_attr_list_key(data_type,tbl_id)).then(([error,data]) => {
+
+                                console.log('rrrr');
+                                console.log(data);
+                            //callback2([error,data]);
                             }).catch(err => {
                                 console.error("--Error-Project-FileName-Get-Blank-Error--",err);
                                 callback2([err,null]);
@@ -331,9 +465,6 @@ const set_cache_item = (cache_connect,data_type,tbl_id,data_item) => {
                 }
                 call();
             },
-            function(call) {
-                call();
-            }
         ]).then(result => {
             callback([error,data_item]);
         }).catch(err => {
@@ -342,8 +473,9 @@ const set_cache_item = (cache_connect,data_type,tbl_id,data_item) => {
         });
     });
 }
+*/
 
-/*
+                            /*
 function set_cache_item(client_redis,data_type,tbl_id,data_item,callback){
         var cache_string_str='';
         async.series([
@@ -384,6 +516,8 @@ function set_cache_item(client_redis,data_type,tbl_id,data_item,callback){
         }
     }
     */
+
+
 
 const get_cache_item_attr_key = (data_type,tbl_id,key) => {
     return data_type + "_" + key + "_" + String(tbl_id);
