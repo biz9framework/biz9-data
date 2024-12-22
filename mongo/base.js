@@ -13,11 +13,11 @@ const biz9_config_file = require(path.join(__dirname, '../../../biz9_config.js')
 const MONGO_FULL_URL="mongodb://"+biz9_config_file.MONGO_USERNAME_PASSWORD+biz9_config_file.MONGO_IP+":"+biz9_config_file.MONGO_PORT+"?retryWrites=true&w=majority&maxIdleTimeMS=60000&connectTimeoutMS=150000&socketTimeoutMS=90000&maxPoolSize=900000&maxConnecting=10000";
 const { MongoClient } = require("mongodb");
 const client_db = new MongoClient(MONGO_FULL_URL);
-const get_db_connect_base = () => {
+const get_db_connect_base = (db_name) => {
 	return new Promise((callback) => {
 		let error = null;
-		client_db.connect().then((data)=> {
-			callback([null,client_db]);
+		client_db.connect(db_name).then((data)=> {
+			callback([null,data.db(db_name)]);
 		}).catch(error => {
 			console.error("--Error-Data-Mongo-Base-Get-DB-BASE-Error--",error);
 			var reset_cmd = "sudo mongod --fork --config "+biz9_config_file.mongo_config;
@@ -27,7 +27,7 @@ const get_db_connect_base = () => {
 				}else{
 					biz9_config_file.ssh_key=' -i '+ biz9_config_file.ssh_key;
 				}
-				reset_cmd='ssh '+ biz9_config_file.ssh_key + " " +biz9_config_file.mongo_server_user +"@"+biz9_config_file.mongo_ip +" -- "+reset_cmd;
+				reset_cmd = 'ssh '+ biz9_config_file.ssh_key + " " +biz9_config_file.mongo_server_user +"@"+biz9_config_file.mongo_ip +" -- "+reset_cmd;
 			}
 			dir = exec(reset_cmd, function(error,stdout,stderr){
 			});
@@ -77,7 +77,6 @@ const check_db_connect_base = (db_connect) => {
 const check_db_client_connected = (db_connect) => {
 	return !!db_connect && !!db_connect.topology && !!db_connect.topology.isConnected()
 }
-
 const update_item_base = (db_connect,data_type,item) => {
 	return new Promise((callback) => {
 		let error = null;

@@ -9,8 +9,8 @@ const biz9_config_file = require(path.join(__dirname, '../../../biz9_config.js')
 const async = require("async");
 const { get_title_url } = require(process.env.BIZ9_HOME + "/biz9-utility/src/code");
 const { get_db_connect_base,check_db_connect_base,close_db_connect_base,update_item_base,get_item_base,delete_item_base,get_tbl_id_list_base}= require("./base.js");
-const get_db_connect_main = async () => {
-    return [error,data] = await get_db_connect_base();
+const get_db_connect_main = async (db_name) => {
+    return [error,data] = await get_db_connect_base(db_name);
 }
 const close_db_connect_main = async (db_connect) => {
     return [error,data] = await close_db_connect_base(db_connect);
@@ -18,8 +18,8 @@ const close_db_connect_main = async (db_connect) => {
 const check_db_connect_main = async (db_connect) => {
     return data = await check_db_connect_base(db_connect);
 }
-const update_item_main = async (db_connect,data_type,data_item) => {
-    return [error,data] = await update_item_base(db_connect,data_type,data_item);
+const update_item_main = async (db_connect,data_type,item_data) => {
+    return [error,data] = await update_item_base(db_connect,data_type,item_data);
 }
 const delete_item_main = async (db_connect,data_type,tbl_id) => {
     return [error,data] = await delete_item_base(db_connect,data_type,tbl_id);
