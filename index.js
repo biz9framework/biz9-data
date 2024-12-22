@@ -4,7 +4,7 @@ Author: certifiedcoderz@gmail.com (Certified CoderZ)
 License GNU General Public License v3.0
 Description: BiZ9 Framework: Data
 */
-const {get_db_connect_adapter,check_db_connect_adapter,close_db_connect_adapter,update_item_adapter,update_item_list_adapter,get_item_adapter,delete_item_adapter,get_sql_paging_adapter}  = require('./adapter.js');
+const {get_db_connect_adapter,check_db_connect_adapter,close_db_connect_adapter,update_item_adapter,update_item_list_adapter,get_item_adapter,delete_item_adapter,get_item_list_adapter}  = require('./adapter.js');
 const get_db_connect = async () => {
      return [error,data] = await get_db_connect_adapter();
 };
@@ -26,8 +26,8 @@ const update_item_list = async (db_connect,data_item_list,options) => {
 const delete_item = async (db_connect,data_type,tbl_id) => {
      return [error,data] = await delete_item_adapter(db_connect,data_type,tbl_id);
 };
-const get_sql_paging = async (db_connect,data_type,sql,sort_by,page_current,page_size,options) => {
-     return [error,data] = await get_sql_paging_adapter(db_connect,data_type,sql,sort_by,page_current,page_size,options);
+const get_item_list = async (db_connect,data_type,sql,sort_by,page_current,page_size,options) => {
+     return [error,data] = await get_item_list_adapter(db_connect,data_type,sql,sort_by,page_current,page_size,options);
 };
 /*
 const get_sql = async (db_connect,data_type,sql_obj,sort_by) => {
@@ -58,7 +58,7 @@ module.exports = {
     update_item_list,
     get_item,
     delete_item,
-    get_sql_paging
+    get_item_list
     /*
     update_list,
     get_sql,

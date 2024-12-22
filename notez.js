@@ -13,7 +13,7 @@ const get_blank = () => {
 		run.method().then((data) => {
 			callback([error,null]);
 		}).catch(error => {
-			console.error("--Error-Project-FileName-Get-Blank-Error--",err);
+			console.error("--Error-Project-FileName-Get-Blank-Error--",error);
 			callback([error,null]);
 		});
 	});
@@ -31,7 +31,7 @@ const update_blank = (data_type,data_item) => {
 		]).then(result => {
 			callback([error,null]);
 		}).catch(error => {
-			console.error("--Error-Project-FileName-Update-Blank-Error--",err);
+			console.error("--Error-Project-FileName-Update-Blank-Error--",error);
 			callback([error,null]);
 		});
 	});

@@ -4,10 +4,10 @@ Author: certifiedcoderz@gmail.com (Certified CoderZ)
 License GNU General Public License v3.0
 Description: BiZ9 Framework: Data - Mongo - Base
 */
-const async = require('async')
+const async = require('async');
 const {get_title_url} = require(process.env.BIZ9_HOME+'/biz9-utility/src/code/index.js')
 const {get_new_item,set_biz_item} = require(process.env.BIZ9_HOME+'/biz9-app/src/code/index.js')
-const {get_db_connect_main,check_db_connect_main,close_db_connect_main,update_item_main,get_item_main,delete_item_main,get_sql_paging_main} = require('./mongo/index.js');
+const {get_db_connect_main,check_db_connect_main,close_db_connect_main,update_item_main,get_item_main,delete_item_main,get_tbl_id_list_main} = require('./mongo/index.js');
 const {get_cache_connect_main,close_cache_connect_main,get_cache_string_main,delete_cache_string_main,set_cache_string_main} = require('./redis/index.js');
 const DB_TITLE='DB';
 const CACHE_TITLE='CACHE';
@@ -72,7 +72,7 @@ const blank = (data_type,data_item) => {
             callback([error,null]);
         }).catch(error => {
             console.error("--Error-Data-Adapter-Blank-END-Error--",error);
-            callback([err,null]);
+            callback([error,null]);
         });
     });
 }
@@ -123,7 +123,7 @@ const update_item_list_adapter = (db_connect,data_item_list,options) => {
                             }else{
                                 go();
                             }
-                        }).catch(err => {
+                        }).catch(error => {
                             console.error("--Error-Data-Adapter-Update-Item-List-3-Error--",error);
                             callback([error,null]);
                         });
@@ -222,6 +222,60 @@ const update_item_adapter = (db_connect,data_type,data_item,options) => {
         });
     });
 }
+const get_item_list_adapter = (db_connect,data_type,sql_obj,sort_by,page_current,page_size,options) => {
+    return new Promise((callback) => {
+        let error = null;
+        let cache_connect = {};
+        let total_count = 0;
+        let item_tbl_id_list = [];
+        //let cache_found = false;
+        //let cache_key_list = null;
+        //let data_item = get_new_item(data_type,tbl_id);
+        //let cache_string_list = [];
+        async.series([
+            function(call) {
+                get_cache_connect_main().then(([error,data]) => {
+                    cache_connect = data;
+                    call();
+                }).catch(error => {
+                    console.error("--Error-Get-Item-Adapter-Error--",error);
+                    callback([error,null]);
+                });
+            },
+            function(call) {
+                get_tbl_id_list_main(db_connect,data_type,sql_obj,sort_by,page_current,page_size).then(([error,total_count,data_list]) => {
+                    error=error;
+                    total_count=total_count;
+                    item_tbl_id_list=data_list;
+                    call();
+                }).catch(error => {
+                    console.error("--Error-Data-Adapter-Get-Sql-Paging-Adapter-2-Error--",error);
+                    callback([error,null]);
+                });
+            },
+            async function(call) {
+                var list = [];
+                for(const item of item_tbl_id_list) {
+                    [error,data] = await get_item_cache_db(cache_connect,db_connect,data_type,item.tbl_id,options);
+                    console.log(data);
+                    list.push(data);
+                    console.log('cool');
+                    console.log(list);
+                }
+            },
+        ]).then(result => {
+            set_biz_item(data_item,options).then(([error,data]) => {
+                callback([error,data]);
+            }).catch(error => {
+                console.error("--Error-Data-Adapter-Get-Item-Adpater-6-Error--",error);
+                callback([error,null]);
+            });
+        }).catch(error => {
+            console.error("--Error-Data-Adapter-Get-Item-Adpater-7-Error--",error);
+            callback([error,null]);
+        });
+    });
+}
 const get_item_adapter = (db_connect,data_type,tbl_id,options) => {
     return new Promise((callback) => {
         let error = null;
@@ -235,76 +289,32 @@ const get_item_adapter = (db_connect,data_type,tbl_id,options) => {
                 get_cache_connect_main().then(([error,data]) => {
                     cache_connect = data;
                     call();
-                }).catch(err => {
-                    console.error("--Error-Data-Adapter-Get-Item-Adapter-Error--",error);
+                }).catch(error => {
+                    console.error("--Error-Adapter-Get-Item-Adapter-Error--",error);
                     callback([error,null]);
                 });
             },
             function(call) {
-                get_cache_string_main(cache_connect,get_cache_item_attr_list_key(data_type,tbl_id)).then(([error,data]) => {
-                    cache_key_list=data;
+                get_item_cache_db(cache_connect,db_connect,data_type,tbl_id,options).then(([error,data]) => {
+                    data_item = data;
                     call();
                 }).catch(error => {
-                    console.error("--Error-Project-FileName-Get-Item-Adapter-2-Error--",error);
+                    console.error("--Error-Adapter-Get-Item-Adapter-2-Error--",error);
                     callback([error,null]);
                 });
-            },
-            async function(call) {
-                if(cache_key_list!=null){
-                    cache_string_list =cache_key_list.split(',');
-                }
-                for(const item of cache_string_list) {
-                    if(item){
-                        const [error,val] = await get_cache_string_main(cache_connect,get_cache_item_attr_key(data_type,tbl_id,item));
-                        if(val){
-                            data_item[item] = val;
-                            cache_found=true;
-                        }else{
-                            data_item[item] =null;
-                        }
-                    }
-                }
-            },
-            function(call){
-                if(!cache_found){
-                    get_item_main(db_connect,data_type,tbl_id).then(([error,data]) => {
-                        set_cache_item(cache_connect,data_type,tbl_id,data).then(([error,data]) => {
-                            if(data){
-                                data_item == data;
-                                data_item.source=DB_TITLE;
-                            }else{
-                                data_item.source=NOT_FOUND_TITLE;
-                            }
-                            call();
-                        }).catch(error => {
-                            console.error("--Error-Data-Adapter-Get-Item-Adpater-3-Error--",error);
-                            callback([error,null]);
-                        });
-                    }).catch(error => {
-                        console.error("--Error-Data-Adapter-Get-Item-Adpater-4-Error--",error);
-                        callback([error,null]);
-                    });
-                }else{
-                    call();
-                }
             },
             function(call) {
                 close_cache_connect_main(cache_connect).then(([error,data]) => {
                     call();
                 }).catch(error => {
-                    console.error("--Error-Data-Adapter-Get-Item-Adpater-5-Error--",error);
+                    console.error("--Error-Adapter-Get-Item-Adapter-3-Error--",error);
                     callback([error,null]);
                 });
-            },
+            }
         ]).then(result => {
-            set_biz_item(data_item,options).then(([error,data]) => {
-                callback([error,data]);
-            }).catch(error => {
-                console.error("--Error-Data-Adapter-Get-Item-Adpater-6-Error--",error);
-                callback([error,null]);
-            });
-        }).catch(err => {
-            console.error("--Error-Data-Adapter-Get-Item-Adpater-7-Error--",error);
+            callback([error,data_item]);
+        }).catch(error => {
+            console.error("--Error-Adapter-Get-Item-Adapter-4-Error--",error);
             callback([error,null]);
         });
     });
@@ -370,7 +380,7 @@ const delete_item_adapter = (db_connect,data_type,tbl_id) => {
                     callback([error,null]);
                 });
             },
-               function(call){
+            function(call){
                 delete_item_main(db_connect,data_type,tbl_id).then(([error,data]) => {
                     data_item = data;
                     data_item.db_del = true;
@@ -380,7 +390,7 @@ const delete_item_adapter = (db_connect,data_type,tbl_id) => {
                     callback([error,null]);
                 });
             },
-         function(call) {
+            function(call) {
                 close_cache_connect_main(cache_connect).then(([error,data]) => {
                     call();
                 }).catch(error => {
@@ -392,15 +402,15 @@ const delete_item_adapter = (db_connect,data_type,tbl_id) => {
             callback([error,null]);
         }).catch(error => {
             console.error("--Error-Data-Adapter-Delete-Item-Adapter-5-Error--",error);
-            callback([err,null]);
+            callback([error,null]);
         });
     });
 }
-const get_sql_paging_adapter = (db_connect,data_type,sql_obj,sort_by,page_current,page_size) => {
+const get_sql_paging_adapter_old = (db_connect,data_type,sql_obj,sort_by,page_current,page_size) => {
     return new Promise((callback) => {
         let error = null;
         let cache_connect = {};
-        let data_list_id_list = [];
+        let item_tbl_id_list = [];
         let total_count = 0;
         async.series([
             function(call) {
@@ -408,19 +418,36 @@ const get_sql_paging_adapter = (db_connect,data_type,sql_obj,sort_by,page_curren
                     cache_connect = data;
                     call();
                 }).catch(error => {
-                    console.error("--Error-Data-Adapter-Blank-Error--",error);
+                    console.error("--Error-Data-Adapter-Get-Sql-Paging-Adapter-Error--",error);
                     callback([error,null]);
                 });
             },
             function(call) {
-                console.log('here');
-                get_sql_paging_main(db_connect,data_type,sql_obj,sort_by,page_current,page_size).then(([error,data]) => {
-                    error = error;
-                    total_count = total_count;
-                    item = data;
+                get_sql_paging_tbl_id_main(db_connect,data_type,sql_obj,sort_by,page_current,page_size).then(([error,total_count,data_list]) => {
+                    error=error;
+                    total_count=total_count;
+                    item_tbl_id_list=data_list;
                     call();
                 }).catch(error => {
-                    console.error("--Error-Data-Adapter-Blank-2-Error--",error);
+                    console.error("--Error-Data-Adapter-Get-Sql-Paging-Adapter-2-Error--",error);
+                    callback([error,null]);
+                });
+            },
+            function(call) {
+                bind_cache_item_paging(cache_connect,data_type,item_tbl_id_list).then(([error,data]) => {
+                    //cache_connect = data;
+                    //call();
+                }).catch(error => {
+                    console.error("--Error-Data-Adapter-Get-Sql-Paging-Adapter-3-Error--",error);
+                    callback([error,null]);
+                });
+            },
+            function(call) {
+                get_cache_connect_main().then(([error,data]) => {
+                    cache_connect = data;
+                    call();
+                }).catch(error => {
+                    console.error("--Error-Data-Adapter-Get-Sql-Paging-Adapter-3-Error--",error);
                     callback([error,null]);
                 });
             },
@@ -436,7 +463,119 @@ const get_sql_paging_adapter = (db_connect,data_type,sql_obj,sort_by,page_curren
             callback([error,null]);
         }).catch(error => {
             console.error("--Error-Data-Adapter-Blank-END-Error--",error);
-            callback([err,null]);
+            callback([error,null]);
+        });
+    });
+}
+const bind_cache_item_paging_old = (cache_connect,data_type,item_tbl_id_list) => {
+    return new Promise((callback) => {
+        let error = null;
+        var new_data_list = [];
+        async.series([
+            function(call) {
+                console.log('aaaaaaaa');
+                //1.
+                for(a=0;a<item_tbl_id_list.length;a++){
+                    item_tbl_id_list[a].source=null;
+                    item_tbl_id_list[a].cache_key_list=null;
+                    item_tbl_id_list[a].data=null;
+                }
+                console.log(item_tbl_id_list);
+                //call();
+            },
+            async function(call) {
+                console.log('aaaa');
+                //2
+                for(const item of item_tbl_id_list) {
+                    if(item){
+                        const [error,val] = await get_cache_string_main(cache_connect,get_cache_item_attr_list_key(item.data_type,item.tbl_id));
+                        if(val){
+                            item.cache_key_list = val;
+                        }else{
+                            item.cache_key_list = null;
+                        }
+                    }
+                }
+                console.log(item_tbl_id_list);
+                console.log('bbb');
+                //call();
+            },
+        ]).then(result => {
+            callback([error,null]);
+        }).catch(error => {
+            console.error("--Error-Project-FileName-Update-Blank-Error--",error);
+            callback([error,null]);
+        });
+    });
+}
+const get_item_cache_db = (cache_connect,db_connect,data_type,tbl_id,options) => {
+    return new Promise((callback) => {
+        let error = null;
+        let cache_found = false;
+        let cache_key_list = null;
+        let data_item = get_new_item(data_type,tbl_id);
+        let cache_string_list = [];
+        async.series([
+            function(call) {
+                get_cache_string_main(cache_connect,get_cache_item_attr_list_key(data_type,tbl_id)).then(([error,data]) => {
+                    cache_key_list=data;
+                    call();
+                }).catch(error => {
+                    console.error("--Error-Project-FileName-Get-Item-Adapter-2-Error--",error);
+                    callback([error,null]);
+                });
+            },
+            async function(call) {
+                if(cache_key_list!=null){
+                    cache_string_list =cache_key_list.split(',');
+                }
+                for(const item of cache_string_list) {
+                    if(item){
+                        const [error,val] = await get_cache_string_main(cache_connect,get_cache_item_attr_key(data_type,tbl_id,item));
+                        if(val){
+                            data_item[item] = val;
+                            cache_found=true;
+                        }else{
+                            data_item[item] = null;
+                        }
+                    }
+                }
+            },
+            function(call){
+                if(cache_found){
+                    data_item.source=CACHE_TITLE;
+                    call();
+                }
+                else{
+                    get_item_main(db_connect,data_type,tbl_id).then(([error,data]) => {
+                        set_cache_item(cache_connect,data_type,tbl_id,data).then(([error,data]) => {
+                            if(data){
+                                data_item = data;
+                                data_item.source = DB_TITLE;
+                            }else{
+                                data_item.source = NOT_FOUND_TITLE;
+                            }
+                            call();
+                        }).catch(error => {
+                            console.error("--Error-Data-Adapter-Get-Item-Adpater-3-Error--",error);
+                            callback([error,null]);
+                        });
+                    }).catch(error => {
+                        console.error("--Error-Data-Adapter-Get-Item-Adpater-4-Error--",error);
+                        callback([error,null]);
+                    });
+                }
+            },
+        ]).then(result => {
+            set_biz_item(data_item,options).then(([error,data]) => {
+                callback([error,data]);
+            }).catch(error => {
+                console.error("--Error-Data-Adapter-Get-Item-Adpater-6-Error--",error);
+                callback([error,null]);
+            });
+        }).catch(error => {
+            console.error("--Error-Data-Adapter-Get-Item-Adpater-7-Error--",error);
+            callback([error,null]);
         });
     });
 }
@@ -453,6 +592,6 @@ module.exports = {
     update_item_adapter,
     update_item_list_adapter,
     get_item_adapter,
-    get_sql_paging_adapter,
+    get_item_list_adapter,
     delete_item_adapter
 };

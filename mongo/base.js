@@ -51,7 +51,6 @@ const close_db_connect_base = (db_connect) => {
 const get_item_base = (db_connect,data_type,tbl_id) => {
 	return new Promise((callback) => {
 		let error = null;
-		let data = {};
 		let collection = {};
 		if(check_db_connect_base(db_connect)){
 			collection = db_connect.collection(data_type);
@@ -91,7 +90,7 @@ const update_item_base = (db_connect,data_type,item) => {
 				collection.insertOne(item).then((data) => {
 					callback([error,item]);
 				}).catch(error => {
-					console.error("--Error-Notez-Base-Update-Item-Base-Error--",error);
+					console.error("--Error-Data-Mongo-Base-Update-Item-Base-Error--",error);
 					callback([error,null]);
 				});
 			}
@@ -100,7 +99,7 @@ const update_item_base = (db_connect,data_type,item) => {
 			collection.updateOne(item).then((data) => {
 				callback([error,item]);
 			}).catch(error => {
-				console.error("--Error-Notez-Base-Update-Item-Base-2-Error--",error);
+				console.error("--Error-Data-Mongo-Base-Update-Item-Base--2-Error--",error);
 				callback([error,null]);
 			});
 		}
@@ -114,13 +113,13 @@ const delete_item_base = (db_connect,data_type,tbl_id) => {
 			collection.deleteMany({tbl_id:tbl_id}).then((data) => {
 				callback([error,data]);
 			}).catch(error => {
-				console.error("--Error-Notez-Base-Delete-Item-Base-Error--",error);
+				console.error("--Error-Data-Mongo-Base-Delete-Item-Base--2-Error--",error);
 				callback([error,null]);
 			});
 		}
 	});
 }
-const get_sql_paging_base = (db_connect,data_type,sql_obj,sort_by,page_current,page_size) => {
+const get_tbl_id_list_base = (db_connect,data_type,sql_obj,sort_by,page_current,page_size) => {
 	return new Promise((callback) => {
 		let error = null;
 		let total_count = 0;
@@ -128,48 +127,41 @@ const get_sql_paging_base = (db_connect,data_type,sql_obj,sort_by,page_current,p
 		let collection = {};
 		async.series([
 			function(call) {
-				console.log('aaaaaa');
 				if(check_db_connect_base(db_connect)){
-					console.log('bbbbbb');
-					collection = db_connect.collection(data_type);
-					console.log('bbbbbbbbb');
-					collection.countDocuments(sql_obj).then((data) => {
-						console.log('ccccccccc');
-						console.log(data);
-						//callback([error,data_list]);
+					db_connect.collection(data_type).countDocuments(sql_obj).then((data) => {
+						total_count = data;
+						call();
 					}).catch(error => {
-						//console.error("--Error-Data-Base-Get-Sql-Paging-Base-Error--",error);
-						//callback([error,null]);
-					});
-				}
-				//call();
-			},
-
-			function(call) {
-				if(check_db_connect_base(db_connect)){
-					collection = db_connect.collection(data_type);
-					collection.find(sql_obj).project({tbl_id:1,data_type:1}).sort(sort_by).collation({locale:"en_US",numericOrdering:true}).toArray().then((data) => {
-						callback([error,data_list]);
-					}).catch(error => {
-						console.error("--Error-Data-Base-Get-Sql-Paging-Base-Error--",error);
+						console.error("--Error-Data-Mongo-Base-Get-Sql-Paging-TblId-Base-Error--",error);
 						callback([error,null]);
 					});
+				}else{
+					console.error("--Error-Data-Mongo-Base-Get-Sql-Paging-TblId-Base-Error--",'No Connection');
 				}
-				call();
 			},
 			function(call) {
-				call();
+				if(check_db_connect_base(db_connect)){
+					db_connect.collection(data_type).find(sql_obj).sort(sort_by).skip(page_current>0?((page_current-1)*page_size):0).limit(page_size).collation({locale:"en_US",numericOrdering:true}).project({tbl_id:1,data_type:1,_id:0}).toArray().then((data) => {
+						data_list = data;
+						call();
+					}).catch(error => {
+						console.error("--Error-Data-Mongo-Base-Get-Sql-Paging-TblId-Base-Error--",error);
+						callback([error,null]);
+					});
+				}else{
+					console.error("--Error-Data-Mongo-Base-Get-Sql-Paging-TblId-Base-Error--",'No connection');
+					callback(['No connection',null]);
+				}
 			}
 		]).then(result => {
-			callback([error,null]);
+			callback([error,total_count,data_list]);
 		}).catch(error => {
 			console.error("--Error-Project-FileName-Update-Blank-Error--",err);
 			callback([error,null]);
 		});
 	});
 }
-
-const get_sql_paging_tbl_id_base = (db_connect,data_type,sql_obj,sort_by,page_current,page_size) => {
+const get_aging_tbl_id_base_old = (db_connect,data_type,sql_obj,sort_by,page_current,page_size) => {
 	return new Promise((callback) => {
 		let error = null;
 		let data_list = [];
@@ -183,10 +175,12 @@ const get_sql_paging_tbl_id_base = (db_connect,data_type,sql_obj,sort_by,page_cu
 				console.error("--Error-Data-Base-Get-Sql-Paging-Tbl-Id-Base-Error--",error);
 				callback([error,null]);
 			});
+		}else{
+			console.error("--Error-Data-Base-Get-Sql-Paging-Tbl-Id-Base-Error--",'No connection');
+			callback(['No connection',null]);
 		}
 	});
 }
-
 module.exports = {
 	get_db_connect_base,
 	check_db_connect_base,
@@ -194,6 +188,5 @@ module.exports = {
 	update_item_base,
 	get_item_base,
 	delete_item_base,
-	get_sql_paging_base,
-	get_sql_paging_tbl_id_base
+	get_tbl_id_list_base
 };
