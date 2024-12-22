@@ -112,7 +112,21 @@ const delete_item_base = (db_connect,data_type,tbl_id) => {
 			collection.deleteMany({tbl_id:tbl_id}).then((data) => {
 				callback([error,data]);
 			}).catch(error => {
-				console.error("--Error-Data-Mongo-Base-Delete-Item-Base--2-Error--",error);
+				console.error("--Error-Data-Mongo-Base-Delete-Item-Base-Error--",error);
+				callback([error,null]);
+			});
+		}
+	});
+}
+const delete_item_list_base = (db_connect,data_type,sql) => {
+	return new Promise((callback) => {
+		let error = null;
+		let collection = db_connect.collection(data_type);
+		if(check_db_connect_base(db_connect)){
+			collection.deleteMany(sql).then((data) => {
+				callback([error,data]);
+			}).catch(error => {
+				console.error("--Error-Data-Mongo-Base-Delete-List-Base-Error--",error);
 				callback([error,null]);
 			});
 		}

@@ -29,7 +29,7 @@ const close_db_connect_adapter = (db_connect) => {
         close_db_connect_main(db_connect).then(([error,data])=> {
             callback([error,data]);
         }).catch(error => {
-            console.error("--Error-Data-Adapter-Close-DB-Adapter-Error--",error);
+            console.error("--Error-Data-Adapter-Close-DB-Connect-Adapter-Error--",error);
             callback([error,null]);
         });
     });
@@ -88,7 +88,7 @@ const update_item_list_adapter = (db_connect,item_data_list,options) => {
                     cache_connect = data;
                     call();
                 }).catch(error => {
-                    console.error("--Error-Data-Adapter-Update-Item-List-Error--",error);
+                    console.error("--Error-Data-Adapter-Update-Item-List-Adapter-Error--",error);
                     callback([error,null]);
                 });
             },
@@ -223,50 +223,44 @@ const update_item_adapter = (db_connect,data_type,item_data,options) => {
         });
     });
 }
-const get_item_list_adapter = (db_connect,data_type,sql_obj,sort_by,page_current,page_size,options) => {
+const get_item_list_adapter = (db_connect,data_type,sql,sort_by,page_current,page_size,options) => {
     return new Promise((callback) => {
         let error = null;
         let cache_connect = {};
-        let total_count = 0;
+        let item_data_count = 0;
         let item_tbl_id_list = [];
-        let item_data_new_list = [];
-        //let cache_found = false;
-        //let cache_key_list = null;
-        //let item_data = get_new_item(data_type,tbl_id);
-        //let cache_string_list = [];
+        let item_data_list = [];
         async.series([
             function(call) {
                 get_cache_connect_main().then(([error,data]) => {
                     cache_connect = data;
                     call();
                 }).catch(error => {
-                    console.error("--Error-Get-Item-Adapter-Error--",error);
+                    console.error("--Error-Get-Item-List-Adapter-Error--",error);
                     callback([error,null]);
                 });
             },
             function(call) {
-                get_tbl_id_list_main(db_connect,data_type,sql_obj,sort_by,page_current,page_size).then(([error,total_count,data_list]) => {
+                get_tbl_id_list_main(db_connect,data_type,sql,sort_by,page_current,page_size).then(([error,total_count,data_list]) => {
                     error=error;
-                    total_count=total_count;
+                    item_data_count=total_count;
                     item_tbl_id_list=data_list;
                     call();
                 }).catch(error => {
-                    console.error("--Error-Data-Adapter-Get-Sql-Paging-Adapter-2-Error--",error);
+                    console.error("--Error-Get-Item-List-Adapter-2-Error--",error);
                     callback([error,null]);
                 });
             },
             async function(call) {
-                var list = [];
                 for(const item of item_tbl_id_list) {
                     [error,data] = await get_item_cache_db(cache_connect,db_connect,data_type,item.tbl_id,options);
-                    item_data_new_list.push(data);
-                    //console.log(item_data_new_list);
+                    item_data_list.push(data);
                 }
             },
         ]).then(result => {
-                callback([error,item_data_new_list]);
+            callback([error,item_data_list,item_data_count,Math.round(item_data_count/page_size+1)]);
         }).catch(error => {
-            console.error("--Error-Data-Adapter-Get-Item-Adpater-7-Error--",error);
+            console.error("--Error-Get-Item-List-Adapter-3-Error--",error);
             callback([error,null]);
         });
     });
@@ -362,7 +356,48 @@ const delete_item_adapter = (db_connect,data_type,tbl_id) => {
                     cache_connect = data;
                     call();
                 }).catch(error => {
-                    console.error("--Error-Data-Adapter-Delete-Item-Adapter-Error--",error);
+                    console.error("--Error-Adapter-Get-Item-Adapter-Error--",error);
+                    callback([error,null]);
+                });
+            },
+            function(call) {
+                delete_item_cache_db(cache_connect,db_connect,data_type,tbl_id).then(([error,data]) => {
+                    item_data = data;
+                    call();
+                }).catch(error => {
+                    console.error("--Error-Adapter-Get-Item-Adapter-2-Error--",error);
+                    callback([error,null]);
+                });
+            },
+            function(call) {
+                close_cache_connect_main(cache_connect).then(([error,data]) => {
+                    call();
+                }).catch(error => {
+                    console.error("--Error-Adapter-Get-Item-Adapter-3-Error--",error);
+                    callback([error,null]);
+                });
+            }
+        ]).then(result => {
+            callback([error,item_data]);
+        }).catch(error => {
+            console.error("--Error-Adapter-Get-Item-Adapter-4-Error--",error);
+            callback([error,null]);
+        });
+    });
+}
+/*
+const delete_item_cache_db = (cache_connect,db_connect,data_type,tbl_id) => {
+    return new Promise((callback) => {
+        let error = null;
+        let cache_connect = {};
+        let item_data = get_new_item(data_type,tbl_id);
+        async.series([
+            function(call) {
+                get_cache_connect_main().then(([error,data]) => {
+                    cache_connect = data;
+                    call();
+                }).catch(error => {
+                    console.error("--Error-Data-Adapter-Delete-Item-Cache-DB-Error--",error);
                     callback([error,null]);
                 });
             },
@@ -371,7 +406,7 @@ const delete_item_adapter = (db_connect,data_type,tbl_id) => {
                     item_data.cache_del = true;
                     call();
                 }).catch(error => {
-                    console.error("--Error-Data-Adapter-Delete-Item-Adapter-2-Error--",error);
+                    console.error("--Error-Data-Adapter-Delete-Item-Cache-DB-2-Error--",error);
                     callback([error,null]);
                 });
             },
@@ -380,7 +415,7 @@ const delete_item_adapter = (db_connect,data_type,tbl_id) => {
                     item_data.db_del = true;
                     call();
                 }).catch(error => {
-                    console.error("--Error-Data-Adapter-Delete-Item-Adapter-3-Error--",error);
+                    console.error("--Error-Data-Adapter-Delete-Item-Cache-DB-3-Error--",error);
                     callback([error,null]);
                 });
             },
@@ -388,120 +423,20 @@ const delete_item_adapter = (db_connect,data_type,tbl_id) => {
                 close_cache_connect_main(cache_connect).then(([error,data]) => {
                     call();
                 }).catch(error => {
-                    console.error("--Error-Data-Adapter-Delete-Item-Adapter-4-Error--",error);
+                    console.error("--Error-Data-Adapter-Delete-Item-Cache-DB-4-Error--",error);
                     callback([error,null]);
                 });
             },
         ]).then(result => {
             callback([error,item_data]);
         }).catch(error => {
-            console.error("--Error-Data-Adapter-Delete-Item-Adapter-5-Error--",error);
-            callback([error,null]);
+            console.error("--Error-Data-Adapter-Delete-Item-Cache-DB-5-Error--",error);
+                    callback([error,null]);
         });
     });
 }
-const get_sql_paging_adapter_old = (db_connect,data_type,sql_obj,sort_by,page_current,page_size) => {
-    return new Promise((callback) => {
-        let error = null;
-        let cache_connect = {};
-        let item_tbl_id_list = [];
-        let total_count = 0;
-        async.series([
-            function(call) {
-                get_cache_connect_main().then(([error,data]) => {
-                    cache_connect = data;
-                    call();
-                }).catch(error => {
-                    console.error("--Error-Data-Adapter-Get-Sql-Paging-Adapter-Error--",error);
-                    callback([error,null]);
-                });
-            },
-            function(call) {
-                get_sql_paging_tbl_id_main(db_connect,data_type,sql_obj,sort_by,page_current,page_size).then(([error,total_count,data_list]) => {
-                    error=error;
-                    total_count=total_count;
-                    item_tbl_id_list=data_list;
-                    call();
-                }).catch(error => {
-                    console.error("--Error-Data-Adapter-Get-Sql-Paging-Adapter-2-Error--",error);
-                    callback([error,null]);
-                });
-            },
-            function(call) {
-                bind_cache_item_paging(cache_connect,data_type,item_tbl_id_list).then(([error,data]) => {
-                    //cache_connect = data;
-                    //call();
-                }).catch(error => {
-                    console.error("--Error-Data-Adapter-Get-Sql-Paging-Adapter-3-Error--",error);
-                    callback([error,null]);
-                });
-            },
-            function(call) {
-                get_cache_connect_main().then(([error,data]) => {
-                    cache_connect = data;
-                    call();
-                }).catch(error => {
-                    console.error("--Error-Data-Adapter-Get-Sql-Paging-Adapter-3-Error--",error);
-                    callback([error,null]);
-                });
-            },
-            function(call) {
-                close_cache_connect_main(cache_connect).then(([error,data]) => {
-                    call();
-                }).catch(error => {
-                    console.error("--Error-Data-Adapter-Blank-3-Error--",error);
-                    callback([error,null]);
-                });
-            },
-        ]).then(result => {
-            callback([error,null]);
-        }).catch(error => {
-            console.error("--Error-Data-Adapter-Blank-END-Error--",error);
-            callback([error,null]);
-        });
-    });
-}
-const bind_cache_item_paging_old = (cache_connect,data_type,item_tbl_id_list) => {
-    return new Promise((callback) => {
-        let error = null;
-        var new_data_list = [];
-        async.series([
-            function(call) {
-                console.log('aaaaaaaa');
-                //1.
-                for(a=0;a<item_tbl_id_list.length;a++){
-                    item_tbl_id_list[a].source=null;
-                    item_tbl_id_list[a].cache_key_list=null;
-                    item_tbl_id_list[a].data=null;
-                }
-                console.log(item_tbl_id_list);
-                //call();
-            },
-            async function(call) {
-                console.log('aaaa');
-                //2
-                for(const item of item_tbl_id_list) {
-                    if(item){
-                        const [error,val] = await get_cache_string_main(cache_connect,get_cache_item_attr_list_key(item.data_type,item.tbl_id));
-                        if(val){
-                            item.cache_key_list = val;
-                        }else{
-                            item.cache_key_list = null;
-                        }
-                    }
-                }
-                console.log(item_tbl_id_list);
-                console.log('bbb');
-                //call();
-            },
-        ]).then(result => {
-            callback([error,null]);
-        }).catch(error => {
-            console.error("--Error-Project-FileName-Update-Blank-Error--",error);
-            callback([error,null]);
-        });
-    });
-}
+*/
+
 const get_item_cache_db = (cache_connect,db_connect,data_type,tbl_id,options) => {
     return new Promise((callback) => {
         let error = null;
@@ -515,7 +450,7 @@ const get_item_cache_db = (cache_connect,db_connect,data_type,tbl_id,options) =>
                     cache_key_list=data;
                     call();
                 }).catch(error => {
-                    console.error("--Error-Project-FileName-Get-Item-Adapter-2-Error--",error);
+                    console.error("--Error-Data-Adapter-Get-Item-Cache-DB-Error--",error);
                     callback([error,null]);
                 });
             },
@@ -542,20 +477,21 @@ const get_item_cache_db = (cache_connect,db_connect,data_type,tbl_id,options) =>
                 }
                 else{
                     get_item_main(db_connect,data_type,tbl_id).then(([error,data]) => {
-                        set_cache_item(cache_connect,data_type,tbl_id,data).then(([error,data]) => {
-                            if(data){
+                        if(data){
+                            set_cache_item(cache_connect,data_type,tbl_id,data).then(([error,data]) => {
                                 item_data = data;
                                 item_data.source = DB_TITLE;
-                            }else{
-                                item_data.source = NOT_FOUND_TITLE;
-                            }
+                                call();
+                            }).catch(error => {
+                                console.error("--Error-Data-Adapter-Get-Item-Cache-DB-2-Error--",error);
+                                callback([error,null]);
+                            });
+                        }else{
+                            item_data.source = NOT_FOUND_TITLE;
                             call();
-                        }).catch(error => {
-                            console.error("--Error-Data-Adapter-Get-Item-Adpater-3-Error--",error);
-                            callback([error,null]);
-                        });
+                        }
                     }).catch(error => {
-                        console.error("--Error-Data-Adapter-Get-Item-Adpater-4-Error--",error);
+                        console.error("--Error-Data-Adapter-Get-Item-Cache-DB-3-Error--",error);
                         callback([error,null]);
                     });
                 }
@@ -564,15 +500,92 @@ const get_item_cache_db = (cache_connect,db_connect,data_type,tbl_id,options) =>
             set_biz_item(item_data,options).then(([error,data]) => {
                 callback([error,data]);
             }).catch(error => {
-                console.error("--Error-Data-Adapter-Get-Item-Adpater-6-Error--",error);
+                console.error("--Error-Data-Adapter-Get-Item-Cache-DB-4-Error--",error);
                 callback([error,null]);
             });
         }).catch(error => {
-            console.error("--Error-Data-Adapter-Get-Item-Adpater-7-Error--",error);
+            console.error("--Error-Data-Adapter-Get-Item-Cache-DB-5-Error--",error);
             callback([error,null]);
         });
     });
 }
+const delete_item_list_adapter = (db_connect,data_type,sql) => {
+    return new Promise((callback) => {
+        let error = null;
+        let cache_connect = {};
+        let item_tbl_id_list = [];
+        let item_data_new_list = [];
+        async.series([
+            function(call) {
+                get_cache_connect_main().then(([error,data]) => {
+                    cache_connect = data;
+                    call();
+                }).catch(error => {
+                    console.error("--Error-Data-Adapter-Delete-Item-List-Adapter-Error--",error);
+                    callback([error,null]);
+                });
+            },
+            function(call) {
+                get_tbl_id_list_main(db_connect,data_type,sql,{},0,9999).then(([error,total_count,data_list]) => {
+                    error=error;
+                    total_count=total_count;
+                    item_tbl_id_list=data_list;
+                    call();
+                }).catch(error => {
+                    console.error("--Error-Data-Adapter-Delete-Item-List-Adapter-2-Error--",error);
+                    callback([error,null]);
+                });
+            },
+            async function(call) {
+                var list = [];
+                for(const item of item_tbl_id_list) {
+                    [error,data] = await delete_item_cache_db(cache_connect,db_connect,data_type,item.tbl_id);
+                    item_data_new_list.push(data);
+                }
+            },
+        ]).then(result => {
+            console.log(item_data_new_list);
+            console.log(item_data_new_list.length);
+            console.log('done');
+            //callback([error,item_data_new_list]);
+        }).catch(error => {
+            console.error("--Error-Data-Adapter-Delete-Item-List-Adapter-3-Error--",error);
+            callback([error,null]);
+        });
+    });
+}
+const delete_item_cache_db = (cache_connect,db_connect,data_type,tbl_id) => {
+    return new Promise((callback) => {
+        let error = null;
+        let item_data = get_new_item(data_type,tbl_id);
+        async.series([
+            function(call) {
+                delete_cache_string_main(cache_connect,get_cache_item_attr_list_key(data_type,tbl_id)).then(([error,data]) => {
+                    item_data.cache_del = true;
+                    call();
+                }).catch(error => {
+                    console.error("--Error-Data-Adapter-Delete-Item-Cache-DB-Error--",error);
+                    callback([error,null]);
+                });
+            },
+            function(call){
+                delete_item_main(db_connect,data_type,tbl_id).then(([error,data]) => {
+                    item_data.db_del = true;
+                    call();
+                }).catch(error => {
+                    console.error("--Error-Data-Adapter-Delete-Item-Adapter-3-Error--",error);
+                    callback([error,null]);
+                });
+            },
+        ]).then(result => {
+            callback([error,item_data]);
+        }).catch(error => {
+            console.error("--Error-Data-Adapter-Get-Item-Cache-DB-5-Error--",error);
+            callback([error,null]);
+        });
+    });
+}
+
 const get_cache_item_attr_key = (data_type,tbl_id,key) => {
     return data_type + "_" + key + "_" + String(tbl_id);
 }
@@ -587,5 +600,6 @@ module.exports = {
     update_item_list_adapter,
     get_item_adapter,
     get_item_list_adapter,
+    delete_item_list_adapter,
     delete_item_adapter
 };
