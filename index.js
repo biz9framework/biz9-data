@@ -35,28 +35,6 @@ const delete_item_list = async (db_connect,data_type,sql) => {
 const count_item_list = async (db_connect,data_type,sql) => {
      return [error,data] = await count_item_list_adapter(db_connect,data_type,sql);
 };
-
-/*
-const get_sql = async (db_connect,data_type,sql_obj,sort_by) => {
-     return [error,data] = await get_item_adapter(db_connect,data_type,sql,sort_by);
-};
-const delete_sql = async (db_connect,data_type,sql_obj) => {
-     return [error,data] = await get_item_adapter(db_connect,data_type,sql_obj);
-};
-const delete_list = async (db_connect,data_type,item_data_list) => {
-     return [error,data] = await get_item_adapter(db_connect,data_type,item_data_list);
-};
-const count = async (db_connect,data_type,sql_obj) => {
-     return [error,data] = await get_item_adapter(db_connect,data_type,sql_obj);
-};
-*/
-
-
-
-
-
-
-
 module.exports = {
     get_db_connect,
     close_db_connect,
@@ -68,13 +46,4 @@ module.exports = {
     get_item_list,
     count_item_list,
     delete_item_list
-    /*
-    update_list,
-    get_sql,
-    delete_item,
-    delete_sql,
-    delete_list,
-    count,
-    drop,
-    */
 };
