@@ -95,7 +95,7 @@ const update_item_base = (db_connect,data_type,item) => {
 			}
 		}else{
 			item.date_save = new moment().toISOString();
-			collection.updateOne(item).then((data) => {
+			collection.updateOne({tbl_id:item.tbl_id},{$set: item}).then((data) => {
 				callback([error,item]);
 			}).catch(error => {
 				console.error("--Error-Data-Mongo-Base-Update-Item-Base--2-Error--",error);
@@ -174,23 +174,17 @@ const get_tbl_id_list_base = (db_connect,data_type,sql_obj,sort_by,page_current,
 		});
 	});
 }
-const get_aging_tbl_id_base_old = (db_connect,data_type,sql_obj,sort_by,page_current,page_size) => {
+const count_item_list_base = (db_connect,data_type,sql) => {
 	return new Promise((callback) => {
 		let error = null;
-		let data_list = [];
-		let page_current = page_current ? page_current : 1;
-		let page_size = page_size ? page_size : 1;
+		let collection = db_connect.collection(data_type);
 		if(check_db_connect_base(db_connect)){
-			db_connect.collection(data_type).countDocuments(sql_obj).then((data) => {
-				total_count = data;
-				callback([error,total_count]);
+			collection.countDocuments(sql).then((data) => {
+				callback([error,data]);
 			}).catch(error => {
-				console.error("--Error-Data-Base-Get-Sql-Paging-Tbl-Id-Base-Error--",error);
+				console.error("--Error-Data-Mongo-Base-Count-Item-List-Base-Error--",error);
 				callback([error,null]);
 			});
-		}else{
-			console.error("--Error-Data-Base-Get-Sql-Paging-Tbl-Id-Base-Error--",'No connection');
-			callback(['No connection',null]);
 		}
 	});
 }
@@ -201,5 +195,7 @@ module.exports = {
 	update_item_base,
 	get_item_base,
 	delete_item_base,
+	delete_item_list_base,
+	count_item_list_base,
 	get_tbl_id_list_base
 };
