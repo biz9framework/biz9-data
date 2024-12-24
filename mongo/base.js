@@ -7,8 +7,8 @@
 const async = require('async');
 const path = require('path');
 const moment = require('moment');
-const {get_guid} = require(process.env.BIZ9_HOME+'/biz9-utility/src/code/index.js')
-const {get_new_item} = require(process.env.BIZ9_HOME+'/biz9-app/src/code/index.js')
+const {get_guid} = require('biz9-utility')
+const {get_new_item} = require('biz9-app')
 const biz9_config_file = require(path.join(__dirname, '../../../biz9_config.js'));
 const MONGO_FULL_URL="mongodb://"+biz9_config_file.MONGO_USERNAME_PASSWORD+biz9_config_file.MONGO_IP+":"+biz9_config_file.MONGO_PORT+"?retryWrites=true&w=majority&maxIdleTimeMS=60000&connectTimeoutMS=150000&socketTimeoutMS=90000&maxPoolSize=900000&maxConnecting=10000";
 const { MongoClient } = require("mongodb");

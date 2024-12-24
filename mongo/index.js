@@ -7,8 +7,8 @@
 const path = require('path');
 const biz9_config_file = require(path.join(__dirname, '../../../biz9_config.js'));
 const async = require("async");
-const { get_title_url } = require(process.env.BIZ9_HOME + "/biz9-utility/src/code");
-const { get_db_connect_base,check_db_connect_base,close_db_connect_base,update_item_base,get_item_base,delete_item_base,get_tbl_id_list_base,count_item_list_base}= require("./base.js");
+const { get_title_url } = require("biz9-utility");
+const { get_db_connect_base,check_db_connect_base,close_db_connect_base,update_item_base,get_item_base,delete_item_base,get_tbl_id_list_base,delete_item_list_base,count_item_list_base}= require("./base.js");
 const get_db_connect_main = async (db_name) => {
     return [error,data] = await get_db_connect_base(db_name);
 }

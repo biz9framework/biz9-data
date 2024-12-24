@@ -25,8 +25,8 @@ const get_title_url = (title) => {
 const get_query = (window) => {
     return get_query_main(window);
 };
-const get_date_time_str = (date,time) => {
-    return get_date_time_str(date,time);
+const get_date_time_str = (datetime) => {
+    return get_date_time_str_main(datetime);
 };
 const get_date_str = (date) => {
     return get_date_str_main(date);
@@ -74,7 +74,7 @@ const text_truncate = (str,length,ending) => {
     return text_truncate_main(str,length,ending);
 };
 const validate_email = (email) => {
-    return validate_email(email);
+    return validate_email_main(email);
 };
 const set_resize_photo_file = async (req,_file_path) => {
       return [error,data] = await set_resize_photo_file_main(req,_file_path);

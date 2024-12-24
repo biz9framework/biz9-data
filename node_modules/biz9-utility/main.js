@@ -5,6 +5,8 @@
  * Utility-Main
  */
 const path = require('path');
+const moment = require('moment');
+const prettydate = require('pretty-date');
 const get_id_main = (max) => {
     if(!max){
         max = 99999;
@@ -50,13 +52,9 @@ const get_query_main = (window) => {
     }
     return vars;
 }
-const get_date_time_str_main = (date,time) => {
-    //Tuesday, February 14th 2023,  at 2:39 am
-    if(!time){
-        return String(moment(date).format("dddd MMMM Do, YYYY"));
-    }else{
-        return String(moment(date+ ' ' + time).format("dddd MMMM Do, YYYY  h:mm a"));
-    }
+const get_date_time_str_main = (datetime) => {
+    //Tuesday, February 14th 2023, at 2:39 am
+    return String(moment(datetime).format("dddd MMMM Do, YYYY h:mm a"));
 }
 const get_date_str_main = (date) => {
     //Tuesday, February 14th 2023

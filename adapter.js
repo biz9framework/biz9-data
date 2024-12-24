@@ -5,8 +5,8 @@ License GNU General Public License v3.0
 Description: BiZ9 Framework: Data - Mongo - Base
 */
 const async = require('async');
-const {get_title_url} = require(process.env.BIZ9_HOME+'/biz9-utility/src/code/index.js')
-const {get_new_item,set_biz_item} = require(process.env.BIZ9_HOME+'/biz9-app/src/code/index.js')
+const {get_title_url} = require('biz9-utility')
+const {get_new_item,set_biz_item} = require('biz9-app')
 const {get_db_connect_main,check_db_connect_main,close_db_connect_main,update_item_main,get_item_main,delete_item_main,get_tbl_id_list_main,delete_item_list_main,count_item_list_main} = require('./mongo/index.js');
 const {get_cache_connect_main,close_cache_connect_main,get_cache_string_main,delete_cache_string_main,set_cache_string_main} = require('./redis/index.js');
 const DB_TITLE='DB';
@@ -583,6 +583,14 @@ const delete_item_list_adapter = (db_connect,data_type,sql) => {
                     call();
                 }).catch(error => {
                     console.error("--Error-Data-Adapter-Delete-Item-List-Adapter-2-Error--",error);
+                    callback([error,null]);
+                });
+            },
+            function(call){
+                delete_item_list_main(db_connect,data_type,sql).then(([error,data]) => {
+                    call();
+                }).catch(error => {
+                    console.error("--Error-Data-Adapter-Delete-Item-List-Adapter-Error--",error);
                     callback([error,null]);
                 });
             },
