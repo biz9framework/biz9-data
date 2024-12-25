@@ -17,14 +17,14 @@ const check_db_connect = async (db_connect) => {
 const update_item = async (db_connect,data_type,item_data,options) => {
      return [error,data] = await update_item_adapter(db_connect,data_type,item_data,options);
 };
-const get_item = async (db_connect,data_type,tbl_id,options) => {
-     return [error,data] = await get_item_adapter(db_connect,data_type,tbl_id,options);
+const get_item = async (db_connect,data_type,id,options) => {
+     return [error,data] = await get_item_adapter(db_connect,data_type,id,options);
 };
 const update_item_list = async (db_connect,item_data_list,options) => {
      return [error,data] = await update_item_list_adapter(db_connect,item_data_list,options);
 };
-const delete_item = async (db_connect,data_type,tbl_id) => {
-     return [error,data] = await delete_item_adapter(db_connect,data_type,tbl_id);
+const delete_item = async (db_connect,data_type,id) => {
+     return [error,data] = await delete_item_adapter(db_connect,data_type,id);
 };
 const get_item_list = async (db_connect,data_type,sql,sort_by,page_current,page_size,options) => {
      return [error,data_list,item_count,page_count] = await get_item_list_adapter(db_connect,data_type,sql,sort_by,page_current,page_size,options);

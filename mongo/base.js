@@ -48,13 +48,13 @@ const close_db_connect_base = (db_connect) => {
 		});
 	});
 }
-const get_item_base = (db_connect,data_type,tbl_id) => {
+const get_item_base = (db_connect,data_type,id) => {
 	return new Promise((callback) => {
 		let error = null;
 		let collection = {};
 		if(check_db_connect_base(db_connect)){
 			collection = db_connect.collection(data_type);
-			collection.findOne({tbl_id:tbl_id}).then((data) => {
+			collection.findOne({id:id}).then((data) => {
 				callback([error,data]);
 			}).catch(error => {
 				console.error("--Error-Data-Base-Get-Item-Base-Error--",error);
@@ -81,12 +81,13 @@ const update_item_base = (db_connect,data_type,item) => {
 	return new Promise((callback) => {
 		let error = null;
 		let collection = db_connect.collection(data_type);
-		if (String(item.tbl_id)=='0') {//insert
-			item.tbl_id = get_guid();
+		if (String(item.id)=='0') {//insert
+			item.id = get_guid();
 			item.date_create = new moment().toISOString();
 			item.date_save = new moment().toISOString();
 			if(check_db_connect_base(db_connect)){
 				collection.insertOne(item).then((data) => {
+					delete item['_id'];
 					callback([error,item]);
 				}).catch(error => {
 					console.error("--Error-Data-Mongo-Base-Update-Item-Base-Error--",error);
@@ -95,7 +96,8 @@ const update_item_base = (db_connect,data_type,item) => {
 			}
 		}else{
 			item.date_save = new moment().toISOString();
-			collection.updateOne({tbl_id:item.tbl_id},{$set: item}).then((data) => {
+			collection.updateOne({id:item.id},{$set: item}).then((data) => {
+				delete item['_id'];
 				callback([error,item]);
 			}).catch(error => {
 				console.error("--Error-Data-Mongo-Base-Update-Item-Base--2-Error--",error);
@@ -104,12 +106,12 @@ const update_item_base = (db_connect,data_type,item) => {
 		}
 	});
 }
-const delete_item_base = (db_connect,data_type,tbl_id) => {
+const delete_item_base = (db_connect,data_type,id) => {
 	return new Promise((callback) => {
 		let error = null;
 		let collection = db_connect.collection(data_type);
 		if(check_db_connect_base(db_connect)){
-			collection.deleteMany({tbl_id:tbl_id}).then((data) => {
+			collection.deleteMany({id:id}).then((data) => {
 				callback([error,data]);
 			}).catch(error => {
 				console.error("--Error-Data-Mongo-Base-Delete-Item-Base-Error--",error);
@@ -132,7 +134,7 @@ const delete_item_list_base = (db_connect,data_type,sql) => {
 		}
 	});
 }
-const get_tbl_id_list_base = (db_connect,data_type,sql_obj,sort_by,page_current,page_size) => {
+const get_id_list_base = (db_connect,data_type,sql_obj,sort_by,page_current,page_size) => {
 	return new Promise((callback) => {
 		let error = null;
 		let total_count = 0;
@@ -154,7 +156,7 @@ const get_tbl_id_list_base = (db_connect,data_type,sql_obj,sort_by,page_current,
 			},
 			function(call) {
 				if(check_db_connect_base(db_connect)){
-					db_connect.collection(data_type).find(sql_obj).sort(sort_by).skip(page_current>0?((page_current-1)*page_size):0).limit(page_size).collation({locale:"en_US",numericOrdering:true}).project({tbl_id:1,data_type:1,_id:0}).toArray().then((data) => {
+					db_connect.collection(data_type).find(sql_obj).sort(sort_by).skip(page_current>0?((page_current-1)*page_size):0).limit(page_size).collation({locale:"en_US",numericOrdering:true}).project({id:1,data_type:1,_id:0}).toArray().then((data) => {
 						data_list = data;
 						call();
 					}).catch(error => {
@@ -197,5 +199,5 @@ module.exports = {
 	delete_item_base,
 	delete_item_list_base,
 	count_item_list_base,
-	get_tbl_id_list_base
+	get_id_list_base
 };

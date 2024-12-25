@@ -7,7 +7,7 @@ Description: BiZ9 Framework: Data - Mongo - Base
 const async = require('async');
 const {get_title_url} = require('biz9-utility')
 const {get_new_item,set_biz_item} = require('biz9-app')
-const {get_db_connect_main,check_db_connect_main,close_db_connect_main,update_item_main,get_item_main,delete_item_main,get_tbl_id_list_main,delete_item_list_main,count_item_list_main} = require('./mongo/index.js');
+const {get_db_connect_main,check_db_connect_main,close_db_connect_main,update_item_main,get_item_main,delete_item_main,get_id_list_main,delete_item_list_main,count_item_list_main} = require('./mongo/index.js');
 const {get_cache_connect_main,close_cache_connect_main,get_cache_string_main,delete_cache_string_main,set_cache_string_main} = require('./redis/index.js');
 const DB_TITLE='DB';
 const CACHE_TITLE='CACHE';
@@ -37,46 +37,6 @@ const close_db_connect_adapter = (db_connect) => {
 const check_db_connect_adapter = (db_connect) => {
     return check_db_connect_main(db_connect);
 }
-const blank = (data_type,item_data) => {
-    return new Promise((callback) => {
-        let error = null;
-        let item_data_new = null;
-        let cache_connect = {};
-        async.series([
-            function(call) {
-                get_cache_connect_main().then(([error,data]) => {
-                    cache_connect = data;
-                    call();
-                }).catch(error => {
-                    console.error("--Error-Data-Adapter-Blank-Error--",error);
-                    callback([error,null]);
-                });
-            },
-            function(call) {
-                go().then(([error,data]) => {
-                    item_data = data;
-                    call();
-                }).catch(error => {
-                    console.error("--Error-Data-Adapter-Blank-2-Error--",error);
-                    callback([error,null]);
-                });
-            },
-            function(call) {
-                close_cache_connect_main(cache_connect).then(([error,data]) => {
-                    call();
-                }).catch(error => {
-                    console.error("--Error-Data-Adapter-Blank-3-Error--",error);
-                    callback([error,null]);
-                });
-            },
-        ]).then(result => {
-            callback([error,null]);
-        }).catch(error => {
-            console.error("--Error-Data-Adapter-Blank-END-Error--",error);
-            callback([error,null]);
-        });
-    });
-}
 const update_item_list_adapter = (db_connect,item_data_list,options) => {
     return new Promise((callback) => {
         let error = null;
@@ -95,7 +55,7 @@ const update_item_list_adapter = (db_connect,item_data_list,options) => {
             function(call){
                 async.forEachOf(item_data_list,(item,key,go)=>{
                     for(property in item[key]){
-                        if(property!='tbl_id'&&property!='data_type'){
+                        if(property!='id'&&property!='data_type'){
                             if(!item[key][property]){
                                 delete item[key][property];
                             }
@@ -113,9 +73,9 @@ const update_item_list_adapter = (db_connect,item_data_list,options) => {
                 async.forEachOf(item_data_list,(item,key,go)=>{
                     if(item){
                         update_item_main(db_connect,item.data_type,item).then(([error,data]) => {
-                            item.tbl_id=data.tbl_id;
+                            item.id=data.id;
                             if(data){
-                                delete_cache_string_main(cache_connect,get_cache_item_attr_list_key(item.data_type,data.tbl_id)).then(([error,data]) => {
+                                delete_cache_string_main(cache_connect,get_cache_item_attr_list_key(item.data_type,data.id)).then(([error,data]) => {
                                     go();
                                 }).catch(error => {
                                     console.error("--Error-Data-Adapter-Update-Item-List-2-Error--",error);
@@ -195,7 +155,7 @@ const update_item_adapter = (db_connect,data_type,item_data,options) => {
                 });
             },
             function(call){
-                delete_cache_string_main(cache_connect,get_cache_item_attr_list_key(item_data.data_type,item_data.tbl_id)).then(([error,data]) => {
+                delete_cache_string_main(cache_connect,get_cache_item_attr_list_key(item_data.data_type,item_data.id)).then(([error,data]) => {
                     call();
                 }).catch(error => {
                     console.error("--Error-Data-Adapter-Update-Item-Adapter-3-Error--",error);
@@ -228,7 +188,7 @@ const get_item_list_adapter = (db_connect,data_type,sql,sort_by,page_current,pag
         let error = null;
         let cache_connect = {};
         let item_data_count = 0;
-        let item_tbl_id_list = [];
+        let item_id_list = [];
         let item_data_list = [];
         async.series([
             function(call) {
@@ -241,10 +201,10 @@ const get_item_list_adapter = (db_connect,data_type,sql,sort_by,page_current,pag
                 });
             },
             function(call) {
-                get_tbl_id_list_main(db_connect,data_type,sql,sort_by,page_current,page_size).then(([error,total_count,data_list]) => {
+                get_id_list_main(db_connect,data_type,sql,sort_by,page_current,page_size).then(([error,total_count,data_list]) => {
                     error=error;
                     item_data_count=total_count;
-                    item_tbl_id_list=data_list;
+                    item_id_list=data_list;
                     call();
                 }).catch(error => {
                     console.error("--Error-Get-Item-List-Adapter-2-Error--",error);
@@ -252,8 +212,8 @@ const get_item_list_adapter = (db_connect,data_type,sql,sort_by,page_current,pag
                 });
             },
             async function(call) {
-                for(const item of item_tbl_id_list) {
-                    [error,data] = await get_item_cache_db(cache_connect,db_connect,data_type,item.tbl_id,options);
+                for(const item of item_id_list) {
+                    [error,data] = await get_item_cache_db(cache_connect,db_connect,data_type,item.id,options);
                     if(data){
                         item_data_list.push(data);
                     }
@@ -267,13 +227,13 @@ const get_item_list_adapter = (db_connect,data_type,sql,sort_by,page_current,pag
         });
     });
 }
-const get_item_adapter = (db_connect,data_type,tbl_id,options) => {
+const get_item_adapter = (db_connect,data_type,id,options) => {
     return new Promise((callback) => {
         let error = null;
         let cache_connect = {};
         let cache_found = false;
         let cache_key_list = null;
-        let item_data = get_new_item(data_type,tbl_id);
+        let item_data = get_new_item(data_type,id);
         let cache_string_list = [];
         async.series([
             function(call) {
@@ -286,7 +246,7 @@ const get_item_adapter = (db_connect,data_type,tbl_id,options) => {
                 });
             },
             function(call) {
-                get_item_cache_db(cache_connect,db_connect,data_type,tbl_id,options).then(([error,data]) => {
+                get_item_cache_db(cache_connect,db_connect,data_type,id,options).then(([error,data]) => {
                     item_data = data;
                     call();
                 }).catch(error => {
@@ -310,7 +270,7 @@ const get_item_adapter = (db_connect,data_type,tbl_id,options) => {
         });
     });
 }
-const set_cache_item = (cache_connect,data_type,tbl_id,item_data) => {
+const set_cache_item = (cache_connect,data_type,id,item_data) => {
     return new Promise((callback) => {
         let error = null;
         let cache_string_str = '';
@@ -327,11 +287,11 @@ const set_cache_item = (cache_connect,data_type,tbl_id,item_data) => {
             async function(call) {
                 for(const item of prop_list) {
                     cache_string_str=cache_string_str+item.title+',';
-                    await set_cache_string_main(cache_connect,get_cache_item_attr_key(data_type,tbl_id,item.title), item.value);
+                    await set_cache_string_main(cache_connect,get_cache_item_attr_key(data_type,id,item.title), item.value);
                 }
             },
             function(call) {
-                    set_cache_string_main(cache_connect,get_cache_item_attr_list_key(data_type,tbl_id),cache_string_str).then(([error,data]) => {
+                    set_cache_string_main(cache_connect,get_cache_item_attr_list_key(data_type,id),cache_string_str).then(([error,data]) => {
                         call();
                     }).catch(error => {
                         console.error("--Error-Data-Adapter-Set-Cache-Item-Error--",error);
@@ -346,11 +306,11 @@ const set_cache_item = (cache_connect,data_type,tbl_id,item_data) => {
         });
     });
 }
-const delete_item_adapter = (db_connect,data_type,tbl_id) => {
+const delete_item_adapter = (db_connect,data_type,id) => {
     return new Promise((callback) => {
         let error = null;
         let cache_connect = {};
-        let item_data = get_new_item(data_type,tbl_id);
+        let item_data = get_new_item(data_type,id);
         async.series([
             function(call) {
                 get_cache_connect_main().then(([error,data]) => {
@@ -362,7 +322,7 @@ const delete_item_adapter = (db_connect,data_type,tbl_id) => {
                 });
             },
             function(call) {
-                delete_item_cache_db(cache_connect,db_connect,data_type,tbl_id).then(([error,data]) => {
+                delete_item_cache_db(cache_connect,db_connect,data_type,id).then(([error,data]) => {
                     item_data = data;
                     call();
                 }).catch(error => {
@@ -386,16 +346,16 @@ const delete_item_adapter = (db_connect,data_type,tbl_id) => {
         });
     });
 }
-const get_item_cache_db = (cache_connect,db_connect,data_type,tbl_id,options) => {
+const get_item_cache_db = (cache_connect,db_connect,data_type,id,options) => {
     return new Promise((callback) => {
         let error = null;
         let cache_found = false;
         let cache_key_list = null;
-        let item_data = get_new_item(data_type,tbl_id);
+        let item_data = get_new_item(data_type,id);
         let cache_string_list = [];
         async.series([
             function(call) {
-                get_cache_string_main(cache_connect,get_cache_item_attr_list_key(data_type,tbl_id)).then(([error,data]) => {
+                get_cache_string_main(cache_connect,get_cache_item_attr_list_key(data_type,id)).then(([error,data]) => {
                     cache_key_list=data;
                     call();
                 }).catch(error => {
@@ -409,7 +369,7 @@ const get_item_cache_db = (cache_connect,db_connect,data_type,tbl_id,options) =>
                 }
                 for(const item of cache_string_list) {
                     if(item){
-                        const [error,val] = await get_cache_string_main(cache_connect,get_cache_item_attr_key(data_type,tbl_id,item));
+                        const [error,val] = await get_cache_string_main(cache_connect,get_cache_item_attr_key(data_type,id,item));
                         if(val){
                             item_data[item] = val;
                             cache_found=true;
@@ -425,9 +385,9 @@ const get_item_cache_db = (cache_connect,db_connect,data_type,tbl_id,options) =>
                     call();
                 }
                 else{
-                    get_item_main(db_connect,data_type,tbl_id).then(([error,data]) => {
+                    get_item_main(db_connect,data_type,id).then(([error,data]) => {
                         if(data){
-                            set_cache_item(cache_connect,data_type,tbl_id,data).then(([error,data]) => {
+                            set_cache_item(cache_connect,data_type,id,data).then(([error,data]) => {
                                 item_data = data;
                                 item_data.source = DB_TITLE;
                                 call();
@@ -452,107 +412,6 @@ const get_item_cache_db = (cache_connect,db_connect,data_type,tbl_id,options) =>
                 console.error("--Error-Data-Adapter-Get-Item-Cache-DB-4-Error--",error);
                 callback([error,null]);
             });
-        }).catch(error => {
-            console.error("--Error-Data-Adapter-Get-Item-Cache-DB-5-Error--",error);
-            callback([error,null]);
-        });
-    });
-}
-const get_item_list_cache_db = (cache_connect,db_connect,data_type,item_tbl_id_list) => {
-    return new Promise((callback) => {
-        let error = null;
-        let item_data_list = [];
-        //let cache_found = false;
-        //let cache_key_list = null;
-        //let item_data = get_new_item(data_type,tbl_id);
-        //let cache_string_list = [];
-        async.series([
-            async function(call) {
-                for(const item of item_tbl_id_list) {
-                    const [error,val] = await get_cache_string_main(cache_connect,get_cache_item_attr_list_key(data_type,item.tbl_id));
-                    //item.cache_key_list_str = null;
-                    //console.log('cool bean');
-                    //if(val){
-                        //item.cache_key_list_str = val.split(',');
-                        console.log('rrrr');
-                        console.log(get_cache_item_attr_list_key(data_type,item.tbl_id));
-                        console.log(error);
-                        console.log(val);
-                        console.log('bbbb');
-                        //console.log(data_type);
-                        //console.log(item.tbl_id);
-                    //}
-                }
-            },
-            function(call) {
-                console.log('aaaaaaaaa');
-            }
-
-            /*
-            function(call) {
-            //1
-                get_cache_string_main(cache_connect,get_cache_item_attr_list_key(data_type,tbl_id)).then(([error,data]) => {
-                    cache_key_list=data;
-                    call();
-                }).catch(error => {
-                    console.error("--Error-Data-Adapter-Get-Item-Cache-DB-Error--",error);
-                    callback([error,null]);
-                });
-            },
-            async function(call) {
-            //2
-                if(cache_key_list!=null){
-                    cache_string_list =cache_key_list.split(',');
-                }
-                for(const item of cache_string_list) {
-                    if(item){
-                        const [error,val] = await get_cache_string_main(cache_connect,get_cache_item_attr_key(data_type,tbl_id,item));
-                        if(val){
-                            item_data[item] = val;
-                           cache_found=true;
-                        }else{
-                            item_data[item] = null;
-                        }
-                    }
-                }
-            },
-            function(call){
-                if(cache_found){
-                    item_data.source=CACHE_TITLE;
-                    call();
-                }
-                else{
-                    get_item_main(db_connect,data_type,tbl_id).then(([error,data]) => {
-                        if(data){
-                            set_cache_item(cache_connect,data_type,tbl_id,data).then(([error,data]) => {
-                                item_data = data;
-                                item_data.source = DB_TITLE;
-                                call();
-                            }).catch(error => {
-                                console.error("--Error-Data-Adapter-Get-Item-Cache-DB-2-Error--",error);
-                                callback([error,null]);
-                            });
-                        }else{
-                            item_data.source = NOT_FOUND_TITLE;
-                            call();
-                        }
-                    }).catch(error => {
-                        console.error("--Error-Data-Adapter-Get-Item-Cache-DB-3-Error--",error);
-                        callback([error,null]);
-                    });
-                }
-            },
-            */
-        ]).then(result => {
-            console.log('done');
-            /*
-            set_biz_item(item_data,options).then(([error,data]) => {
-                callback([error,data]);
-            }).catch(error => {
-                console.error("--Error-Data-Adapter-Get-Item-Cache-DB-4-Error--",error);
-                callback([error,null]);
-            });
-            */
         }).catch(error => {
             console.error("--Error-Data-Adapter-Get-Item-Cache-DB-5-Error--",error);
             callback([error,null]);
@@ -563,7 +422,7 @@ const delete_item_list_adapter = (db_connect,data_type,sql) => {
     return new Promise((callback) => {
         let error = null;
         let cache_connect = {};
-        let item_tbl_id_list = [];
+        let item_id_list = [];
         let item_data_new_list = [];
         async.series([
             function(call) {
@@ -576,10 +435,10 @@ const delete_item_list_adapter = (db_connect,data_type,sql) => {
                 });
             },
             function(call) {
-                get_tbl_id_list_main(db_connect,data_type,sql,{},0,9999).then(([error,total_count,data_list]) => {
+                get_id_list_main(db_connect,data_type,sql,{},0,9999).then(([error,total_count,data_list]) => {
                     error=error;
                     total_count=total_count;
-                    item_tbl_id_list=data_list;
+                    item_id_list=data_list;
                     call();
                 }).catch(error => {
                     console.error("--Error-Data-Adapter-Delete-Item-List-Adapter-2-Error--",error);
@@ -596,8 +455,8 @@ const delete_item_list_adapter = (db_connect,data_type,sql) => {
             },
             async function(call) {
                 var list = [];
-                for(const item of item_tbl_id_list) {
-                    [error,data] = await delete_item_cache_db(cache_connect,db_connect,data_type,item.tbl_id);
+                for(const item of item_id_list) {
+                    [error,data] = await delete_item_cache_db(cache_connect,db_connect,data_type,item.id);
                     item_data_new_list.push(data);
                 }
             },
@@ -609,13 +468,13 @@ const delete_item_list_adapter = (db_connect,data_type,sql) => {
         });
     });
 }
-const delete_item_cache_db = (cache_connect,db_connect,data_type,tbl_id) => {
+const delete_item_cache_db = (cache_connect,db_connect,data_type,id) => {
     return new Promise((callback) => {
         let error = null;
         let cache_connect = {};
         let cache_key_list = '';
         let cache_string_list = '';
-        let item_data = get_new_item(data_type,tbl_id);
+        let item_data = get_new_item(data_type,id);
         async.series([
             function(call) {
                 get_cache_connect_main().then(([error,data]) => {
@@ -627,7 +486,7 @@ const delete_item_cache_db = (cache_connect,db_connect,data_type,tbl_id) => {
                 });
             },
             function(call) {
-                get_cache_string_main(cache_connect,get_cache_item_attr_list_key(data_type,tbl_id)).then(([error,data]) => {
+                get_cache_string_main(cache_connect,get_cache_item_attr_list_key(data_type,id)).then(([error,data]) => {
                     cache_key_list=data;
                     call();
                 }).catch(error => {
@@ -641,12 +500,12 @@ const delete_item_cache_db = (cache_connect,db_connect,data_type,tbl_id) => {
                 }
                 for(const item of cache_string_list) {
                     if(item){
-                        const [error,val] = await delete_cache_string_main(cache_connect,get_cache_item_attr_key(data_type,tbl_id,item));
+                        const [error,val] = await delete_cache_string_main(cache_connect,get_cache_item_attr_key(data_type,id,item));
                     }
                 }
             },
             function(call){
-                delete_cache_string_main(cache_connect,get_cache_item_attr_list_key(data_type,tbl_id)).then(([error,data]) => {
+                delete_cache_string_main(cache_connect,get_cache_item_attr_list_key(data_type,id)).then(([error,data]) => {
                     item_data.cache_del = true;
                     call();
                 }).catch(error => {
@@ -655,7 +514,7 @@ const delete_item_cache_db = (cache_connect,db_connect,data_type,tbl_id) => {
                 });
             },
             function(call){
-                delete_item_main(db_connect,data_type,tbl_id).then(([error,data]) => {
+                delete_item_main(db_connect,data_type,id).then(([error,data]) => {
                     item_data.db_del = true;
                     call();
                 }).catch(error => {
@@ -701,11 +560,11 @@ const count_item_list_adapter = (db_connect,data_type,sql) => {
         });
     });
 }
-const get_cache_item_attr_key = (data_type,tbl_id,key) => {
-    return data_type + "_" + key + "_" + String(tbl_id);
+const get_cache_item_attr_key = (data_type,id,key) => {
+    return data_type + "_" + key + "_" + String(id);
 }
-const get_cache_item_attr_list_key = (data_type,tbl_id) => {
-    return data_type+"_aik_"+String(tbl_id);
+const get_cache_item_attr_list_key = (data_type,id) => {
+    return data_type+"_aik_"+String(id);
 }
 module.exports = {
     get_db_connect_adapter,
