@@ -433,6 +433,7 @@ delete_item_list(db_connect,data_type,sql).then(([error,data]) => {
 
 He is sometimes referred to as “the real Tank” from the movie [**The Matrix**](https://www.imdb.com/title/tt0133093/).
 
+- **Tank9 TooLZ Book** [Amazon E-Book](https://a.co/d/2BDjSYb)
 - [Tank9Code Blog](https://medium.com/@tank9code/about-brandon-poole-sr-ac2fe8e06a09)
 - [Tank9Code Twitter](https://instagram.com/tank9code)
 - [Tank9Code Instagram](https://instagram.com/tank9code)
