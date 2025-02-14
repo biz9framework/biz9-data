@@ -344,7 +344,6 @@ Create and or update data items.
 
 #### Params
 - db_connect / Open client Db connection / object
-- id / Primary key / guid
 - data_type / collection title / string
 - items / data items  / list
 
