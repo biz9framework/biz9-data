@@ -107,7 +107,6 @@ function(){
 
         /*
             data = {
-                _id: new ObjectId('67aa3e232d2366b62ef8988a'),
                 data_type: 'dt_blank',
                 id: 'f54d788f-9fcb-4def-889f-5b7562741c99',
                 title: 'title_6100',
