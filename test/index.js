@@ -7,32 +7,22 @@ const { get_db_connect,close_db_connect,update_item,get_item,delete_item } = req
 router.get('/connect', function(req, res, next) {
 
     let db_connect = {};
-    let data_config = {
-        APP_TITLE_ID:'mongo_database_app_title_id',
-        MONGO_IP:"0.0.0.0",
-        MONGO_USERNAME_PASSWORD:"",
-        MONGO_PORT_ID:"27019",
-        MONGO_SERVER_USER:"admin",
-        MONGO_CONFIG_FILE_PATH:'/etc/mongod.conf',
-        SSH_KEY:"",
-        REDIS_URL:"0.0.0.0",
-        REDIS_PORT_ID:"27019",
-    };
-    let item =
-        {
-            data_type: 'dt_blank',
-            id: 0,
-            title: 'title_6100',
-            first_name: 'first_name_6100',
-            last_name: 'last_name_6100',
-            user_name: 'user_name_6100',
-            test_group_id: 6100
-        };
 
     async.series([
 
         // get_db_connect
         function(call){
+            let data_config = {
+                APP_TITLE_ID:'mongo_database_app_title_id',
+                MONGO_IP:"0.0.0.0",
+                MONGO_USERNAME_PASSWORD:"",
+                MONGO_PORT_ID:"27019",
+                MONGO_SERVER_USER:"admin",
+                MONGO_CONFIG_FILE_PATH:'/etc/mongod.conf',
+                SSH_KEY:"",
+                REDIS_URL:"0.0.0.0",
+                REDIS_PORT_ID:"27019",
+            };
 
             get_db_connect(data_config).then(([error,data]) => {
                 db_connect = data;
@@ -45,7 +35,16 @@ router.get('/connect', function(req, res, next) {
         // update_item
         function(call){
             let data_type = 'dt_blank';
-            let id = 0;
+            let item =
+                {
+                    data_type: 'dt_blank',
+                    id: 0,
+                    title: 'title_6100',
+                    first_name: 'first_name_6100',
+                    last_name: 'last_name_6100',
+                    user_name: 'user_name_6100',
+                    test_group_id: 6100
+                };
 
             update_item(db_connect,data_type,item).then(([error,data]) => {
                 item = data;
