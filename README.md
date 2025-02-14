@@ -390,7 +390,8 @@ let data_item_list = [item_1, item_2, item_3]
 update_item_list(db_connect,data_type,data_item_list).then(([error,data]) => {
 
     /*
-       data = {
+       data = [
+        {
             data_type: 'dt_blank',
             id: '33daeca3-d466-tcae-cf4e-55b3fe9f31a1',
             title: 'title_438',
@@ -429,6 +430,7 @@ update_item_list(db_connect,data_type,data_item_list).then(([error,data]) => {
             app_title_id: 'mongo_database_title',
             source: 'DB'
         },
+        ];
     */
 
 })
