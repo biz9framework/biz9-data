@@ -450,7 +450,7 @@ Delete data items.
 #### Example
 ```javascript
 let data_type = "dt_blank";
-let filter = {data_type:data_type};
+let filter = {first_name:'first_name_6100'};
 
 delete_item_list(db_connect,data_type,filter).then(([error,data]) => {
 
