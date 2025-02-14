@@ -12,7 +12,7 @@ This framework is used as a **data access component** for **mobile** and **websi
 Use the [npm](https://npm.com) installer to install.
 
 ```bash
-npm i biz9-data-server
+npm i biz9-data
 ```
 
 ## Required
