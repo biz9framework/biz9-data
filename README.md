@@ -54,7 +54,7 @@ function(){
 
     get_db_connect(data_config).then(([error,data]) => {
 
-        /* data return
+        /*
             db_connect = data;
         */
     })
@@ -77,8 +77,8 @@ function(){
 
     update_item(db_connect,data_type,item).then(([error,data]) => {
 
-        /* data return
-            {
+        /*
+            data = {
                 data_type: 'dt_blank',
                 id: 'f54d788f-9fcb-4def-889f-5b7562741c99',
                 title: 'title_6100',
@@ -103,19 +103,21 @@ function(){
 
     get_item(db_connect,data_type,id).then(([error,data]) => {
 
-        data = {
-            _id: new ObjectId('67aa3e232d2366b62ef8988a'),
-            data_type: 'dt_blank',
-            id: 'f54d788f-9fcb-4def-889f-5b7562741c99',
-            title: 'title_6100',
-            first_name: 'first_name_6100',
-            last_name: 'last_name_6100',
-            user_name: 'user_name_6100',
-            test_group_id: 6100,
-            date_create: '2025-02-10T17:57:55.024Z',
-            date_save: '2025-02-10T17:57:55.026Z',
-            source: 'DB'
-        }
+        /*
+            data = {
+                _id: new ObjectId('67aa3e232d2366b62ef8988a'),
+                data_type: 'dt_blank',
+                id: 'f54d788f-9fcb-4def-889f-5b7562741c99',
+                title: 'title_6100',
+                first_name: 'first_name_6100',
+                last_name: 'last_name_6100',
+                user_name: 'user_name_6100',
+                test_group_id: 6100,
+                date_create: '2025-02-10T17:57:55.024Z',
+                date_save: '2025-02-10T17:57:55.026Z',
+                source: 'DB'
+            }
+        */
 
     });
 
@@ -130,12 +132,12 @@ function(){
     delete_item(db_connect,data_type,id).then(([error,data]) => {
 
         /*
-        data = {
-            data_type: 'dt_blank',
-            id: 'ab70a896-5d65-422d-b12f-0c701f2cc95d',
-            cache_del: true,
-            db_del: true
-        };
+            data = {
+                data_type: 'dt_blank',
+                id: 'ab70a896-5d65-422d-b12f-0c701f2cc95d',
+                cache_del: true,
+                db_del: true
+            };
         */
 
     });
@@ -146,6 +148,9 @@ function(){
 function(){
 
     close_db_connect(db_connect).then(([error,data]) => {
+        /*
+            data = null;
+        */
     });
 }
 
@@ -190,9 +195,11 @@ let data_config = {
 };
 
 get_db_connect(data_config).then(([error,data]) => {
-    /* return data
+
+    /*
         db_connect = data;
     */
+
 })
 
 ```
@@ -208,9 +215,11 @@ Close Db connection.
 
 ```javascript
 close_db_connect(db_connect).then(([error,data]) => {
-    /* return data
-        null;
+
+    /*
+       data = null;
     */
+
 })
 ```
 
@@ -243,21 +252,23 @@ let item = {
 };
 
 update_item(db_connect,data_type,id,item).then(([error,data]) => {
-    /* return data
-    {
-        data_type: 'dt_blank',
-        id: '9f1aeca3-b466-4cae-af4e-35b3fe9f31a1',
-        title: 'title_438',
-        first_name: 'first_name_438',
-        last_name: 'last_name_438',
-        user_name: 'user_name_438',
-        test_group_id: 438,
-        date_create: '2025-02-10T02:16:46.137Z',
-        date_save: '2025-02-10T02:16:46.138Z',
-        app_title_id: 'mongo_database_title',
-        source: 'DB'
-    }
+
+    /*
+        data = {
+            data_type: 'dt_blank',
+            id: '9f1aeca3-b466-4cae-af4e-35b3fe9f31a1',
+            title: 'title_438',
+            first_name: 'first_name_438',
+            last_name: 'last_name_438',
+            user_name: 'user_name_438',
+            test_group_id: 438,
+            date_create: '2025-02-10T02:16:46.137Z',
+            date_save: '2025-02-10T02:16:46.138Z',
+            app_title_id: 'mongo_database_title',
+            source: 'DB'
+        }
     */
+
 })
 ```
 
@@ -280,8 +291,8 @@ let id="d31facf1-769e-48a6-a7d2-6c349e4b808e";
 
 get_item(db_connect,data_type,id).then(([error,data]) => {
 
-    /* return data
-        {
+    /*
+        data = {
             data_type: 'dt_blank',
             id: 'd31facf1-769e-48a6-a7d2-6c349e4b808e',
             title: 'title_450',
@@ -316,8 +327,8 @@ let data_type="dt_blank";
 let id="d31facf1-769e-48a6-a7d2-6c349e4b808e";
 delete_item(db_connect,data_type,id).then(([error,data]) => {
 
-    /* return data
-        {
+    /*
+        data =  {
             data_type: 'dt_blank',
             id: 'd31facf1-769e-48a6-a7d2-6c349e4b808e',
             cache_del: true,
@@ -379,8 +390,8 @@ let data_item_list = [item_1, item_2, item_3]
 
 update_item_list(db_connect,data_type,data_item_list).then(([error,data]) => {
 
-    /* return data
-       {
+    /*
+       data = {
             data_type: 'dt_blank',
             id: '33daeca3-d466-tcae-cf4e-55b3fe9f31a1',
             title: 'title_438',
@@ -443,8 +454,8 @@ let filter = {data_type:data_type};
 
 delete_item_list(db_connect,data_type,filter).then(([error,data]) => {
 
-    /* return data
-        [];
+    /*
+       data = [];
     */
 
 })
