@@ -157,10 +157,10 @@ function(){
 ```
 
 * [get_db_connect](#get_db_connect)
-### <a id="get_db_connect"></a>Get DB
+### <a id="get_db_connect"></a>Get Db
     Intialize and open Db connection.
 #### Params
-- Data config / DB configuration settings / object
+- Data config / Db configuration settings / object
     ```javascript
     let data_config = {
         APP_TITLE_ID:'mongo_database_title',
