@@ -433,6 +433,45 @@ update_item_list(db_connect,data_type,data_item_list).then(([error,data]) => {
 
 })
 ```
+### <a id="get_item_list"></a>get_item_list
+Get data items.
+
+#### Params
+- db_connect / Open client Db connection / object
+- data_type / collection title / string
+- filter / Selection criteria / object
+
+#### Returns
+- error / Error message / string
+- items / Data items / list
+
+#### Example
+```javascript
+let data_type="dt_blank";
+
+let filter = {first_name:'first_name_6100'};
+
+get_item_list(db_connect,data_type,filter).then(([error,data]) => {
+
+    /*
+       data = {
+            data_type: 'dt_blank',
+            id: '33daeca3-d466-tcae-cf4e-55b3fe9f31a1',
+            title: 'title_438',
+            first_name: 'first_name_6100',
+            last_name: 'last_name_438',
+            user_name: 'user_name_438',
+            test_group_id: 438,
+            date_create: '2025-02-10T02:16:46.137Z',
+            date_save: '2025-02-10T02:16:46.138Z',
+            app_title_id: 'mongo_database_title',
+            source: 'DB'
+        },
+    */
+
+})
+```
+
 
 ### <a id="delete_item_list"></a>delete_item_list
 Delete data items.
