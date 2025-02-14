@@ -32,26 +32,7 @@ npm i biz9-data
 * [Credit](#credit)
 
 ### <a id="expressjsexample"></a>Example with Express.js
-```node
-/*
-
-* Express.JS BiZ9-Service Sample App
-
-* Required
-    - $ npm i mocha
-    - $ npm i express
-    - $ npm i async
-
-* Test files
-    - app.js = app Express server configuration file.
-    - test.js = Mocha test sample.
-    - index.js = controller for url
-
-* Run test
-    $> mocha -g 'connect' test.js
-
-*/
-
+```javascript
 const { get_db_connect,close_db_connect,update_item,get_item,delete_item } = require("biz9-data");
 
 let db_connect = {};
@@ -191,6 +172,7 @@ function(){
 #### Example
 ```javascript
 let db_connect = {};
+
 let data_config = {
     APP_TITLE_ID:'mongo_database_title',
     MONGO_IP:"0.0.0.0",
@@ -204,10 +186,10 @@ let data_config = {
 };
 
 get_db_connect(data_config).then(([error,data]) => {
-    db_connect = data;
-}).catch(error => {
-    console.log(error);
-});
+    /* return data
+        db_connect = data;
+    */
+})
 
 ```
 
@@ -219,60 +201,33 @@ Close Db connection.
 - error / Error message / string
 - db_connect / Closed client Db connection / object
 #### Example
+
 ```javascript
 close_db_connect(db_connect).then(([error,data]) => {
-}).catch(error => {
-    console.log(error);
-});
-```
-
-### <a id="get_item"></a>get_item
-Get a data item.
-#### Params
-- db_connect / Open client Db connection / object
-- data_type / collection title / string
-- id / ( optional ) / Primary key / GUID
-#### Returns
-- error / Error message / string
-- item / Data item / object
-#### Example
-```javascript
-let data_type="dt_blank";
-let id="d31facf1-769e-48a6-a7d2-6c349e4b808e";
-get_item(db_connect,data_type,id).then(([error,data]) => {
-    data = {
-        data_type: 'dt_blank',
-        id: 'd31facf1-769e-48a6-a7d2-6c349e4b808e',
-        title: 'title_450',
-        first_name: 'first_name_450',
-        last_name: 'last_name_450',
-        user_name: 'user_name_450',
-        test_group_id: 450,
-        date_create: '2025-02-10T02:16:46.137Z',
-        date_save: '2025-02-10T02:16:46.138Z',
-        app_title_id: 'mongo_database_title',
-        source: 'CACHE'
-    };
-}).catch(error => {
-    console.log(error);
-});
+    /* return data
+        null;
+    */
+})
 ```
 
 ### <a id="update_item"></a>update_item
 Create and or update data item.
+
 #### Params
 - db_connect / Open client Db connection / object
-- id / Primary key / GUID
+- id / Primary key / guid
 - data_type / collection title / string
-- item / data item  / object
+- item / data item / object
+
 #### Returns
 - error / Error message / string
 - item / Data item / object
+
 #### Example
 ```javascript
 let data_type="dt_blank";
-let id = 0; // Intialize new data item, id = 0
-//let id="9f1aeca3-b466-4cae-af4e-35b3fe9f31a1";  // Get exsisting data item. Guid
+let id="9f1aeca3-b466-4cae-af4e-35b3fe9f31a1"; // 0 = intialize new data item.
+
 let item = {
     id: id,
     data_type:data_type,
@@ -282,10 +237,148 @@ let item = {
     user_name: 'user_name_438',
     test_group_id: 438
 };
+
 update_item(db_connect,data_type,id,item).then(([error,data]) => {
-        data = {
+    /* return data
+    {
+        data_type: 'dt_blank',
+        id: '9f1aeca3-b466-4cae-af4e-35b3fe9f31a1',
+        title: 'title_438',
+        first_name: 'first_name_438',
+        last_name: 'last_name_438',
+        user_name: 'user_name_438',
+        test_group_id: 438,
+        date_create: '2025-02-10T02:16:46.137Z',
+        date_save: '2025-02-10T02:16:46.138Z',
+        app_title_id: 'mongo_database_title',
+        source: 'DB'
+    }
+    */
+})
+```
+
+### <a id="get_item"></a>get_item
+Get a data item.
+
+#### Params
+- db_connect / Open client Db connection / object
+- data_type / collection title / string
+- id / Primary key / guid
+
+#### Returns
+- error / Error message / string
+- item / Data item / object
+
+#### Example
+```javascript
+let data_type="dt_blank";
+let id="d31facf1-769e-48a6-a7d2-6c349e4b808e";
+
+get_item(db_connect,data_type,id).then(([error,data]) => {
+
+    /* return data
+        {
             data_type: 'dt_blank',
-            id: '9f1aeca3-b466-4cae-af4e-35b3fe9f31a1',
+            id: 'd31facf1-769e-48a6-a7d2-6c349e4b808e',
+            title: 'title_450',
+            first_name: 'first_name_450',
+            last_name: 'last_name_450',
+            user_name: 'user_name_450',
+            test_group_id: 450,
+            date_create: '2025-02-10T02:16:46.137Z',
+            date_save: '2025-02-10T02:16:46.138Z',
+            app_title_id: 'mongo_database_title',
+            source: 'CACHE'
+        };
+    */
+})
+```
+
+### <a id="delete_item"></a>delete_item
+Delete data item.
+
+#### Params
+- db_connect / Open client Db connection / object
+- data_type / Collection title / string
+- id / Primary key / guid
+
+#### Returns
+- error / Error message / string
+- data / Empty data item. / object
+
+#### Example
+```bash
+let data_type="dt_blank";
+let id="d31facf1-769e-48a6-a7d2-6c349e4b808e";
+delete_item(db_connect,data_type,id).then(([error,data]) => {
+
+    /* return data
+        {
+            data_type: 'dt_blank',
+            id: 'd31facf1-769e-48a6-a7d2-6c349e4b808e',
+            cache_del: true,
+            db_del: true
+        };
+    /*
+
+})
+```
+
+### <a id="update_item_list"></a>update_item
+Create and or update data items.
+
+#### Params
+- db_connect / Open client Db connection / object
+- id / Primary key / guid
+- data_type / collection title / string
+- items / data items  / list
+
+#### Returns
+- error / Error message / string
+- items / Data items / list
+
+#### Example
+```javascript
+let data_type="dt_blank";
+
+let item_1 = {
+    id: 0,
+    data_type:'dt_blank',
+    title: 'title_438',
+    first_name: 'first_name_438',
+    last_name: 'last_name_438',
+    user_name: 'user_name_438',
+    test_group_id: 438
+};
+
+let item_2 = {
+    id: 0,
+    data_type:'dt_blank',
+    title: 'title_440',
+    first_name: 'first_name_440',
+    last_name: 'last_name_440',
+    user_name: 'user_name_440',
+    test_group_id: 440
+};
+
+let item_3 = {
+    id: 0,
+    data_type:'dt_blank',
+    title: 'title_450',
+    first_name: 'first_name_450',
+    last_name: 'last_name_450',
+    user_name: 'user_name_450',
+    test_group_id: 450
+};
+
+let data_item_list = [item_1, item_2, item_3]
+
+update_item_list(db_connect,data_type,data_item_list).then(([error,data]) => {
+
+    /* return data
+       {
+            data_type: 'dt_blank',
+            id: '33daeca3-d466-tcae-cf4e-55b3fe9f31a1',
             title: 'title_438',
             first_name: 'first_name_438',
             last_name: 'last_name_438',
@@ -295,56 +388,62 @@ update_item(db_connect,data_type,id,item).then(([error,data]) => {
             date_save: '2025-02-10T02:16:46.138Z',
             app_title_id: 'mongo_database_title',
             source: 'DB'
-        }
-}).catch(error => {
-    console.log(error);
-});
-```
-
-### <a id="delete_item"></a>delete_item
-Delete data item.
-#### Params
-- db_connect / Open client Db connection / object
-- data_type / Collection title / string
-- id / Primary key / GUID
-#### Returns
-- error / Error message / string
-- data / Empty data item. / object
-#### Example
-```bash
-let data_type="dt_blank";
-let id="d31facf1-769e-48a6-a7d2-6c349e4b808e";
-delete_item(db_connect,data_type,id).then(([error,data]) => {
-        data =
+        },
         {
             data_type: 'dt_blank',
-            id: 'd31facf1-769e-48a6-a7d2-6c349e4b808e',
-            cache_del: true,
-            db_del: true
-        };
-}).catch(error => {
-    console.log(error);
-});
+            id: '33daeca3-d466-tcae-cf4e-55b3fe9f31a1',
+            title: 'title_440',
+            first_name: 'first_name_440',
+            last_name: 'last_name_440',
+            user_name: 'user_name_440',
+            test_group_id: 440,
+            date_create: '2025-02-10T02:16:46.137Z',
+            date_save: '2025-02-10T02:16:46.138Z',
+            app_title_id: 'mongo_database_title',
+            source: 'DB'
+        },
+        {
+            data_type: 'dt_blank',
+            id: '33daeca3-d466-tcae-cf4e-55b3fe9f31a1',
+            title: 'title_450',
+            first_name: 'first_name_450',
+            last_name: 'last_name_450',
+            user_name: 'user_name_450',
+            test_group_id: 450,
+            date_create: '2025-02-10T02:16:46.137Z',
+            date_save: '2025-02-10T02:16:46.138Z',
+            app_title_id: 'mongo_database_title',
+            source: 'DB'
+        },
+    */
+
+})
 ```
 
 ### <a id="delete_item_list"></a>delete_item_list
 Delete data items.
+
 #### Params
 - db_connect / Open client Db connection / object
-- filter_object / Filter  / object
 - data_type / Collection title / string
+- filter / Selection criteria / object
+
 #### Returns
 - error / Error message / string
 - data / Empty data list / list
+
 #### Example
 ```javascript
 let data_type = "dt_blank";
-let sql = {data_type:data_type}; //filter field and value
-delete_item_list(db_connect,data_type,sql).then(([error,data]) => {
-    data = [];
-}).catch(error => {
-    console.log(error);
-});
+let filter = {data_type:data_type};
+
+delete_item_list(db_connect,data_type,filter).then(([error,data]) => {
+
+    /* return data
+        [];
+    */
+
+})
 ```
 
 ## Contents
