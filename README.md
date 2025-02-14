@@ -64,6 +64,7 @@ function(){
 // update_item
 function(){
 
+    let data_type = 'dt_blank';
     let item =
         {
             data_type: 'dt_blank',
