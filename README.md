@@ -157,7 +157,7 @@ function(){
 ```
 
 * [get_db_connect](#get_db_connect)
-### <a id="get_db_connect"></a>Get Db
+### <a id="get_db_connect"></a>get_db_connect
     Intialize and open Db connection.
 #### Params
 - Data config / Db configuration settings / object
