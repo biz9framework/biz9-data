@@ -65,10 +65,11 @@ function(){
 function(){
 
     let data_type = 'dt_blank';
+    let id = 0; // 0 intialize new data item;
     let item =
         {
             data_type: 'dt_blank',
-            id: 0,
+            id: id,
             title: 'title_6100',
             first_name: 'first_name_6100',
             last_name: 'last_name_6100',
