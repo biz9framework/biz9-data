@@ -238,8 +238,8 @@ Create and or update data item.
 
 #### Example
 ```javascript
-let data_type="dt_blank";
-let id="9f1aeca3-b466-4cae-af4e-35b3fe9f31a1"; // 0 = intialize new data item.
+let data_type = "dt_blank";
+let id = "9f1aeca3-b466-4cae-af4e-35b3fe9f31a1"; // 0 = intialize new data item.
 
 let item = {
     id: id,
@@ -286,8 +286,8 @@ Get a data item.
 
 #### Example
 ```javascript
-let data_type="dt_blank";
-let id="d31facf1-769e-48a6-a7d2-6c349e4b808e";
+let data_type = "dt_blank";
+let id = "d31facf1-769e-48a6-a7d2-6c349e4b808e";
 
 get_item(db_connect,data_type,id).then(([error,data]) => {
 
@@ -323,8 +323,8 @@ Delete data item.
 
 #### Example
 ```bash
-let data_type="dt_blank";
-let id="d31facf1-769e-48a6-a7d2-6c349e4b808e";
+let data_type = "dt_blank";
+let id = "d31facf1-769e-48a6-a7d2-6c349e4b808e";
 delete_item(db_connect,data_type,id).then(([error,data]) => {
 
     /*
@@ -353,7 +353,7 @@ Create and or update data items.
 
 #### Example
 ```javascript
-let data_type="dt_blank";
+let data_type = "dt_blank";
 
 let item_1 = {
     id: 0,
@@ -449,7 +449,7 @@ Get data items.
 
 #### Example
 ```javascript
-let data_type="dt_blank";
+let data_type = "dt_blank";
 
 let filter = {first_name:'first_name_6100'};
 
