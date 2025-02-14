@@ -57,9 +57,9 @@ function(){
         /*
             db_connect = data;
         */
-    })
+    });
 
-},
+}
 
 // update_item
 function(){
@@ -142,7 +142,7 @@ function(){
 
     });
 
-},
+}
 
 // close_db_connect
 function(){
@@ -200,7 +200,7 @@ get_db_connect(data_config).then(([error,data]) => {
         db_connect = data;
     */
 
-})
+});
 
 ```
 
@@ -220,7 +220,7 @@ close_db_connect(db_connect).then(([error,data]) => {
        data = null;
     */
 
-})
+});
 ```
 
 ### <a id="update_item"></a>update_item
@@ -269,7 +269,7 @@ update_item(db_connect,data_type,id,item).then(([error,data]) => {
         };
     */
 
-})
+});
 ```
 
 ### <a id="get_item"></a>get_item
@@ -306,7 +306,7 @@ get_item(db_connect,data_type,id).then(([error,data]) => {
             source: 'CACHE'
         };
     */
-})
+});
 ```
 
 ### <a id="delete_item"></a>delete_item
@@ -336,7 +336,7 @@ delete_item(db_connect,data_type,id).then(([error,data]) => {
         };
     /*
 
-})
+});
 ```
 
 ### <a id="update_item_list"></a>update_item_list
@@ -433,7 +433,7 @@ update_item_list(db_connect,data_type,data_item_list).then(([error,data]) => {
         ];
     */
 
-})
+});
 ```
 ### <a id="get_item_list"></a>get_item_list
 Get data items.
@@ -473,7 +473,7 @@ get_item_list(db_connect,data_type,filter).then(([error,data]) => {
         ];
     */
 
-})
+});
 ```
 
 
@@ -500,7 +500,7 @@ delete_item_list(db_connect,data_type,filter).then(([error,data]) => {
        data = [];
     */
 
-})
+});
 ```
 
 ## Contents
