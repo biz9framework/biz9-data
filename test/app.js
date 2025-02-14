@@ -1,4 +1,3 @@
-async=require("async");
 express=require("express");
 
 const index=require("./");
