@@ -82,6 +82,7 @@ router.get('/connect', function(req, res, next) {
         },
         // get_item_2
         function(call){
+            let data_type = item.data_type;
             let id = item.id;
 
             get_item(db_connect,data_type,id).then(([error,data]) => {
