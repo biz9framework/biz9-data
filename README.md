@@ -339,7 +339,7 @@ delete_item(db_connect,data_type,id).then(([error,data]) => {
 })
 ```
 
-### <a id="update_item_list"></a>update_item
+### <a id="update_item_list"></a>update_item_list
 Create and or update data items.
 
 #### Params
