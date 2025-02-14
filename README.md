@@ -266,7 +266,7 @@ update_item(db_connect,data_type,id,item).then(([error,data]) => {
             date_save: '2025-02-10T02:16:46.138Z',
             app_title_id: 'mongo_database_title',
             source: 'DB'
-        }
+        };
     */
 
 })
