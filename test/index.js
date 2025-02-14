@@ -28,6 +28,7 @@ router.get('/connect', function(req, res, next) {
             user_name: 'user_name_6100',
             test_group_id: 6100
         };
+
     async.series([
 
         // get_db_connect
