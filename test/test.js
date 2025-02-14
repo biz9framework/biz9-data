@@ -20,14 +20,12 @@ const { get_db_connect,close_db_connect,update_item,get_item,delete_item } = req
 
 describe('connect', function(){ this.timeout(25000);
     it("_connect", function(done){
-        console.log('TEST-Connect-Start');
         let url = "http://localhost:1901/connect?app_title_id=dynamic_app_title_id";
         axios.get(url, {
             data: {}
         })
             .then(function (response) {
                 console.log(response.data.item);
-                console.log('BIZ9-TEST-CONNECT-SUCCESS');
             })
             .catch(function (error) {
                 console.log("TEST-BIZ9-Connect-ERROR"+ " " + error);
