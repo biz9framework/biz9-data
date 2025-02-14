@@ -319,7 +319,7 @@ Delete data item.
 
 #### Returns
 - error / Error message / string
-- data / Empty data item. / object
+- data / Empty data item / object
 
 #### Example
 ```bash
