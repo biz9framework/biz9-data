@@ -53,7 +53,10 @@ let data_config = {
 function(){
 
     get_db_connect(data_config).then(([error,data]) => {
-        db_connect = data;
+
+        /* data return
+            db_connect = data;
+        */
     })
 
 },
@@ -74,20 +77,21 @@ function(){
 
     update_item(db_connect,data_type,item).then(([error,data]) => {
 
-        data = {
-            data_type: 'dt_blank',
-            id: 'f54d788f-9fcb-4def-889f-5b7562741c99',
-            title: 'title_6100',
-            first_name: 'first_name_6100',
-            last_name: 'last_name_6100',
-            user_name: 'user_name_6100',
-            test_group_id: 6100,
-            date_create: '2025-02-10T17:55:31.629Z',
-            date_save: '2025-02-10T17:55:31.632Z',
-            app_title_id: 'mongo_database_app_title_id',
-            source: 'DB'
-        };
-
+        /* data return
+            {
+                data_type: 'dt_blank',
+                id: 'f54d788f-9fcb-4def-889f-5b7562741c99',
+                title: 'title_6100',
+                first_name: 'first_name_6100',
+                last_name: 'last_name_6100',
+                user_name: 'user_name_6100',
+                test_group_id: 6100,
+                date_create: '2025-02-10T17:55:31.629Z',
+                date_save: '2025-02-10T17:55:31.632Z',
+                app_title_id: 'mongo_database_app_title_id',
+                source: 'DB'
+            };
+        */
     });
 }
 
