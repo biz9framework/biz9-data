@@ -1,5 +1,5 @@
 let express = require('express');
-async=require("async");
+const async=require("async");
 let router = express.Router();
 
 const { get_db_connect,close_db_connect,update_item,get_item,delete_item } = require("biz9-data-server");
