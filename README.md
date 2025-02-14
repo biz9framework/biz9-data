@@ -30,7 +30,7 @@ npm i biz9-data
 * [Credit](#credit)
 
 ### <a id="expressjsexample"></a>Example with Express.js
-View the full working [test example].(https://github.com/biz9framework/biz9-data/blob/main/test/index.js)
+View the full working [test example.](https://github.com/biz9framework/biz9-data/blob/main/test/index.js)
 ```javascript
 const { get_db_connect,close_db_connect,update_item,get_item,delete_item } = require("biz9-data");
 
