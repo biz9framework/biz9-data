@@ -456,7 +456,8 @@ let filter = {first_name:'first_name_6100'};
 get_item_list(db_connect,data_type,filter).then(([error,data]) => {
 
     /*
-       data = {
+       data = [
+        {
             data_type: 'dt_blank',
             id: '33daeca3-d466-tcae-cf4e-55b3fe9f31a1',
             title: 'title_438',
@@ -469,6 +470,7 @@ get_item_list(db_connect,data_type,filter).then(([error,data]) => {
             app_title_id: 'mongo_database_title',
             source: 'DB'
         },
+        ]
     */
 
 })
