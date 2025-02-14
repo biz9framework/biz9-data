@@ -6,7 +6,7 @@ This framework is used as a **data access component** for **mobile** and **websi
 
 **The BiZ9-Data-Server** is the **ORM** solution currently promoted for use with [**React**](https://react.dev/), [**React-Native**](https://reactnative.dev/), [**Angular**](https://angular.dev/), and web based projects as a component of the [**data access stack**](https://angular.dev/).
 
-![Mongo and Redis Chart](https://github.com/biz9framework/biz9-data-server/blob/main/img/mongo-redis.jpg?raw=true)
+![Mongo and Redis Chart](https://github.com/biz9framework/biz9-data/blob/main/img/mongo-redis.jpg?raw=true)
 
 ## Installation
 Use the [npm](https://npm.com) installer to install.
