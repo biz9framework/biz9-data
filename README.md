@@ -470,7 +470,7 @@ get_item_list(db_connect,data_type,filter).then(([error,data]) => {
             app_title_id: 'mongo_database_title',
             source: 'DB'
         },
-        ]
+        ];
     */
 
 })
