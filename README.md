@@ -385,7 +385,7 @@ let item_3 = {
     test_group_id: 450
 };
 
-let data_item_list = [item_1, item_2, item_3]
+let data_item_list = [item_1, item_2, item_3];
 
 update_item_list(db_connect,data_type,data_item_list).then(([error,data]) => {
 
