@@ -1,7 +1,7 @@
 const async = require('async');
 const assert = require('node:assert');
 const { get_db_connect,close_db_connect,check_db_connect,update_item,update_item_list,get_item,delete_item,get_item_list,delete_item_list,count_item_list } = require("./");
-const {get_guid,get_id} = require("biz9-utility");
+const {get_guid,get_id,w} = require("biz9-utility");
 
 /*
  * availble
@@ -21,7 +21,7 @@ list_item_update
 /* --- TEST CONFIG START --- */
 //const ID = '0'; // 0 = intialize a new data item.
 const ID = '6f3495eb-6da7-43f6-afe5-a5386672db32';
-const DATA_TYPE = 'blank_biz';
+const DATA_TYPE = 'dt_blank';
 const APP_TITLE_ID = 'db_title_feb_11';
 const SQL = {};
 /* --- TEST CONFIG END --- */
@@ -341,30 +341,30 @@ describe('item_delete', function(){ this.timeout(25000);
             });
     });
 });
-
-//9_update_list //9_list
-describe('test_item_list_update', function(){ this.timeout(25000);
-    it("_test_item_list_update", function(done){
+describe('list_item_update', function(){ this.timeout(25000);
+    it("_list_item_update", function(done){
+        let cloud_error=null;
         let db_connect = {};
         let item_test_list = [];
         async.series([
             function(call){
-                console.log('--TEST-GET-ITEM-UPDATE-LIST-START--');
+                console.log('TEST-LIST-ITEM-UPDATE-CONNECT-START');
                 get_db_connect(data_config).then(([error,data])=> {
                     if(error){
-                        throw '--TEST-GET-ITEM-UPDATE-LIST-ERROR--'+ error;
+                        cloud_error=error_append(cloud_error,error);
+                        w('error',error);
                     }
                     db_connect = data;
                     assert.notEqual(db_connect,null);
-                    console.log('--TEST-GET-ITEM-UPDATE-LIST-END--');
+                    console.log('TEST-LIST-ITEM-UPDATE-CONNECT-SUCCESS');
                     call();
-                }).catch(error => handleError(error))
-                function handleError(error) {
-                    console.error("--Error--",error);
-                }
+                }).catch(error => {
+                    cloud_error=error_append(cloud_error,error);
+                    call();
+                });
             },
             function(call){
-                console.log('--TEST-GET-ITEM-UPDATE-LIST-2-START--');
+                console.log('TEST-LIST-ITEM-UPDATE-UPDATE-START');
                 test_group_id=get_id();
                 for(a=0;a<10;a++){
                     item_test=get_test_item();
@@ -373,51 +373,148 @@ describe('test_item_list_update', function(){ this.timeout(25000);
                 }
                 update_item_list(db_connect,item_test_list).then(([error,data])=> {
                     if(error){
-                        throw '--TEST-INSERT-LIST-2-ERROR '+ error;
+                        cloud_error=error_append(cloud_error,error);
                     }
                     console.log(data);
                     assert.notEqual(0,data.length);
                     assert.strictEqual(10,data.length);
                     assert.notEqual(0,data[0].id);
-                    console.log('--TEST-GET-ITEM-UPDATE-LIST-2-END--');
+                    console.log('TEST-LIST-ITEM-UPDATE-UPDATE-SUCCESS');
                     call();
-                }).catch(error => handleError(error))
-                function handleError(error) {
-                    console.error("--Error--",error);
-                }
+                }).catch(error => {
+                    cloud_error=error_append(cloud_error,error);
+                    call();
+                });
             },
             function(call){
+                console.log('TEST-LIST-ITEM-UPDATE-CLOSE-START');
                 close_db_connect(db_connect).then(([error,data])=> {
-                    console.log('--TEST-GET-ITEM-UPDATE-LIST-3-START--');
                     if(error){
-                        throw '--TEST-GET-ITEM-UPDATE-3-- '+ error;
+                        cloud_error=error_append(cloud_error,error);
                     }
                     db_connect=data;
                     assert.equal(data,null);
-                    console.log('--TEST-GET-ITEM-UPDATE-LIST-3-END--');
+                    console.log('TEST-LIST-ITEM-UPDATE-CLOSE-SUCCESS');
                     call();
-                }).catch(error => handleError(error))
-                function handleError(error) {
-                    console.error("--Error--",error);
-                }
+                }).catch(error => {
+                    cloud_error=error_append(cloud_error,error);
+                    call();
+                });
             },
             function(call){
-                console.log('--TEST-GET-ITEM-UPDATE-LIST-Assert--START');
+                console.log('TEST-LIST-ITEM-UPDATE-ASSERT-START');
                 assert.notEqual(item_test.first_name,0);
                 assert.notEqual(item_test.first_name,null);
                 assert.notEqual(item_test.id,0);
                 assert.notEqual(item_test.id,null);
                 assert.equal(null,db_connect);
-                console.log('--TEST-GET-ITEM-UPDATE-LIST-Assert--END');
+                console.log('TEST-LIST-ITEM-UPDATE-ASSERT-SUCCESS');
                 call();
             },
         ],
             function(error, result){
-                console.log('--TEST-GET-ITEM-UPDATE-LIST--DONE--');
+                if(cloud_error){
+                    w_error("TEST-LIST-ITEM-UPDATE-ERROR-DONE",cloud_error);
+                }else{
+                    console.log('TEST-LIST-ITEM-UPDATE-CONNECT-SUCCESS-DONE');
+                    console.log('TEST-LIST-ITEM-UPDATE-UPDATE-SUCCESS-DONE');
+                    console.log('TEST-LIST-ITEM-UPDATE-CLOSE-SUCCESS-DONE');
+                    console.log('TEST-LIST-ITEM-UPDATE-ASSERT-SUCCESS-DONE');
+                    console.log('TEST-LIST-ITEM-UPDATE-DONE');
+                }
                 done();
             });
     });
 });
+
+describe('list_item_get', function(){ this.timeout(25000);
+    it("_list_item_get", function(done){
+        let cloud_error = null;
+        let db_connect = {};
+        let data_list = [];
+        let data_type ='dt_blank';
+        let filter ={data_type:'dt_blank'};
+        let sort_by ={title:-1};
+        let page_current =1;
+        let page_size =10;
+        async.series([
+            function(call){
+                console.log('TEST-LIST-ITEM-GET-CONNECT-START');
+                get_db_connect(data_config).then(([error,data])=> {
+                    if(error){
+                        cloud_error=error_append(cloud_error,error);
+                        w('error',error);
+                    }
+                    db_connect = data;
+                    assert.notEqual(db_connect,null);
+                    console.log('TEST-LIST-ITEM-GET-CONNECT-SUCCESS');
+                    call();
+                }).catch(error => {
+                    cloud_error=error_append(cloud_error,error);
+                    call();
+                });
+            },
+            function(call){
+                console.log('TEST-LIST-ITEM-GET-GET-ITEM-LIST-START');
+               w('data_type',data_type);
+                w('filter',filter);
+                w('sort_by',sort_by);
+                w('page_current',page_current);
+                w('page_size',page_size);
+                get_item_list(db_connect,data_type,filter,sort_by,page_current,page_size).then(([error,data,item_count,page_count])=> {
+                    if(error){
+                        cloud_error=error_append(cloud_error,error);
+                    }else{
+                        data_list = data;
+                        w('data',data_list);
+                        w('item_count',item_count);
+                        w('page_count',page_count);
+                        console.log('TEST-LIST-ITEM-GET-GET-ITEM-LIST-SUCCESS');
+                    }
+                    call();
+                }).catch(error => {
+                    cloud_error=error_append(cloud_error,error);
+                    call();
+                });
+            },
+            function(call){
+                console.log('TEST-LIST-ITEM-GET-CLOSE-START');
+                close_db_connect(db_connect).then(([error,data])=> {
+                    if(error){
+                        cloud_error=error_append(cloud_error,error);
+                    }
+                    db_connect=data;
+                    assert.equal(data,null);
+                    console.log('TEST-LIST-ITEM-GET-CLOSE-SUCCESS');
+                    call();
+                }).catch(error => {
+                    cloud_error=error_append(cloud_error,error);
+                    call();
+                });
+            },
+            function(call){
+                console.log('TEST-LIST-ITEM-GET-ASSERT-START');
+                assert.equal(data_list.length,page_size);
+                console.log('TEST-LIST-ITEM-GET-ASSERT-SUCCESS');
+                call();
+            },
+        ],
+            function(error, result){
+                if(cloud_error){
+                    w_error("TEST-LIST-ITEM-GET-ERROR-DONE",cloud_error);
+                }else{
+
+                    console.log('TEST-LIST-ITEM-GET-CONNECT-SUCCESS-DONE');
+                    console.log('TEST-LIST-ITEM-GET-GET-SUCCESS-DONE');
+                    console.log('TEST-LIST-ITEM-GET-ASSERT-SUCCESS-DONE');
+                    console.log('TEST-LIST-ITEM-GET-CLOSE-SUCCESS-DONE');
+                    console.log('TEST-LIST-ITEM-GET-DONE');
+                }
+                done();
+            });
+    });
+});
+
 //9_blank
 describe('test_blank', function(){ this.timeout(25000);
     it("_test_blank", function(done){

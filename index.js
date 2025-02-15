@@ -28,14 +28,6 @@ const delete_item = async (db_connect,data_type,id) => {
 };
 const get_item_list = async (db_connect,data_type,filter,sort_by,page_current,page_size) => {
     return [error,data_list,item_count,page_count] = await get_item_list_adapter(db_connect,data_type,filter,sort_by,page_current,page_size);
-    /*
-    console.log('here');
-    console.log(data_list);
-    console.log('here2');
-    console.log(item_count);
-    console.log('here3');
-    console.log(page_count);
-    */
 };
 const delete_item_list = async (db_connect,data_type,filter) => {
     return [error,data_list] = await delete_item_list_adapter(db_connect,data_type,filter);
