@@ -440,21 +440,28 @@ Get data items.
 - db_connect / Open client Db connection / object
 - data_type / collection title / string
 - filter / Selection criteria / object
+- sort_by / Sort criteria / object
+- page_current / Current page of paged list / int
+- page_size / Paged list max count  / int
 
 #### Returns
 - error / Error message / string
 - items / Data items / list
+- item_count / Total items found matching selection criteria / int
+- page_count / Total number of pages in paged list / int
 
 #### Example
 ```javascript
 let data_type = "dt_blank";
-
 let filter = {first_name:'first_name_6100'};
+let sort_by = {first_name:-1};
+let page_current = 1;
+let page_size = 10;
 
-get_item_list(db_connect,data_type,filter).then(([error,data]) => {
+get_item_list(db_connect,data_type,filter,sort_by,page_current,page_size).then(([error,data_list,item_count,page_count]) => {
 
     /*
-       data = [
+       data_list = [
         {
             data_type: 'dt_blank',
             id: '33daeca3-d466-tcae-cf4e-55b3fe9f31a1',
@@ -469,6 +476,10 @@ get_item_list(db_connect,data_type,filter).then(([error,data]) => {
             source: 'DB'
         },
         ];
+
+        item_count = 10;
+
+        page_count = 5;
     */
 
 });
