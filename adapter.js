@@ -103,6 +103,7 @@ const update_item_list_adapter = (db_connect,item_data_list) => {
             },
             async function(call) {
                 for(const item of item_data_list) {
+                    item.source=DB_TITLE;
                     item_data_new_list.push(item);
                 }
             },
@@ -174,7 +175,7 @@ const update_item_adapter = (db_connect,data_type,item_data) => {
         });
     });
 }
-const get_item_list_adapter = (db_connect,data_type,sql,sort_by,page_current,page_size) => {
+const get_item_list_adapter = (db_connect,data_type,filter,sort_by,page_current,page_size) => {
     return new Promise((callback) => {
         let cache_connect = {};
         let item_data_count = 0;
@@ -191,7 +192,10 @@ const get_item_list_adapter = (db_connect,data_type,sql,sort_by,page_current,pag
                 });
             },
             function(call) {
-                get_id_list_main(db_connect,data_type,sql,sort_by,page_current,page_size).then(([error,total_count,data_list]) => {
+                if(!page_current){
+                    page_current=0;
+                }
+                get_id_list_main(db_connect,data_type,filter,sort_by,page_current,page_size).then(([error,total_count,data_list]) => {
                     error=error;
                     item_data_count=total_count;
                     item_id_list=data_list;
@@ -400,7 +404,7 @@ const get_item_cache_db = (cache_connect,db_connect,data_type,id) => {
         });
     });
 }
-const delete_item_list_adapter = (db_connect,data_type,sql) => {
+const delete_item_list_adapter = (db_connect,data_type,filter) => {
     return new Promise((callback) => {
         let cache_connect = {};
         let item_id_list = [];
@@ -416,7 +420,7 @@ const delete_item_list_adapter = (db_connect,data_type,sql) => {
                 });
             },
             function(call) {
-                get_id_list_main(db_connect,data_type,sql,{},0,9999).then(([error,total_count,data_list]) => {
+                get_id_list_main(db_connect,data_type,filter,{},0,9999).then(([error,total_count,data_list]) => {
                     error=error;
                     total_count=total_count;
                     item_id_list=data_list;
@@ -427,7 +431,7 @@ const delete_item_list_adapter = (db_connect,data_type,sql) => {
                 });
             },
             function(call){
-                delete_item_list_main(db_connect,data_type,sql).then(([error,data]) => {
+                delete_item_list_main(db_connect,data_type,filter).then(([error,data]) => {
                     call();
                 }).catch(error => {
                     w_error("Data-Adapter-Delete-Item-List-Adapter",error);
@@ -518,12 +522,12 @@ const delete_item_cache_db = (cache_connect,db_connect,data_type,id) => {
         });
     });
 }
-const count_item_list_adapter = (db_connect,data_type,sql) => {
+const count_item_list_adapter = (db_connect,data_type,filter) => {
     return new Promise((callback) => {
         let item_list_count = 0;
         async.series([
             function(call) {
-                count_item_list_main(db_connect,data_type,sql).then(([error,data]) => {
+                count_item_list_main(db_connect,data_type,filter).then(([error,data]) => {
                     item_list_count = data;
                     call();
                 }).catch(error => {

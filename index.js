@@ -26,14 +26,22 @@ const update_item_list = async (db_connect,item_data_list) => {
 const delete_item = async (db_connect,data_type,id) => {
     return [error,data] = await delete_item_adapter(db_connect,data_type,id);
 };
-const get_item_list = async (db_connect,data_type,sql,sort_by,page_current,page_size) => {
-    return [error,data_list,item_count,page_count] = await get_item_list_adapter(db_connect,data_type,sql,sort_by,page_current,page_size);
+const get_item_list = async (db_connect,data_type,filter,sort_by,page_current,page_size) => {
+    return [error,data_list,item_count,page_count] = await get_item_list_adapter(db_connect,data_type,filter,sort_by,page_current,page_size);
+    /*
+    console.log('here');
+    console.log(data_list);
+    console.log('here2');
+    console.log(item_count);
+    console.log('here3');
+    console.log(page_count);
+    */
 };
-const delete_item_list = async (db_connect,data_type,sql) => {
-    return [error,data_list] = await delete_item_list_adapter(db_connect,data_type,sql);
+const delete_item_list = async (db_connect,data_type,filter) => {
+    return [error,data_list] = await delete_item_list_adapter(db_connect,data_type,filter);
 };
-const count_item_list = async (db_connect,data_type,sql) => {
-    return [error,data] = await count_item_list_adapter(db_connect,data_type,sql);
+const count_item_list = async (db_connect,data_type,filter) => {
+    return [error,data] = await count_item_list_adapter(db_connect,data_type,filter);
 };
 module.exports = {
     get_db_connect,

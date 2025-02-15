@@ -24,14 +24,14 @@ const delete_item_main = async (db_connect,data_type,id) => {
 const get_item_main = async (db_connect,data_type,id) => {
     return [error,data] = await get_item_base(db_connect,data_type,id);
 }
-const get_id_list_main = async (db_connect,data_type,sql,sort_by,page_current,page_size) => {
-	return [error,total_count,data_list] = await get_id_list_base(db_connect,data_type,sql,sort_by,page_current,page_size);
+const get_id_list_main = async (db_connect,data_type,filter,sort_by,page_current,page_size) => {
+	return [error,total_count,data_list] = await get_id_list_base(db_connect,data_type,filter,sort_by,page_current,page_size);
 }
-const delete_item_list_main = async (db_connect,data_type,sql) => {
-	return [error,data_list] = await delete_item_list_base(db_connect,data_type,sql);
+const delete_item_list_main = async (db_connect,data_type,filter) => {
+	return [error,data_list] = await delete_item_list_base(db_connect,data_type,filter);
 }
-const count_item_list_main = async (db_connect,data_type,sql) => {
-	return [error,data] = await count_item_list_base(db_connect,data_type,sql);
+const count_item_list_main = async (db_connect,data_type,filter) => {
+	return [error,data] = await count_item_list_base(db_connect,data_type,filter);
 }
 module.exports = {
 	get_db_connect_main,

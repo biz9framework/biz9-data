@@ -50,6 +50,9 @@ const get_item_base = (db_connect,data_type,id) => {
 		if(check_db_connect_base(db_connect)){
 			collection = db_connect.collection(data_type);
 			collection.findOne({id:id}).then((data) => {
+                if(data){
+                    delete data['_id'];
+                }
 				callback([error,data]);
 			}).catch(error => {
 				console.log("Data-Base-Get-Item-Base-Error",error);
@@ -113,11 +116,11 @@ const delete_item_base = (db_connect,data_type,id) => {
 		}
 	});
 }
-const delete_item_list_base = (db_connect,data_type,sql) => {
+const delete_item_list_base = (db_connect,data_type,filter) => {
 	return new Promise((callback) => {
 		let collection = db_connect.collection(data_type);
 		if(check_db_connect_base(db_connect)){
-			collection.deleteMany(sql).then((data) => {
+			collection.deleteMany(filter).then((data) => {
 				callback([error,data]);
 			}).catch(error => {
 				w_error("Data-Mongo-Base-Delete-List-Base-Error",error);
@@ -126,7 +129,7 @@ const delete_item_list_base = (db_connect,data_type,sql) => {
 		}
 	});
 }
-const get_id_list_base = (db_connect,data_type,sql_obj,sort_by,page_current,page_size) => {
+const get_id_list_base = (db_connect,data_type,filter,sort_by,page_current,page_size) => {
 	return new Promise((callback) => {
 		let total_count = 0;
 		let data_list = [];
@@ -134,7 +137,7 @@ const get_id_list_base = (db_connect,data_type,sql_obj,sort_by,page_current,page
 		async.series([
 			function(call) {
 				if(check_db_connect_base(db_connect)){
-					db_connect.collection(data_type).countDocuments(sql_obj).then((data) => {
+					db_connect.collection(data_type).countDocuments(filter).then((data) => {
 						total_count = data;
 						call();
 					}).catch(error => {
@@ -148,7 +151,7 @@ const get_id_list_base = (db_connect,data_type,sql_obj,sort_by,page_current,page
 			},
 			function(call) {
 				if(check_db_connect_base(db_connect)){
-					db_connect.collection(data_type).find(sql_obj).sort(sort_by).skip(page_current>0?((page_current-1)*page_size):0).limit(page_size).collation({locale:"en_US",numericOrdering:true}).project({id:1,data_type:1,_id:0}).toArray().then((data) => {
+					db_connect.collection(data_type).find(filter).sort(sort_by).skip(page_current>0?((page_current-1)*page_size):0).limit(page_size).collation({locale:"en_US",numericOrdering:true}).project({id:1,data_type:1,_id:0}).toArray().then((data) => {
 						data_list = data;
 						call();
 					}).catch(error => {
@@ -168,11 +171,11 @@ const get_id_list_base = (db_connect,data_type,sql_obj,sort_by,page_current,page
 		});
 	});
 }
-const count_item_list_base = (db_connect,data_type,sql) => {
+const count_item_list_base = (db_connect,data_type,filter) => {
 	return new Promise((callback) => {
 		let collection = db_connect.collection(data_type);
 		if(check_db_connect_base(db_connect)){
-			collection.countDocuments(sql).then((data) => {
+			collection.countDocuments(filter).then((data) => {
 				callback([error,data]);
 			}).catch(error => {
 				w_error("Data-Mongo-Base-Count-Item-List-Base-Error",error);
