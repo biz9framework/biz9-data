@@ -3,14 +3,14 @@ const assert = require('node:assert');
 const { get_db_connect,close_db_connect,check_db_connect,update_item,update_item_list,get_item,delete_item,get_item_list,delete_item_list,count_item_list } = require("./");
 const {get_guid,get_id,w,get_test_item} = require("biz9-utility");
 /*
- * availble
+ * availble tests
 connect
-item_update
-item_get
-item_delete
-item_list_update
-item_list_get
-item_list_delete
+- item_update
+- item_get
+- item_delete
+- item_list_update
+- item_list_get
+- item_list_delete
 */
 /* --- TEST CONFIG START --- */
 //const ID = '0'; // 0 = intialize a new data item.
