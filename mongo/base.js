@@ -50,7 +50,9 @@ const get_item_base = (db_connect,data_type,id) => {
 		if(check_db_connect_base(db_connect)){
 			collection = db_connect.collection(data_type);
 			collection.findOne({id:id}).then((data) => {
+                if(data){
                 delete data['_id'];
+                }
 				callback([error,data]);
 			}).catch(error => {
 				console.log("Data-Base-Get-Item-Base-Error",error);
@@ -82,7 +84,9 @@ const update_item_base = (db_connect,data_type,item) => {
 			item.date_save = new moment().toISOString();
 			if(check_db_connect_base(db_connect)){
 				collection.insertOne(item).then((data) => {
-					delete item['_id'];
+                    if(data){
+					    delete item['_id'];
+                    }
 					callback([error,item]);
 				}).catch(error => {
 					w_error("Data-Mongo-Base-Update-Item-Base-Error",error);
@@ -92,7 +96,9 @@ const update_item_base = (db_connect,data_type,item) => {
 		}else{
 			item.date_save = new moment().toISOString();
 			collection.updateOne({id:item.id},{$set: item}).then((data) => {
-				delete item['_id'];
+                if(data){
+				    delete item['_id'];
+                }
 				callback([error,item]);
 			}).catch(error => {
 				w_error("Data-Mongo-Base-Update-Item-Base-Error",error);

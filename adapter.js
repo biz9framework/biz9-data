@@ -194,7 +194,7 @@ const get_item_list_adapter = (db_connect,data_type,filter,sort_by,page_current,
             },
             function(call) {
                 if(!page_current){
-                    page_current=0;
+                    page_current=1;
                 }
                 get_id_list_main(db_connect,data_type,filter,sort_by,page_current,page_size).then(([error,total_count,data_list]) => {
                     error=error;
