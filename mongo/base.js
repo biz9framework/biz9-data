@@ -50,9 +50,7 @@ const get_item_base = (db_connect,data_type,id) => {
 		if(check_db_connect_base(db_connect)){
 			collection = db_connect.collection(data_type);
 			collection.findOne({id:id}).then((data) => {
-                if(data){
-                    delete data['_id'];
-                }
+                delete data['_id'];
 				callback([error,data]);
 			}).catch(error => {
 				console.log("Data-Base-Get-Item-Base-Error",error);

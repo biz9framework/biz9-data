@@ -104,6 +104,7 @@ const update_item_list_adapter = (db_connect,item_data_list) => {
             async function(call) {
                 for(const item of item_data_list) {
                     item.source=DB_TITLE;
+                    item.app_title_id = db_connect.data_config.APP_TITLE_ID;
                     item_data_new_list.push(item);
                 }
             },
@@ -315,6 +316,7 @@ const delete_item_adapter = (db_connect,data_type,id) => {
             function(call) {
                 delete_item_cache_db(cache_connect,db_connect,data_type,id).then(([error,data]) => {
                     item_data = data;
+                    item_data.app_title_id=db_connect.data_config.APP_TITLE_ID;
                     call();
                 }).catch(error => {
                     w_error("Adapter-Get-Item-Adapter-2",error);
@@ -370,7 +372,6 @@ const get_item_cache_db = (cache_connect,db_connect,data_type,id) => {
                 }
             },
             function(call){
-                item_data.app_title_id=db_connect.data_config.APP_TITLE_ID;
                 if(cache_found){
                     item_data.source=CACHE_TITLE;
                    call();
@@ -395,6 +396,10 @@ const get_item_cache_db = (cache_connect,db_connect,data_type,id) => {
                         callback([error,null]);
                     });
                 }
+            },
+         function(call) {
+                item_data.app_title_id=db_connect.data_config.APP_TITLE_ID;
+                call();
             },
         ]).then(result => {
             callback([error,item_data]);
@@ -513,6 +518,10 @@ const delete_item_cache_db = (cache_connect,db_connect,data_type,id) => {
                     w_error("Data-Adapter-Delete-Item-Cache-DB-4",error);
                     callback([error,null]);
                 });
+            },
+            function(call) {
+                item_data.app_title_id=db_connect.data_config.APP_TITLE_ID;
+                call();
             },
         ]).then(result => {
             callback([error,item_data]);

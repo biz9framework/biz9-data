@@ -14,9 +14,10 @@ connect
 */
 /* --- TEST CONFIG START --- */
 //const ID = '0'; // 0 = intialize a new data item.
-const ID = '1db7ccdf-6990-4593-9fdf-d84c3c642362';
+const ID = '6c3bd47a-fe90-4e62-92c1-61d96ff4c008';
 const DATA_TYPE = 'dt_blank';
-const APP_TITLE_ID = 'db_title_feb_11';
+const FILTER = {test_group_id:31865};
+const APP_TITLE_ID = 'db_title_feb_14';
 const SQL = {};
 /* --- TEST CONFIG END --- */
 
@@ -425,8 +426,8 @@ describe('item_list_get', function(){ this.timeout(25000);
         let cloud_error = null;
         let db_connect = {};
         let data_list = [];
-        let data_type ='dt_blank';
-        let filter ={title:'title_1813'};
+        let data_type =DATA_TYPE;
+        let filter =FILTER;
         let sort_by ={title:-1};
         let page_current =1;
         let page_size =10;
@@ -511,8 +512,8 @@ describe('item_list_delete', function(){ this.timeout(25000);
         let cloud_error = null;
         let db_connect = {};
         let data_list = [];
-        let data_type ='dt_blank';
-        let filter ={title:'title_1813'};
+        let data_type =DATA_TYPE;
+        let filter =FILTER;
         async.series([
             function(call){
                 console.log('TEST-LIST-ITEM-DELETE-CONNECT-START');
