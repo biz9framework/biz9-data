@@ -27,7 +27,7 @@ npm i biz9-data
 * [get_item_list](#get_item_list)
 * [update_item_list](#update_item_list)
 * [delete_item_list](#delete_item_list)
-* [Credit](#credit)
+* [Credits](#credit)
 
 ### <a id="expressjsexample"></a>Example with Express.js
 View the full working [test example.](https://github.com/biz9framework/biz9-data/blob/main/test/index.js)
@@ -512,7 +512,7 @@ delete_item_list(db_connect,data_type,filter).then(([error,data]) => {
 });
 ```
 
-## Contents
+## Credits
 ### <a id="credit"></a>Credits
 
 #### Company
@@ -556,8 +556,13 @@ He is sometimes referred to as “the real Tank” from the movie [**The Matrix*
 ##### #Mobile
 ##### #Apple
 ##### #Android
+##### #ApplicationDevelopment
+##### #SoftwareFramework
+##### #Cloud
 ##### #IOS
 ##### #Linux
+##### #JavaScript
+##### #NoSQL
 ##### #AppMoneyNoteZ
 ##### #TaNK9Code
 ##### Thank you for your time.
