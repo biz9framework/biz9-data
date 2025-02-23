@@ -6,7 +6,7 @@
  */
 const async = require('async');
 const moment = require('moment');
-const {get_guid,w_error} = require("biz9-utility");
+const {Number,Log} = require("biz9-utility");
 const { MongoClient } = require("mongodb");
 let client_db = {};
 const get_db_connect_base = (data_config) => {
@@ -16,7 +16,7 @@ const get_db_connect_base = (data_config) => {
 		client_db.connect(data_config.APP_TITLE_ID).then((data)=> {
 			callback([null,data.db(data_config.APP_TITLE_ID)]);
 		}).catch(error => {
-			w_error("Data-Mongo-Base-Get-DB-BASE-Error--",error);
+			Log.error("Data-Mongo-Base-Get-DB-BASE-Error--",error);
 			var reset_cmd = "sudo mongod --fork --config "+data_config.MONGO_CONFIG;
 			if(data_config.MONGO_IP!='0.0.0.0'){
 				if(!data_config.SSH_KEY){
@@ -39,7 +39,7 @@ const close_db_connect_base = (db_connect) => {
 		client_db.close().then((data)=> {
 			callback([error,null]);
 		}).catch(error => {
-			w_error("Data-Mongo-Base-Close-DB-Base-Error",error);
+			Log.error("Data-Mongo-Base-Close-DB-Base-Error",error);
 			callback([error,null]);
 		});
 	});
@@ -55,7 +55,7 @@ const get_item_base = (db_connect,data_type,id) => {
                 }
 				callback([error,data]);
 			}).catch(error => {
-				console.log("Data-Base-Get-Item-Base-Error",error);
+				Log.error("Data-Base-Get-Item-Base-Error",error);
 				callback([error,null]);
 			});
 		}
@@ -79,7 +79,7 @@ const update_item_base = (db_connect,data_type,item) => {
 	return new Promise((callback) => {
 		let collection = db_connect.collection(data_type);
 		if (String(item.id)=='0') {//insert
-			item.id = get_guid();
+			item.id = Number.get_guid();
 			item.date_create = new moment().toISOString();
 			item.date_save = new moment().toISOString();
 			if(check_db_connect_base(db_connect)){
@@ -89,7 +89,7 @@ const update_item_base = (db_connect,data_type,item) => {
                     }
 					callback([error,item]);
 				}).catch(error => {
-					w_error("Data-Mongo-Base-Update-Item-Base-Error",error);
+					Log.error("Data-Mongo-Base-Update-Item-Base-Error",error);
 					callback([error,null]);
 				});
 			}
@@ -101,7 +101,7 @@ const update_item_base = (db_connect,data_type,item) => {
                 }
 				callback([error,item]);
 			}).catch(error => {
-				w_error("Data-Mongo-Base-Update-Item-Base-Error",error);
+				Log.error("Data-Mongo-Base-Update-Item-Base-Error",error);
 				callback([error,null]);
 			});
 		}
@@ -114,7 +114,7 @@ const delete_item_base = (db_connect,data_type,id) => {
 			collection.deleteMany({id:id}).then((data) => {
 				callback([error,data]);
 			}).catch(error => {
-				w_error("Data-Mongo-Base-Delete-Item-Base-Error",error);
+				Log.error("Data-Mongo-Base-Delete-Item-Base-Error",error);
 				callback([error,null]);
 			});
 		}
@@ -127,7 +127,7 @@ const delete_item_list_base = (db_connect,data_type,filter) => {
 			collection.deleteMany(filter).then((data) => {
 				callback([error,data]);
 			}).catch(error => {
-				w_error("Data-Mongo-Base-Delete-List-Base-Error",error);
+				Log.error("Data-Mongo-Base-Delete-List-Base-Error",error);
 				callback([error,null]);
 			});
 		}
@@ -145,11 +145,11 @@ const get_id_list_base = (db_connect,data_type,filter,sort_by,page_current,page_
 						total_count = data;
 						call();
 					}).catch(error => {
-						w_error("Data-Mongo-Base-Get-Sql-Paging-TblId-Bas-Errore",error);
+						Log.error("Data-Mongo-Base-Get-Sql-Paging-TblId-Bas-Errore",error);
 						callback([error,null]);
 					});
 				}else{
-					w_error("Data-Mongo-Base-Get-Sql-Paging-TblId-Base-Error",error);
+					Log.error("Data-Mongo-Base-Get-Sql-Paging-TblId-Base-Error",error);
 					callback(['No connection',null]);
 				}
 			},
@@ -159,18 +159,18 @@ const get_id_list_base = (db_connect,data_type,filter,sort_by,page_current,page_
 						data_list = data;
 						call();
 					}).catch(error => {
-						w_error("Data-Mongo-Base-Get-Sql-Paging-TblId-Base-Error",error);
+						Log.error("Data-Mongo-Base-Get-Sql-Paging-TblId-Base-Error",error);
 						callback([error,null]);
 					});
 				}else{
-					w_error("Data-Mongo-Base-Get-Sql-Paging-TblId-Base-Error",error);
+					Log.error("Data-Mongo-Base-Get-Sql-Paging-TblId-Base-Error",error);
                     callback(['No connection',null]);
 				}
 			}
 		]).then(result => {
 			callback([error,total_count,data_list]);
 		}).catch(error => {
-			w_error("Project-FileName-Update-Blank-Error",error);
+			Log.error("Project-FileName-Update-Blank-Error",error);
 			callback([error,null]);
 		});
 	});
@@ -182,7 +182,7 @@ const count_item_list_base = (db_connect,data_type,filter) => {
 			collection.countDocuments(filter).then((data) => {
 				callback([error,data]);
 			}).catch(error => {
-				w_error("Data-Mongo-Base-Count-Item-List-Base-Error",error);
+				Log.error("Data-Mongo-Base-Count-Item-List-Base-Error",error);
 				callback([error,null]);
 			});
 		}

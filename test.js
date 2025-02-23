@@ -1,7 +1,7 @@
 const async = require('async');
 const assert = require('node:assert');
-const { get_db_connect,close_db_connect,check_db_connect,update_item,update_item_list,get_item,delete_item,get_item_list,delete_item_list,count_item_list } = require("./");
-const {get_guid,get_id,w,get_test_item} = require("biz9-utility");
+const { Db, Item, List } = require("./");
+const { Test, Log, Number } = require("biz9-utility");
 /*
  * availble tests
 connect
@@ -14,10 +14,11 @@ connect
 */
 /* --- TEST CONFIG START --- */
 //const ID = '0'; // 0 = intialize a new data item.
-const ID = '6c3bd47a-fe90-4e62-92c1-61d96ff4c008';
+const ID = 'bbb0da35-c2b9-47fd-86b0-56cde5c1a61f';
 const DATA_TYPE = 'dt_blank';
-const FILTER = {test_group_id:31865};
-const APP_TITLE_ID = 'db_title_feb_14';
+//const FILTER = {test_group_id:59367};
+const FILTER = {data_type:DATA_TYPE};
+const APP_TITLE_ID = 'db_title_feb_23';
 const SQL = {};
 /* --- TEST CONFIG END --- */
 
@@ -42,41 +43,41 @@ describe('connect', function(){ this.timeout(25000);
         let db_connect = {};
         async.series([
             function(call){
-                console.log('TEST-CONNECT-LOCAL-START');
-                get_db_connect(data_config).then(([error,data])=> {
+                console.log('CONNECT-LOCAL-START');
+                Db.open(data_config).then(([error,data])=> {
                     db_connect = data;
                     if(error){
-                        cloud_error=error_append(cloud_error,error);
+                        cloud_error=Log.append(cloud_error,error);
                     }else{
                         assert.notEqual(db_connect,null);
                         console.log(data);
-                        console.log('TEST-CONNECT-LOCAL-SUCCESS');
+                        console.log('CONNECT-LOCAL-SUCCESS');
                     }
                     call();
                 }).catch(error => {
-                    cloud_error=error_append(cloud_error,error);
+                    Log.error('Connect',error);
                     call();
                 });
             },
             function(call){
-                console.log('TEST-CHECK-DB-CONNECT-START');
-                check_db_connect(db_connect).then((data)=> {
+                console.log('CHECK-DB-CONNECT-START');
+                Db.check(db_connect).then((data)=> {
                     if(error){
-                        cloud_error=error_append(cloud_error,error);
+                        cloud_error=Log.append(cloud_error,error);
                     }
                     console.log(data);
-                    console.log('TEST-CHECK-DB-CONNECT-SUCCESS');
+                    console.log('CHECK-DB-CONNECT-SUCCESS');
                     call();
                 }).catch(error => {
-                    cloud_error=error_append(cloud_error,error);
+                    cloud_error=Log.append(cloud_error,error);
                     call();
                 });
             },
             function(call){
-                console.log('TEST-CLOSE-DB-CONNECT-START');
-                close_db_connect(db_connect).then(([error,data])=> {
+                console.log('CLOSE-DB-CONNECT-START');
+                Db.close(db_connect).then(([error,data])=> {
                     if(error){
-                        cloud_error=error_append(cloud_error,error);
+                        cloud_error=Log.append(cloud_error,error);
                     }
                     db_connect = data;
                     assert.equal(db_connect,null);
@@ -84,18 +85,18 @@ describe('connect', function(){ this.timeout(25000);
                     console.log('TEST-CLOSE-DB-SUCCESS');
                     call();
                 }).catch(error => {
-                    cloud_error=error_append(cloud_error,error);
+                    cloud_error=Log.append(cloud_error,error);
                 });
             },
         ],
             function(error, result){
                 if(cloud_error){
-                    w_error("TEST-CONNECT-ERROR-DONE",cloud_error);
+                    Log.error("CONNECT-ERROR-DONE",cloud_error);
                 }else{
-                    console.log('TEST-CONNECT-LOCAL-SUCCESS-DONE');
-                    console.log('TEST-CONNECT-CHECK-SUCCESS-DONE');
-                    console.log('TEST-CONNECT-CLOSE-SUCCESS-DONE');
-                    console.log('TEST-CONNECT-DONE');
+                    console.log('CONNECT-LOCAL-SUCCESS-DONE');
+                    console.log('CONNECT-CHECK-SUCCESS-DONE');
+                    console.log('CONNECT-CLOSE-SUCCESS-DONE');
+                    console.log('CONNECT-DONE');
                 }
                 done();
             });
@@ -105,75 +106,77 @@ describe('item_update', function(){ this.timeout(25000);
     it("_item_update", function(done){
         let cloud_error=null;
         let db_connect = {};
-        let item_test = get_test_item('dt_blank',0);
+        let item_test = Test.get_item('dt_blank',0);
         async.series([
             function(call){
-                console.log('TEST-ITEM-UPDATE-CONNECT-START');
-                get_db_connect(data_config).then(([error,data])=> {
+                console.log('ITEM-UPDATE-CONNECT-START');
+                Db.open(data_config).then(([error,data])=> {
                     if(error){
-                        cloud_error=error_append(cloud_error,error);
+                        cloud_error=Log.append(cloud_error,error);
                         w('error',error);
                     }
                     db_connect = data;
                     assert.notEqual(db_connect,null);
-                    console.log('TEST-ITEM-UPDATE-CONNECT-SUCCESS');
+                    console.log('ITEM-UPDATE-CONNECT-SUCCESS');
                     call();
                 }).catch(error => {
-                    cloud_error=error_append(cloud_error,error);
+                    cloud_error=Log.append(cloud_error,error);
                     call();
                 });
             },
             function(call){
-                console.log('TEST-ITEM-UPDATE-UPDATE-START');
-                update_item(db_connect,DATA_TYPE,item_test).then(([error,data])=> {
+                console.log('ITEM-UPDATE-UPDATE-START');
+                Item.update(db_connect,DATA_TYPE,item_test).then(([error,data])=> {
+                    console.log('aaa');
+                    console.log(error);
                     if(error){
-                        cloud_error=error_append(cloud_error,error);
+                        cloud_error=Log.append(cloud_error,error);
                     }
                     item_test = data;
-                    assert.notEqual(data,null);
                     console.log(item_test);
-                    console.log('TEST-ITEM-UPDATE-UPDATE-SUCCESS');
+                    assert.notEqual(data,null);
+                    console.log('ITEM-UPDATE-UPDATE-SUCCESS');
                     call();
                 }).catch(error => {
-                    cloud_error=error_append(cloud_error,error);
+                    cloud_error=Log.append(cloud_error,error);
                     call();
                 });
             },
             function(call){
-                console.log('TEST-ITEM-UPDATE-CLOSE-START');
-                close_db_connect(db_connect).then(([error,data])=> {
+                console.log('ITEM-UPDATE-CLOSE-START');
+                Db.close(db_connect).then(([error,data])=> {
                     if(error){
-                        cloud_error=error_append(cloud_error,error);
+                        cloud_error=Log.append(cloud_error,error);
                     }
                     db_connect=data;
                     assert.equal(data,null);
-                    console.log('TEST-ITEM-UPDATE-CLOSE-SUCCESS');
+                    console.log('ITEM-UPDATE-CLOSE-SUCCESS');
                     call();
                 }).catch(error => {
-                    cloud_error=error_append(cloud_error,error);
+                    cloud_error=Log.append(cloud_error,error);
                     call();
                 });
             },
             function(call){
-                console.log('TEST-ITEM-UPDATE-ASSERT-START');
+                console.log('ITEM-UPDATE-ASSERT-START');
                 assert.notEqual(item_test.first_name,0);
                 assert.notEqual(item_test.first_name,null);
                 assert.notEqual(item_test.id,0);
                 assert.notEqual(item_test.id,null);
                 assert.equal(null,db_connect);
-                console.log('TEST-ITEM-UPDATE-ASSERT-SUCCESS');
+                console.log('ITEM-UPDATE-ASSERT-SUCCESS');
                 call();
             },
         ],
             function(error, result){
                 if(cloud_error){
-                    w_error("TEST-ITEM-UPDATE-ERROR-DONE",cloud_error);
+                    Log.error("ITEM-UPDATE-ERROR-DONE",cloud_error);
                 }else{
-                    console.log('TEST-ITEM-UPDATE-CONNECT-SUCCESS-DONE');
-                    console.log('TEST-ITEM-UPDATE-UPDATE-SUCCESS-DONE');
-                    console.log('TEST-ITEM-UPDATE-CLOSE-SUCCESS-DONE');
-                    console.log('TEST-ITEM-UPDATE-ASSERT-SUCCESS-DONE');
-                    console.log('TEST-ITEM-UPDATE-DONE');
+                    console.log('ITEM-UPDATE-CONNECT-SUCCESS-DONE');
+                    console.log('ITEM-UPDATE-UPDATE-SUCCESS-DONE');
+                    console.log('ITEM-UPDATE-CLOSE-SUCCESS-DONE');
+                    console.log('ITEM-UPDATE-ASSERT-SUCCESS-DONE');
+                    console.log('ITEM-UPDATE-DONE');
                 }
                 done();
             });
@@ -187,26 +190,26 @@ describe('item_get', function(){ this.timeout(25000);
         async.series([
             function(call){
                 console.log('TEST-ITEM-GET-CONNECT-START');
-                get_db_connect(data_config).then(([error,data])=> {
+                Db.open(data_config).then(([error,data])=> {
                     if(error){
-                        cloud_error=error_append(cloud_error,error);
-                        w('error',error);
+                        cloud_error=Log.append(cloud_error,error);
+                        Log.w('error',error);
                     }
                     db_connect = data;
                     assert.notEqual(db_connect,null);
                     console.log('TEST-ITEM-GET-CONNECT-SUCCESS');
                     call();
                 }).catch(error => {
-                    cloud_error=error_append(cloud_error,error);
+                    cloud_error=Log.append(cloud_error,error);
                     call();
                 });
             },
             function(call){
                 console.log('TEST-ITEM-GET-GET-START');
-                get_item(db_connect,DATA_TYPE,item_test.id).then(([error,data])=> {
+                Item.get(db_connect,DATA_TYPE,item_test.id).then(([error,data])=> {
                     if(error){
-                        cloud_error=error_append(cloud_error,error);
-                        w('error',error);
+                        cloud_error=Log.append(cloud_error,error);
+                        Log.w('error',error);
                     }
                     console.log(data);
                     item_test = data;
@@ -216,22 +219,22 @@ describe('item_get', function(){ this.timeout(25000);
                     console.log('TEST-GET-ITEM-GET-SUCCESS');
                     call();
                 }).catch(error => {
-                    cloud_error=error_append(cloud_error,error);
+                    cloud_error=Log.append(cloud_error,error);
                     call();
                 });
             },
             function(call){
                 console.log('TEST-ITEM-GET-CLOSE-START');
-                close_db_connect(db_connect).then(([error,data])=> {
+                Db.close(db_connect).then(([error,data])=> {
                     if(error){
-                        cloud_error=error_append(cloud_error,error);
+                        cloud_error=Log.append(cloud_error,error);
                     }
                     db_connect=data;
                     assert.equal(data,null);
                     console.log('TEST-ITEM-GET-CLOSE-SUCCESS');
                     call();
                 }).catch(error => {
-                    cloud_error=error_append(cloud_error,error);
+                    cloud_error=Log.append(cloud_error,error);
                     call();
                 });
             },
@@ -248,7 +251,7 @@ describe('item_get', function(){ this.timeout(25000);
         ],
             function(error, result){
                 if(cloud_error){
-                    w_error("TEST-ITEM-GET-ERROR-DONE",cloud_error);
+                    Log.error("TEST-ITEM-GET-ERROR-DONE",cloud_error);
                 }else{
 
                     console.log('TEST-ITEM-GET-CONNECT-SUCCESS-DONE');
@@ -269,48 +272,48 @@ describe('item_delete', function(){ this.timeout(25000);
         async.series([
             function(call){
                 console.log('TEST-ITEM-DELETE-CONNECT-START');
-                get_db_connect(data_config).then(([error,data])=> {
+                Db.open(data_config).then(([error,data])=> {
                     if(error){
-                        cloud_error=error_append(cloud_error,error);
-                        w('error',error);
+                        cloud_error=Log.append(cloud_error,error);
+                        Log.error('error',error);
                     }
                     db_connect = data;
                     assert.notEqual(db_connect,null);
                     console.log('TEST-ITEM-DELETE-CONNECT-SUCCESS');
                     call();
                 }).catch(error => {
-                    cloud_error=error_append(cloud_error,error);
+                    cloud_error=Log.append(cloud_error,error);
                     call();
                 });
             },
             function(call){
                 console.log('TEST-ITEM-DELETE-GET-START');
-                delete_item(db_connect,DATA_TYPE,item_test.id).then(([error,data])=> {
+                Item.delete(db_connect,DATA_TYPE,item_test.id).then(([error,data])=> {
                     if(error){
-                        cloud_error=error_append(cloud_error,error);
-                        w('error',error);
+                        cloud_error=Log.append(cloud_error,error);
+                        Log.error('error',error);
                     }
                     item_test = data;
                     console.log(item_test);
                     console.log('--TEST-DELETE-ITEM-2-SUCCESS--');
                     call();
                 }).catch(error => {
-                    cloud_error=error_append(cloud_error,error);
+                    cloud_error=Log.append(cloud_error,error);
                     call();
                 });
             },
             function(call){
                 console.log('TEST-ITEM-DELETE-CLOSE-START');
-                close_db_connect(db_connect).then(([error,data])=> {
+                Db.close(db_connect).then(([error,data])=> {
                     if(error){
-                        cloud_error=error_append(cloud_error,error);
+                        cloud_error=Log.append(cloud_error,error);
                     }
                     db_connect=data;
                     assert.equal(data,null);
                     console.log('TEST-ITEM-DELETE-CLOSE-SUCCESS');
                     call();
                 }).catch(error => {
-                    cloud_error=error_append(cloud_error,error);
+                    cloud_error=Log.append(cloud_error,error);
                     call();
                 });
             },
@@ -324,7 +327,7 @@ describe('item_delete', function(){ this.timeout(25000);
         ],
             function(error, result){
                 if(cloud_error){
-                    w_error("TEST-ITEM-DELETE-ERROR-DONE",cloud_error);
+                    Log.error("TEST-ITEM-DELETE-ERROR-DONE",cloud_error);
                 }else{
                     console.log('TEST-ITEM-DELETE-CONNECT-SUCCESS-DONE');
                     console.log('TEST-ITEM-DELETE-GET-SUCCESS-DONE');
@@ -344,31 +347,31 @@ describe('item_list_update', function(){ this.timeout(25000);
         async.series([
             function(call){
                 console.log('TEST-LIST-ITEM-UPDATE-CONNECT-START');
-                get_db_connect(data_config).then(([error,data])=> {
+                Db.open(data_config).then(([error,data])=> {
                     if(error){
-                        cloud_error=error_append(cloud_error,error);
-                        w('error',error);
+                        cloud_error=Log.append(cloud_error,error);
+                        Log.error('error',error);
                     }
                     db_connect = data;
                     assert.notEqual(db_connect,null);
                     console.log('TEST-LIST-ITEM-UPDATE-CONNECT-SUCCESS');
                     call();
                 }).catch(error => {
-                    cloud_error=error_append(cloud_error,error);
+                    cloud_error=Log.append(cloud_error,error);
                     call();
                 });
             },
             function(call){
                 console.log('TEST-LIST-ITEM-UPDATE-UPDATE-START');
-                test_group_id=get_id();
+                let test_group_id=Number.get_id();
                 for(a=0;a<10;a++){
-                    item_test=get_test_item('dt_blank',0);
+                    item_test=Test.get_item('dt_blank',0);
                     item_test.test_group_id=test_group_id;
                     item_test_list.push(item_test);
                 }
-                update_item_list(db_connect,item_test_list).then(([error,data])=> {
+                List.update(db_connect,item_test_list).then(([error,data])=> {
                     if(error){
-                        cloud_error=error_append(cloud_error,error);
+                        cloud_error=Log.append(cloud_error,error);
                     }
                     console.log(data);
                     assert.notEqual(0,data.length);
@@ -377,22 +380,22 @@ describe('item_list_update', function(){ this.timeout(25000);
                     console.log('TEST-LIST-ITEM-UPDATE-UPDATE-SUCCESS');
                     call();
                 }).catch(error => {
-                    cloud_error=error_append(cloud_error,error);
+                    cloud_error=Log.append(cloud_error,error);
                     call();
                 });
             },
             function(call){
                 console.log('TEST-LIST-ITEM-UPDATE-CLOSE-START');
-                close_db_connect(db_connect).then(([error,data])=> {
+                Db.close(db_connect).then(([error,data])=> {
                     if(error){
-                        cloud_error=error_append(cloud_error,error);
+                        cloud_error=Log.append(cloud_error,error);
                     }
                     db_connect=data;
                     assert.equal(data,null);
                     console.log('TEST-LIST-ITEM-UPDATE-CLOSE-SUCCESS');
                     call();
                 }).catch(error => {
-                    cloud_error=error_append(cloud_error,error);
+                    cloud_error=Log.append(cloud_error,error);
                     call();
                 });
             },
@@ -409,7 +412,7 @@ describe('item_list_update', function(){ this.timeout(25000);
         ],
             function(error, result){
                 if(cloud_error){
-                    w_error("TEST-LIST-ITEM-UPDATE-ERROR-DONE",cloud_error);
+                    Log.error("TEST-LIST-ITEM-UPDATE-ERROR-DONE",cloud_error);
                 }else{
                     console.log('TEST-LIST-ITEM-UPDATE-CONNECT-SUCCESS-DONE');
                     console.log('TEST-LIST-ITEM-UPDATE-UPDATE-SUCCESS-DONE');
@@ -433,75 +436,75 @@ describe('item_list_get', function(){ this.timeout(25000);
         let page_size =10;
         async.series([
             function(call){
-                console.log('TEST-LIST-ITEM-GET-CONNECT-START');
-                get_db_connect(data_config).then(([error,data])=> {
+                console.log('LIST-ITEM-GET-CONNECT-START');
+                Db.open(data_config).then(([error,data])=> {
                     if(error){
-                        cloud_error=error_append(cloud_error,error);
-                        w('error',error);
+                        cloud_error=Log.append(cloud_error,error);
+                        Log.error('error',error);
                     }
                     db_connect = data;
                     assert.notEqual(db_connect,null);
-                    console.log('TEST-LIST-ITEM-GET-CONNECT-SUCCESS');
+                    console.log('LIST-ITEM-GET-CONNECT-SUCCESS');
                     call();
                 }).catch(error => {
-                    cloud_error=error_append(cloud_error,error);
+                    cloud_error=Log.append(cloud_error,error);
                     call();
                 });
             },
             function(call){
-                console.log('TEST-LIST-ITEM-GET-GET-ITEM-LIST-START');
-                w('data_type',data_type);
-                w('filter',filter);
-                w('sort_by',sort_by);
-                w('page_current',page_current);
-                w('page_size',page_size);
-                get_item_list(db_connect,data_type,filter,sort_by,page_current,page_size).then(([error,data,item_count,page_count])=> {
+                console.log('LIST-ITEM-GET-GET-ITEM-LIST-START');
+                Log.w('data_type',data_type);
+                Log.w('filter',filter);
+                Log.w('sort_by',sort_by);
+                Log.w('page_current',page_current);
+                Log.w('page_size',page_size);
+                List.get(db_connect,data_type,filter,sort_by,page_current,page_size).then(([error,data,item_count,page_count])=> {
+                    data_list = data;
                     if(error){
-                        cloud_error=error_append(cloud_error,error);
+                        cloud_error=Log.append(cloud_error,error);
                     }else{
-                        data_list = data;
-                        w('data',data_list);
-                        w('item_count',item_count);
-                        w('page_count',page_count);
-                        console.log('TEST-LIST-ITEM-GET-GET-ITEM-LIST-SUCCESS');
+                        Log.w('data',data);
+                        Log.w('item_count',item_count);
+                        Log.w('page_count',page_count);
+                        console.log('LIST-ITEM-GET-GET-ITEM-LIST-SUCCESS');
                     }
                     call();
                 }).catch(error => {
-                    cloud_error=error_append(cloud_error,error);
+                    cloud_error=Log.append(cloud_error,error);
                     call();
                 });
             },
             function(call){
-                console.log('TEST-LIST-ITEM-GET-CLOSE-START');
-                close_db_connect(db_connect).then(([error,data])=> {
+                console.log('LIST-ITEM-GET-CLOSE-START');
+                Db.close(db_connect).then(([error,data])=> {
                     if(error){
-                        cloud_error=error_append(cloud_error,error);
+                        cloud_error=Log.append(cloud_error,error);
                     }
                     db_connect=data;
                     assert.equal(data,null);
-                    console.log('TEST-LIST-ITEM-GET-CLOSE-SUCCESS');
+                    console.log('LIST-ITEM-GET-CLOSE-SUCCESS');
                     call();
                 }).catch(error => {
-                    cloud_error=error_append(cloud_error,error);
+                    cloud_error=Log.append(cloud_error,error);
                     call();
                 });
             },
             function(call){
-                console.log('TEST-LIST-ITEM-GET-ASSERT-START');
+                console.log('LIST-ITEM-GET-ASSERT-START');
                 assert.equal(data_list.length,page_size);
-                console.log('TEST-LIST-ITEM-GET-ASSERT-SUCCESS');
+                console.log('LIST-ITEM-GET-ASSERT-SUCCESS');
                 call();
             },
         ],
             function(error, result){
                 if(cloud_error){
-                    w_error("TEST-LIST-ITEM-GET-ERROR-DONE",cloud_error);
+                    Log.error("LIST-ITEM-GET-ERROR-DONE",cloud_error);
                 }else{
-                    console.log('TEST-LIST-ITEM-GET-CONNECT-SUCCESS-DONE');
-                    console.log('TEST-LIST-ITEM-GET-GET-SUCCESS-DONE');
-                    console.log('TEST-LIST-ITEM-GET-ASSERT-SUCCESS-DONE');
-                    console.log('TEST-LIST-ITEM-GET-CLOSE-SUCCESS-DONE');
-                    console.log('TEST-LIST-ITEM-GET-DONE');
+                    console.log('LIST-ITEM-GET-CONNECT-SUCCESS-DONE');
+                    console.log('LIST-ITEM-GET-GET-SUCCESS-DONE');
+                    console.log('LIST-ITEM-GET-ASSERT-SUCCESS-DONE');
+                    console.log('LIST-ITEM-GET-CLOSE-SUCCESS-DONE');
+                    console.log('LIST-ITEM-GET-DONE');
                 }
                 done();
             });
@@ -517,9 +520,9 @@ describe('item_list_delete', function(){ this.timeout(25000);
         async.series([
             function(call){
                 console.log('TEST-LIST-ITEM-DELETE-CONNECT-START');
-                get_db_connect(data_config).then(([error,data])=> {
+                Db.open(data_config).then(([error,data])=> {
                     if(error){
-                        cloud_error=error_append(cloud_error,error);
+                        cloud_error=Log.append(cloud_error,error);
                         w('error',error);
                     }
                     db_connect = data;
@@ -527,40 +530,40 @@ describe('item_list_delete', function(){ this.timeout(25000);
                     console.log('TEST-LIST-ITEM-DELETE-CONNECT-SUCCESS');
                     call();
                 }).catch(error => {
-                    cloud_error=error_append(cloud_error,error);
+                    cloud_error=Log.append(cloud_error,error);
                     call();
                 });
             },
             function(call){
                 console.log('TEST-LIST-ITEM-GET-DELETE-ITEM-LIST-START');
-                w('data_type',data_type);
-                w('filter',filter);
-                delete_item_list(db_connect,data_type,filter).then(([error,data])=> {
+                Log.error('data_type',data_type);
+                Log.error('filter',filter);
+                List.delete(db_connect,data_type,filter).then(([error,data])=> {
                     if(error){
-                        cloud_error=error_append(cloud_error,error);
+                        cloud_error=Log.append(cloud_error,error);
                     }else{
                         data_list = data;
-                        w('data',data_list);
+                        Log.error('data',data_list);
                         console.log('TEST-LIST-ITEM-GET-GET-ITEM-LIST-SUCCESS');
                     }
                     call();
                 }).catch(error => {
-                    cloud_error=error_append(cloud_error,error);
+                    cloud_error=Log.append(cloud_error,error);
                     call();
                 });
             },
             function(call){
                 console.log('TEST-LIST-ITEM-DELETE-CLOSE-START');
-                close_db_connect(db_connect).then(([error,data])=> {
+                Db.close(db_connect).then(([error,data])=> {
                     if(error){
-                        cloud_error=error_append(cloud_error,error);
+                        cloud_error=Log.append(cloud_error,error);
                     }
                     db_connect=data;
                     assert.equal(data,null);
                     console.log('TEST-LIST-ITEM-DELETE-CLOSE-SUCCESS');
                     call();
                 }).catch(error => {
-                    cloud_error=error_append(cloud_error,error);
+                    cloud_error=Log.append(cloud_error,error);
                     call();
                 });
             },
@@ -573,7 +576,7 @@ describe('item_list_delete', function(){ this.timeout(25000);
         ],
             function(error, result){
                 if(cloud_error){
-                    w_error("TEST-LIST-ITEM-DELETE-ERROR-DONE",cloud_error);
+                    Log.error("TEST-LIST-ITEM-DELETE-ERROR-DONE",cloud_error);
                 }else{
                     console.log('TEST-LIST-ITEM-DELETE-CONNECT-SUCCESS-DONE');
                     console.log('TEST-LIST-ITEM-DELETE-GET-SUCCESS-DONE');
