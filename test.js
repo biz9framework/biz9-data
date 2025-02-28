@@ -13,8 +13,8 @@ connect
 - item_list_delete
 */
 /* --- TEST CONFIG START --- */
-//const ID = '0'; // 0 = intialize a new data item.
-const ID = 'bbb0da35-c2b9-47fd-86b0-56cde5c1a61f';
+const ID = '0'; // 0 = intialize a new data item.
+//const ID = 'bbb0da35-c2b9-47fd-86b0-56cde5c1a61f';
 const DATA_TYPE = 'dt_blank';
 //const FILTER = {test_group_id:59367};
 const FILTER = {data_type:DATA_TYPE};
@@ -43,16 +43,12 @@ describe('connect', function(){ this.timeout(25000);
         let db_connect = {};
         async.series([
             function(call){
-                console.log('CONNECT-LOCAL-START');
                 Db.open(data_config).then(([error,data])=> {
+                    cloud_error=Log.append(cloud_error,error);
                     db_connect = data;
-                    if(error){
-                        cloud_error=Log.append(cloud_error,error);
-                    }else{
-                        assert.notEqual(db_connect,null);
-                        console.log(data);
-                        console.log('CONNECT-LOCAL-SUCCESS');
-                    }
+                    assert.notEqual(db_connect,null);
+                    console.log(data);
+                    console.log('CONNECT-LOCAL-SUCCESS');
                     call();
                 }).catch(error => {
                     Log.error('Connect',error);
@@ -60,11 +56,11 @@ describe('connect', function(){ this.timeout(25000);
                 });
             },
             function(call){
-                console.log('CHECK-DB-CONNECT-START');
                 Db.check(db_connect).then((data)=> {
-                    if(error){
-                        cloud_error=Log.append(cloud_error,error);
-                    }
+                    cloud_error=Log.append(cloud_error,error);
+                    Log.w('data',data);
+                    Log.w('error',error);
+                    assert.notEqual(data,null);
                     console.log(data);
                     console.log('CHECK-DB-CONNECT-SUCCESS');
                     call();
@@ -74,11 +70,8 @@ describe('connect', function(){ this.timeout(25000);
                 });
             },
             function(call){
-                console.log('CLOSE-DB-CONNECT-START');
                 Db.close(db_connect).then(([error,data])=> {
-                    if(error){
-                        cloud_error=Log.append(cloud_error,error);
-                    }
+                    cloud_error=Log.append(cloud_error,error);
                     db_connect = data;
                     assert.equal(db_connect,null);
                     console.log(data);
@@ -90,14 +83,11 @@ describe('connect', function(){ this.timeout(25000);
             },
         ],
             function(error, result){
-                if(cloud_error){
-                    Log.error("CONNECT-ERROR-DONE",cloud_error);
-                }else{
-                    console.log('CONNECT-LOCAL-SUCCESS-DONE');
-                    console.log('CONNECT-CHECK-SUCCESS-DONE');
-                    console.log('CONNECT-CLOSE-SUCCESS-DONE');
-                    console.log('CONNECT-DONE');
-                }
+                Log.error("CONNECT-ERROR-DONE",cloud_error);
+                console.log('CONNECT-LOCAL-SUCCESS-DONE');
+                console.log('CONNECT-CHECK-SUCCESS-DONE');
+                console.log('CONNECT-CLOSE-SUCCESS-DONE');
+                console.log('CONNECT-DONE');
                 done();
             });
     });
@@ -106,18 +96,15 @@ describe('item_update', function(){ this.timeout(25000);
     it("_item_update", function(done){
         let cloud_error=null;
         let db_connect = {};
-        let item_test = Test.get_item('dt_blank',0);
+        var item_test = Test.get_item('dt_blank',0);
         async.series([
             function(call){
-                console.log('ITEM-UPDATE-CONNECT-START');
+                console.log('ITEM-UPDATE-START');
                 Db.open(data_config).then(([error,data])=> {
-                    if(error){
-                        cloud_error=Log.append(cloud_error,error);
-                        w('error',error);
-                    }
+                    cloud_error=Log.append(cloud_error,error);
                     db_connect = data;
                     assert.notEqual(db_connect,null);
-                    console.log('ITEM-UPDATE-CONNECT-SUCCESS');
+                    console.log('ITEM-UPDATE-SUCCESS');
                     call();
                 }).catch(error => {
                     cloud_error=Log.append(cloud_error,error);
@@ -127,11 +114,7 @@ describe('item_update', function(){ this.timeout(25000);
             function(call){
                 console.log('ITEM-UPDATE-UPDATE-START');
                 Item.update(db_connect,DATA_TYPE,item_test).then(([error,data])=> {
-                    console.log('aaa');
-                    console.log(error);
-                    if(error){
-                        cloud_error=Log.append(cloud_error,error);
-                    }
+                    cloud_error=Log.append(cloud_error,error);
                     item_test = data;
                     console.log(item_test);
                     assert.notEqual(data,null);
