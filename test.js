@@ -1,6 +1,6 @@
 const async = require('async');
 const assert = require('node:assert');
-const { Db, Item, List } = require("./");
+const { Data } = require("./");
 const { Test, Log, Number } = require("biz9-utility");
 /*
  * availble tests
@@ -13,8 +13,8 @@ connect
 - item_list_delete
 */
 /* --- TEST CONFIG START --- */
-const ID = '0'; // 0 = intialize a new data item.
-//const ID = 'bbb0da35-c2b9-47fd-86b0-56cde5c1a61f';
+//const ID = '0'; // 0 = intialize a new data item.
+const ID = '220269f0-2e16-4c94-812b-6e1803ec884a';
 const DATA_TYPE = 'dt_blank';
 //const FILTER = {test_group_id:59367};
 const FILTER = {data_type:DATA_TYPE};
@@ -43,50 +43,51 @@ describe('connect', function(){ this.timeout(25000);
         let db_connect = {};
         async.series([
             function(call){
-                Db.open(data_config).then(([error,data])=> {
+                Data.open_db(data_config).then(([error,data])=> {
                     cloud_error=Log.append(cloud_error,error);
                     db_connect = data;
                     assert.notEqual(db_connect,null);
                     console.log(data);
-                    console.log('CONNECT-LOCAL-SUCCESS');
+                    console.log('CONNECT-OPEN-SUCCESS');
                     call();
                 }).catch(error => {
-                    Log.error('Connect',error);
-                    call();
+                    Log.error('CONNECT-OPEN-ERROR',error);
+                    cloud_error=Log.append(cloud_error,error);
                 });
             },
             function(call){
-                Db.check(db_connect).then((data)=> {
+                Data.check_db(db_connect).then((data)=> {
                     cloud_error=Log.append(cloud_error,error);
                     Log.w('data',data);
                     Log.w('error',error);
                     assert.notEqual(data,null);
                     console.log(data);
-                    console.log('CHECK-DB-CONNECT-SUCCESS');
+                    console.log('CONNECT-CHECK-SUCCESS');
                     call();
                 }).catch(error => {
+                    Log.error('CONNECT-CHECK-ERROR',error);
                     cloud_error=Log.append(cloud_error,error);
-                    call();
                 });
             },
             function(call){
-                Db.close(db_connect).then(([error,data])=> {
+                Data.close_db(db_connect).then(([error,data])=> {
                     cloud_error=Log.append(cloud_error,error);
                     db_connect = data;
                     assert.equal(db_connect,null);
                     console.log(data);
-                    console.log('TEST-CLOSE-DB-SUCCESS');
+                    console.log('CONNECT-CLOSE-SUCCESS');
                     call();
                 }).catch(error => {
+                    Log.error('CONNECT-CLOSE-ERROR',error);
                     cloud_error=Log.append(cloud_error,error);
                 });
             },
         ],
             function(error, result){
                 Log.error("CONNECT-ERROR-DONE",cloud_error);
-                console.log('CONNECT-LOCAL-SUCCESS-DONE');
-                console.log('CONNECT-CHECK-SUCCESS-DONE');
-                console.log('CONNECT-CLOSE-SUCCESS-DONE');
+                console.log('CONNECT-OPEN-SUCCESS');
+                console.log('CONNECT-CHECK-SUCCESS');
+                console.log('CONNECT-CLOSE-SUCCESS');
                 console.log('CONNECT-DONE');
                 done();
             });
@@ -100,7 +101,7 @@ describe('item_update', function(){ this.timeout(25000);
         async.series([
             function(call){
                 console.log('ITEM-UPDATE-START');
-                Db.open(data_config).then(([error,data])=> {
+                Data.open_db(data_config).then(([error,data])=> {
                     cloud_error=Log.append(cloud_error,error);
                     db_connect = data;
                     assert.notEqual(db_connect,null);
@@ -113,7 +114,7 @@ describe('item_update', function(){ this.timeout(25000);
             },
             function(call){
                 console.log('ITEM-UPDATE-UPDATE-START');
-                Item.update(db_connect,DATA_TYPE,item_test).then(([error,data])=> {
+                Data.update_item(db_connect,DATA_TYPE,item_test).then(([error,data])=> {
                     cloud_error=Log.append(cloud_error,error);
                     item_test = data;
                     console.log(item_test);
@@ -127,7 +128,7 @@ describe('item_update', function(){ this.timeout(25000);
             },
             function(call){
                 console.log('ITEM-UPDATE-CLOSE-START');
-                Db.close(db_connect).then(([error,data])=> {
+                Data.close_db(db_connect).then(([error,data])=> {
                     if(error){
                         cloud_error=Log.append(cloud_error,error);
                     }
@@ -173,7 +174,7 @@ describe('item_get', function(){ this.timeout(25000);
         async.series([
             function(call){
                 console.log('TEST-ITEM-GET-CONNECT-START');
-                Db.open(data_config).then(([error,data])=> {
+                Data.open_db(data_config).then(([error,data])=> {
                     if(error){
                         cloud_error=Log.append(cloud_error,error);
                         Log.w('error',error);
@@ -189,7 +190,7 @@ describe('item_get', function(){ this.timeout(25000);
             },
             function(call){
                 console.log('TEST-ITEM-GET-GET-START');
-                Item.get(db_connect,DATA_TYPE,item_test.id).then(([error,data])=> {
+                Data.get_item(db_connect,DATA_TYPE,item_test.id).then(([error,data])=> {
                     if(error){
                         cloud_error=Log.append(cloud_error,error);
                         Log.w('error',error);
@@ -208,7 +209,7 @@ describe('item_get', function(){ this.timeout(25000);
             },
             function(call){
                 console.log('TEST-ITEM-GET-CLOSE-START');
-                Db.close(db_connect).then(([error,data])=> {
+                Data.close_db(db_connect).then(([error,data])=> {
                     if(error){
                         cloud_error=Log.append(cloud_error,error);
                     }
@@ -255,7 +256,7 @@ describe('item_delete', function(){ this.timeout(25000);
         async.series([
             function(call){
                 console.log('TEST-ITEM-DELETE-CONNECT-START');
-                Db.open(data_config).then(([error,data])=> {
+                Data.open_db(data_config).then(([error,data])=> {
                     if(error){
                         cloud_error=Log.append(cloud_error,error);
                         Log.error('error',error);
@@ -271,7 +272,7 @@ describe('item_delete', function(){ this.timeout(25000);
             },
             function(call){
                 console.log('TEST-ITEM-DELETE-GET-START');
-                Item.delete(db_connect,DATA_TYPE,item_test.id).then(([error,data])=> {
+                Data.delete_item(db_connect,DATA_TYPE,item_test.id).then(([error,data])=> {
                     if(error){
                         cloud_error=Log.append(cloud_error,error);
                         Log.error('error',error);
@@ -287,7 +288,7 @@ describe('item_delete', function(){ this.timeout(25000);
             },
             function(call){
                 console.log('TEST-ITEM-DELETE-CLOSE-START');
-                Db.close(db_connect).then(([error,data])=> {
+                Data.close_db(db_connect).then(([error,data])=> {
                     if(error){
                         cloud_error=Log.append(cloud_error,error);
                     }
@@ -330,7 +331,7 @@ describe('item_list_update', function(){ this.timeout(25000);
         async.series([
             function(call){
                 console.log('TEST-LIST-ITEM-UPDATE-CONNECT-START');
-                Db.open(data_config).then(([error,data])=> {
+                Data.open_db(data_config).then(([error,data])=> {
                     if(error){
                         cloud_error=Log.append(cloud_error,error);
                         Log.error('error',error);
@@ -352,7 +353,7 @@ describe('item_list_update', function(){ this.timeout(25000);
                     item_test.test_group_id=test_group_id;
                     item_test_list.push(item_test);
                 }
-                List.update(db_connect,item_test_list).then(([error,data])=> {
+                Data.update_list(db_connect,item_test_list).then(([error,data])=> {
                     if(error){
                         cloud_error=Log.append(cloud_error,error);
                     }
@@ -369,7 +370,7 @@ describe('item_list_update', function(){ this.timeout(25000);
             },
             function(call){
                 console.log('TEST-LIST-ITEM-UPDATE-CLOSE-START');
-                Db.close(db_connect).then(([error,data])=> {
+                Data.close_db(db_connect).then(([error,data])=> {
                     if(error){
                         cloud_error=Log.append(cloud_error,error);
                     }
@@ -420,7 +421,7 @@ describe('item_list_get', function(){ this.timeout(25000);
         async.series([
             function(call){
                 console.log('LIST-ITEM-GET-CONNECT-START');
-                Db.open(data_config).then(([error,data])=> {
+                Data.open_db(data_config).then(([error,data])=> {
                     if(error){
                         cloud_error=Log.append(cloud_error,error);
                         Log.error('error',error);
@@ -441,7 +442,7 @@ describe('item_list_get', function(){ this.timeout(25000);
                 Log.w('sort_by',sort_by);
                 Log.w('page_current',page_current);
                 Log.w('page_size',page_size);
-                List.get(db_connect,data_type,filter,sort_by,page_current,page_size).then(([error,data,item_count,page_count])=> {
+                Data.get_list(db_connect,data_type,filter,sort_by,page_current,page_size).then(([error,data,item_count,page_count])=> {
                     data_list = data;
                     if(error){
                         cloud_error=Log.append(cloud_error,error);
@@ -459,7 +460,7 @@ describe('item_list_get', function(){ this.timeout(25000);
             },
             function(call){
                 console.log('LIST-ITEM-GET-CLOSE-START');
-                Db.close(db_connect).then(([error,data])=> {
+                Data.close_db(db_connect).then(([error,data])=> {
                     if(error){
                         cloud_error=Log.append(cloud_error,error);
                     }
@@ -503,7 +504,7 @@ describe('item_list_delete', function(){ this.timeout(25000);
         async.series([
             function(call){
                 console.log('TEST-LIST-ITEM-DELETE-CONNECT-START');
-                Db.open(data_config).then(([error,data])=> {
+                Data.open_db(data_config).then(([error,data])=> {
                     if(error){
                         cloud_error=Log.append(cloud_error,error);
                         w('error',error);
@@ -521,7 +522,7 @@ describe('item_list_delete', function(){ this.timeout(25000);
                 console.log('TEST-LIST-ITEM-GET-DELETE-ITEM-LIST-START');
                 Log.error('data_type',data_type);
                 Log.error('filter',filter);
-                List.delete(db_connect,data_type,filter).then(([error,data])=> {
+                Data.delete_list(db_connect,data_type,filter).then(([error,data])=> {
                     if(error){
                         cloud_error=Log.append(cloud_error,error);
                     }else{
@@ -537,7 +538,7 @@ describe('item_list_delete', function(){ this.timeout(25000);
             },
             function(call){
                 console.log('TEST-LIST-ITEM-DELETE-CLOSE-START');
-                Db.close(db_connect).then(([error,data])=> {
+                Data.close_db(db_connect).then(([error,data])=> {
                     if(error){
                         cloud_error=Log.append(cloud_error,error);
                     }

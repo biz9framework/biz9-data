@@ -19,20 +19,20 @@ npm i biz9-data
 
 ## Contents
 * [Example with Express.js](#expressjsexample)
-* [Db.open](#get_db_connect)
-* [Db.close](#close_db_connect)
-* [Item.update](#update_item)
-* [Item.get](#get_item)
-* [Item.delete](#delete_item)
-* [List.get](#get_item_list)
-* [List.update](#update_item_list)
-* [List.delete](#delete_item_list)
+* [Data.open_db](#get_db_connect)
+* [Data.close_db](#close_db_connect)
+* [Data.update_item](#update_item)
+* [Data.get_item](#get_item)
+* [Data.delete_item](#delete_item)
+* [Data.get_list](#get_item_list)
+* [Data.update_list](#update_item_list)
+* [Data.delete_list](#delete_item_list)
 * [Credits](#credit)
 
 ### <a id="expressjsexample"></a>Example with Express.js
 View the full working [test example.](https://github.com/biz9framework/biz9-data/blob/main/test/index.js)
 ```javascript
-const { Db,Item,List } = require("biz9-data");
+const { Data } = require("biz9-data");
 
 // get_db_connect
 function(){
@@ -50,7 +50,7 @@ function(){
         REDIS_PORT_ID:"27019",
     };
 
-    Db.open(data_config).then(([error,data]) => {
+    Data.open_db(data_config).then(([error,data]) => {
 
         /*
             db_connect = data;
@@ -75,7 +75,7 @@ function(){
             test_group_id: 6100
         };
 
-    Item.update(db_connect,data_type,item).then(([error,data]) => {
+    Data.update_item(db_connect,data_type,item).then(([error,data]) => {
 
         /*
             data = {
@@ -101,7 +101,7 @@ function(){
     let data_type = 'dt_blank';
     let id = 'f54d788f-9fcb-4def-889f-5b7562741c99';
 
-    Item.get(db_connect,data_type,id).then(([error,data]) => {
+    Data.get_item(db_connect,data_type,id).then(([error,data]) => {
 
         /*
             data = {
@@ -128,7 +128,7 @@ function(){
     let data_type = 'dt_blank';
     let id = 'f54d788f-9fcb-4def-889f-5b7562741c99';
 
-    Item.delete(db_connect,data_type,id).then(([error,data]) => {
+    Data.delete_item(db_connect,data_type,id).then(([error,data]) => {
 
         /*
             data = {
@@ -146,7 +146,7 @@ function(){
 // close_db_connect
 function(){
 
-    Db.close(db_connect).then(([error,data]) => {
+    Data.close_db(db_connect).then(([error,data]) => {
         /*
             data = null;
         */
@@ -155,7 +155,7 @@ function(){
 
 ```
 
-### <a id="get_db_connect"></a>Db.open
+### <a id="get_db_connect"></a>Data.open_db
     Intialize and open Db connection.
 #### Params
 - Data config / Db configuration settings / object
@@ -192,7 +192,7 @@ let data_config = {
     REDIS_PORT_ID:"27019",
 };
 
-Db.open(data_config).then(([error,data]) => {
+Data.open_db(data_config).then(([error,data]) => {
 
     /*
         db_connect = data;
@@ -202,7 +202,7 @@ Db.open(data_config).then(([error,data]) => {
 
 ```
 
-### <a id="close_db_connect"></a>Db.close
+### <a id="close_db_connect"></a>Data.close_db
 Close Db connection.
 #### Params
 - db_connect / Open client Db connection / object
@@ -212,7 +212,7 @@ Close Db connection.
 #### Example
 
 ```javascript
-Db.close(db_connect).then(([error,data]) => {
+Data.close_db(db_connect).then(([error,data]) => {
 
     /*
        data = null;
@@ -221,7 +221,7 @@ Db.close(db_connect).then(([error,data]) => {
 });
 ```
 
-### <a id="update_item"></a>Item.update
+### <a id="update_item"></a>Data.update_item
 Create and or update data item.
 
 #### Params
@@ -249,7 +249,7 @@ let item = {
     test_group_id: 438
 };
 
-Item.update(db_connect,data_type,id,item).then(([error,data]) => {
+Data.update_item(db_connect,data_type,id,item).then(([error,data]) => {
 
     /*
         data = {
@@ -270,7 +270,7 @@ Item.update(db_connect,data_type,id,item).then(([error,data]) => {
 });
 ```
 
-### <a id="get_item"></a>Item.get
+### <a id="get_item"></a>Data.get_item
 Get a data item.
 
 #### Params
@@ -287,7 +287,7 @@ Get a data item.
 let data_type = "dt_blank";
 let id = "d31facf1-769e-48a6-a7d2-6c349e4b808e";
 
-Item.get(db_connect,data_type,id).then(([error,data]) => {
+Data.get_item(db_connect,data_type,id).then(([error,data]) => {
 
     /*
         data = {
@@ -307,7 +307,7 @@ Item.get(db_connect,data_type,id).then(([error,data]) => {
 });
 ```
 
-### <a id="delete_item"></a>Item.delete
+### <a id="delete_item"></a>Data.delete_item
 Delete data item.
 
 #### Params
@@ -323,7 +323,7 @@ Delete data item.
 ```bash
 let data_type = "dt_blank";
 let id = "d31facf1-769e-48a6-a7d2-6c349e4b808e";
-Item.delete(db_connect,data_type,id).then(([error,data]) => {
+Data.delete_item(db_connect,data_type,id).then(([error,data]) => {
 
     /*
         data =  {
@@ -337,7 +337,7 @@ Item.delete(db_connect,data_type,id).then(([error,data]) => {
 });
 ```
 
-### <a id="update_item_list"></a>List.update
+### <a id="update_item_list"></a>Data.update_list
 Create and or update data items.
 
 #### Params
@@ -385,7 +385,7 @@ let item_3 = {
 
 let data_item_list = [item_1, item_2, item_3];
 
-List.update(db_connect,data_type,data_item_list).then(([error,data]) => {
+Data.update_list(db_connect,data_type,data_item_list).then(([error,data]) => {
 
     /*
        data = [
@@ -433,7 +433,7 @@ List.update(db_connect,data_type,data_item_list).then(([error,data]) => {
 
 });
 ```
-### <a id="get_item_list"></a>List.get
+### <a id="get_item_list"></a>Data.get_list
 Get data items.
 
 #### Params
@@ -458,7 +458,7 @@ let sort_by = {first_name:-1};
 let page_current = 1;
 let page_size = 10;
 
-List.get(db_connect,data_type,filter,sort_by,page_current,page_size).then(([error,data_list,item_count,page_count]) => {
+Data.get_list(db_connect,data_type,filter,sort_by,page_current,page_size).then(([error,data_list,item_count,page_count]) => {
 
     /*
        data_list = [
@@ -485,7 +485,7 @@ List.get(db_connect,data_type,filter,sort_by,page_current,page_size).then(([erro
 });
 ```
 
-### <a id="delete_item_list"></a>List.delete
+### <a id="delete_item_list"></a>Data.delete_list
 Delete data items.
 
 #### Params
@@ -502,7 +502,7 @@ Delete data items.
 let data_type = "dt_blank";
 let filter = {first_name:'first_name_6100'};
 
-List.delete(db_connect,data_type,filter).then(([error,data]) => {
+Data.delete_list(db_connect,data_type,filter).then(([error,data]) => {
 
     /*
        data = [];
