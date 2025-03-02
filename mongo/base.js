@@ -19,12 +19,12 @@ const get_db_connect_base = (data_config) => {
 			Log.error("Data-Mongo-Base-Get-DB-BASE-Error--",error);
 			var reset_cmd = "sudo mongod --fork --config "+data_config.MONGO_CONFIG;
 			if(data_config.MONGO_IP!='0.0.0.0'){
-				if(!data_config.SSH_KEY){
-					data_config.SSH_KEY='';
+				if(!data_config.MONGO_SSH_KEY){
+					data_config.MONGO_SSH_KEY='';
 				}else{
-					data_config.SSH_KEY=' -i '+ data_config.SSH_KEY;
+					data_config.MONGO_SSH_KEY=' -i '+ data_config.MONGO_SSH_KEY;
 				}
-				reset_cmd = 'ssh '+ data_config.SSH_KEY + " " +data_config.MONGO_SERVER_USER +"@"+data_config.MONGO_IP +" -- "+reset_cmd;
+				reset_cmd = 'ssh '+ data_config.MONGO_SSH_KEY + " " +data_config.MONGO_SERVER_USER +"@"+data_config.MONGO_IP +" -- "+reset_cmd;
 			}
 			dir = exec(reset_cmd, function(error,stdout,stderr){
 			});

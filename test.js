@@ -30,7 +30,7 @@ const data_config ={
     MONGO_PORT_ID:"27019",
     MONGO_SERVER_USER:'admin',
     MONGO_CONFIG_FILE_PATH:'/etc/mongod.conf',
-    SSH_KEY:"",
+    MONGO_SSH_KEY:"",
     REDIS_URL:"0.0.0.0",
     REDIS_PORT_ID:"27019"
 };
