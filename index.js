@@ -5,7 +5,6 @@ License GNU General Public License v3.0
 Description: BiZ9 Framework: Data
 */
 const { get_db_connect_adapter,check_db_connect_adapter,close_db_connect_adapter,update_item_adapter,update_item_list_adapter,get_item_adapter,delete_item_adapter,get_item_list_adapter,delete_item_list_adapter,count_item_list_adapter }  = require('./adapter.js');
-
 class Data {
     static open_db = async (data_config) => {
         return [error,data] = await get_db_connect_adapter(data_config);
@@ -32,7 +31,6 @@ class Data {
     static get_list = async (db_connect,data_type,filter,sort_by,page_current,page_size) => {
         const [error,data,item_count,page_count] = await get_item_list_adapter(db_connect,data_type,filter,sort_by,page_current,page_size);
         return [error,data,item_count,page_count];
-
     };
     static delete_list = async (db_connect,data_type,filter) => {
         return [error,data_list] = await delete_item_list_adapter(db_connect,data_type,filter);
@@ -41,7 +39,6 @@ class Data {
         return [error,data] = await count_item_list_adapter(db_connect,data_type,filter);
     };
 }
-
 module.exports = {
     Data,
 };

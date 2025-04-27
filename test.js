@@ -1,7 +1,7 @@
 const async = require('async');
 const assert = require('node:assert');
-const { Data } = require("./");
-const { Test, Log, Number } = require("biz9-utility");
+const {Data} = require("./");
+const {Test,Log,Number} = require("biz9-utility");
 /*
  * availble tests
 connect
@@ -14,7 +14,7 @@ connect
 */
 /* --- TEST CONFIG START --- */
 //const ID = '0'; // 0 = intialize a new data item.
-const ID = '220269f0-2e16-4c94-812b-6e1803ec884a';
+const ID = '63be17f4-9523-4a3c-aa23-92a2f1a31773';
 const DATA_TYPE = 'dt_blank';
 //const FILTER = {test_group_id:59367};
 const FILTER = {data_type:DATA_TYPE};
@@ -97,7 +97,7 @@ describe('item_update', function(){ this.timeout(25000);
     it("_item_update", function(done){
         let cloud_error=null;
         let db_connect = {};
-        var item_test = Test.get_item('dt_blank',0);
+        var item_test = Test.get_item('dt_blank',ID);
         async.series([
             function(call){
                 console.log('ITEM-UPDATE-START');
