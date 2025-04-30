@@ -52,7 +52,7 @@ const update_item_list_adapter = (db_connect,item_data_list) => {
                     call();
                 }).catch(error => {
                     Log.error("Data-Adapter-Update-Item-List-Adapter",error);
-                    callback([error,null]);
+                    callback([error,[]]);
                 });
             },
             function(call){
@@ -89,7 +89,7 @@ const update_item_list_adapter = (db_connect,item_data_list) => {
                             }
                         }).catch(error => {
                             Log.error("Data-Adapter-Update-Item-List-3",error);
-                            callback([error,null]);
+                            callback([error,[]]);
                         });
                     }else{
                         go();
@@ -113,14 +113,14 @@ const update_item_list_adapter = (db_connect,item_data_list) => {
                     call();
                 }).catch(error => {
                     Log.error("Data-Adapter-Update-Item-List-4-Error",error);
-                    callback([error,null]);
+                    callback([error,[]]);
                 });
             },
         ]).then(result => {
             callback([error,item_data_new_list]);
         }).catch(error => {
             Log.error("Data-Adapter-Update-Item-List-5",error);
-            callback([error,null]);
+            callback([error,[]]);
         });
     });
 }
@@ -134,7 +134,7 @@ const update_item_adapter = (db_connect,data_type,item_data) => {
                     call();
                 }).catch(error => {
                     Log.error("Data-Adapter-Update-Item-Adapter",error);
-                    callback([error,null]);
+                    callback([error,[]]);
                 });
             },
             function(call){
@@ -142,7 +142,7 @@ const update_item_adapter = (db_connect,data_type,item_data) => {
                     call();
                 }).catch(error => {
                     Log.error("Data-Adapter-Update-Item-Adapter-2",error);
-                    callback([error,null]);
+                    callback([error,[]]);
                 });
             },
             function(call){
@@ -157,7 +157,7 @@ const update_item_adapter = (db_connect,data_type,item_data) => {
                     call();
                 }).catch(error => {
                     Log.error("Data-Adapter-Update-Item-Adapter-3",error);
-                    callback([error,null]);
+                    callback([error,[]]);
                 });
             },
             function(call) {
@@ -165,14 +165,14 @@ const update_item_adapter = (db_connect,data_type,item_data) => {
                     call();
                 }).catch(error => {
                     Log.error("Data-Adapter-Update-Item-Adapter-4",error);
-                    callback([error,null]);
+                    callback([error,[]]);
                 });
             },
         ]).then(result => {
             callback([error,item_data]);
         }).catch(error => {
             Log.error("Data-Adapter-Update-Item-Adapter-END",error);
-            callback([error,null]);
+            callback([error,[]]);
         });
     });
 }
@@ -189,7 +189,7 @@ const get_item_list_adapter = (db_connect,data_type,filter,sort_by,page_current,
                     call();
                 }).catch(error => {
                     Log.error("Get-Item-List-Adapter",error);
-                    callback([error,null]);
+                    callback([error,[]]);
                 });
             },
             function(call) {
@@ -199,26 +199,30 @@ const get_item_list_adapter = (db_connect,data_type,filter,sort_by,page_current,
                 get_id_list_main(db_connect,data_type,filter,sort_by,page_current,page_size).then(([error,total_count,data_list]) => {
                     error=error;
                     item_data_count=total_count;
-                    item_id_list=data_list;
+                    if(data_list.length>0){
+                        item_id_list=data_list;
+                    }
                     call();
                 }).catch(error => {
                     Log.error("Get-Item-List-Adapter-2",error);
-                    callback([error,null]);
+                    callback([error,[]]);
                 });
             },
             async function(call) {
+                if(item_id_list.length>0){
                 for(const item of item_id_list) {
                     [error,data] = await get_item_cache_db(cache_connect,db_connect,data_type,item.id);
                     if(data){
                         item_data_list.push(data);
                     }
                 }
+                }
             },
         ]).then(result => {
             callback([error,item_data_list,item_data_count,Math.round(item_data_count/page_size+1)]);
         }).catch(error => {
             Log.error("Get-Item-List-Adapter-3",error);
-            callback([error,null]);
+            callback([error,[]]);
         });
     });
 }
@@ -421,7 +425,7 @@ const delete_item_list_adapter = (db_connect,data_type,filter) => {
                     call();
                 }).catch(error => {
                     Log.error("Data-Adapter-Delete-Item-List-Adapter",error);
-                    callback([error,null]);
+                    callback([error,[]]);
                 });
             },
             function(call) {
@@ -432,7 +436,7 @@ const delete_item_list_adapter = (db_connect,data_type,filter) => {
                     call();
                 }).catch(error => {
                     Log.error("Data-Adapter-Delete-Item-List-Adapter-2",error);
-                    callback([error,null]);
+                    callback([error,[]]);
                 });
             },
             function(call){
@@ -440,7 +444,7 @@ const delete_item_list_adapter = (db_connect,data_type,filter) => {
                     call();
                 }).catch(error => {
                     Log.error("Data-Adapter-Delete-Item-List-Adapter",error);
-                    callback([error,null]);
+                    callback([error,[]]);
                 });
             },
             async function(call) {
@@ -454,7 +458,7 @@ const delete_item_list_adapter = (db_connect,data_type,filter) => {
             callback([error,item_data_new_list]);
         }).catch(error => {
             Log.error("Data-Adapter-Delete-Item-List-Adapter-3",error);
-            callback([error,null]);
+            callback([error,[]]);
         });
     });
 }

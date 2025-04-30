@@ -4,7 +4,7 @@ const {Data} = require("./");
 const {Test,Log,Number} = require("biz9-utility");
 /*
  * availble tests
-connect
+- connect
 - item_update
 - item_get
 - item_delete
@@ -14,7 +14,7 @@ connect
 */
 /* --- TEST CONFIG START --- */
 //const ID = '0'; // 0 = intialize a new data item.
-const ID = '63be17f4-9523-4a3c-aa23-92a2f1a31773';
+const ID = '2f6cefa1-1d88-4c06-8e6b-eb49f2d73284';
 const DATA_TYPE = 'dt_blank';
 //const FILTER = {test_group_id:59367};
 const FILTER = {data_type:DATA_TYPE};
