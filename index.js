@@ -4,7 +4,7 @@ Author: certifiedcoderz@gmail.com (Certified CoderZ)
 License GNU General Public License v3.0
 Description: BiZ9 Framework: Data
 */
-const { get_db_connect_adapter,check_db_connect_adapter,close_db_connect_adapter,update_item_adapter,update_item_list_adapter,get_item_adapter,delete_item_adapter,get_item_list_adapter,delete_item_list_adapter,count_item_list_adapter }  = require('./adapter.js');
+const { get_db_connect_adapter,check_db_connect_adapter,close_db_connect_adapter,update_item_adapter,update_item_list_adapter,get_item_adapter,delete_item_adapter,get_item_list_adapter,delete_item_list_adapter,count_item_list_adapter,delete_item_cache }  = require('./adapter.js');
 class Data {
     static open_db = async (data_config) => {
         return [error,data] = await get_db_connect_adapter(data_config);
@@ -24,7 +24,9 @@ class Data {
     static delete_item = async (db_connect,data_type,id) => {
         return [error,data] = await delete_item_adapter(db_connect,data_type,id);
     };
-
+    static delete_cache_item = async (db_connect,data_type,id) => {
+        return [error,data] = await delete_item_cache(db_connect,data_type,id);
+    };
     static update_list = async (db_connect,item_data_list) => {
         return [error,data] = await update_item_list_adapter(db_connect,item_data_list);
     };

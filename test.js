@@ -134,7 +134,7 @@ describe('item_update', function(){ this.timeout(25000);
                     }
                     db_connect=data;
                     assert.equal(data,null);
-                    console.log('ITEM-UPDATE-CLOSE-SUCCESS');
+                    console.log('ITEM-UPDATE-DELETE-CACHE-CLOSE-SUCCESS');
                     call();
                 }).catch(error => {
                     cloud_error=Log.append(cloud_error,error);
@@ -286,6 +286,24 @@ describe('item_delete', function(){ this.timeout(25000);
                     call();
                 });
             },
+            /*
+            function(call){
+                console.log('TEST-ITEM-DELETE-CACHE-GET-START');
+                Data.delete_cache_item(db_connect,DATA_TYPE,item_test.id).then(([error,data])=> {
+                    if(error){
+                        cloud_error=Log.append(cloud_error,error);
+                        Log.error('error',error);
+                    }
+                    console.log(error);
+                    console.log(data);
+                    console.log('--TEST-DELETE-CACHE-ITEM-2-SUCCESS--');
+                    call();
+                }).catch(error => {
+                    cloud_error=Log.append(cloud_error,error);
+                    call();
+                });
+            },
+            */
             function(call){
                 console.log('TEST-ITEM-DELETE-CLOSE-START');
                 Data.close_db(db_connect).then(([error,data])=> {
@@ -303,6 +321,7 @@ describe('item_delete', function(){ this.timeout(25000);
             },
             function(call){
                 console.log('TEST-ITEM-DELETE-ASSERT-START');
+                console.log(item_test);
                 assert.equal(item_test.cache_del,true);
                 assert.equal(item_test.db_del,true);
                 console.log('TEST-ITEM-DELETE-ASSERT-SUCCESS');
