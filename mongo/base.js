@@ -8,13 +8,14 @@ const async = require('async');
 const moment = require('moment');
 const {Number,Log} = require("biz9-utility");
 const { MongoClient } = require("mongodb");
+
 let client_db = {};
 const get_db_connect_base = (data_config) => {
 	return new Promise((callback) => {
     const mongo_full_url="mongodb://"+data_config.MONGO_USERNAME_PASSWORD+data_config.MONGO_IP+":"+data_config.MONGO_PORT_ID+"?retryWrites=true&w=majority&maxIdleTimeMS=60000&connectTimeoutMS=150000&socketTimeoutMS=90000&maxPoolSize=900000&maxConnecting=10000";
         client_db = new MongoClient(mongo_full_url);
-		client_db.connect(data_config.APP_TITLE_ID).then((data)=> {
-			callback([null,data.db(data_config.APP_TITLE_ID)]);
+		client_db.connect(data_config.APP_ID).then((data)=> {
+			callback([null,data.db(data_config.APP_ID)]);
 		}).catch(error => {
 			Log.error("DATA-MONGO-BASE-GET-DB-BASE-ERROR--",error);
 			var reset_cmd = "sudo mongod --fork --config "+data_config.MONGO_CONFIG;
@@ -34,6 +35,7 @@ const get_db_connect_base = (data_config) => {
 		});
 	});
 }
+
 const close_db_connect_base = (db_connect) => {
 	return new Promise((callback) => {
 		client_db.close().then((data)=> {
@@ -44,6 +46,7 @@ const close_db_connect_base = (db_connect) => {
 		});
 	});
 }
+
 const get_item_base = (db_connect,data_type,id) => {
 	return new Promise((callback) => {
 		let collection = null;
@@ -63,6 +66,7 @@ const get_item_base = (db_connect,data_type,id) => {
 		}
 	});
 }
+
 const check_db_connect_base = (db_connect) => {
 	if(!db_connect.client){
 		return false;
@@ -74,9 +78,11 @@ const check_db_connect_base = (db_connect) => {
 		return true;
 	}
 }
+
 const check_db_client_connected = (db_connect) => {
 	return !!db_connect && !!db_connect.topology && !!db_connect.topology.isConnected()
 }
+
 const update_item_base = (db_connect,data_type,item) => {
 	return new Promise((callback) => {
 		let collection = db_connect.collection(data_type);
@@ -109,6 +115,7 @@ const update_item_base = (db_connect,data_type,item) => {
 		}
 	});
 }
+
 const delete_item_base = (db_connect,data_type,id) => {
 	return new Promise((callback) => {
 		let collection = db_connect.collection(data_type);
@@ -126,6 +133,7 @@ const delete_item_base = (db_connect,data_type,id) => {
 		}
 	});
 }
+
 const delete_item_list_base = (db_connect,data_type,filter) => {
 	return new Promise((callback) => {
 		let collection = db_connect.collection(data_type);
@@ -143,20 +151,13 @@ const delete_item_list_base = (db_connect,data_type,filter) => {
 		}
 	});
 }
+
 const get_id_list_base = (db_connect,data_type,filter,sort_by,page_current,page_size) => {
 	return new Promise((callback) => {
 		let total_count = 0;
 		let data_list = [];
 		let collection = {};
 		async.series([
-			function(call) {
-                Log.w('data_type',data_type);
-                Log.w('filter',filter);
-                Log.w('sort_by',sort_by);
-                Log.w('page_current',page_current);
-                Log.w('page_size',page_size);
-                call();
-            },
 			function(call) {
 				if(check_db_connect_base(db_connect)){
 					db_connect.collection(data_type).countDocuments(filter).then((data) => {
@@ -197,6 +198,7 @@ const get_id_list_base = (db_connect,data_type,filter,sort_by,page_current,page_
 		});
 	});
 }
+
 const count_item_list_base = (db_connect,data_type,filter) => {
 	return new Promise((callback) => {
 		let collection = db_connect.collection(data_type);
@@ -214,6 +216,7 @@ const count_item_list_base = (db_connect,data_type,filter) => {
 		}
 	});
 }
+
 module.exports = {
 	get_db_connect_base,
 	check_db_connect_base,

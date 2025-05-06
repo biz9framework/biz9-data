@@ -13,7 +13,7 @@ router.get('/connect', function(req, res, next) {
         // get_db_connect
         function(call){
             let data_config = {
-                APP_TITLE_ID:'mongo_database_app_title_id',
+                APP_ID:'mongo_database_app_id',
                 MONGO_IP:"0.0.0.0",
                 MONGO_USERNAME_PASSWORD:"",
                 MONGO_PORT_ID:"27019",

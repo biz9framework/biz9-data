@@ -39,7 +39,7 @@ function(){
     let db_connect = {};
 
     let data_config = {
-        APP_TITLE_ID:'mongo_database_app_title_id',
+        APP_ID:'mongo_database_app_id',
         MONGO_IP:"0.0.0.0",
         MONGO_USERNAME_PASSWORD:"",
         MONGO_PORT_ID:"27019",
@@ -88,7 +88,7 @@ function(){
                 test_group_id: 6100,
                 date_create: '2025-02-10T17:55:31.629Z',
                 date_save: '2025-02-10T17:55:31.632Z',
-                app_title_id: 'mongo_database_app_title_id',
+                app_id: 'mongo_database_app_id',
                 source: 'DB'
             };
         */
@@ -161,7 +161,7 @@ function(){
 - Data config / Db configuration settings / object
     ```javascript
     let data_config = {
-        APP_TITLE_ID:'mongo_database_title',
+        APP_ID:'mongo_database_title',
         MONGO_IP:"0.0.0.0",
         MONGO_USERNAME_PASSWORD:"",
         MONGO_PORT_ID:"27019",
@@ -181,7 +181,7 @@ function(){
 let db_connect = {};
 
 let data_config = {
-    APP_TITLE_ID:'mongo_database_title',
+    APP_ID:'mongo_database_title',
     MONGO_IP:"0.0.0.0",
     MONGO_USERNAME_PASSWORD:"",
     MONGO_PORT_ID:"27019",
@@ -262,7 +262,7 @@ Data.update_item(db_connect,data_type,id,item).then(([error,data]) => {
             test_group_id: 438,
             date_create: '2025-02-10T02:16:46.137Z',
             date_save: '2025-02-10T02:16:46.138Z',
-            app_title_id: 'mongo_database_title',
+            app_id: 'mongo_database_title',
             source: 'DB'
         };
     */
@@ -300,7 +300,7 @@ Data.get_item(db_connect,data_type,id).then(([error,data]) => {
             test_group_id: 450,
             date_create: '2025-02-10T02:16:46.137Z',
             date_save: '2025-02-10T02:16:46.138Z',
-            app_title_id: 'mongo_database_title',
+            app_id: 'mongo_database_title',
             source: 'CACHE'
         };
     */
@@ -399,7 +399,7 @@ Data.update_list(db_connect,data_type,data_item_list).then(([error,data]) => {
             test_group_id: 438,
             date_create: '2025-02-10T02:16:46.137Z',
             date_save: '2025-02-10T02:16:46.138Z',
-            app_title_id: 'mongo_database_title',
+            app_id: 'mongo_database_title',
             source: 'DB'
         },
         {
@@ -412,7 +412,7 @@ Data.update_list(db_connect,data_type,data_item_list).then(([error,data]) => {
             test_group_id: 440,
             date_create: '2025-02-10T02:16:46.137Z',
             date_save: '2025-02-10T02:16:46.138Z',
-            app_title_id: 'mongo_database_title',
+            app_id: 'mongo_database_title',
             source: 'DB'
         },
         {
@@ -425,7 +425,7 @@ Data.update_list(db_connect,data_type,data_item_list).then(([error,data]) => {
             test_group_id: 450,
             date_create: '2025-02-10T02:16:46.137Z',
             date_save: '2025-02-10T02:16:46.138Z',
-            app_title_id: 'mongo_database_title',
+            app_id: 'mongo_database_title',
             source: 'DB'
         },
         ];
@@ -472,7 +472,7 @@ Data.get_list(db_connect,data_type,filter,sort_by,page_current,page_size).then((
             test_group_id: 438,
             date_create: '2025-02-10T02:16:46.137Z',
             date_save: '2025-02-10T02:16:46.138Z',
-            app_title_id: 'mongo_database_title',
+            app_id: 'mongo_database_title',
             source: 'DB'
         },
         ];
