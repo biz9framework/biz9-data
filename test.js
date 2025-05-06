@@ -18,13 +18,13 @@ const ID = '2f6cefa1-1d88-4c06-8e6b-eb49f2d73284';
 const DATA_TYPE = 'dt_blank';
 //const FILTER = {test_group_id:59367};
 const FILTER = {data_type:DATA_TYPE};
-const APP_TITLE_ID = 'db_title_feb_23';
+const APP_ID = 'db_title_feb_23';
 const SQL = {};
 /* --- TEST CONFIG END --- */
 
 /* --- DATA CONFIG START --- */
 const data_config ={
-    APP_TITLE_ID:APP_TITLE_ID,
+    APP_ID:APP_ID,
     MONGO_IP:'0.0.0.0',
     MONGO_USERNAME_PASSWORD:'',
     MONGO_PORT_ID:"27019",
