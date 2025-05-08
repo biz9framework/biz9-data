@@ -43,13 +43,15 @@ describe('connect', function(){ this.timeout(25000);
         let db_connect = {};
         async.series([
             function(call){
+                console.log('11111111111');
                 Data.open_db(data_config).then(([error,data])=> {
+                    console.log('222222222');
                     cloud_error=Log.append(cloud_error,error);
                     db_connect = data;
                     assert.notEqual(db_connect,null);
                     console.log(data);
                     console.log('CONNECT-OPEN-SUCCESS');
-                    call();
+                    //call();
                 }).catch(error => {
                     Log.error('CONNECT-OPEN-ERROR',error);
                     cloud_error=Log.append(cloud_error,error);
