@@ -1,12 +1,13 @@
 const async = require('async');
 const assert = require('node:assert');
-const {Data} = require("./");
+const {Data,Database,Portal} = require(".");
 const {Test,Log,Number} = require("biz9-utility");
+const {DataType} = require("biz9-logic");
 /*
  * availble tests
 - connect
 - item_update
-- item_get
+- get_data
 - item_delete
 - item_list_update
 - item_list_get
@@ -14,11 +15,12 @@ const {Test,Log,Number} = require("biz9-utility");
 */
 /* --- TEST CONFIG START --- */
 //const ID = '0'; // 0 = intialize a new data item.
-const ID = '2f6cefa1-1d88-4c06-8e6b-eb49f2d73284';
-const DATA_TYPE = 'dt_blank';
+const ID = '067865b0-b133-4593-96d5-ba9555326bf7';
+const TITLE_URL = 'product_1';
+const DATA_TYPE = 'product_biz';
 //const FILTER = {test_group_id:59367};
 const FILTER = {data_type:DATA_TYPE};
-const APP_ID = 'db_title_feb_23';
+const APP_ID = 'test-may26';
 const SQL = {};
 /* --- TEST CONFIG END --- */
 
@@ -40,8 +42,78 @@ const data_config ={
 describe('connect', function(){ this.timeout(25000);
     it("_connect", function(done){
         let cloud_error=null;
-        let db_connect = {};
+        let database = {};
         async.series([
+        // GET - START
+        async function(call){
+                console.log('DATABASE-START');
+                //const [error,data] = await Team.get_member(db_connect,title_url);
+                const [error,data] = await Database.get({app_id:"test-may26",biz9_config_file:"/home/think2/www/doqbox/biz9-framework/biz9-service/code/biz9_config"});
+            console.log('connect-good');
+                database = data;
+                Log.w('database',database);
+        },
+
+        async function(call){
+                console.log('PORTAL-GET-LIST-START');
+                let data_type = DataType.SERVICE;
+                let filter = {};
+                let sort_by = {};
+                let page_current = 1;
+                let page_size = 99;
+                const [error,data] = await Portal.get_list(database,data_type,filter,sort_by,page_current,page_size,{get_items:true,get_photos:true});
+                console.log(data);
+                console.log('PORTAL-GET-LIST-END');
+                //database = data;
+                //Log.w('database',database);
+
+            /*
+                console.log('PORTAL-GET-START');
+                let data_type = "product_biz";
+                let title_url = 'product_1';
+                //const [error,data] = await Portal.get();
+                const [error,data] = await Portal.get(database,data_type,title_url,{get_items:true,get_photos:true});
+                console.log(data);
+                console.log('PORTAL-GET-END');
+                //database = data;
+                //Log.w('database',database);
+            */
+
+        },
+
+        /*
+        async function(call){
+                const [error,data] = await Database.close(database);
+                Log.w('data_close',data);
+               console.log('DATABASE-CLOSE');
+                //call();
+        },
+        */
+        // GET - END
+
+
+        // CONNECT - START
+        /*
+        async function(call){
+                console.log('DATABASE-START');
+                let title_url = 'sales_team';
+                //const [error,data] = await Team.get_member(db_connect,title_url);
+                const [error,data] = await Database.get({app_id:"test-may26",biz9_config_file:"/home/think2/www/doqbox/biz9-framework/biz9-service/code/biz9_config"});
+            console.log('connect-good');
+                database = data;
+                Log.w('database',database);
+                //call();
+        },
+        async function(call){
+                const [error,data] = await Database.close(database);
+                Log.w('data_close',data);
+               console.log('DATABASE-CLOSE');
+                //call();
+        },
+        */
+        // CONNECT - END
+
+            /*
             function(call){
                 console.log('11111111111');
                 Data.open_db(data_config).then(([error,data])=> {
@@ -49,11 +121,12 @@ describe('connect', function(){ this.timeout(25000);
                     cloud_error=Log.append(cloud_error,error);
                     db_connect = data;
                     assert.notEqual(db_connect,null);
-                    console.log(data);
+                    Log.w('data',data);
                     console.log('CONNECT-OPEN-SUCCESS');
                     //call();
                 }).catch(error => {
                     Log.error('CONNECT-OPEN-ERROR',error);
+                    console.log(error);
                     cloud_error=Log.append(cloud_error,error);
                 });
             },
@@ -84,13 +157,10 @@ describe('connect', function(){ this.timeout(25000);
                     cloud_error=Log.append(cloud_error,error);
                 });
             },
+            */
         ],
             function(error, result){
-                Log.error("CONNECT-ERROR-DONE",cloud_error);
-                console.log('CONNECT-OPEN-SUCCESS');
-                console.log('CONNECT-CHECK-SUCCESS');
-                console.log('CONNECT-CLOSE-SUCCESS');
-                console.log('CONNECT-DONE');
+                //console.log('CONNECT-DONE');
                 done();
             });
     });
@@ -168,8 +238,8 @@ describe('item_update', function(){ this.timeout(25000);
             });
     });
 });
-describe('item_get', function(){ this.timeout(25000);
-    it("_item_get", function(done){
+describe('get_data', function(){ this.timeout(25000);
+    it("_get_data", function(done){
         let cloud_error = null;
         let db_connect = {};
         let item_test = get_new_item(DATA_TYPE,ID);
@@ -193,6 +263,7 @@ describe('item_get', function(){ this.timeout(25000);
             function(call){
                 console.log('TEST-ITEM-GET-GET-START');
                 Data.get_item(db_connect,DATA_TYPE,item_test.id).then(([error,data])=> {
+                //Data.get_item(db_connect,DATA_TYPE,item_test.id,{title_url:TITLE_URL}).then(([error,data])=> {
                     if(error){
                         cloud_error=Log.append(cloud_error,error);
                         Log.w('error',error);

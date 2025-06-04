@@ -8,7 +8,6 @@ const async = require('async');
 const moment = require('moment');
 const {Number,Log} = require("biz9-utility");
 const { MongoClient } = require("mongodb");
-
 let client_db = {};
 const get_db_connect_base = (data_config) => {
 	return new Promise((callback) => {
@@ -35,7 +34,6 @@ const get_db_connect_base = (data_config) => {
 		});
 	});
 }
-
 const close_db_connect_base = (db_connect) => {
 	return new Promise((callback) => {
 		client_db.close().then((data)=> {
@@ -46,7 +44,6 @@ const close_db_connect_base = (db_connect) => {
 		});
 	});
 }
-
 const get_item_base = (db_connect,data_type,id) => {
 	return new Promise((callback) => {
 		let collection = null;
@@ -66,7 +63,6 @@ const get_item_base = (db_connect,data_type,id) => {
 		}
 	});
 }
-
 const check_db_connect_base = (db_connect) => {
 	if(!db_connect.client){
 		return false;
@@ -78,11 +74,9 @@ const check_db_connect_base = (db_connect) => {
 		return true;
 	}
 }
-
 const check_db_client_connected = (db_connect) => {
 	return !!db_connect && !!db_connect.topology && !!db_connect.topology.isConnected()
 }
-
 const update_item_base = (db_connect,data_type,item) => {
 	return new Promise((callback) => {
 		let collection = db_connect.collection(data_type);
@@ -115,7 +109,6 @@ const update_item_base = (db_connect,data_type,item) => {
 		}
 	});
 }
-
 const delete_item_base = (db_connect,data_type,id) => {
 	return new Promise((callback) => {
 		let collection = db_connect.collection(data_type);
@@ -133,7 +126,6 @@ const delete_item_base = (db_connect,data_type,id) => {
 		}
 	});
 }
-
 const delete_item_list_base = (db_connect,data_type,filter) => {
 	return new Promise((callback) => {
 		let collection = db_connect.collection(data_type);
@@ -151,7 +143,6 @@ const delete_item_list_base = (db_connect,data_type,filter) => {
 		}
 	});
 }
-
 const get_id_list_base = (db_connect,data_type,filter,sort_by,page_current,page_size) => {
 	return new Promise((callback) => {
 		let total_count = 0;
@@ -198,7 +189,6 @@ const get_id_list_base = (db_connect,data_type,filter,sort_by,page_current,page_
 		});
 	});
 }
-
 const count_item_list_base = (db_connect,data_type,filter) => {
 	return new Promise((callback) => {
 		let collection = db_connect.collection(data_type);
@@ -216,7 +206,6 @@ const count_item_list_base = (db_connect,data_type,filter) => {
 		}
 	});
 }
-
 module.exports = {
 	get_db_connect_base,
 	check_db_connect_base,

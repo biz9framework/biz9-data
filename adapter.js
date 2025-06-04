@@ -11,18 +11,19 @@ const {get_cache_connect_main,close_cache_connect_main,get_cache_string_main,del
 const DB_TITLE='DB';
 const CACHE_TITLE='CACHE';
 const NOT_FOUND_TITLE='NOT-FOUND';
-
-const get_new_item = (data_type,id) => {
+const get_new_item=(data_type,id)=>{
     if(!id){
         id=0;
     }
     return {data_type:data_type,id:id};
 }
-
-const get_db_connect_adapter = (data_config) => {
+const get_db_connect_adapter=(data_config)=>{
     return new Promise((callback) => {
-        get_db_connect_main(data_config).then(([error,data]) => {
+        console.log('444444444444');
+        get_db_connect_main(data_config).then(([error,data])=>{
+            console.log('555555555');
             data.data_config=data_config;
+            console.log(data);
             callback([error,data]);
         }).catch(error => {
             Log.error("Data-Adapter-Get-DB-Adapter",error);
@@ -30,10 +31,9 @@ const get_db_connect_adapter = (data_config) => {
         });
     });
 }
-
-const close_db_connect_adapter = (db_connect) => {
+const close_db_connect_adapter=(db_connect)=>{
     return new Promise((callback) => {
-        close_db_connect_main(db_connect).then(([error,data])=> {
+        close_db_connect_main(db_connect).then(([error,data])=>{
             callback([error,data]);
         }).catch(error => {
             Log.error("Data-Adapter-Close-DB-Connect-Adapter",error);
@@ -41,21 +41,19 @@ const close_db_connect_adapter = (db_connect) => {
         });
     });
 }
-
-const check_db_connect_adapter = (db_connect) => {
+const check_db_connect_adapter=(db_connect)=>{
     return check_db_connect_main(db_connect);
 }
-
-const update_item_list_adapter = (db_connect,item_data_list) => {
+const update_item_list_adapter=(db_connect,item_data_list)=>{
     return new Promise((callback) => {
         let cache_connect = {};
-        let item_data_new_list = [];
+        let item_data_new_list=[];
         async.series([
             function(call) {
-                get_cache_connect_main(db_connect.data_config).then(([error,data]) => {
-                    cache_connect = data;
+                get_cache_connect_main(db_connect.data_config).then(([error,data])=>{
+                    cache_connect=data;
                     call();
-                }).catch(error => {
+                }).catch(error=>{
                     Log.error("Data-Adapter-Update-Item-List-Adapter",error);
                     callback([error,[]]);
                 });
@@ -106,22 +104,22 @@ const update_item_list_adapter = (db_connect,item_data_list) => {
                     call();
                 });
             },
-            async function(call) {
-                for(const item of item_data_list) {
+            async function(call){
+                for(const item of item_data_list){
                     item.source=DB_TITLE;
                     item.app_id = db_connect.data_config.APP_ID;
                     item_data_new_list.push(item);
                 }
             },
-            function(call) {
-                close_cache_connect_main(cache_connect).then(([error,data]) => {
+            function(call){
+                close_cache_connect_main(cache_connect).then(([error,data])=>{
                     call();
                 }).catch(error => {
                     Log.error("Data-Adapter-Update-Item-List-4-Error",error);
                     callback([error,[]]);
                 });
             },
-        ]).then(result => {
+        ]).then(result=>{
             callback([error,item_data_new_list]);
         }).catch(error => {
             Log.error("Data-Adapter-Update-Item-List-5",error);
@@ -129,24 +127,23 @@ const update_item_list_adapter = (db_connect,item_data_list) => {
         });
     });
 }
-
-const update_item_adapter = (db_connect,data_type,item_data) => {
+const update_item_adapter=(db_connect,data_type,item_data) => {
     return new Promise((callback) => {
-        let cache_connect = {};
+        let cache_connect={};
         async.series([
-            function(call) {
-                get_cache_connect_main(db_connect.data_config).then(([error,data]) => {
-                    cache_connect = data;
+            function(call){
+                get_cache_connect_main(db_connect.data_config).then(([error,data])=>{
+                    cache_connect=data;
                     call();
-                }).catch(error => {
+                }).catch(error=>{
                     Log.error("Data-Adapter-Update-Item-Adapter",error);
                     callback([error,[]]);
                 });
             },
             function(call){
-                update_item_main(db_connect,data_type,item_data).then(([error,data]) => {
+                update_item_main(db_connect,data_type,item_data).then(([error,data])=>{
                     call();
-                }).catch(error => {
+                }).catch(error=>{
                     Log.error("Data-Adapter-Update-Item-Adapter-2",error);
                     callback([error,[]]);
                 });
@@ -182,7 +179,6 @@ const update_item_adapter = (db_connect,data_type,item_data) => {
         });
     });
 }
-
 const get_item_list_adapter = (db_connect,data_type,filter,sort_by,page_current,page_size) => {
     return new Promise((callback) => {
         let cache_connect = {};
@@ -217,12 +213,12 @@ const get_item_list_adapter = (db_connect,data_type,filter,sort_by,page_current,
             },
             async function(call) {
                 if(item_id_list.length>0){
-                for(const item of item_id_list) {
-                    [error,data] = await get_item_cache_db(cache_connect,db_connect,data_type,item.id);
-                    if(data){
-                        item_data_list.push(data);
+                    for(const item of item_id_list) {
+                        [error,data] = await get_item_cache_db(cache_connect,db_connect,data_type,item.id);
+                        if(data){
+                            item_data_list.push(data);
+                        }
                     }
-                }
                 }
             },
         ]).then(result => {
@@ -233,9 +229,11 @@ const get_item_list_adapter = (db_connect,data_type,filter,sort_by,page_current,
         });
     });
 }
-
-const get_item_adapter = (db_connect,data_type,id) => {
+const get_item_adapter = (db_connect,data_type,id,option) => {
     return new Promise((callback) => {
+        if(!option){
+            option = {};
+        }
         let cache_connect = {};
         let cache_found = false;
         let cache_key_list = null;
@@ -252,13 +250,29 @@ const get_item_adapter = (db_connect,data_type,id) => {
                 });
             },
             function(call) {
-                get_item_cache_db(cache_connect,db_connect,data_type,id).then(([error,data]) => {
-                    item_data = data;
-                    call();
-                }).catch(error => {
-                    Log.error("Adapter-Get-Item-Adapter-2",error);
-                    callback([error,null]);
-                });
+                if(option.title_url){
+                    let filter={title_url:option.title_url};
+                    let sort_by={};
+                    let page_current=1;
+                    let page_size=1;
+                    get_item_list_adapter(db_connect,data_type,filter,sort_by,page_current,page_size).then(([error,data]) => {
+                        if(data.length>0){
+                            item_data = data[0];
+                        }
+                        call();
+                    }).catch(error => {
+                        Log.error("Adapter-Get-Item-Adapter-2",error);
+                        callback([error,null]);
+                    });
+                }else{
+                    get_item_cache_db(cache_connect,db_connect,data_type,id).then(([error,data]) => {
+                        item_data = data;
+                        call();
+                    }).catch(error => {
+                        Log.error("Adapter-Get-Item-Adapter-2",error);
+                        callback([error,null]);
+                    });
+                }
             },
             function(call) {
                 close_cache_connect_main(cache_connect).then(([error,data]) => {
@@ -276,7 +290,6 @@ const get_item_adapter = (db_connect,data_type,id) => {
         });
     });
 }
-
 const set_cache_item = (cache_connect,data_type,id,item_data) => {
     return new Promise((callback) => {
         let cache_string_str = '';
@@ -297,12 +310,12 @@ const set_cache_item = (cache_connect,data_type,id,item_data) => {
                 }
             },
             function(call) {
-                    set_cache_string_main(cache_connect,get_cache_item_attr_list_key(data_type,id),cache_string_str).then(([error,data]) => {
-                        call();
-                    }).catch(error => {
-                        Log.error("Data-Adapter-Set-Cache-Item",error);
-                        callback([error,null]);
-                    });
+                set_cache_string_main(cache_connect,get_cache_item_attr_list_key(data_type,id),cache_string_str).then(([error,data]) => {
+                    call();
+                }).catch(error => {
+                    Log.error("Data-Adapter-Set-Cache-Item",error);
+                    callback([error,null]);
+                });
             },
         ]).then(result => {
             callback([error,item_data]);
@@ -312,7 +325,6 @@ const set_cache_item = (cache_connect,data_type,id,item_data) => {
         });
     });
 }
-
 const delete_item_adapter = (db_connect,data_type,id) => {
     return new Promise((callback) => {
         let item_data = get_new_item(data_type,id);
@@ -335,7 +347,6 @@ const delete_item_adapter = (db_connect,data_type,id) => {
         });
     });
 }
-
 const get_item_cache_db = (cache_connect,db_connect,data_type,id) => {
     return new Promise((callback) => {
         let cache_found = false;
@@ -371,7 +382,7 @@ const get_item_cache_db = (cache_connect,db_connect,data_type,id) => {
             function(call){
                 if(cache_found){
                     item_data.source=CACHE_TITLE;
-                   call();
+                    call();
                 }
                 else{
                     get_item_main(db_connect,data_type,id).then(([error,data]) => {
@@ -394,7 +405,7 @@ const get_item_cache_db = (cache_connect,db_connect,data_type,id) => {
                     });
                 }
             },
-         function(call) {
+            function(call) {
                 item_data.app_id=db_connect.data_config.APP_ID;
                 call();
             },
@@ -406,7 +417,6 @@ const get_item_cache_db = (cache_connect,db_connect,data_type,id) => {
         });
     });
 }
-
 const delete_item_list_adapter = (db_connect,data_type,filter) => {
     return new Promise((callback) => {
         let item_id_list = [];
@@ -446,9 +456,8 @@ const delete_item_list_adapter = (db_connect,data_type,filter) => {
         });
     });
 }
-
-const delete_item_cache = (db_connect,data_type,id) => {
-    return new Promise((callback) => {
+const delete_item_cache=(db_connect,data_type,id)=>{
+    return new Promise((callback)=>{
         let cache_connect = {};
         let cache_key_list = '';
         let cache_string_list = '';
@@ -511,7 +520,6 @@ const delete_item_cache = (db_connect,data_type,id) => {
         });
     });
 }
-
 const delete_item_cache_db = (db_connect,data_type,id) => {
     return new Promise((callback) => {
         let cache_connect = {};
@@ -585,7 +593,6 @@ const delete_item_cache_db = (db_connect,data_type,id) => {
         });
     });
 }
-
 const count_item_list_adapter = (db_connect,data_type,filter) => {
     return new Promise((callback) => {
         let item_list_count = 0;
@@ -607,15 +614,12 @@ const count_item_list_adapter = (db_connect,data_type,filter) => {
         });
     });
 }
-
 const get_cache_item_attr_key = (data_type,id,key) => {
     return data_type + "_" + key + "_" + String(id);
 }
-
 const get_cache_item_attr_list_key = (data_type,id) => {
     return data_type+"_aik_"+String(id);
 }
-
 module.exports = {
     get_db_connect_adapter,
     check_db_connect_adapter,
