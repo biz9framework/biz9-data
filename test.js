@@ -2,7 +2,7 @@ const async = require('async');
 const assert = require('node:assert');
 const {Data,Database,Portal} = require(".");
 const {Test,Log,Number} = require("biz9-utility");
-const {DataType} = require("biz9-logic");
+const {DataType,DataItem} = require("biz9-logic");
 /*
  * availble tests
 - connect
@@ -49,35 +49,124 @@ describe('connect', function(){ this.timeout(25000);
                 console.log('DATABASE-START');
                 //const [error,data] = await Team.get_member(db_connect,title_url);
                 const [error,data] = await Database.get({app_id:"test-may26",biz9_config_file:"/home/think2/www/doqbox/biz9-framework/biz9-service/code/biz9_config"});
-            console.log('connect-good');
                 database = data;
-                Log.w('database',database);
+                console.log('DATABASE-END');
         },
 
         async function(call){
+            console.log('BUSSINESS-START');
+                const [error,data] = await Portal.get_business(database,{get_items:true});
+                Log.w('data',data);
+                console.log('BUSINESS-END');
+
+
+
+            /*
+            console.log('PAGE-START');
+            let title_url = "page_1";
+                const [error,data] = await Portal.get_page(database,title_url,{get_items:true});
+                Log.w('data',data);
+                console.log('PAGE-END');
+
+*/
+
+            /*
+            console.log('PORTAL-COUNT-LIST-START');
+                let id = 0;
+                let data_type = DataType.BLANK;
+                let filter = {};
+                let item_list = [];
+                Log.w('data',item_list);
+                const [error,data] = await Portal.count(database,data_type,filter,{});
+                Log.w('data',data);
+                console.log('PORTAL-COUNT-LIST-END');
+                */
+
+            /*
+                console.log('PORTAL-DELETE-LIST-START');
+                let id = 0;
+                let data_type = DataType.BLANK;
+                let filter = {};
+                let item_list = [];
+                Log.w('data',item_list);
+                const [error,data] = await Portal.delete_list(database,data_type,filter,{});
+                Log.w('data',data);
+                console.log('PORTAL-DELETE-LIST-END');
+                */
+
+            /*
+                console.log('PORTAL-UPDATE-LIST-START');
+                let id = 0;
+                let data_type = DataType.BLANK;
+                let item = Test.get_item(data_type,id);
+                let item_list = [];
+                item_list.push(Test.get_item(data_type,id));
+                item_list.push(Test.get_item(data_type,id));
+                item_list.push(Test.get_item(data_type,id));
+                Log.w('data',item_list);
+                const [error,data] = await Portal.update_list(database,item_list,{});
+                Log.w('data',data);
+                console.log('PORTAL-UPDATE-LIST-END');
+                //Log.w('database',database);
+                */
+
+
+            /*
+                console.log('PORTAL-UPDATE-START');
+                let id = 0;
+                let data_type = DataType.BLANK;
+                let item = Test.get_item(data_type,id);
+                Log.w('item',item);
+                const [error,data] = await Portal.update(database,data_type,item,{});
+                Log.w('data',data);
+                console.log('PORTAL-GET-END');
+                //Log.w('database',database);
+            */
+
+            /*
                 console.log('PORTAL-GET-LIST-START');
-                let data_type = DataType.SERVICE;
+                let data_type = DataType.BLANK;
                 let filter = {};
                 let sort_by = {};
                 let page_current = 1;
                 let page_size = 99;
                 const [error,data] = await Portal.get_list(database,data_type,filter,sort_by,page_current,page_size,{get_items:true,get_photos:true});
                 console.log(data);
-                console.log('PORTAL-GET-LIST-END');
+                console.log('PORTAL-GET-LIST-SUCCESS');
                 //database = data;
                 //Log.w('database',database);
-
+                */
             /*
+
                 console.log('PORTAL-GET-START');
-                let data_type = "product_biz";
-                let title_url = 'product_1';
+                let data_type = DataType.BLANK;
+                let key = "1d5e10eb-8927-442d-83ae-52f2e156daad";
+                //let key = 'product_1';
                 //const [error,data] = await Portal.get();
-                const [error,data] = await Portal.get(database,data_type,title_url,{get_items:true,get_photos:true});
+                const [error,data] = await Portal.get(database,data_type,key,{get_items:true,get_photos:true});
                 console.log(data);
-                console.log('PORTAL-GET-END');
+                console.log('PORTAL-GET-SUCCESS');
                 //database = data;
                 //Log.w('database',database);
+                console.log('PORTAL-GET-END');
+
             */
+
+    /*
+                console.log('PORTAL-DELETE-START');
+                let data_type = DataType.BLANK;
+                let key = "1d5e10eb-8927-442d-83ae-52f2e156daad";
+                //let key = 'product_1';
+                //const [error,data] = await Portal.get();
+                const [error,data] = await Portal.delete(database,data_type,key,{get_items:true,get_photos:true});
+                console.log(data);
+                console.log('PORTAL-DELETE-SUCCESS');
+                //database = data;
+                //Log.w('database',database);
+                console.log('PORTAL-DELETE-END');
+                */
+
+
 
         },
 
