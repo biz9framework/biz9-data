@@ -1,6 +1,6 @@
 const async = require('async');
 const assert = require('node:assert');
-const {Data,Database,Portal} = require(".");
+const {Data,Database,Portal,Category} = require(".");
 const {Test,Log,Number} = require("biz9-utility");
 const {DataType,DataItem} = require("biz9-logic");
 /*
@@ -15,7 +15,7 @@ const {DataType,DataItem} = require("biz9-logic");
 */
 /* --- TEST CONFIG START --- */
 //const ID = '0'; // 0 = intialize a new data item.
-const ID = '067865b0-b133-4593-96d5-ba9555326bf7';
+const ID = 'be1130e3-d61a-4cd4-9184-c65e98315012';
 const TITLE_URL = 'product_1';
 const DATA_TYPE = 'product_biz';
 //const FILTER = {test_group_id:59367};
@@ -52,12 +52,18 @@ describe('connect', function(){ this.timeout(25000);
                 database = data;
                 console.log('DATABASE-END');
         },
-
         async function(call){
+            console.log('CATEGORY-START');
+                let filter = {category:"Application Template"};
+                const [error,data] = await Category.get_category_product_group_list(database,filter,{get_items:true});
+                Log.w('data',data);
+            console.log('CATEGORY-END');
+            /*
             console.log('ADMIN-START');
                 const [error,data] = await Portal.get_admin(database,{get_items:true});
                 Log.w('data',data);
                 console.log('ADMIN-END');
+                */
 
 
             /*
@@ -262,74 +268,170 @@ describe('connect', function(){ this.timeout(25000);
             });
     });
 });
-describe('item_update', function(){ this.timeout(25000);
-    it("_item_update", function(done){
+describe('item_delete', function(){ this.timeout(25000);
+    it("_item_delete", function(done){
         let cloud_error=null;
-        let db_connect = {};
-        var item_test = Test.get_item('dt_blank',ID);
+        let database = {};
+        var item = DataItem.get_new(DATA_TYPE,ID);
         async.series([
-            function(call){
-                console.log('ITEM-UPDATE-START');
-                Data.open_db(data_config).then(([error,data])=> {
+            async function(call){
+                console.log('DATABASE-START');
+                //const [error,data] = await Team.get_member(db_connect,title_url);
+                const [error,data] = await Database.get({app_id:"test-may26",biz9_config_file:"/home/think2/www/doqbox/biz9-framework/biz9-service/code/biz9_config"});
+                if(error){
                     cloud_error=Log.append(cloud_error,error);
-                    db_connect = data;
-                    assert.notEqual(db_connect,null);
-                    console.log('ITEM-UPDATE-SUCCESS');
-                    call();
-                }).catch(error => {
-                    cloud_error=Log.append(cloud_error,error);
-                    call();
-                });
+                }else{
+                    database = data;
+                    //console.log(database);
+                    console.log('DATABASE-SUCCESS');
+                }
+                console.log('DATABASE-END');
             },
-            function(call){
-                console.log('ITEM-UPDATE-UPDATE-START');
-                Data.update_item(db_connect,DATA_TYPE,item_test).then(([error,data])=> {
+            async function(call){
+                console.log('DELETE-START');
+                const [error,data] = await Portal.delete(database,item.data_type,item.id,{});
+                if(error){
                     cloud_error=Log.append(cloud_error,error);
-                    item_test = data;
-                    console.log(item_test);
-                    assert.notEqual(data,null);
-                    console.log('ITEM-UPDATE-UPDATE-SUCCESS');
-                    call();
-                }).catch(error => {
-                    cloud_error=Log.append(cloud_error,error);
-                    call();
-                });
+                }else{
+                    item = data;
+                    assert.notEqual(item,null);
+                    console.log(item);
+                    console.log('DELETE-SUCCESS');
+                }
+                console.log('DELETE-END');
             },
-            function(call){
-                console.log('ITEM-UPDATE-CLOSE-START');
-                Data.close_db(db_connect).then(([error,data])=> {
-                    if(error){
-                        cloud_error=Log.append(cloud_error,error);
-                    }
-                    db_connect=data;
-                    assert.equal(data,null);
-                    console.log('ITEM-UPDATE-DELETE-CACHE-CLOSE-SUCCESS');
-                    call();
-                }).catch(error => {
+            async function(call){
+                console.log('CLOSE-CLOSE');
+                const [error,data] = await Database.close(database,{});
+                if(error){
                     cloud_error=Log.append(cloud_error,error);
-                    call();
-                });
-            },
-            function(call){
-                console.log('ITEM-UPDATE-ASSERT-START');
-                assert.notEqual(item_test.first_name,0);
-                assert.notEqual(item_test.first_name,null);
-                assert.notEqual(item_test.id,0);
-                assert.notEqual(item_test.id,null);
-                assert.equal(null,db_connect);
-                console.log('ITEM-UPDATE-ASSERT-SUCCESS');
-                call();
+                }else{
+                    database = data;
+                    assert.Equal(data,null);
+                    console.log('CLOSE-SUCCESS');
+                }
+                console.log('CLOSE-END');
             },
         ],
             function(error, result){
                 if(cloud_error){
-                    Log.error("ITEM-UPDATE-ERROR-DONE",cloud_error);
+                    Log.error("DELETE-ERROR-DONE",cloud_error);
                 }else{
-                    console.log('ITEM-UPDATE-CONNECT-SUCCESS-DONE');
-                    console.log('ITEM-UPDATE-UPDATE-SUCCESS-DONE');
-                    console.log('ITEM-UPDATE-CLOSE-SUCCESS-DONE');
-                    console.log('ITEM-UPDATE-ASSERT-SUCCESS-DONE');
-                    console.log('ITEM-UPDATE-DONE');
+                    console.log('DELETE-DONE');
+                }
+                done();
+            });
+    });
+});
+
+
+describe('item_get', function(){ this.timeout(25000);
+    it("_item_get", function(done){
+        let cloud_error=null;
+        let database = {};
+        var item = DataItem.get_new(DATA_TYPE,ID);
+        async.series([
+            async function(call){
+                console.log('DATABASE-START');
+                //const [error,data] = await Team.get_member(db_connect,title_url);
+                const [error,data] = await Database.get({app_id:"test-may26",biz9_config_file:"/home/think2/www/doqbox/biz9-framework/biz9-service/code/biz9_config"});
+                if(error){
+                    cloud_error=Log.append(cloud_error,error);
+                }else{
+                    database = data;
+                    //console.log(database);
+                    console.log('DATABASE-SUCCESS');
+                }
+                console.log('DATABASE-END');
+            },
+            async function(call){
+                console.log('GET-START');
+                const [error,data] = await Portal.get(database,item.data_type,item.id,{});
+                if(error){
+                    cloud_error=Log.append(cloud_error,error);
+                }else{
+                    item = data;
+                    assert.notEqual(item,null);
+                    console.log(item);
+                    console.log('GET-SUCCESS');
+                }
+                console.log('UPDATE-END');
+            },
+            async function(call){
+                console.log('CLOSE-CLOSE');
+                const [error,data] = await Database.close(database,{});
+                if(error){
+                    cloud_error=Log.append(cloud_error,error);
+                }else{
+                    database = data;
+                    assert.Equal(data,null);
+                    console.log('CLOSE-SUCCESS');
+                }
+                console.log('CLOSE-END');
+            },
+        ],
+            function(error, result){
+                if(cloud_error){
+                    Log.error("GET-ERROR-DONE",cloud_error);
+                }else{
+                    console.log('GET-DONE');
+                }
+                done();
+            });
+    });
+});
+
+describe('item_update', function(){ this.timeout(25000);
+    it("_item_update", function(done){
+        let cloud_error=null;
+        let database = {};
+        var item_test = Test.get_item(DATA_TYPE,ID);
+        async.series([
+            async function(call){
+                console.log('DATABASE-START');
+                //const [error,data] = await Team.get_member(db_connect,title_url);
+                const [error,data] = await Database.get({app_id:"test-may26",biz9_config_file:"/home/think2/www/doqbox/biz9-framework/biz9-service/code/biz9_config"});
+                if(error){
+                    cloud_error=Log.append(cloud_error,error);
+                }else{
+                    database = data;
+                    //console.log(database);
+                    console.log('DATABASE-SUCCESS');
+                }
+                console.log('DATABASE-END');
+            },
+            async function(call){
+                console.log('UPDATE-START');
+                const [error,data] = await Portal.update(database,DATA_TYPE,item_test,{});
+                if(error){
+                    cloud_error=Log.append(cloud_error,error);
+                }else{
+                    item_test = data;
+                    assert.notEqual(item_test,null);
+                    console.log(item_test);
+                    console.log('UPDATE-SUCCESS');
+                }
+                console.log('UPDATE-END');
+            },
+            async function(call){
+                console.log('CLOSE-CLOSE');
+                const [error,data] = await Database.close(database,{});
+                if(error){
+                    cloud_error=Log.append(cloud_error,error);
+                }else{
+                    database = data;
+                    assert.Equal(data,null);
+                    console.log(item_test);
+                    console.log('CLOSE-SUCCESS');
+                }
+                console.log('CLOSE-END');
+            },
+        ],
+            function(error, result){
+                if(cloud_error){
+                    Log.error("UPDATE-ERROR-DONE",cloud_error);
+                }else{
+                    console.log('UPDATE-DONE');
                 }
                 done();
             });
