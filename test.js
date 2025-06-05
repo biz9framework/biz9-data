@@ -54,10 +54,18 @@ describe('connect', function(){ this.timeout(25000);
         },
 
         async function(call){
+            console.log('ADMIN-START');
+                const [error,data] = await Portal.get_admin(database,{get_items:true});
+                Log.w('data',data);
+                console.log('ADMIN-END');
+
+
+            /*
             console.log('BUSSINESS-START');
                 const [error,data] = await Portal.get_business(database,{get_items:true});
                 Log.w('data',data);
                 console.log('BUSINESS-END');
+                */
 
 
 

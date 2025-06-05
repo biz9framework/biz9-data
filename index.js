@@ -154,7 +154,49 @@ class Portal {
             });
         });
     };
-    //class Business
+    static get_admin = async (database,option) => {
+        /* option params
+         * n/a
+         */
+        return new Promise((callback) => {
+            let error = null;
+            let data_type = DataType.ADMIN;
+            let admin = {data_type:DataType.ADMIN,id:0};
+            if(option == null){
+                option = {};
+            }
+            async.series([
+                function(call){
+                        let filter = {};
+                        let sort_by = {};
+                        let page_current = 1;
+                        let page_size = 3;
+                        Data.get_list(database,data_type,filter,sort_by,page_current,page_size).then(([error,data,item_count,page_count])=> {
+                            if(error){
+                                error=Log.append(error,error);
+                            }else{
+                                if(data.length>0){
+                                    admin = data[0];
+                                }
+                            }
+                            call();
+                        }).catch(error => {
+                            Log.error("Portal-Admin",error);
+                            error = Log.append(error,error);
+                            call();
+                        });
+                },
+
+            ]).then(result => {
+                callback([error,admin]);
+            }).catch(error => {
+                Log.error("Admin-Get",error);
+                callback([error,[]]);
+            });
+        });
+    };
+
+
     static get_business = async (database,option) => {
         /* option params
          * n/a
@@ -196,7 +238,6 @@ class Portal {
             });
         });
     };
-
 
     //class Page
     static get_page = async (database,key,option) => {
