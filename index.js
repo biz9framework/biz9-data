@@ -8,11 +8,11 @@ const async = require('async');
 const {get_db_connect_main,check_db_connect_main,close_db_connect_main,update_item_main,get_item_main,delete_item_main,get_id_list_main,delete_item_list_main,count_item_list_main} = require('./mongo/index.js');
 const {Scriptz}=require("biz9-scriptz");
 const {Log,Str,Number}=require("/home/think2/www/doqbox/biz9-framework/biz9-utility/code");
-const {DataItem,DataType}=require("/home/think2/www/doqbox/biz9-framework/biz9-logic/code");
+const {DataItem,DataType,FieldType}=require("/home/think2/www/doqbox/biz9-framework/biz9-logic/code");
 const { get_db_connect_adapter,check_db_connect_adapter,close_db_connect_adapter,update_item_adapter,update_item_list_adapter,get_item_adapter,delete_item_adapter,get_item_list_adapter,delete_item_list_adapter,count_item_list_adapter,delete_item_cache }  = require('./adapter.js');
 const {get_database_main} = require("./main");
 class Database {
-   static get = async (option) => {
+   static get = async (data_config,option) => {
         /* return
          * - n/a
          * option params
@@ -27,18 +27,20 @@ class Database {
                 option = {biz9_config_file:null,app_id:null};
             }
             if(option.biz9_config_file==null){
-                //option.biz9_config_file=null;
-                option.biz9_config_file="/home/think2/www/doqbox/biz9-framework/biz9-service/code/biz9_config"; //test
+                option.biz9_config_file=null;
+            }else{
+                data_config = Scriptz.get_biz9_config(option);
             }
-            if(option.app_id==null){
-                option.app_id=null;
+            if(option.app_id){
+                data_config.app_id = option.app_id;
+            }
+            if(data_config.app_id==null){
                 cloud_error=Log.append(cloud_error,"Database Error: Missing app_id.");
             }
-            let biz9_config = Scriptz.get_biz9_config({biz9_config_file:option.biz9_config_file,app_id:(option.app_id)?option.app_id:null});
-            Data.open_db(biz9_config).then(([error,data])=>{
+            Data.open_db(data_config).then(([error,data])=>{
                 cloud_error=Log.append(cloud_error,error);
-                data.data_config=biz9_config;
-                data.app_id=biz9_config.APP_ID;
+                data.data_config=data_config;
+                data.app_id=data_config.APP_ID;
                 callback([error,data]);
             }).catch(error => {
                 cloud_error=Log.append(cloud_error,error);
@@ -494,7 +496,6 @@ static get = async (database,option) => {
     };
 }
 class Portal {
-   //class Portal
     static get_list = (database,data_type,filter,sort_by,page_current,page_size,option) => {
         /* option params
          * Items
@@ -504,6 +505,7 @@ class Portal {
          *  - photo_count / int / ex. 1-999 / def. 19
          *  - photo_sort_by / query obj / ex. {date_create:1}
          */
+
         return new Promise((callback) => {
             let cloud_data = {item_list:[],item_count:0,page_count:0};
             let error=null;
@@ -545,15 +547,26 @@ class Portal {
             });
         });
     };
-    //class Portal
     static get = async (database,data_type,key,option) => {
-        /* option params
-         * Items
-         *  - get_items / bool / ex. true,false / def. true
-         * Photos
-         *  - get_photos / bool / ex. true,false / def. true
-         *  - photo_count / int / ex. 1-999 / def. 19
-         *  - photo_sort_by / query obj / ex. {date_create:1}
+         /*
+         *
+         * Params
+         * - title
+         *   - description: n/a / type: n/a / example: n/a / required: n/a
+         *
+         * Option
+         * - get_items
+         *   - description: n/a / type: bool / example: true / required: false
+         * - get_photos
+         *   - description: n/a / type: bool / example: true / required: false
+         * - photo_count
+         *   - description: n/a / type: int / example: 19 / required: false
+         * - photo_sort_by
+         *   - description: n/a / type: obj / example: {date_create:1} / required: false
+         * Return
+         * - title
+         *   - description: n/a / type: n/a
+         *
          */
         return new Promise((callback) => {
             let error = null;
@@ -561,7 +574,7 @@ class Portal {
             let full_item_list = [];
             let new_item_list = [];
             if(option == null){
-                option = {get_items:false,get_photos:false}
+                option = {get_items:false,get_photos:false,title_url:null}
             }
             if(option.get_items==null){
                 option.get_items=false;
@@ -571,8 +584,13 @@ class Portal {
             }
             async.series([
                 function(call){
-                    if(Number.check_is_guid(key)){
-                        Data.get_item(database,data_type,key).then(([error,data])=> {
+                    if(!Number.check_is_guid(key)){
+                        option.title_url = key;
+                    }
+                    call();
+                },
+                function(call){
+                        Data.get_item(database,data_type,key,option).then(([error,data])=> {
                             if(error){
                                 error=Log.append(error,error);
                             }else{
@@ -586,31 +604,6 @@ class Portal {
                             error = Log.append(error,error);
                             call();
                         });
-                    }else{
-                        let filter = {};
-                        if(key){
-                            filter = {title_url:key};
-                        }
-                        let sort_by = {title:-1};
-                        let page_current = 1;
-                        let page_size = 3;
-                        Data.get_list(database,data_type,filter,sort_by,page_current,page_size).then(([error,data,item_count,page_count])=> {
-                            if(error){
-                                error=Log.append(error,error);
-                            }else{
-                                if(data.length>0){
-                                    top_item = data[0];
-                                    top_item.items = [];
-                                    top_item.photos = [];
-                                }
-                            }
-                            call();
-                        }).catch(error => {
-                            Log.error("Portal-Get-Key-B",error);
-                            error = Log.append(error,error);
-                            call();
-                        });
-                    }
                 },
                 function(call){
                     if(top_item.id && option.get_items){
@@ -688,7 +681,6 @@ class Portal {
             });
         });
     };
-    //class Portal
     static update = async (database,data_type,item_data,option) => {
         /* option params
          * n/a
@@ -800,21 +792,35 @@ class Portal {
             });
         });
     };
-    //class Portal
     static delete = async (database,data_type,id,option) => {
-        /* option params
-         * n/a
+         /*
+         * Params
+         * - title
+         *   - description / type / example / required
+         * Option
+         * - delete_items
+         *   - description / bool / example / default: false
+         * - delete_photos
+         *   - description / bool / example / default: false
+         * Return
+         * - title
+         *   - description / type /
          */
-        return new Promise((callback) => {
+       return new Promise((callback) => {
             let error = null;
-            let item = DataItem.get_new(data_type,id);
+            let item = DataItem.get_new(data_type,id,{delete_items:false,delete_photos:false});
             if(option == null){
-                option = {};
+                option = {delete_items:false,delete_photos:false};
             }
+           if(option.delete_items==null){
+               option.delete_items=false;
+           }
+           if(option.delete_photos==null){
+               option.delete_photos=false;
+           }
             async.series([
                 function(call){
                     Data.delete_item(database,data_type,id).then(([error,data])=> {
-                        console.log(data);
                         if(error){
                             error=Log.append(error,error);
                         }else{
@@ -825,6 +831,44 @@ class Portal {
                         error = Log.append(error,error);
                         call();
                     });
+                },
+                function(call){
+                    if(option.delete_items){
+                        let data_type = DataType.ITEM;
+                        let filter = {parent_id:item.id};
+                    Data.delete_list(database,data_type,filter).then(([error,data])=> {
+                        if(error){
+                            error=Log.append(error,error);
+                        }else{
+                            item.delete_items = true;
+                        }
+                        call();
+                    }).catch(error => {
+                        error = Log.append(error,error);
+                        call();
+                    });
+                    }else{
+                        call();
+                    }
+                },
+                function(call){
+                    if(option.delete_photos){
+                        let data_type = DataType.PHOTO;
+                        let filter = {parent_id:item.id};
+                    Data.delete_list(database,data_type,filter).then(([error,data])=> {
+                        if(error){
+                            error=Log.append(error,error);
+                        }else{
+                            item.delete_photos = true;
+                        }
+                        call();
+                    }).catch(error => {
+                        error = Log.append(error,error);
+                        call();
+                    });
+                    }else{
+                        call();
+                    }
                 },
             ]).then(result => {
                 callback([error,item]);
@@ -891,6 +935,7 @@ class Portal {
                         call();
                     });
                 },
+
             ]).then(result => {
                 callback([error,item_list]);
             }).catch(error => {
@@ -947,12 +992,14 @@ class Portal {
             let error = null;
             let top_item = {data_type:data_type,id:0,photos:[],items:[]};
             let copy_top_item = {data_type:data_type,id:0,photos:[],items:[]};
+            let item_list = [];
+            let copy_item_list = [];
             if(option == null){
                 option = {get_items:false,get_photos:false}
             }
             async.series([
                  function(call){
-                    Data.get_item(db_connect,data_type,id).then(([error,data])=> {
+                    Data.get_item(database,data_type,id).then(([error,data])=> {
                         if(error){
                             error=Log.append(error,error);
                         }
@@ -973,7 +1020,7 @@ class Portal {
                     call();
                 },
                 function(call){
-                    Data.update_item(db_connect,copy_top_item.data_type,copy_top_item).then(([error,data])=> {
+                    Data.update_item(database,copy_top_item.data_type,copy_top_item).then(([error,data])=> {
                         if(error){
                             error=Log.append(error,error);
                         }else{
@@ -992,12 +1039,12 @@ class Portal {
                         let sort_by={title:-1};
                         let page_current = 1;
                         let page_size = 999;
-                        Data.get_list(db_connect,data_type,filter,sort_by,page_current,page_size).then(([error,data,item_count,page_count])=> {
+                        Data.get_list(database,data_type,filter,sort_by,page_current,page_size).then(([error,data,item_count,page_count])=> {
                             if(error){
                                 error=Log.append(error,error);
                             }else{
                                 if(data.length > 0){
-                                    items = data;
+                                    item_list = data;
                                 }
                             }
                             call();
@@ -1011,17 +1058,17 @@ class Portal {
                 },
                 function(call){
                     let source_top_items = [];
-                    for(let a=0;a<items.length;a++){
+                    for(let a=0;a<item_list.length;a++){
                         let copy_sub_item={data_type:DataType.ITEM,id:0,top_id:copy_top_item.id,top_data_type:copy_top_item.data_type};
-                        copy_sub_item[FieldType.SOURCE_ID] = items[a].id;
-                        copy_sub_item[FieldType.SOURCE_DATA_TYPE] = items[a].data_type;
-                        copy_sub_item[FieldType.SOURCE_PARENT_ID] = items[a].parent_id;
-                        copy_sub_item[FieldType.SOURCE_PARENT_DATA_TYPE] = items[a].parent_data_type;
-                        copy_sub_item[FieldType.SOURCE_TOP_ID] = items[a].top_id;
-                        copy_sub_item[FieldType.SOURCE_TOP_DATA_TYPE] = items[a].top_data_type;
-                        for(const key in items[a]) {
+                        copy_sub_item[FieldType.SOURCE_ID] = item_list[a].id;
+                        copy_sub_item[FieldType.SOURCE_DATA_TYPE] = item_list[a].data_type;
+                        copy_sub_item[FieldType.SOURCE_PARENT_ID] = item_list[a].parent_id;
+                        copy_sub_item[FieldType.SOURCE_PARENT_DATA_TYPE] = item_list[a].parent_data_type;
+                        copy_sub_item[FieldType.SOURCE_TOP_ID] = item_list[a].top_id;
+                        copy_sub_item[FieldType.SOURCE_TOP_DATA_TYPE] = item_list[a].top_data_type;
+                        for(const key in item_list[a]) {
                             if( key != FieldType.ID && key != FieldType.SOURCE && key != FieldType.PARENT_ID && key != FieldType.PARENT_DATA_TYPE ){
-                                copy_sub_item[key] = items[a][key];
+                                copy_sub_item[key] = item_list[a][key];
                             }
                         }
                         copy_item_list.push(copy_sub_item);
@@ -1029,7 +1076,7 @@ class Portal {
                     call();
                 },
                 function(call){
-                    Data.update_list(db_connect,copy_item_list).then(([error,data])=> {
+                    Data.update_list(database,copy_item_list).then(([error,data])=> {
                         if(error){
                             error=Log.append(error,error);
                         }
@@ -1054,7 +1101,7 @@ class Portal {
                     call();
                 },
                 function(call){
-                    Data.update_list(db_connect,copy_item_list).then(([error,data])=> {
+                    Data.update_list(database,copy_item_list).then(([error,data])=> {
                         if(error){
                             error=Log.append(error,error);
                         }
@@ -1063,28 +1110,29 @@ class Portal {
                     })
                 },
             ]).then(result => {
-                callback([error,item_data]);
+                callback([error,copy_top_item]);
             }).catch(error => {
                 Log.error("Blank-Get",error);
                 callback([error,[]]);
             });
         });
     };
-
-
 }
 class Blank {
     static get = async (database,data_type,title_url,option) => {
-        /*
-         * params
-         * - title_tbd
-         *   - description. / type / ex.
-         * option
-         * - title_tbd
-         *   - description. / type / ex.
-         * return
-         * - title_tbd
-         *   - description. / type / ex.
+         /*
+         *
+         * Params
+         * - title
+         *   - description: n/a / type: n/a / example: n/a / required: true
+         *
+         * Option
+         * - title
+         *   - description: n/a / type: n/a / example: n/a / required: false
+         *
+         * Return
+         * - title
+         *   - description: n/a / type: n/a
          *
          */
         return new Promise((callback) => {
@@ -1161,8 +1209,8 @@ class Data {
     static update_item = async (db_connect,data_type,item_data) => {
         return [error,data] = await update_item_adapter(db_connect,data_type,item_data);
     };
-    static get_item = async (db_connect,data_type,id,option) => {
-        return [error,data] = await get_item_adapter(db_connect,data_type,id,option);
+    static get_item = async (db_connect,data_type,key,option) => {
+        return [error,data] = await get_item_adapter(db_connect,data_type,key,option);
     };
     static delete_item = async (db_connect,data_type,id) => {
         return [error,data] = await delete_item_adapter(db_connect,data_type,id);
