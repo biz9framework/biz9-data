@@ -9,7 +9,6 @@ class Top_Item_Main{
          *  - photo_sort_by / query obj / ex. {date_create:1}
          */
         return new Promise((callback) => {
-            console.log('333333333333');
             let error = null;
             let top_item = {data_type:data_type,id:0,photos:[],items:[]};
             let full_item_list = [];

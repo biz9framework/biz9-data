@@ -167,6 +167,8 @@ const get_id_list_base = (db_connect,data_type,filter,sort_by,page_current,page_
 			},
 			function(call) {
 				if(check_db_connect_base(db_connect)){
+                    page_current = parseInt(page_current);
+                    page_size = parseInt(page_size);
 					db_connect.collection(data_type).find(filter).sort(sort_by).skip(page_current>0?((page_current-1)*page_size):0).limit(page_size).collation({locale:"en_US",numericOrdering:true}).project({id:1,data_type:1,_id:0}).toArray().then((data) => {
                         if(data){
 						    data_list = data;

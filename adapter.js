@@ -2,13 +2,13 @@
 Copyright 2023 Certified CoderZ
 Author: certifiedcoderz@gmail.com (Certified CoderZ)
 License GNU General Public License v3.0
-Description: BiZ9 Framework: Data - Mongo - Base
+Description: BiZ9 Framework: Data - Mongo - Adapter
 */
 const async = require('async');
-const {Log} = require("biz9-utility");
 const {get_db_connect_main,check_db_connect_main,close_db_connect_main,update_item_main,get_item_main,delete_item_main,get_id_list_main,delete_item_list_main,count_item_list_main} = require('./mongo/index.js');
 const {get_cache_connect_main,close_cache_connect_main,get_cache_string_main,delete_cache_string_main,set_cache_string_main} = require('./redis/index.js');
 const {DataItem}=require("/home/think2/www/doqbox/biz9-framework/biz9-logic/code");
+const {Log,Str,Number}=require("/home/think2/www/doqbox/biz9-framework/biz9-utility/code");
 const DB_TITLE='DB';
 const CACHE_TITLE='CACHE';
 const NOT_FOUND_TITLE='NOT-FOUND';
@@ -221,15 +221,15 @@ const get_item_list_adapter = (db_connect,data_type,filter,sort_by,page_current,
         });
     });
 }
-const get_item_adapter = (db_connect,data_type,id,option) => {
+const get_item_adapter = (db_connect,data_type,key,option) => {
     return new Promise((callback) => {
         if(!option){
             option = {};
         }
         let cache_connect = {};
         let cache_found = false;
+        let item_data = {};
         let cache_key_list = null;
-        let item_data = DataItem.get_new(data_type,id);
         let cache_string_list = [];
         async.series([
             function(call) {
@@ -242,7 +242,8 @@ const get_item_adapter = (db_connect,data_type,id,option) => {
                 });
             },
             function(call) {
-                if(option.title_url){
+                if(option.title_url && !Number.check_is_guid(option.title_url)){
+                    item_data = DataItem.get_new(data_type,0,{title_url:option.title_url});
                     let filter={title_url:option.title_url};
                     let sort_by={};
                     let page_current=1;
@@ -259,7 +260,8 @@ const get_item_adapter = (db_connect,data_type,id,option) => {
                         callback([error,null]);
                     });
                 }else{
-                    get_item_cache_db(cache_connect,db_connect,data_type,id).then(([error,data]) => {
+                    item_data = DataItem.get_new(data_type,key);
+                    get_item_cache_db(cache_connect,db_connect,data_type,key).then(([error,data]) => {
                         if(data){
                             item_data = data;
                         }
