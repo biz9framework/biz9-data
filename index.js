@@ -7,8 +7,8 @@ Description: BiZ9 Framework: Data
 const async = require('async');
 const {get_db_connect_main,check_db_connect_main,close_db_connect_main,update_item_main,get_item_main,delete_item_main,get_id_list_main,delete_item_list_main,count_item_list_main} = require('./mongo/index.js');
 const {Scriptz}=require("biz9-scriptz");
-const {Log,Str,Number}=require("/home/think2/www/doqbox/biz9-framework/biz9-utility/code");
-const {DataItem,DataType,FieldType}=require("/home/think2/www/doqbox/biz9-framework/biz9-logic/code");
+const {Log,Str,Number}=require("biz9-utility");
+const {DataItem,DataType,FieldType}=require("biz9-logic");
 const { get_db_connect_adapter,check_db_connect_adapter,close_db_connect_adapter,update_item_adapter,update_item_list_adapter,get_item_adapter,delete_item_adapter,get_item_list_adapter,delete_item_list_adapter,count_item_list_adapter,delete_item_cache }  = require('./adapter.js');
 const {get_database_main} = require("./main");
 class Database {

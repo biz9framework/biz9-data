@@ -7,8 +7,8 @@ Description: BiZ9 Framework: Data - Mongo - Adapter
 const async = require('async');
 const {get_db_connect_main,check_db_connect_main,close_db_connect_main,update_item_main,get_item_main,delete_item_main,get_id_list_main,delete_item_list_main,count_item_list_main} = require('./mongo/index.js');
 const {get_cache_connect_main,close_cache_connect_main,get_cache_string_main,delete_cache_string_main,set_cache_string_main} = require('./redis/index.js');
-const {DataItem}=require("/home/think2/www/doqbox/biz9-framework/biz9-logic/code");
-const {Log,Str,Number}=require("/home/think2/www/doqbox/biz9-framework/biz9-utility/code");
+const {DataItem}=require("biz9-logic");
+const {Log,Str,Number}=require("biz9-utility");
 const DB_TITLE='DB';
 const CACHE_TITLE='CACHE';
 const NOT_FOUND_TITLE='NOT-FOUND';

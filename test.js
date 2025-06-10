@@ -2,7 +2,7 @@ const async = require('async');
 const assert = require('node:assert');
 const {Data,Database,Portal,Category} = require(".");
 const {Log,Number} = require("biz9-utility");
-const {DataType,DataItem,Item_Logic} = require("/home/think2/www/doqbox/biz9-framework/biz9-logic/code");
+const {DataType,DataItem,Item_Logic} = require("biz9-logic");
 /*
  * availble tests
 - connect
