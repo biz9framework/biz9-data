@@ -12,7 +12,7 @@ const {DataItem,DataType,FieldType}=require("biz9-logic");
 const { get_db_connect_adapter,check_db_connect_adapter,close_db_connect_adapter,update_item_adapter,update_item_list_adapter,get_item_adapter,delete_item_adapter,get_item_list_adapter,delete_item_list_adapter,count_item_list_adapter,delete_item_cache }  = require('./adapter.js');
 const {get_database_main} = require("./main");
 class Database {
-   static get = async (data_config,option) => {
+    static get = async (data_config,option) => {
         /* return
          * - n/a
          * option params
@@ -72,7 +72,7 @@ class Database {
     }
 }
 class List {
- static get_parent_child_list = (full_item_list) => {
+    static get_parent_child_list = (full_item_list) => {
         /* option params
          * - full_item_list
          *      - List of objects. Bind all child id values to matching parent id. / list / ex. Products and child attributes items.
@@ -129,7 +129,7 @@ class List {
     };
 }
 class Page {
-     //class Page
+    //class Page
     static get = async (database,key,option) => {
         /* option params
          * - database
@@ -137,7 +137,9 @@ class Page {
          * - key
          *      - tbd
          * - option
-         *      - get_photos / bool / ex. true,false / def. true
+         *      - get_item / bool / ex. true,false / def. false
+         *      - get_photo / bool / ex. true,false / def. false
+         *      - get_business / bool / ex. true,false / def. false
          *      - photo_count / int / ex. 1-999 / def. 19
          *      - photo_sort_by / query obj / ex. {date_create:1}
          * return objects
@@ -145,158 +147,37 @@ class Page {
          *      - tbd
          */
         return new Promise((callback) => {
+            let cloud_data = {};
+            cloud_data.page = {data_type:DataType.PAGE,id:0,photos:[],items:[]};
+            cloud_data.business = {data_type:DataType.BUSINESS,id:0};
             let error = null;
             let data_type = DataType.PAGE;
-            let cloud_data = {};
-            let page = {data_type:DataType.PAGE,id:0,photos:[],items:[]};
-            let business = {data_type:DataType.BUSINESS,id:0};
             let full_item_list = [];
             let new_item_list = [];
             if(option == null){
-                option = {get_items:false,get_photos:false}
+                option = {get_item:false,get_photo:false,get_business:false}
             }
-            if(option.get_items==null){
-                option.get_items=false;
+            if(option.get_item==null){
+                option.get_item=false;
             }
-            if(option.get_photos==null){
-                option.get_photos=false;
+            if(option.get_photo==null){
+                option.get_photo=false;
+            }
+            if(option.get_business==null){
+                option.get_business=false;
             }
             async.series([
-                function(call){
-                    if(Number.check_is_guid(key)){
-                        Data.get_item(database,data_type,key).then(([error,data])=> {
-                            if(error){
-                                error=Log.append(error,error);
-                            }else{
-                                page = data;
-                                page.items = [];
-                                page.photos = [];
-                            }
-                            call();
-                        }).catch(error => {
-                            Log.error("Portal-Get-Key-A",error);
-                            error = Log.append(error,error);
-                            call();
-                        });
-                    }else{
-                        let filter = {};
-                        if(key){
-                            filter = {title_url:key};
-                        }
-                        let sort_by = {title:-1};
-                        let page_current = 1;
-                        let page_size = 3;
-                        Data.get_list(database,data_type,filter,sort_by,page_current,page_size).then(([error,data,item_count,page_count])=> {
-                            if(error){
-                                error=Log.append(error,error);
-                            }else{
-                                if(data.length>0){
-                                    page = data[0];
-                                    page.items = [];
-                                    page.photos = [];
-                                }
-                            }
-                            call();
-                        }).catch(error => {
-                            Log.error("Portal-Get-Key-B",error);
-                            error = Log.append(error,error);
-                            call();
-                        });
-                    }
-                },
-                function(call){
-                    if(page.id && option.get_items){
-                        let filter={top_id:page.id};
-                        let data_type = DataType.ITEM;
-                        let sort_by={title:-1};
-                        let page_current = 1;
-                        let page_size = 999;
-                        Data.get_list(database,data_type,filter,sort_by,page_current,page_size).then(([error,data,item_count,page_count])=> {
-                            if(error){
-                                error=Log.append(error,error);
-                            }else{
-                                if(data.length > 0){
-                                    full_item_list = data;
-                                }
-                            }
-                            call();
-                        }).catch(error => {
-                            error = Log.append(error,error);
-                            call();
-                        });
-                    }else{
-                        call();
-                    }
-                },
                 async function(call){
-                    if(page.id && option.get_items){
-                        const [error,data] = await List.get_parent_child_list(full_item_list);
-                        new_item_list = data;
-                    }
-                },
-                function(call){
-                    if(page.id && option.get_items){
-                        for(let a=0; a<new_item_list.length; a++){
-                            new_item_list[a].items = [];
-                            let item_title_url = Str.get_title_url(new_item_list[a].title);
-                            page[item_title_url] = new Object();
-                            for(let b=0;b<new_item_list.length;b++){
-                                if(new_item_list[a].parent_id == new_item_list[b].id){
-                                    new_item_list[a].items.push(new_item_list[b]);
-                                }
-                            }
-                            page[item_title_url] = new_item_list[a];
-                            page.items.push(new_item_list[a]);
-                        }
-                        call();
-                    }
-                    else{
-                        call();
-                    }
-                },
-                async function(call){
-                    if(option.get_photos){
-                        if(option.photo_count == null){
-                            option.photo_count = 19;
-                        }
-                        if(option.photo_sort_by == null){
-                            option.photo_sort_by = {date_create:1};
-                        }
-                        let filter = {parent_id:page.id};
-                        let sort_by = option.photo_sort_by;
-                        let page_current = 1;
-                        let page_size = option.photo_count;
-                        const [error,data] = await Portal.get_list(database,DataType.PHOTO,filter,sort_by,page_current,page_size,option);
-                        if(data.item_list.length > 0){
-                            page.photos = data.item_list;
+                    const [error,data] = await Portal.get(database,DataType.PAGE,key,option);
+                    if(error){
+                        error=Log.append(error,error);
+                    }else{
+                        if(data.id){
+                            cloud_data.page = data;
                         }
                     }
                 },
-                function(call){
-                        let filter = {};
-                        let sort_by = {};
-                        let data_type = DataType.BUSINESS;
-                        let page_current = 1;
-                        let page_size = 3;
-                        Data.get_list(database,data_type,filter,sort_by,page_current,page_size).then(([error,data,item_count,page_count])=> {
-                            if(error){
-                                error=Log.append(error,error);
-                            }else{
-                                if(data.length>0){
-                                    business = data[0];
-                                }
-                            }
-                            call();
-                        }).catch(error => {
-                            Log.error("Portal-Get-Key-B",error);
-                            error = Log.append(error,error);
-                            call();
-                        });
-                },
-
             ]).then(result => {
-                cloud_data.page = page;
-                cloud_data.business = business;
                 callback([error,cloud_data]);
             }).catch(error => {
                 Log.error("Page-Get",error);
@@ -306,7 +187,7 @@ class Page {
     };
 }
 class Category {
-static get_category_product_group_list = async (database,filter,option) => {
+    static get_category_product_group_list = async (database,filter,option) => {
         /* option params
          * - database
          *      - tbd
@@ -338,45 +219,45 @@ static get_category_product_group_list = async (database,filter,option) => {
             }
             async.series([
                 function(call){
-                        let data_type = DataType.CATEGORY;
-                        let sort_by = {};
-                        let page_current = 1;
-                        let page_size = 999;
-                        Data.get_list(database,data_type,filter,sort_by,page_current,page_size).then(([error,data,item_count,page_count])=> {
-                            if(error){
-                                error=Log.append(error,error);
-                            }else{
-                                if(data.length>0){
-                                    category_list = data;
-                                }
+                    let data_type = DataType.CATEGORY;
+                    let sort_by = {};
+                    let page_current = 1;
+                    let page_size = 999;
+                    Data.get_list(database,data_type,filter,sort_by,page_current,page_size).then(([error,data,item_count,page_count])=> {
+                        if(error){
+                            error=Log.append(error,error);
+                        }else{
+                            if(data.length>0){
+                                category_list = data;
                             }
-                            call();
-                        }).catch(error => {
-                            Log.error("Category-Get-Group-Product-1",error);
-                            error = Log.append(error,error);
-                            call();
-                        });
+                        }
+                        call();
+                    }).catch(error => {
+                        Log.error("Category-Get-Group-Product-1",error);
+                        error = Log.append(error,error);
+                        call();
+                    });
                 },
                 function(call){
-                        let sort_by = {};
-                        let data_type = DataType.PRODUCT;
-                        let filter = {};
-                        let page_current = 1;
-                        let page_size = 999;
-                        Data.get_list(database,data_type,filter,sort_by,page_current,page_size).then(([error,data,item_count,page_count])=> {
-                            if(error){
-                                error=Log.append(error,error);
-                            }else{
-                                if(data.length>0){
-                                    product_list = data;
-                                }
+                    let sort_by = {};
+                    let data_type = DataType.PRODUCT;
+                    let filter = {};
+                    let page_current = 1;
+                    let page_size = 999;
+                    Data.get_list(database,data_type,filter,sort_by,page_current,page_size).then(([error,data,item_count,page_count])=> {
+                        if(error){
+                            error=Log.append(error,error);
+                        }else{
+                            if(data.length>0){
+                                product_list = data;
                             }
-                            call();
-                        }).catch(error => {
-                            Log.error("Category-Get-Group-Product-2",error);
-                            error = Log.append(error,error);
-                            call();
-                        });
+                        }
+                        call();
+                    }).catch(error => {
+                        Log.error("Category-Get-Group-Product-2",error);
+                        error = Log.append(error,error);
+                        call();
+                    });
                 },
                 function(call){
                     for(let a = 0;a<category_list.length;a++){
@@ -385,12 +266,12 @@ static get_category_product_group_list = async (database,filter,option) => {
                         for(let b = 0;b<product_list.length;b++){
                             if(category_list[a].title == product_list[b].category){
                                 category_list[a].product_count = category_list[a].product_count + 1;
-                                    let add = true;
-                                    for(let c = 0;c<category_list[a].products.length;c++){
-                                        if(category_list[a].products[c].id == product_list[b].id){
-                                            add = false;
-                                        }
+                                let add = true;
+                                for(let c = 0;c<category_list[a].products.length;c++){
+                                    if(category_list[a].products[c].id == product_list[b].id){
+                                        add = false;
                                     }
+                                }
                                 if(add){
                                     category_list[a].products.push(product_list[b]);
                                 }
@@ -410,7 +291,7 @@ static get_category_product_group_list = async (database,filter,option) => {
 }
 
 class Business {
-static get = async (database,option) => {
+    static get = async (database,option) => {
         /* option params
          * n/a
          */
@@ -423,24 +304,24 @@ static get = async (database,option) => {
             }
             async.series([
                 function(call){
-                        let filter = {};
-                        let sort_by = {};
-                        let page_current = 1;
-                        let page_size = 3;
-                        Data.get_list(database,data_type,filter,sort_by,page_current,page_size).then(([error,data,item_count,page_count])=> {
-                            if(error){
-                                error=Log.append(error,error);
-                            }else{
-                                if(data.length>0){
-                                    business = data[0];
-                                }
+                    let filter = {};
+                    let sort_by = {};
+                    let page_current = 1;
+                    let page_size = 3;
+                    Data.get_list(database,data_type,filter,sort_by,page_current,page_size).then(([error,data,item_count,page_count])=> {
+                        if(error){
+                            error=Log.append(error,error);
+                        }else{
+                            if(data.length>0){
+                                business = data[0];
                             }
-                            call();
-                        }).catch(error => {
-                            Log.error("Portal-Business",error);
-                            error = Log.append(error,error);
-                            call();
-                        });
+                        }
+                        call();
+                    }).catch(error => {
+                        Log.error("Portal-Business",error);
+                        error = Log.append(error,error);
+                        call();
+                    });
                 },
 
             ]).then(result => {
@@ -453,7 +334,7 @@ static get = async (database,option) => {
     };
 }
 class Admin {
-static get = async (database,option) => {
+    static get = async (database,option) => {
         /* option params
          * n/a
          */
@@ -466,24 +347,24 @@ static get = async (database,option) => {
             }
             async.series([
                 function(call){
-                        let filter = {};
-                        let sort_by = {};
-                        let page_current = 1;
-                        let page_size = 3;
-                        Data.get_list(database,data_type,filter,sort_by,page_current,page_size).then(([error,data,item_count,page_count])=> {
-                            if(error){
-                                error=Log.append(error,error);
-                            }else{
-                                if(data.length>0){
-                                    admin = data[0];
-                                }
+                    let filter = {};
+                    let sort_by = {};
+                    let page_current = 1;
+                    let page_size = 3;
+                    Data.get_list(database,data_type,filter,sort_by,page_current,page_size).then(([error,data,item_count,page_count])=> {
+                        if(error){
+                            error=Log.append(error,error);
+                        }else{
+                            if(data.length>0){
+                                admin = data[0];
                             }
-                            call();
-                        }).catch(error => {
-                            Log.error("Portal-Admin",error);
-                            error = Log.append(error,error);
-                            call();
-                        });
+                        }
+                        call();
+                    }).catch(error => {
+                        Log.error("Portal-Admin",error);
+                        error = Log.append(error,error);
+                        call();
+                    });
                 },
 
             ]).then(result => {
@@ -496,68 +377,17 @@ static get = async (database,option) => {
     };
 }
 class Portal {
-    static get_list = (database,data_type,filter,sort_by,page_current,page_size,option) => {
-        /* option params
-         * Items
-         *  - get_items / bool / ex. true,false / def. true
-         * Photos
-         *  - get_photos / bool / ex. true,false / def. true
-         *  - photo_count / int / ex. 1-999 / def. 19
-         *  - photo_sort_by / query obj / ex. {date_create:1}
-         */
-
-        return new Promise((callback) => {
-            let cloud_data = {item_list:[],item_count:0,page_count:0};
-            let error=null;
-            if(option==null){
-                option = {get_items:true};
-            }
-            async.series([
-                function(call){
-                    Data.get_list(database,data_type,filter,sort_by,page_current,page_size).then(([error,data,item_count,page_count])=>{
-                        if(error){
-                            error=Log.append(error,error);
-                        }else{
-                            cloud_data.item_count=item_count;
-                            cloud_data.page_count=page_count;
-                            cloud_data.filter=filter;
-                            cloud_data.data_type=data_type;
-                            if(data.length>0){
-                                cloud_data.item_list=data;
-                                call();
-                            }else{
-                                call();
-                            }
-                        }
-                    }).catch(error => {
-                        error=Log.append(error,error);
-                    });
-                },
-                async function(call){
-                    if(option.get_items){
-                        const [error,data] = await List.get_parent_child_list(cloud_data.item_list);
-                        cloud_data.item_list = data;
-                    }
-                },
-            ]).then(result => {
-                callback([error,cloud_data]);
-            }).catch(error => {
-                Log.error("Portal-Get",error);
-                callback([error,[]]);
-            });
-        });
-    };
     static get = async (database,data_type,key,option) => {
-         /*
+        /*
          *
          * Params
          * - title
          *   - description: n/a / type: n/a / example: n/a / required: n/a
          *
          * Option
-         * - get_items
+         * - get_item
          *   - description: n/a / type: bool / example: true / required: false
-         * - get_photos
+         * - get_photo
          *   - description: n/a / type: bool / example: true / required: false
          * - photo_count
          *   - description: n/a / type: int / example: 19 / required: false
@@ -570,17 +400,17 @@ class Portal {
          */
         return new Promise((callback) => {
             let error = null;
-            let top_item = {data_type:data_type,id:0,photos:[],items:[]};
+            let top_item = {data_type:data_type,id:0,items:[],photos:[]};
             let full_item_list = [];
             let new_item_list = [];
             if(option == null){
-                option = {get_items:false,get_photos:false,title_url:null}
+                option = {get_item:false,get_photo:false,title_url:null}
             }
-            if(option.get_items==null){
-                option.get_items=false;
+            if(option.get_item==null){
+                option.get_item=false;
             }
-            if(option.get_photos==null){
-                option.get_photos=false;
+            if(option.get_photo==null){
+                option.get_photo=false;
             }
             async.series([
                 function(call){
@@ -590,23 +420,23 @@ class Portal {
                     call();
                 },
                 function(call){
-                        Data.get_item(database,data_type,key,option).then(([error,data])=> {
-                            if(error){
-                                error=Log.append(error,error);
-                            }else{
-                                top_item = data;
-                                top_item.items = [];
-                                top_item.photos = [];
-                            }
-                            call();
-                        }).catch(error => {
-                            Log.error("Portal-Get-Key-A",error);
-                            error = Log.append(error,error);
-                            call();
-                        });
+                    Data.get_item(database,data_type,key,option).then(([error,data])=> {
+                        if(error){
+                            error=Log.append(error,error);
+                        }else{
+                            top_item = data;
+                            top_item.items = [];
+                            top_item.photos = [];
+                        }
+                        call();
+                    }).catch(error => {
+                        Log.error("Portal-Get-Key-A",error);
+                        error = Log.append(error,error);
+                        call();
+                    });
                 },
                 function(call){
-                    if(top_item.id && option.get_items){
+                    if(top_item.id && option.get_item){
                         let filter={top_id:top_item.id};
                         let data_type = DataType.ITEM;
                         let sort_by={title:-1};
@@ -630,22 +460,16 @@ class Portal {
                     }
                 },
                 async function(call){
-                    if(top_item.id && option.get_items){
+                    if(top_item.id && option.get_item){
                         const [error,data] = await List.get_parent_child_list(full_item_list);
                         new_item_list = data;
                     }
                 },
                 function(call){
-                    if(top_item.id && option.get_items){
+                    if(top_item.id && option.get_item){
                         for(let a=0; a<new_item_list.length; a++){
-                            new_item_list[a].items = [];
                             let item_title_url = Str.get_title_url(new_item_list[a].title);
                             top_item[item_title_url] = new Object();
-                            for(let b=0;b<new_item_list.length;b++){
-                                if(new_item_list[a].parent_id == new_item_list[b].id){
-                                    new_item_list[a].items.push(new_item_list[b]);
-                                }
-                            }
                             top_item[item_title_url] = new_item_list[a];
                             top_item.items.push(new_item_list[a]);
                         }
@@ -656,7 +480,7 @@ class Portal {
                     }
                 },
                 async function(call){
-                    if(option.get_photos){
+                    if(option.get_photo){
                         if(option.photo_count == null){
                             option.photo_count = 19;
                         }
@@ -681,6 +505,57 @@ class Portal {
             });
         });
     };
+    static get_list = (database,data_type,filter,sort_by,page_current,page_size,option) => {
+        /* option params
+         * Items
+         *  - get_item / bool / ex. true,false / def. true
+         * Photos
+         *  - get_photo / bool / ex. true,false / def. true
+         *  - photo_count / int / ex. 1-999 / def. 19
+         *  - photo_sort_by / query obj / ex. {date_create:1}
+         */
+        return new Promise((callback) => {
+            let cloud_data = {item_list:[],item_count:0,page_count:0};
+            let error=null;
+            if(option==null){
+                option = {get_item:true};
+            }
+            async.series([
+                function(call){
+                    Data.get_list(database,data_type,filter,sort_by,page_current,page_size).then(([error,data,item_count,page_count])=>{
+                        if(error){
+                            error=Log.append(error,error);
+                        }else{
+                            cloud_data.item_count=item_count;
+                            cloud_data.page_count=page_count;
+                            cloud_data.filter=filter;
+                            cloud_data.data_type=data_type;
+                            if(data.length>0){
+                                cloud_data.item_list=data;
+                                call();
+                            }else{
+                                call();
+                            }
+                        }
+                    }).catch(error => {
+                        error=Log.append(error,error);
+                    });
+                },
+                async function(call){
+                    if(option.get_item){
+                        const [error,data] = await List.get_parent_child_list(cloud_data.item_list);
+                        cloud_data.item_list = data;
+                    }
+                },
+            ]).then(result => {
+                callback([error,cloud_data]);
+            }).catch(error => {
+                Log.error("Portal-Get",error);
+                callback([error,[]]);
+            });
+        });
+    };
+
     static update = async (database,data_type,item_data,option) => {
         /* option params
          * n/a
@@ -793,7 +668,7 @@ class Portal {
         });
     };
     static delete = async (database,data_type,id,option) => {
-         /*
+        /*
          * Params
          * - title
          *   - description / type / example / required
@@ -806,18 +681,18 @@ class Portal {
          * - title
          *   - description / type /
          */
-       return new Promise((callback) => {
+        return new Promise((callback) => {
             let error = null;
             let item = DataItem.get_new(data_type,id,{delete_items:false,delete_photos:false});
             if(option == null){
                 option = {delete_items:false,delete_photos:false};
             }
-           if(option.delete_items==null){
-               option.delete_items=false;
-           }
-           if(option.delete_photos==null){
-               option.delete_photos=false;
-           }
+            if(option.delete_items==null){
+                option.delete_items=false;
+            }
+            if(option.delete_photos==null){
+                option.delete_photos=false;
+            }
             async.series([
                 function(call){
                     Data.delete_item(database,data_type,id).then(([error,data])=> {
@@ -836,17 +711,17 @@ class Portal {
                     if(option.delete_items){
                         let data_type = DataType.ITEM;
                         let filter = {parent_id:item.id};
-                    Data.delete_list(database,data_type,filter).then(([error,data])=> {
-                        if(error){
-                            error=Log.append(error,error);
-                        }else{
-                            item.delete_items = true;
-                        }
-                        call();
-                    }).catch(error => {
-                        error = Log.append(error,error);
-                        call();
-                    });
+                        Data.delete_list(database,data_type,filter).then(([error,data])=> {
+                            if(error){
+                                error=Log.append(error,error);
+                            }else{
+                                item.delete_items = true;
+                            }
+                            call();
+                        }).catch(error => {
+                            error = Log.append(error,error);
+                            call();
+                        });
                     }else{
                         call();
                     }
@@ -855,17 +730,17 @@ class Portal {
                     if(option.delete_photos){
                         let data_type = DataType.PHOTO;
                         let filter = {parent_id:item.id};
-                    Data.delete_list(database,data_type,filter).then(([error,data])=> {
-                        if(error){
-                            error=Log.append(error,error);
-                        }else{
-                            item.delete_photos = true;
-                        }
-                        call();
-                    }).catch(error => {
-                        error = Log.append(error,error);
-                        call();
-                    });
+                        Data.delete_list(database,data_type,filter).then(([error,data])=> {
+                            if(error){
+                                error=Log.append(error,error);
+                            }else{
+                                item.delete_photos = true;
+                            }
+                            call();
+                        }).catch(error => {
+                            error = Log.append(error,error);
+                            call();
+                        });
                     }else{
                         call();
                     }
@@ -995,10 +870,10 @@ class Portal {
             let item_list = [];
             let copy_item_list = [];
             if(option == null){
-                option = {get_items:false,get_photos:false}
+                option = {get_item:false,get_photo:false}
             }
             async.series([
-                 function(call){
+                function(call){
                     Data.get_item(database,data_type,id).then(([error,data])=> {
                         if(error){
                             error=Log.append(error,error);
@@ -1120,7 +995,7 @@ class Portal {
 }
 class Blank {
     static get = async (database,data_type,title_url,option) => {
-         /*
+        /*
          *
          * Params
          * - title
@@ -1139,7 +1014,7 @@ class Blank {
             let error = null;
             let top_item = {data_type:data_type,id:0,photos:[],items:[]};
             if(option == null){
-                option = {get_items:false,get_photos:false}
+                option = {get_item:false,get_photo:false}
             }
             async.series([
                 function(call){

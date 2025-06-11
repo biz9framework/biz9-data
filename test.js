@@ -2,7 +2,7 @@ const async = require('async');
 const assert = require('node:assert');
 const {Data,Database,Portal,Category} = require(".");
 const {Log,Number} = require("biz9-utility");
-const {DataType,DataItem,Item_Logic} = require("biz9-logic");
+const {DataType,DataItem,Item_Logic,Page_Logic,Template_Logic} = require("/home/think2/www/doqbox/biz9-framework/biz9-logic/code");
 /*
  * availble tests
 - connect
@@ -16,13 +16,14 @@ const {DataType,DataItem,Item_Logic} = require("biz9-logic");
 /* --- TEST CONFIG START --- */
 //const KEY = '0'; // 0 = intialize a new data item.
 //const KEY = 'd220d962-4491-4022-b5be-374d8168d79b';
+//http://localhost:1904/main/crud/get_item_parent_top/blog_post_biz/27394892-8b61-4ddd-93d7-9251a45a652c?app_id=test-june11
 const KEY = 'title_5153';
-const ID = 'eaf4c2a9-2cc0-460a-8dca-12833a656096';
-const DATA_TYPE = DataType.BLANK;
+const ID = '27394892-8b61-4ddd-93d7-9251a45a652c';
+const DATA_TYPE = DataType.PAGE;
 const OPTION = {};
 //const FILTER = {test_group_id:59367};
 const FILTER = {data_type:DATA_TYPE};
-const APP_ID = 'test-june8';
+const APP_ID = 'test-june11';
 const SQL = {};
 /* --- TEST CONFIG END --- */
 
@@ -50,19 +51,36 @@ describe('connect', function(){ this.timeout(25000);
         async function(call){
                 console.log('DATABASE-START');
                 //const [error,data] = await Team.get_member(db_connect,title_url);
-                const [error,data] = await Database.get({app_id:"test-may26",biz9_config_file:"/home/think2/www/doqbox/biz9-framework/biz9-service/code/biz9_config"});
+                const [error,data] = await Database.get(DATA_CONFIG);
                 database = data;
                 console.log('DATABASE-END');
         },
         async function(call){
+                console.log('TEMPLATE-START');
+                let template = Template_Logic.get_test("Primary",{get_value:true,get_item:true});
+                Log.w('template',template);
+                //const [error,data] = await Category.get_category_product_group_list(database,filter,{get_item:true});
+                //Log.w('data',data);
+                console.log('TEMPLATE-END');
+
+            /*
+                console.log('PAGE-START');
+                let page = Page_Logic.get_test("Page " + String(Number.get_id()),{get_value:true,get_item:true});
+                Log.w('page',page);
+                //const [error,data] = await Category.get_category_product_group_list(database,filter,{get_item:true});
+                //Log.w('data',data);
+                console.log('PAGE-END');
+            */
+            /*
             console.log('CATEGORY-START');
                 let filter = {category:"Application Template"};
-                const [error,data] = await Category.get_category_product_group_list(database,filter,{get_items:true});
+                const [error,data] = await Category.get_category_product_group_list(database,filter,{get_item:true});
                 Log.w('data',data);
             console.log('CATEGORY-END');
+            */
             /*
             console.log('ADMIN-START');
-                const [error,data] = await Portal.get_admin(database,{get_items:true});
+                const [error,data] = await Portal.get_admin(database,{get_item:true});
                 Log.w('data',data);
                 console.log('ADMIN-END');
                 */
@@ -70,7 +88,7 @@ describe('connect', function(){ this.timeout(25000);
 
             /*
             console.log('BUSSINESS-START');
-                const [error,data] = await Portal.get_business(database,{get_items:true});
+                const [error,data] = await Portal.get_business(database,{get_item:true});
                 Log.w('data',data);
                 console.log('BUSINESS-END');
                 */
@@ -80,7 +98,7 @@ describe('connect', function(){ this.timeout(25000);
             /*
             console.log('PAGE-START');
             let title_url = "page_1";
-                const [error,data] = await Portal.get_page(database,title_url,{get_items:true});
+                const [error,data] = await Portal.get_page(database,title_url,{get_item:true});
                 Log.w('data',data);
                 console.log('PAGE-END');
 
@@ -128,53 +146,25 @@ describe('connect', function(){ this.timeout(25000);
 
 
             /*
-                console.log('PORTAL-UPDATE-START');
-                let id = 0;
-                let data_type = DataType.BLANK;
-                let item = Test.get_item(data_type,id);
-                Log.w('item',item);
-                const [error,data] = await Portal.update(database,data_type,item,{});
-                Log.w('data',data);
-                console.log('PORTAL-GET-END');
-                //Log.w('database',database);
-            */
-
-            /*
                 console.log('PORTAL-GET-LIST-START');
                 let data_type = DataType.BLANK;
                 let filter = {};
                 let sort_by = {};
                 let page_current = 1;
                 let page_size = 99;
-                const [error,data] = await Portal.get_list(database,data_type,filter,sort_by,page_current,page_size,{get_items:true,get_photos:true});
+                const [error,data] = await Portal.get_list(database,data_type,filter,sort_by,page_current,page_size,{get_item:true,get_photo:true});
                 console.log(data);
                 console.log('PORTAL-GET-LIST-SUCCESS');
                 //database = data;
                 //Log.w('database',database);
                 */
-            /*
-
-                console.log('PORTAL-GET-START');
-                let data_type = DataType.BLANK;
-                let key = "1d5e10eb-8927-442d-83ae-52f2e156daad";
-                //let key = 'product_1';
-                //const [error,data] = await Portal.get();
-                const [error,data] = await Portal.get(database,data_type,key,{get_items:true,get_photos:true});
-                console.log(data);
-                console.log('PORTAL-GET-SUCCESS');
-                //database = data;
-                //Log.w('database',database);
-                console.log('PORTAL-GET-END');
-
-            */
-
-    /*
+                   /*
                 console.log('PORTAL-DELETE-START');
                 let data_type = DataType.BLANK;
                 let key = "1d5e10eb-8927-442d-83ae-52f2e156daad";
                 //let key = 'product_1';
                 //const [error,data] = await Portal.get();
-                const [error,data] = await Portal.delete(database,data_type,key,{get_items:true,get_photos:true});
+                const [error,data] = await Portal.delete(database,data_type,key,{get_item:true,get_photo:true});
                 console.log(data);
                 console.log('PORTAL-DELETE-SUCCESS');
                 //database = data;
