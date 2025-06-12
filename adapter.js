@@ -243,7 +243,7 @@ const get_item_adapter = (db_connect,data_type,key,option) => {
             },
             function(call) {
                 if(option.title_url && !Number.check_is_guid(option.title_url)){
-                    item_data = DataItem.get_new(data_type,0,{title_url:option.title_url});
+                    item_data = DataItem.get_new(data_type,0,{title_url:option.title_url,app_id:db_connect.app_id});
                     let filter={title_url:option.title_url};
                     let sort_by={};
                     let page_current=1;
@@ -252,7 +252,9 @@ const get_item_adapter = (db_connect,data_type,key,option) => {
                         if(data.length>0){
                             item_data = data[0];
                         }else{
-                            item_data = DataItem.get_new(data_type,0,{title_url:option.title_url,source:NOT_FOUND_TITLE,items:[],photos:[]});
+                            item_data.source = NOT_FOUND_TITLE;
+                            item_data.items=[];
+                            item_data.photos=[];
                         }
                         call();
                     }).catch(error => {
@@ -260,7 +262,7 @@ const get_item_adapter = (db_connect,data_type,key,option) => {
                         callback([error,null]);
                     });
                 }else{
-                    item_data = DataItem.get_new(data_type,key);
+                    item_data = DataItem.get_new(data_type,key,{title_url:option.title_url,app_id:db_connect.app_id});
                     get_item_cache_db(cache_connect,db_connect,data_type,key).then(([error,data]) => {
                         if(data){
                             item_data = data;
@@ -349,7 +351,7 @@ const get_item_cache_db = (cache_connect,db_connect,data_type,id) => {
     return new Promise((callback) => {
         let cache_found = false;
         let cache_key_list = null;
-        let item_data = DataItem.get_new(data_type,id);
+        let item_data = DataItem.get_new(data_type,id,{app_id:db_connect.app_id});
         let cache_string_list = [];
         async.series([
             function(call) {
