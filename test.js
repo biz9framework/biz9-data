@@ -23,7 +23,7 @@ const DATA_TYPE = DataType.PAGE;
 const OPTION = {};
 //const FILTER = {test_group_id:59367};
 const FILTER = {data_type:DATA_TYPE};
-const APP_ID = 'test-june11';
+const APP_ID = 'test-june14';
 const SQL = {};
 /* --- TEST CONFIG END --- */
 
@@ -57,13 +57,36 @@ describe('connect', function(){ this.timeout(25000);
         },
         async function(call){
                 console.log('TEMPLATE-START');
-                let template = Template_Logic.get_test("Primary",{get_value:true,get_item:true});
-                Log.w('template',template);
+                //let data_type=DataType.ITEM;
+                let data_type=DataType.TEMPLATE;
+                let key="primary";
+                //let key="header";
+                const [error,data] = await Portal.get(database,data_type,key,{get_item:true});
+                //let template = Template_Logic.get_test("Primary",{get_value:true,get_item:true});
+                //Log.w('template',template);
                 //const [error,data] = await Category.get_category_product_group_list(database,filter,{get_item:true});
-                //Log.w('data',data);
+                Log.w('error',error);
+                Log.w('data',data.header.items.length);
+                //Log.w('data_items_len',data.items.length);
+                //Log.w('data_items_len',data.items.length);
+                //Log.w('data_header',data.header);
+                //Log.w('data_header_item_1',data.header.item_1);
+                //Log.w('data_items',data.items.length);
                 console.log('TEMPLATE-END');
 
+
             /*
+                console.log('COPY-START');
+                let data_type = DataType.TEMPLATE;
+                let id = "faa23e97-84d4-40af-b766-440de9b9be77";
+                let copy_item = Portal.copy(database,data_type,id);
+                //Log.w('copy_item',copy_item);
+                //const [error,data] = await Category.get_category_product_group_list(database,filter,{get_item:true});
+                //Log.w('data',data);
+                console.log('COPY-END');
+                */
+
+                       /*
                 console.log('PAGE-START');
                 let page = Page_Logic.get_test("Page " + String(Number.get_id()),{get_value:true,get_item:true});
                 Log.w('page',page);

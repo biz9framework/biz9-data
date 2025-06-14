@@ -400,7 +400,7 @@ class Portal {
          */
         return new Promise((callback) => {
             let error = null;
-            let top_item = {data_type:data_type,id:0,items:[],photos:[]};
+            let item = {data_type:data_type,id:0,items:[],photos:[]};
             let full_item_list = [];
             let new_item_list = [];
             if(option == null){
@@ -414,19 +414,22 @@ class Portal {
             }
             async.series([
                 function(call){
+                    console.log('11111111111');
                     if(!Number.check_is_guid(key)){
                         option.title_url = key;
                     }
                     call();
                 },
                 function(call){
+                    console.log('22222222222');
                     Data.get_item(database,data_type,key,option).then(([error,data])=> {
                         if(error){
                             error=Log.append(error,error);
                         }else{
-                            top_item = data;
-                            top_item.items = [];
-                            top_item.photos = [];
+                            item = data;
+                            item.items = [];
+                            item.photos = [];
+                            Log.w('item',item);
                         }
                         call();
                     }).catch(error => {
@@ -436,13 +439,19 @@ class Portal {
                     });
                 },
                 function(call){
-                    if(top_item.id && option.get_item){
-                        let filter={top_id:top_item.id};
+                    let filter = {};
+                    if(item.id && option.get_item){
+                        if(Str.check_is_null(item.top_id)){
+                            filter={top_id:item.id};
+                        }else{
+                            filter={top_id:item.top_id};
+                        }
                         let data_type = DataType.ITEM;
                         let sort_by={title:-1};
                         let page_current = 1;
                         let page_size = 999;
                         Data.get_list(database,data_type,filter,sort_by,page_current,page_size).then(([error,data,item_count,page_count])=> {
+                            Log.w('data',data);
                             if(error){
                                 error=Log.append(error,error);
                             }else{
@@ -459,19 +468,22 @@ class Portal {
                         call();
                     }
                 },
+
                 async function(call){
-                    if(top_item.id && option.get_item){
+                    if(item.id && option.get_item){
                         const [error,data] = await List.get_parent_child_list(full_item_list);
                         new_item_list = data;
                     }
                 },
                 function(call){
-                    if(top_item.id && option.get_item){
+                    if(item.id && option.get_item){
                         for(let a=0; a<new_item_list.length; a++){
-                            let item_title_url = Str.get_title_url(new_item_list[a].title);
-                            top_item[item_title_url] = new Object();
-                            top_item[item_title_url] = new_item_list[a];
-                            top_item.items.push(new_item_list[a]);
+                            if(new_item_list[a].parent_id == item.id){
+                                let item_title_url = Str.get_title_url(new_item_list[a].title);
+                                item[item_title_url] = new Object();
+                                item[item_title_url] = new_item_list[a];
+                                item.items.push(new_item_list[a]);
+                            }
                         }
                         call();
                     }
@@ -487,18 +499,18 @@ class Portal {
                         if(option.photo_sort_by == null){
                             option.photo_sort_by = {date_create:1};
                         }
-                        let filter = {parent_id:top_item.id};
+                        let filter = {parent_id:item.id};
                         let sort_by = option.photo_sort_by;
                         let page_current = 1;
                         let page_size = option.photo_count;
                         const [error,data] = await Portal.get_list(database,DataType.PHOTO,filter,sort_by,page_current,page_size,option);
                         if(data.item_list.length > 0){
-                            top_item.photos = data.item_list;
+                            item.photos = data.item_list;
                         }
                     }
                 },
             ]).then(result => {
-                callback([error,top_item]);
+                callback([error,item]);
             }).catch(error => {
                 Log.error("Portal-Get",error);
                 callback([error,[]]);
@@ -865,8 +877,8 @@ class Portal {
          */
         return new Promise((callback) => {
             let error = null;
-            let top_item = {data_type:data_type,id:0,photos:[],items:[]};
-            let copy_top_item = {data_type:data_type,id:0,photos:[],items:[]};
+            let top_item = {data_type:data_type,id:0};
+            let copy_top_item = {data_type:data_type,id:0};
             let item_list = [];
             let copy_item_list = [];
             if(option == null){
@@ -887,6 +899,7 @@ class Portal {
                     copy_top_item[FieldType.TITLE_URL] = 'copy_'+top_item[FieldType.TITLE_URL];
                     copy_top_item[FieldType.SOURCE_ID] = top_item.id;
                     copy_top_item[FieldType.SOURCE_DATA_TYPE] = top_item.data_type;
+
                     for(const key in top_item) {
                         if(key!=FieldType.ID&&key!=FieldType.SOURCE&&key!=FieldType.TITLE&&key!=FieldType.TITLE_URL){
                             copy_top_item[key]=top_item[key];
@@ -903,7 +916,7 @@ class Portal {
                         }
                         call();
                     }).catch(error => {
-                        error=Log.append(error,error);
+                       error=Log.append(error,error);
                         call();
                     });
                 },
