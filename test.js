@@ -1,8 +1,8 @@
 const async = require('async');
 const assert = require('node:assert');
-const {Data,Database,Portal,Category} = require(".");
+const {Data,Database,Portal,Category_Data,Product_Data,Page_Data} = require(".");
 const {Log,Number} = require("biz9-utility");
-const {DataType,DataItem,Item_Logic,Page_Logic,Template_Logic} = require("/home/think2/www/doqbox/biz9-framework/biz9-logic/code");
+const {DataType,DataItem,Item_Logic,Page_Logic,Template_Logic,Blog_Post_Logic,Content_Logic,Obj} = require("/home/think2/www/doqbox/biz9-framework/biz9-logic/code");
 /*
  * availble tests
 - connect
@@ -23,7 +23,7 @@ const DATA_TYPE = DataType.PAGE;
 const OPTION = {};
 //const FILTER = {test_group_id:59367};
 const FILTER = {data_type:DATA_TYPE};
-const APP_ID = 'test-june14';
+const APP_ID = 'test-june17';
 const SQL = {};
 /* --- TEST CONFIG END --- */
 
@@ -56,6 +56,42 @@ describe('connect', function(){ this.timeout(25000);
                 console.log('DATABASE-END');
         },
         async function(call){
+                //console.log('PRODUCT-START');
+                //let key ="product_1";
+                //const [error,data] = await Product_Data.get(database,key,{get_photo:true,get_item:true});
+                //Log.w('error',error);
+                //Log.w('data',data);
+                //let search = Obj.get_search(DataType.PRODUCT,{title:'Product 25'},{},1,20);
+                //const [error,data] = await Product_Data.get_list(database,search.filter,search.sort_by,search.page_current,search.page_size,{get_photo:true,get_item:true});
+                //Log.w('error',error);
+                //Log.w('data',data);
+                //console.log('PRODUCT-END');
+
+            /*
+                console.log('CONTENT-START');
+                let content = Content_Logic.get_test("Content " + String(Number.get_id()),{get_value:true,get_item:true});
+                Log.w('content',content);
+                //const [error,data] = await Category.get_category_product_group_list(database,filter,{get_item:true});
+                //Log.w('data',data);
+                console.log('CONTENT-END');
+            */
+
+            /*
+                console.log('BLOG-START');
+                let blog = Blog_Post_Logic.get_test("Blog " + String(Number.get_id()),{get_value:true,get_item:true});
+                Log.w('blog_post',blog);
+                //const [error,data] = await Category.get_category_product_group_list(database,filter,{get_item:true});
+                //Log.w('data',data);
+                console.log('BLOG-END');
+                */
+                console.log('PAGE-START');
+                //let page = Page_Logic.get_test("Page " + String(Number.get_id()),{get_value:true,get_item:true});
+                //Log.w('page',page);
+                const [error,data] = await Page_Data.get('page_1',database,{get_business:true});
+                Log.w('data',data);
+                console.log('PAGE-END');
+
+            /*
                 console.log('TEMPLATE-START');
                 //let data_type=DataType.ITEM;
                 let data_type=DataType.TEMPLATE;
@@ -73,6 +109,7 @@ describe('connect', function(){ this.timeout(25000);
                 //Log.w('data_header_item_1',data.header.item_1);
                 //Log.w('data_items',data.items.length);
                 console.log('TEMPLATE-END');
+                */
 
 
             /*
@@ -86,18 +123,13 @@ describe('connect', function(){ this.timeout(25000);
                 console.log('COPY-END');
                 */
 
-                       /*
-                console.log('PAGE-START');
-                let page = Page_Logic.get_test("Page " + String(Number.get_id()),{get_value:true,get_item:true});
-                Log.w('page',page);
-                //const [error,data] = await Category.get_category_product_group_list(database,filter,{get_item:true});
-                //Log.w('data',data);
-                console.log('PAGE-END');
-            */
             /*
             console.log('CATEGORY-START');
-                let filter = {category:"Application Template"};
-                const [error,data] = await Category.get_category_product_group_list(database,filter,{get_item:true});
+                let filter = {};
+                let sort_by = {};
+                let page_current = {};
+                let page_size = {};
+                const [error,data] = await Category_Data.get_list(database,filter,sort_by,page_current,page_size,{get_item:false});
                 Log.w('data',data);
             console.log('CATEGORY-END');
             */
@@ -115,18 +147,6 @@ describe('connect', function(){ this.timeout(25000);
                 Log.w('data',data);
                 console.log('BUSINESS-END');
                 */
-
-
-
-            /*
-            console.log('PAGE-START');
-            let title_url = "page_1";
-                const [error,data] = await Portal.get_page(database,title_url,{get_item:true});
-                Log.w('data',data);
-                console.log('PAGE-END');
-
-*/
-
             /*
             console.log('PORTAL-COUNT-LIST-START');
                 let id = 0;

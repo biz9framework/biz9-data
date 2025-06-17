@@ -71,7 +71,67 @@ class Database {
         });
     }
 }
-class List {
+class List_Data {
+   static get_list = (database,data_type,filter,sort_by,page_current,page_size,option) => {
+        /* option params
+         * - database
+         *    - tbd
+         * - filter
+         *    - tbd
+         * - sort_by
+         *    - tbd
+         * - page_current
+         *    - tbd
+         * - page_size
+         *    - tbd
+         * - option
+         *    - get_photo / bool / ex. true,false / def. false /n/a
+         *    - photo_count / int / ex. 1-999 / def. 19 /n/a
+         *    - photo_sort_by / query obj / ex. {date_create:1} /n/a
+         * -  return objects
+         *    - cloud_data
+         *      - item_count
+         *      - page_count
+         *      - filter
+         *      - data_type
+         *      - item_list
+         */
+        return new Promise((callback) => {
+            let cloud_data = {item_list:[],item_count:0,page_count:0,filter:filter,data_type:data_type};
+            let error=null;
+            if(option==null){
+                option = {get_item:true};
+            }
+            async.series([
+                function(call){
+                    Data.get_list(database,data_type,filter,sort_by,page_current,page_size).then(([error,data,item_count,page_count])=>{
+                        if(error){
+                            error=Log.append(error,error);
+                        }else{
+                            if(data.length>0){
+                                cloud_data.item_list=data;
+                                cloud_data.item_count=item_count;
+                                cloud_data.page_count=page_count;
+                                cloud_data.filter = filter;
+                                cloud_data.data_type = data_type;
+                                call();
+                            }else{
+                                call();
+                            }
+                        }
+                    }).catch(error => {
+                        error=Log.append(error,error);
+                    });
+                },
+            ]).then(result => {
+                callback([error,cloud_data]);
+            }).catch(error => {
+                Log.error("List-Data-Get",error);
+                callback([error,[]]);
+            });
+        });
+    };
+
     static get_parent_child_list = (full_item_list) => {
         /* option params
          * - full_item_list
@@ -128,32 +188,72 @@ class List {
         });
     };
 }
-class Page {
-    //class Page
+class Product_Data {
     static get = async (database,key,option) => {
-        /* option params
-         * - database
-         *      - tbd
-         * - key
-         *      - tbd
-         * - option
-         *      - get_item / bool / ex. true,false / def. false
-         *      - get_photo / bool / ex. true,false / def. false
-         *      - get_business / bool / ex. true,false / def. false
-         *      - photo_count / int / ex. 1-999 / def. 19
-         *      - photo_sort_by / query obj / ex. {date_create:1}
-         * return objects
-         * - page
-         *      - tbd
-         */
+        return new Promise((callback) => {
+            let cloud_data = {};
+            cloud_data.product = {data_type:DataType.PRODUCT,id:0,photos:[],items:[]};
+            let error = null;
+            if(option == null){
+                option = {get_item:false,get_photo:false}
+            }
+            if(option.get_item==null){
+                option.get_item=false;
+            }
+            if(option.get_photo==null){
+                option.get_photo=false;
+            }
+            async.series([
+                async function(call){
+                    const [error,data] = await Portal.get(database,DataType.PRODUCT,key,option);
+                    if(error){
+                        error=Log.append(error,error);
+                    }else{
+                        if(data.id){
+                            cloud_data.product = data;
+                        }
+                    }
+                },
+            ]).then(result => {
+                callback([error,cloud_data]);
+            }).catch(error => {
+                Log.error("Product--Data-Get",error);
+                callback([error,[]]);
+            });
+        });
+    };
+    static get_list = (database,filter,sort_by,page_current,page_size,option) => {
+        return new Promise((callback) => {
+            let cloud_data = {item_list:[],item_count:0,page_count:0};
+            let error=null;
+            if(option==null){
+                option = {get_item:true};
+            }
+            async.series([
+                async function(call){
+                        const [error,data] = await List_Data.get_list(database,DataType.PRODUCT,filter,sort_by,page_current,page_size,option);
+                        if(error){
+                        error=Log.append(error,error);
+                        }else{
+                            cloud_data = data;
+                    }
+                },
+            ]).then(result => {
+                callback([error,cloud_data]);
+            }).catch(error => {
+                Log.error("Product-Get-List",error);
+                callback([error,[]]);
+            });
+        });
+    };
+}
+class Page_Data {
+    static get = async (database,key,option) => {
         return new Promise((callback) => {
             let cloud_data = {};
             cloud_data.page = {data_type:DataType.PAGE,id:0,photos:[],items:[]};
             cloud_data.business = {data_type:DataType.BUSINESS,id:0};
             let error = null;
-            let data_type = DataType.PAGE;
-            let full_item_list = [];
-            let new_item_list = [];
             if(option == null){
                 option = {get_item:false,get_photo:false,get_business:false}
             }
@@ -177,6 +277,18 @@ class Page {
                         }
                     }
                 },
+                /*
+                async function(call){
+                    const [error,data] = await Business_Data.get(database,option);
+                    if(error){
+                        error=Log.append(error,error);
+                    }else{
+                        if(data.id){
+                            cloud_data.business = data;
+                        }
+                    }
+                },
+                */
             ]).then(result => {
                 callback([error,cloud_data]);
             }).catch(error => {
@@ -186,7 +298,70 @@ class Page {
         });
     };
 }
-class Category {
+class Category_Data {
+        static get_list = (database,filter,sort_by,page_current,page_size,option) => {
+        /* option params
+         * - database
+         *    - tbd
+         * - filter
+         *    - tbd
+         * - sort_by
+         *    - tbd
+         * - page_current
+         *    - tbd
+         * - page_size
+         *    - tbd
+         * - option
+         *    - get_photo / bool / ex. true,false / def. false /n/a
+         *    - photo_count / int / ex. 1-999 / def. 19 /n/a
+         *    - photo_sort_by / query obj / ex. {date_create:1} /n/a
+         * -  return objects
+         *    - cloud_data
+         *      - item_count
+         *      - page_count
+         *      - filter
+         *      - data_type
+         *      - item_list
+         */
+        return new Promise((callback) => {
+            let cloud_data = {item_list:[],item_count:0,page_count:0};
+            let error=null;
+            if(option==null){
+                option = {get_item:true};
+            }
+            async.series([
+                function(call){
+                    Data.get_list(database,DataType.CATEGORY,filter,sort_by,page_current,page_size).then(([error,data,item_count,page_count])=>{
+                        if(error){
+                            error=Log.append(error,error);
+                        }else{
+                            if(data.length>0){
+                                cloud_data.item_list=data;
+                                call();
+                            }else{
+                                call();
+                            }
+                        }
+                    }).catch(error => {
+                        error=Log.append(error,error);
+                    });
+                },
+                async function(call){
+                    if(option.get_item){
+                        const [error,data] = await List_Data.get_parent_child_list(cloud_data.item_list);
+                        cloud_data.item_list = data;
+                    }
+                },
+            ]).then(result => {
+                callback([error,cloud_data]);
+            }).catch(error => {
+                Log.error("Portal-Get",error);
+                callback([error,[]]);
+            });
+        });
+    };
+
+
     static get_category_product_group_list = async (database,filter,option) => {
         /* option params
          * - database
@@ -205,7 +380,7 @@ class Category {
          */
         return new Promise((callback) => {
             let error = null;
-            let data_type = DataType.PRODUCT;
+            let data_type = DataType.CATEGORY;
             let category_list = [];
             let product_list = [];
             if(option == null){
@@ -233,7 +408,7 @@ class Category {
                         }
                         call();
                     }).catch(error => {
-                        Log.error("Category-Get-Group-Product-1",error);
+                        Log.error("Category-Data.Get-Group-Product-1",error);
                         error = Log.append(error,error);
                         call();
                     });
@@ -254,7 +429,7 @@ class Category {
                         }
                         call();
                     }).catch(error => {
-                        Log.error("Category-Get-Group-Product-2",error);
+                        Log.error("Category-Data-Get-Group-Product-2",error);
                         error = Log.append(error,error);
                         call();
                     });
@@ -283,18 +458,15 @@ class Category {
             ]).then(result => {
                 callback([error,business]);
             }).catch(error => {
-                Log.error("Business-Get",error);
+                Log.error("Business-Data-Get",error);
                 callback([error,[]]);
             });
         });
     };
 }
 
-class Business {
+class Business_Data {
     static get = async (database,option) => {
-        /* option params
-         * n/a
-         */
         return new Promise((callback) => {
             let error = null;
             let data_type = DataType.BUSINESS;
@@ -318,7 +490,7 @@ class Business {
                         }
                         call();
                     }).catch(error => {
-                        Log.error("Portal-Business",error);
+                        Log.error("Portal-Business-Data",error);
                         error = Log.append(error,error);
                         call();
                     });
@@ -327,13 +499,13 @@ class Business {
             ]).then(result => {
                 callback([error,business]);
             }).catch(error => {
-                Log.error("Business-Get",error);
+                Log.error("Business-Data-Get",error);
                 callback([error,[]]);
             });
         });
     };
 }
-class Admin {
+class Admin_Data {
     static get = async (database,option) => {
         /* option params
          * n/a
@@ -361,7 +533,7 @@ class Admin {
                         }
                         call();
                     }).catch(error => {
-                        Log.error("Portal-Admin",error);
+                        Log.error("Portal-Admin-Data",error);
                         error = Log.append(error,error);
                         call();
                     });
@@ -370,7 +542,7 @@ class Admin {
             ]).then(result => {
                 callback([error,admin]);
             }).catch(error => {
-                Log.error("Admin-Get",error);
+                Log.error("Admin-Data-Get",error);
                 callback([error,[]]);
             });
         });
@@ -414,22 +586,22 @@ class Portal {
             }
             async.series([
                 function(call){
-                    console.log('11111111111');
+                    console.log('111111111111');
                     if(!Number.check_is_guid(key)){
                         option.title_url = key;
                     }
                     call();
                 },
                 function(call){
-                    console.log('22222222222');
+                    console.log('2222222222');
                     Data.get_item(database,data_type,key,option).then(([error,data])=> {
+                        console.log('333333333');
                         if(error){
                             error=Log.append(error,error);
                         }else{
                             item = data;
                             item.items = [];
                             item.photos = [];
-                            Log.w('item',item);
                         }
                         call();
                     }).catch(error => {
@@ -451,7 +623,6 @@ class Portal {
                         let page_current = 1;
                         let page_size = 999;
                         Data.get_list(database,data_type,filter,sort_by,page_current,page_size).then(([error,data,item_count,page_count])=> {
-                            Log.w('data',data);
                             if(error){
                                 error=Log.append(error,error);
                             }else{
@@ -468,10 +639,9 @@ class Portal {
                         call();
                     }
                 },
-
                 async function(call){
                     if(item.id && option.get_item){
-                        const [error,data] = await List.get_parent_child_list(full_item_list);
+                        const [error,data] = await List_Data.get_parent_child_list(full_item_list);
                         new_item_list = data;
                     }
                 },
@@ -555,7 +725,7 @@ class Portal {
                 },
                 async function(call){
                     if(option.get_item){
-                        const [error,data] = await List.get_parent_child_list(cloud_data.item_list);
+                        const [error,data] = await List_Data.get_parent_child_list(cloud_data.item_list);
                         cloud_data.item_list = data;
                     }
                 },
@@ -567,7 +737,6 @@ class Portal {
             });
         });
     };
-
     static update = async (database,data_type,item_data,option) => {
         /* option params
          * n/a
@@ -793,7 +962,7 @@ class Portal {
             ]).then(result => {
                 callback([error,item_list]);
             }).catch(error => {
-                Log.error("Update-List",error);
+                Log.error("Update-List-Data",error);
                 callback([error,[]]);
             });
         });
@@ -826,7 +995,7 @@ class Portal {
             ]).then(result => {
                 callback([error,item_list]);
             }).catch(error => {
-                Log.error("Delete-List",error);
+                Log.error("Delete-List-Data",error);
                 callback([error,[]]);
             });
         });
@@ -857,7 +1026,7 @@ class Portal {
             ]).then(result => {
                 callback([error,count]);
             }).catch(error => {
-                Log.error("Count-List",error);
+                Log.error("Count-List-Data",error);
                 callback([error,[]]);
             });
         });
@@ -1121,12 +1290,13 @@ class Data {
     };
 }
 module.exports = {
-    Admin,
-    Business,
-    Category,
+    Admin_Data,
+    Business_Data,
+    Category_Data,
     Data,
     Database,
-    List,
-    Page,
+    List_Data,
+    Page_Data,
     Portal,
+    Product_Data,
 };
