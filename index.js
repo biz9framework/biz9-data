@@ -8,7 +8,7 @@ const async = require('async');
 const {get_db_connect_main,check_db_connect_main,close_db_connect_main,update_item_main,get_item_main,delete_item_main,get_id_list_main,delete_item_list_main,count_item_list_main} = require('./mongo/index.js');
 const {Scriptz}=require("biz9-scriptz");
 const {Log,Str,Number}=require("biz9-utility");
-const {DataItem,DataType,FieldType}=require("biz9-logic");
+const {DataItem,DataType,FieldType,Item_Logic}=require("/home/think2/www/doqbox/biz9-framework/biz9-logic/code");
 const { get_db_connect_adapter,check_db_connect_adapter,close_db_connect_adapter,update_item_adapter,update_item_list_adapter,get_item_adapter,delete_item_adapter,get_item_list_adapter,delete_item_list_adapter,count_item_list_adapter,delete_item_cache }  = require('./adapter.js');
 const {get_database_main} = require("./main");
 class Database {
@@ -59,8 +59,9 @@ class Database {
          *  - app_id
          *      - database id. / string / ex. project_500
          */
+        let cloud_error=null;
         return new Promise((callback) => {
-            Data.close(database).then(([error,data])=>{
+            Data.close_db(database).then(([error,data])=>{
                 cloud_error=Log.append(cloud_error,error);
                 callback([error,data]);
             }).catch(error => {
@@ -72,7 +73,7 @@ class Database {
     }
 }
 class List_Data {
-   static get_list = (database,data_type,filter,sort_by,page_current,page_size,option) => {
+    static get_list = (database,data_type,filter,sort_by,page_current,page_size,option) => {
         /* option params
          * - database
          *    - tbd
@@ -97,7 +98,7 @@ class List_Data {
          *      - item_list
          */
         return new Promise((callback) => {
-            let cloud_data = {item_list:[],item_count:0,page_count:0,filter:filter,data_type:data_type};
+            let cloud_data = {item_list:[],item_count:0,page_count:0,filter:filter,data_type:data_type,app_id:database.app_id};
             let error=null;
             if(option==null){
                 option = {get_item:true};
@@ -114,6 +115,7 @@ class List_Data {
                                 cloud_data.page_count=page_count;
                                 cloud_data.filter = filter;
                                 cloud_data.data_type = data_type;
+                                cloud_data.app_id = database.app_id;
                                 call();
                             }else{
                                 call();
@@ -131,7 +133,6 @@ class List_Data {
             });
         });
     };
-
     static get_parent_child_list = (full_item_list) => {
         /* option params
          * - full_item_list
@@ -188,6 +189,124 @@ class List_Data {
         });
     };
 }
+class Blog_Post_Data {
+    static get = async (database,key,option) => {
+        return new Promise((callback) => {
+            let cloud_data = {};
+            cloud_data.blog_post = {data_type:DataType.BLOG_POST,id:0,photos:[],items:[]};
+            let error = null;
+            if(option == null){
+                option = {get_item:false,get_photo:false}
+            }
+            if(option.get_item==null){
+                option.get_item=false;
+            }
+            if(option.get_photo==null){
+                option.get_photo=false;
+            }
+            async.series([
+                async function(call){
+                    const [error,data] = await Portal.get(database,DataType.BLOG_POST,key,option);
+                    if(error){
+                        error=Log.append(error,error);
+                    }else{
+                        if(data.id){
+                            cloud_data.blog_post = data;
+                        }
+                    }
+                },
+            ]).then(result => {
+                callback([error,cloud_data]);
+            }).catch(error => {
+                Log.error("Blog_Post--Data-Get",error);
+                callback([error,[]]);
+            });
+        });
+    };
+    static get_list = (database,filter,sort_by,page_current,page_size,option) => {
+        return new Promise((callback) => {
+            let cloud_data = {item_list:[],item_count:0,page_count:0};
+            let error=null;
+            if(option==null){
+                option = {get_item:true};
+            }
+            async.series([
+                async function(call){
+                    const [error,data] = await List_Data.get_list(database,DataType.BLOG_POST,filter,sort_by,page_current,page_size,option);
+                    if(error){
+                        error=Log.append(error,error);
+                    }else{
+                        cloud_data = data;
+                    }
+                },
+            ]).then(result => {
+                callback([error,cloud_data]);
+            }).catch(error => {
+                Log.error("Blog_Post-Get-List",error);
+                callback([error,[]]);
+            });
+        });
+    };
+}
+class Event_Data {
+    static get = async (database,key,option) => {
+        return new Promise((callback) => {
+            let cloud_data = {};
+            cloud_data.event = {data_type:DataType.EVENT,id:0,photos:[],items:[]};
+            let error = null;
+            if(option == null){
+                option = {get_item:false,get_photo:false}
+            }
+            if(option.get_item==null){
+                option.get_item=false;
+            }
+            if(option.get_photo==null){
+                option.get_photo=false;
+            }
+            async.series([
+                async function(call){
+                    const [error,data] = await Portal.get(database,DataType.EVENT,key,option);
+                    if(error){
+                        error=Log.append(error,error);
+                    }else{
+                        if(data.id){
+                            cloud_data.event = data;
+                        }
+                    }
+                },
+            ]).then(result => {
+                callback([error,cloud_data]);
+            }).catch(error => {
+                Log.error("Event--Data-Get",error);
+                callback([error,[]]);
+            });
+        });
+    };
+    static get_list = (database,filter,sort_by,page_current,page_size,option) => {
+        return new Promise((callback) => {
+            let cloud_data = {item_list:[],item_count:0,page_count:0};
+            let error=null;
+            if(option==null){
+                option = {get_item:true};
+            }
+            async.series([
+                async function(call){
+                    const [error,data] = await List_Data.get_list(database,DataType.EVENT,filter,sort_by,page_current,page_size,option);
+                    if(error){
+                        error=Log.append(error,error);
+                    }else{
+                        cloud_data = data;
+                    }
+                },
+            ]).then(result => {
+                callback([error,cloud_data]);
+            }).catch(error => {
+                Log.error("Event-Get-List",error);
+                callback([error,[]]);
+            });
+        });
+    };
+}
 class Product_Data {
     static get = async (database,key,option) => {
         return new Promise((callback) => {
@@ -231,11 +350,11 @@ class Product_Data {
             }
             async.series([
                 async function(call){
-                        const [error,data] = await List_Data.get_list(database,DataType.PRODUCT,filter,sort_by,page_current,page_size,option);
-                        if(error){
+                    const [error,data] = await List_Data.get_list(database,DataType.PRODUCT,filter,sort_by,page_current,page_size,option);
+                    if(error){
                         error=Log.append(error,error);
-                        }else{
-                            cloud_data = data;
+                    }else{
+                        cloud_data = data;
                     }
                 },
             ]).then(result => {
@@ -277,7 +396,6 @@ class Page_Data {
                         }
                     }
                 },
-                /*
                 async function(call){
                     const [error,data] = await Business_Data.get(database,option);
                     if(error){
@@ -288,7 +406,6 @@ class Page_Data {
                         }
                     }
                 },
-                */
             ]).then(result => {
                 callback([error,cloud_data]);
             }).catch(error => {
@@ -299,7 +416,7 @@ class Page_Data {
     };
 }
 class Category_Data {
-        static get_list = (database,filter,sort_by,page_current,page_size,option) => {
+    static get_list = (database,filter,sort_by,page_current,page_size,option) => {
         /* option params
          * - database
          *    - tbd
@@ -313,6 +430,7 @@ class Category_Data {
          *    - tbd
          * - option
          *    - get_photo / bool / ex. true,false / def. false /n/a
+         *    - get_product / bool / ex. true,false / def. false /n/a
          *    - photo_count / int / ex. 1-999 / def. 19 /n/a
          *    - photo_sort_by / query obj / ex. {date_create:1} /n/a
          * -  return objects
@@ -325,33 +443,64 @@ class Category_Data {
          */
         return new Promise((callback) => {
             let cloud_data = {item_list:[],item_count:0,page_count:0};
+            let product_list = [];
+            let search = {};
             let error=null;
             if(option==null){
-                option = {get_item:true};
+                option = {get_product:false};
             }
+            if(option.get_product==null){
+                option.get_product=false;
+            }
+
             async.series([
-                function(call){
-                    Data.get_list(database,DataType.CATEGORY,filter,sort_by,page_current,page_size).then(([error,data,item_count,page_count])=>{
-                        if(error){
-                            error=Log.append(error,error);
-                        }else{
-                            if(data.length>0){
-                                cloud_data.item_list=data;
-                                call();
-                            }else{
-                                call();
-                            }
-                        }
-                    }).catch(error => {
-                        error=Log.append(error,error);
-                    });
-                },
                 async function(call){
-                    if(option.get_item){
-                        const [error,data] = await List_Data.get_parent_child_list(cloud_data.item_list);
-                        cloud_data.item_list = data;
+                    search = Item_Logic.get_search(DataType.CATEGORY,filter,sort_by,page_current,page_size);
+                    const [error,data] = await List_Data.get_list(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option);
+                    if(error){
+                        error=Log.append(error,error);
+                    }else{
+                        cloud_data = data;
                     }
                 },
+                async function(call){
+                    if(option.get_product){
+
+                    search = Item_Logic.get_search(DataType.PRODUCT,{},{},1,999);
+                    const [error,data] = await List_Data.get_list(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option);
+                    if(error){
+                        error=Log.append(error,error);
+                    }else{
+                        product_list = data.item_list;
+                    }
+                    }
+                },
+                function(call){
+                    if(option.get_product){
+                        for(let a = 0;a<cloud_data.item_list.length;a++){
+                            cloud_data.item_list[a].product_count = 0;
+                            cloud_data.item_list[a].products = [];
+                            for(let b = 0;b<product_list.length;b++){
+                                if(cloud_data.item_list[a].title == product_list[b].category){
+                                    cloud_data.item_list[a].product_count = cloud_data.item_list[a].product_count + 1;
+                                    let add = true;
+                                    for(let c = 0;c<cloud_data.item_list[a].products.length;c++){
+                                        if(cloud_data.item_list[a].products[c].id == product_list[b].id){
+                                            add = false;
+                                        }
+                                    }
+                                    if(add){
+                                        cloud_data.item_list[a].products.push(product_list[b]);
+                                    }
+                                }
+                            }
+                        }
+                        call();
+                    }else{
+                        call();
+                    }
+                },
+
             ]).then(result => {
                 callback([error,cloud_data]);
             }).catch(error => {
@@ -360,111 +509,7 @@ class Category_Data {
             });
         });
     };
-
-
-    static get_category_product_group_list = async (database,filter,option) => {
-        /* option params
-         * - database
-         *      - tbd
-         * - filter
-         *      - tbd
-         * - option
-         *      - get_product / bool / ex. true,false / def. true
-         *      - product_count / int / ex. 1-999 / def. 19
-         *      - product_sort_by / query obj / ex. {date_create:1}
-         * return objects
-         * - category_list
-         *   - product_count
-         *   - product_list
-         *
-         */
-        return new Promise((callback) => {
-            let error = null;
-            let data_type = DataType.CATEGORY;
-            let category_list = [];
-            let product_list = [];
-            if(option == null){
-                option = {get_product:false,product_sort_by:{}};
-            }
-            if(option.get_product==null){
-                option.get_product = false;
-            }
-            if(option.product_sort_by==null){
-                option.product_sort_by = {date_create:1};
-            }
-            async.series([
-                function(call){
-                    let data_type = DataType.CATEGORY;
-                    let sort_by = {};
-                    let page_current = 1;
-                    let page_size = 999;
-                    Data.get_list(database,data_type,filter,sort_by,page_current,page_size).then(([error,data,item_count,page_count])=> {
-                        if(error){
-                            error=Log.append(error,error);
-                        }else{
-                            if(data.length>0){
-                                category_list = data;
-                            }
-                        }
-                        call();
-                    }).catch(error => {
-                        Log.error("Category-Data.Get-Group-Product-1",error);
-                        error = Log.append(error,error);
-                        call();
-                    });
-                },
-                function(call){
-                    let sort_by = {};
-                    let data_type = DataType.PRODUCT;
-                    let filter = {};
-                    let page_current = 1;
-                    let page_size = 999;
-                    Data.get_list(database,data_type,filter,sort_by,page_current,page_size).then(([error,data,item_count,page_count])=> {
-                        if(error){
-                            error=Log.append(error,error);
-                        }else{
-                            if(data.length>0){
-                                product_list = data;
-                            }
-                        }
-                        call();
-                    }).catch(error => {
-                        Log.error("Category-Data-Get-Group-Product-2",error);
-                        error = Log.append(error,error);
-                        call();
-                    });
-                },
-                function(call){
-                    for(let a = 0;a<category_list.length;a++){
-                        category_list[a].product_count = 0;
-                        category_list[a].products = [];
-                        for(let b = 0;b<product_list.length;b++){
-                            if(category_list[a].title == product_list[b].category){
-                                category_list[a].product_count = category_list[a].product_count + 1;
-                                let add = true;
-                                for(let c = 0;c<category_list[a].products.length;c++){
-                                    if(category_list[a].products[c].id == product_list[b].id){
-                                        add = false;
-                                    }
-                                }
-                                if(add){
-                                    category_list[a].products.push(product_list[b]);
-                                }
-                            }
-                        }
-                    }
-                    call();
-                },
-            ]).then(result => {
-                callback([error,business]);
-            }).catch(error => {
-                Log.error("Business-Data-Get",error);
-                callback([error,[]]);
-            });
-        });
-    };
 }
-
 class Business_Data {
     static get = async (database,option) => {
         return new Promise((callback) => {
@@ -586,16 +631,13 @@ class Portal {
             }
             async.series([
                 function(call){
-                    console.log('111111111111');
                     if(!Number.check_is_guid(key)){
                         option.title_url = key;
                     }
                     call();
                 },
                 function(call){
-                    console.log('2222222222');
                     Data.get_item(database,data_type,key,option).then(([error,data])=> {
-                        console.log('333333333');
                         if(error){
                             error=Log.append(error,error);
                         }else{
@@ -612,7 +654,7 @@ class Portal {
                 },
                 function(call){
                     let filter = {};
-                    if(item.id && option.get_item){
+                    if(item.id && option.get_item || option.get_section){
                         if(Str.check_is_null(item.top_id)){
                             filter={top_id:item.id};
                         }else{
@@ -621,7 +663,7 @@ class Portal {
                         let data_type = DataType.ITEM;
                         let sort_by={title:-1};
                         let page_current = 1;
-                        let page_size = 999;
+                        let page_size = 999999;
                         Data.get_list(database,data_type,filter,sort_by,page_current,page_size).then(([error,data,item_count,page_count])=> {
                             if(error){
                                 error=Log.append(error,error);
@@ -640,13 +682,13 @@ class Portal {
                     }
                 },
                 async function(call){
-                    if(item.id && option.get_item){
+                    if(item.id && option.get_item || option.get_section){
                         const [error,data] = await List_Data.get_parent_child_list(full_item_list);
                         new_item_list = data;
                     }
                 },
                 function(call){
-                    if(item.id && option.get_item){
+                    if(item.id && option.get_item || option.get_section){
                         for(let a=0; a<new_item_list.length; a++){
                             if(new_item_list[a].parent_id == item.id){
                                 let item_title_url = Str.get_title_url(new_item_list[a].title);
@@ -1085,7 +1127,7 @@ class Portal {
                         }
                         call();
                     }).catch(error => {
-                       error=Log.append(error,error);
+                        error=Log.append(error,error);
                         call();
                     });
                 },
@@ -1299,4 +1341,6 @@ module.exports = {
     Page_Data,
     Portal,
     Product_Data,
+    Blog_Post_Data,
+    Event_Data,
 };
