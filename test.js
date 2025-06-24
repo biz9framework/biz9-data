@@ -23,7 +23,7 @@ const DATA_TYPE = DataType.PAGE;
 const OPTION = {};
 //const FILTER = {test_group_id:59367};
 const FILTER = {data_type:DATA_TYPE};
-const APP_ID = 'test-june21';
+const APP_ID = 'test-june24';
 const SQL = {};
 /* --- TEST CONFIG END --- */
 
@@ -215,13 +215,16 @@ describe('connect', function(){ this.timeout(25000);
                 console.log('PORTAL-START');
                 let data_type = DataType.PRODUCT;
                 let filter = {title:'apple'};
-                let key = 'cool';
+                let key = 'product_website_64';
                 let sort_by = {};
                 let page_current = 1;
                 let page_size = 99;
                 //const [error,data] = await Portal.get_list(database,data_type,filter,sort_by,page_current,page_size,{get_item:true,get_photo:true});
-                const [error,data] = await Portal.get(database,data_type,key,{get_item:true,get_photo:true});
+                //const [error,data] = await Portal.get(database,cloud.product.data_type,cloud.product.key,{get_photo:true});
+                const [error,data] = await Portal.get(database,data_type,key,{get_photo:true});
                 console.log(data);
+                console.log(data.title);
+                console.log(data.photos.length);
                 console.log('PORTAL-SUCCESS');
                 //database = data;
                 //Log.w('database',database);
