@@ -7,7 +7,7 @@ Description: BiZ9 Framework: Data
 const async = require('async');
 const {get_db_connect_main,check_db_connect_main,close_db_connect_main,update_item_main,get_item_main,delete_item_main,get_id_list_main,delete_item_list_main,count_item_list_main} = require('./mongo/index.js');
 const {Scriptz}=require("biz9-scriptz");
-const {Log,Str,Number}=require("biz9-utility");
+const {Log,Str,Number,Obj}=require("/home/think2/www/doqbox/biz9-framework/biz9-utility/code");
 const {DataItem,DataType,FieldType,Item_Logic}=require("/home/think2/www/doqbox/biz9-framework/biz9-logic/code");
 const { get_db_connect_adapter,check_db_connect_adapter,close_db_connect_adapter,update_item_adapter,update_item_list_adapter,get_item_adapter,delete_item_adapter,get_item_list_adapter,delete_item_list_adapter,count_item_list_adapter,delete_item_cache }  = require('./adapter.js');
 const {get_database_main} = require("./main");
@@ -23,9 +23,7 @@ class Database {
          */
         let cloud_error=null;
         return new Promise((callback) => {
-            if(option==null){
-                option = {biz9_config_file:null,app_id:null};
-            }
+            option = !Obj.check_is_empty(option) ? option : {biz9_config_file:null,app_id:null};
             if(option.biz9_config_file==null){
                 option.biz9_config_file=null;
             }else{
@@ -100,9 +98,7 @@ class List_Data {
         return new Promise((callback) => {
             let cloud_data = {item_list:[],item_count:0,page_count:0,filter:filter,data_type:data_type,app_id:database.app_id};
             let error=null;
-            if(option==null){
-                option = {get_item:true};
-            }
+            option = !Obj.check_is_empty(option) ? option : {get_item:true};
             async.series([
                 function(call){
                     Data.get_list(database,data_type,filter,sort_by,page_current,page_size).then(([error,data,item_count,page_count])=>{
@@ -285,10 +281,8 @@ class Event_Data {
     static get_list = (database,filter,sort_by,page_current,page_size,option) => {
         return new Promise((callback) => {
             let cloud_data = {item_list:[],item_count:0,page_count:0};
+            option = !Obj.check_is_empty(option) ? option : {get_item:true};
             let error=null;
-            if(option==null){
-                option = {get_item:true};
-            }
             async.series([
                 async function(call){
                     const [error,data] = await List_Data.get_list(database,DataType.EVENT,filter,sort_by,page_current,page_size,option);
@@ -307,6 +301,58 @@ class Event_Data {
         });
     };
 }
+class Content_Data {
+    static get = async (database,key,option) => {
+        return new Promise((callback) => {
+            let cloud_data = {};
+            cloud_data.content = {data_type:DataType.CONTENT,id:0,photos:[],items:[]};
+            let error = null;
+            option = !Obj.check_is_empty(option) ? option : {get_item:false,get_photo:false};
+            option.get_item = !Str.check_is_null(option.get_item) ? option.get_item : false;
+            option.get_photo = !Str.check_is_null(option.get_photo) ? option.get_photo : false;
+            async.series([
+                async function(call){
+                    const [error,data] = await Portal.get(database,DataType.CONTENT,key,option);
+                    if(error){
+                        error=Log.append(error,error);
+                    }else{
+                        if(data.id){
+                            cloud_data.content = data;
+                        }
+                    }
+                },
+            ]).then(result => {
+                callback([error,cloud_data]);
+            }).catch(error => {
+                Log.error("Product--Data-Get",error);
+                callback([error,[]]);
+            });
+        });
+    };
+    static get_list = (database,filter,sort_by,page_current,page_size,option) => {
+        return new Promise((callback) => {
+            let cloud_data = {item_list:[],item_count:0,page_count:0};
+            let error=null;
+            option = !Obj.check_is_empty(option) ? option : {get_item:true};
+            async.series([
+                async function(call){
+                    const [error,data] = await List_Data.get_list(database,DataType.CONTENT,filter,sort_by,page_current,page_size,option);
+                    if(error){
+                        error=Log.append(error,error);
+                    }else{
+                        cloud_data = data;
+                    }
+                },
+            ]).then(result => {
+                callback([error,cloud_data]);
+            }).catch(error => {
+                Log.error("Product-Get-List",error);
+                callback([error,[]]);
+            });
+        });
+    };
+}
+
 class Product_Data {
     static get = async (database,key,option) => {
         return new Promise((callback) => {
@@ -617,7 +663,7 @@ class Portal {
          */
         return new Promise((callback) => {
             let error = null;
-            let item = {data_type:data_type,id:0,items:[],photos:[]};
+            let item = {data_type:data_type,id:0,items:[],photos:[],app_id:database.app_id};
             let full_item_list = [];
             let new_item_list = [];
             if(option == null){
@@ -739,7 +785,7 @@ class Portal {
          *  - photo_sort_by / query obj / ex. {date_create:1}
          */
         return new Promise((callback) => {
-            let cloud_data = {item_list:[],item_count:0,page_count:0};
+            let cloud_data = {item_list:[],item_count:0,page_count:0,app_id:database.app_id};
             let error=null;
             if(option==null){
                 option = {get_item:true};
@@ -1335,6 +1381,7 @@ module.exports = {
     Admin_Data,
     Business_Data,
     Category_Data,
+    Content_Data,
     Data,
     Database,
     List_Data,

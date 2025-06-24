@@ -242,7 +242,7 @@ const get_item_adapter = (db_connect,data_type,key,option) => {
                 });
             },
             function(call) {
-                if(option.title_url && !Number.check_is_guid(option.title_url)){
+                if(option.title_url && ! Number.check_is_guid(option.title_url)){
                     item_data = DataItem.get_new(data_type,0,{title_url:option.title_url,app_id:db_connect.app_id});
                     let filter={title_url:option.title_url};
                     let sort_by={};
@@ -255,6 +255,7 @@ const get_item_adapter = (db_connect,data_type,key,option) => {
                             item_data.source = NOT_FOUND_TITLE;
                             item_data.items=[];
                             item_data.photos=[];
+                            item_data.app_id = db_connect.app_id;
                         }
                         call();
                     }).catch(error => {
@@ -266,6 +267,7 @@ const get_item_adapter = (db_connect,data_type,key,option) => {
                     get_item_cache_db(cache_connect,db_connect,data_type,key).then(([error,data]) => {
                         if(data){
                             item_data = data;
+                            item_data.app_id = db_connect.app_id;
                         }
                         call();
                     }).catch(error => {

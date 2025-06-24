@@ -1,6 +1,6 @@
 const async = require('async');
 const assert = require('node:assert');
-const {Data,Database,Portal,Category_Data,Product_Data,Page_Data,Blog_Post_Data} = require(".");
+const {Data,Database,Portal,Category_Data,Product_Data,Page_Data,Blog_Post_Data,Content_Data} = require(".");
 const {Log,Number} = require("biz9-utility");
 const {DataType,DataItem,Item_Logic,Page_Logic,Template_Logic,Blog_Post_Logic,Content_Logic} = require("/home/think2/www/doqbox/biz9-framework/biz9-logic/code");
 /*
@@ -23,7 +23,7 @@ const DATA_TYPE = DataType.PAGE;
 const OPTION = {};
 //const FILTER = {test_group_id:59367};
 const FILTER = {data_type:DATA_TYPE};
-const APP_ID = 'test-june20';
+const APP_ID = 'test-june21';
 const SQL = {};
 /* --- TEST CONFIG END --- */
 
@@ -83,15 +83,13 @@ describe('connect', function(){ this.timeout(25000);
                 //Log.w('data',data);
                 //console.log('PRODUCT-END');
 
-            /*
-                console.log('CONTENT-START');
-                let content = Content_Logic.get_test("Content " + String(Number.get_id()),{get_value:true,get_item:true});
-                Log.w('content',content);
-                //const [error,data] = await Category.get_category_product_group_list(database,filter,{get_item:true});
+                //console.log('CONTENT-START');
+                //let content = Content_Logic.get_test("Content " + String(Number.get_id()),{get_value:true,get_item:true});
+                //const [error,data] = await Content_Data.get(database,'partners',{get_item:true});
                 //Log.w('data',data);
-                console.log('CONTENT-END');
-            */
+                //console.log('CONTENT-END');
 
+            /*
                 console.log('BLOG-START');
                 //let blog = Blog_Post_Logic.get_test("Blog " + String(Number.get_id()),{get_value:true,get_item:true});
                 //Log.w('blog_post',blog);
@@ -99,6 +97,8 @@ describe('connect', function(){ this.timeout(25000);
                 const [error,data] = await Blog_Post_Data.get_list(database,search.filter,search.sort_by,search.page_current,search.page_size,{get_photo:true,get_item:true});
                 Log.w('data',data);
                 console.log('BLOG-END');
+                */
+
                 //console.log('PAGE-START');
                 //let page = Page_Logic.get_test("Page " + String(Number.get_id()),{get_value:true,get_item:true});
                 //Log.w('page',page);
@@ -212,19 +212,20 @@ describe('connect', function(){ this.timeout(25000);
                 */
 
 
-            /*
-                console.log('PORTAL-GET-LIST-START');
-                let data_type = DataType.BLANK;
-                let filter = {};
+                console.log('PORTAL-START');
+                let data_type = DataType.PRODUCT;
+                let filter = {title:'apple'};
+                let key = 'cool';
                 let sort_by = {};
                 let page_current = 1;
                 let page_size = 99;
-                const [error,data] = await Portal.get_list(database,data_type,filter,sort_by,page_current,page_size,{get_item:true,get_photo:true});
+                //const [error,data] = await Portal.get_list(database,data_type,filter,sort_by,page_current,page_size,{get_item:true,get_photo:true});
+                const [error,data] = await Portal.get(database,data_type,key,{get_item:true,get_photo:true});
                 console.log(data);
-                console.log('PORTAL-GET-LIST-SUCCESS');
+                console.log('PORTAL-SUCCESS');
                 //database = data;
                 //Log.w('database',database);
-                */
+    //
                    /*
                 console.log('PORTAL-DELETE-START');
                 let data_type = DataType.BLANK;
