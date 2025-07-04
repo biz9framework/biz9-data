@@ -72,7 +72,7 @@ describe('connect', function(){ this.timeout(25000);
             Log.w('search',search);
             let option = {get_group:true,group_search:Item_Logic.get_search(DataType.PRODUCT,{},{},1,90),group_parent_field:'title',group_child_field:'category'};
             const [error,data] = await List_Data.get_list(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option);
-            //Log.w('data',data);
+            Log.w('data',data);
             console.log('LIST-END');
 
 

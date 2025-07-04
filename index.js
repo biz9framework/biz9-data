@@ -105,16 +105,11 @@ class List_Data {
          */
         return new Promise((callback) => {
             let cloud_data = {item_list:[],item_count:0,page_count:0,filter:filter,data_type:data_type,app_id:database.app_id};
-            let child_item_list = [];
+            let group_item_list = [];
             let error=null;
             option = !Obj.check_is_empty(option) ? option : {get_item:true};
             async.series([
                 function(call){
-                    Log.w('data_type',data_type);
-                    Log.w('filter',filter);
-                    Log.w('sort_by',sort_by);
-                    Log.w('page_current',page_current);
-                    Log.w('page_size',page_size);
                     Data.get_list(database,data_type,filter,sort_by,page_current,page_size).then(([error,data,item_count,page_count])=>{
                         if(error){
                             error=Log.append(error,error);
@@ -137,14 +132,13 @@ class List_Data {
                 },
                 function(call){
                     if(option.get_group){
-                        Log.w('option',option);
                     option.group_search = option.group_search ? option.group_search : Item_Logic.get_search(DataType.BLANK,{},{title:1},1,999);
                     Data.get_list(database,option.group_search.data_type,option.group_search.filter,option.group_search.sort_by,option.group_search.page_current,option.group_search.page_size).then(([error,data,item_count,page_count])=>{
                         if(error){
                             error=Log.append(error,error);
                         }else{
                             if(data.length>0){
-                                child_item_list=data;
+                                group_item_list=data;
                                 call();
                             }else
                             {
@@ -160,11 +154,11 @@ class List_Data {
                 },
                 function(call){
                     if(option.get_group){
-                        for(let a = 0; a<child_item_list.length;a++){
-                            for(let b = 0; b<child_item_list.length;b++){
-                                child_item_list[a][option.group_parent_field].items = [];
-                                if(child_item_list[a][option.group_parent_field] == child_item_list[b][option.group_child_field]){
-                                    child_item_list[a][option.group_parent_field].items.push(child_item_list[b][option.group_child_field]);
+                        for(let a = 0; a<cloud_data.item_list.length;a++){
+                            cloud_data.item_list[a].items = [];
+                            for(let b = 0; b<group_item_list.length;b++){
+                                if(cloud_data.item_list[a][option.group_parent_field] == group_item_list[b][option.group_child_field]){
+                                    cloud_data.item_list[a].items.push(group_item_list[b]);
                                 }
                             }
                         }
@@ -181,6 +175,50 @@ class List_Data {
             });
         });
     };
+    static get_child_list = (database,item_list,data_type,filter,sort_by,page_current,page_size,option) => {
+        console.log('aaaaaaaaaaa');
+        return new Promise((callback) => {
+            let error=null;
+            //option = !Obj.check_is_empty(option) ? option : {get_item:true};
+            async.series([
+                function(call){
+                    console.log('bbbbbbbbbbb');
+                    Data.get_list(database,data_type,filter,sort_by,page_current,page_size).then(([error,data,item_count,page_count])=>{
+                        if(error){
+                            error=Log.append(error,error);
+                        }else{
+                            if(data.length>0){
+                                child_item_list=data;
+                                call();
+                            }else{
+                                call();
+                            }
+                        }
+                    }).catch(error => {
+                        error=Log.append(error,error);
+                    });
+                },
+                function(call){
+                    console.log('cccccccccc');
+                        for(let a = 0; a<item_list.length;a++){
+                            item_list[a].items = [];
+                            for(let b = 0; b<child_item_list.length;b++){
+                                if(item_list[a][option.group_parent_field] == child_item_list[b][option.group_child_field]){
+                                    item_list[a].items.push(child_item_list[b]);
+                                }
+                            }
+                        }
+                        call();
+                    }
+            ]).then(result => {
+                callback([error,cloud_data]);
+            }).catch(error => {
+                Log.error("List-Data-Get",error);
+                callback([error,[]]);
+            });
+        });
+    };
+
     static get_parent_child_list = (full_item_list) => {
         /* option params
          * - full_item_list
