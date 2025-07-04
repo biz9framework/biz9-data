@@ -1,6 +1,6 @@
 const async = require('async');
 const assert = require('node:assert');
-const {Data,Database,Portal,Category_Data,Product_Data,Page_Data,Blog_Post_Data,Content_Data} = require(".");
+const {Data,Database,Portal,Category_Data,Product_Data,Page_Data,Blog_Post_Data,Content_Data,Stat_Data} = require(".");
 const {Log,Number} = require("biz9-utility");
 const {DataType,DataItem,Item_Logic,Page_Logic,Template_Logic,Blog_Post_Logic,Content_Logic} = require("/home/think2/www/doqbox/biz9-framework/biz9-logic/code");
 /*
@@ -23,7 +23,7 @@ const DATA_TYPE = DataType.PAGE;
 const OPTION = {};
 //const FILTER = {test_group_id:59367};
 const FILTER = {data_type:DATA_TYPE};
-const APP_ID = 'test-june24';
+const APP_ID = 'test-june30';
 const SQL = {};
 /* --- TEST CONFIG END --- */
 
@@ -56,6 +56,15 @@ describe('connect', function(){ this.timeout(25000);
                 console.log('DATABASE-END');
         },
         async function(call){
+            console.log('STAT-START');
+            let data_type = DataType.PRODUCT;
+            let id = 344;
+            let customer_id = 999;
+            const [error,data] = await Stat_Data.update_item_view_count(database,data_type,id,customer_id);
+            Log.w('data',data);
+
+
+            console.log('STAT-END');
 
             /*
             console.log('SEARCH-START');
@@ -211,21 +220,24 @@ describe('connect', function(){ this.timeout(25000);
                 //Log.w('database',database);
                 */
 
-
+            /*
                 console.log('PORTAL-START');
                 let data_type = DataType.PRODUCT;
-                let filter = {title:'apple'};
+                //let filter = {title:'apple'};
+                let filter = { title: { $regex:'.*4', $options: "i" } }
+
                 let key = 'product_website_64';
                 let sort_by = {};
                 let page_current = 1;
                 let page_size = 99;
-                //const [error,data] = await Portal.get_list(database,data_type,filter,sort_by,page_current,page_size,{get_item:true,get_photo:true});
+                const [error,data] = await Portal.get_list(database,data_type,filter,sort_by,page_current,page_size,{get_item:true,get_photo:true});
                 //const [error,data] = await Portal.get(database,cloud.product.data_type,cloud.product.key,{get_photo:true});
-                const [error,data] = await Portal.get(database,data_type,key,{get_photo:true});
+                //const [error,data] = await Portal.get(database,data_type,key,{get_photo:true});
                 console.log(data);
                 console.log(data.title);
                 console.log(data.photos.length);
                 console.log('PORTAL-SUCCESS');
+                */
                 //database = data;
                 //Log.w('database',database);
     //

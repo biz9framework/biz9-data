@@ -206,9 +206,7 @@ class Blog_Post_Data {
                     if(error){
                         error=Log.append(error,error);
                     }else{
-                        if(data.id){
                             cloud_data.blog_post = data;
-                        }
                     }
                 },
             ]).then(result => {
@@ -265,9 +263,7 @@ class Event_Data {
                     if(error){
                         error=Log.append(error,error);
                     }else{
-                        if(data.id){
                             cloud_data.event = data;
-                        }
                     }
                 },
             ]).then(result => {
@@ -316,9 +312,7 @@ class Content_Data {
                     if(error){
                         error=Log.append(error,error);
                     }else{
-                        if(data.id){
                             cloud_data.content = data;
-                        }
                     }
                 },
             ]).then(result => {
@@ -374,9 +368,7 @@ class Product_Data {
                     if(error){
                         error=Log.append(error,error);
                     }else{
-                        if(data.id){
                             cloud_data.product = data;
-                        }
                     }
                 },
             ]).then(result => {
@@ -417,7 +409,6 @@ class Page_Data {
         return new Promise((callback) => {
             let cloud_data = {};
             cloud_data.page = {data_type:DataType.PAGE,id:0,photos:[],items:[]};
-            cloud_data.business = {data_type:DataType.BUSINESS,id:0};
             let error = null;
             if(option == null){
                 option = {get_item:false,get_photo:false,get_business:false}
@@ -437,12 +428,12 @@ class Page_Data {
                     if(error){
                         error=Log.append(error,error);
                     }else{
-                        if(data.id){
                             cloud_data.page = data;
-                        }
                     }
                 },
                 async function(call){
+                    if(option.get_business){
+                    cloud_data.business = {data_type:DataType.BUSINESS,id:0};
                     const [error,data] = await Business_Data.get(database,option);
                     if(error){
                         error=Log.append(error,error);
@@ -451,11 +442,61 @@ class Page_Data {
                             cloud_data.business = data;
                         }
                     }
+                    }
                 },
             ]).then(result => {
                 callback([error,cloud_data]);
             }).catch(error => {
                 Log.error("Page-Get",error);
+                callback([error,[]]);
+            });
+        });
+    };
+}
+class Template_Data {
+    static get = async (database,key,option) => {
+        return new Promise((callback) => {
+            let cloud_data = {};
+            cloud_data.template = {data_type:DataType.TEMPLATE,id:0,photos:[],items:[]};
+            let error = null;
+            if(option == null){
+                option = {get_item:false,get_photo:false,get_business:false}
+            }
+            if(option.get_item==null){
+                option.get_item=false;
+            }
+            if(option.get_photo==null){
+                option.get_photo=false;
+            }
+            if(option.get_business==null){
+                option.get_business=false;
+            }
+            async.series([
+                async function(call){
+                    const [error,data] = await Portal.get(database,DataType.TEMPLATE,key,option);
+                    if(error){
+                        error=Log.append(error,error);
+                    }else{
+                            cloud_data.template = data;
+                    }
+                },
+                async function(call){
+                    if(option.get_business){
+                    cloud_data.business = {data_type:DataType.BUSINESS,id:0};
+                    const [error,data] = await Business_Data.get(database,option);
+                    if(error){
+                        error=Log.append(error,error);
+                    }else{
+                        if(data.id){
+                            cloud_data.business = data;
+                        }
+                    }
+                    }
+                },
+            ]).then(result => {
+                callback([error,cloud_data]);
+            }).catch(error => {
+                Log.error("Template-Get",error);
                 callback([error,[]]);
             });
         });
@@ -1106,6 +1147,7 @@ class Portal {
                         }else{
                             count = data;
                         }
+                        call();
                     }).catch(error => {
                         error = Log.append(error,error);
                         call();
@@ -1341,6 +1383,294 @@ class Faq{
         });
     }
 }
+class Stat_Data {
+   static update_item_view_count = async (database,data_type,id,customer_id,option) => {
+        return new Promise((callback) => {
+            let cloud_data = {};
+            let new_view = false;
+            let item_count = 0;
+            cloud_data.item = DataItem.get_new(data_type,0);
+            cloud_data.stat = DataItem.get_new(DataType.STAT,0,{count:0,item_id:id,customer_id:customer_id,type_id:FieldType.STAT_VIEW_ID});
+            let error = null;
+            async.series([
+               async function(call){
+                    let search = Item_Logic.get_search(DataType.STAT,{customer_id:cloud_data.item.customer_id,item_id:cloud_data.item.id,type_id:FieldType.STAT_VIEW_ID},{},1,999);
+                    const [error,data] = await Portal.count(database,search.data_type,search.filter);
+                    if(error){
+                        error=Log.append(error,error);
+                    }else{
+                        new_view = data<=0 ? true : false;
+                        cloud_data.item.count = data;
+                    }
+                },
+                //get item
+                async function(call){
+                    if(new_view){
+                        console.log('aaaaaaaa');
+                    const [error,data] = await Portal.get(database,cloud_data.item.data_type,cloud_data.item.id,{get_item:false});
+                        Log.w('data',data);
+                        /*
+                    if(error){
+                        error=Log.append(error,error);
+                    }else{
+                        if(data.id){
+                            cloud_data.item = data;
+                        }
+                    }
+                    */
+                    }
+                    Log.w('cloud_44',cloud_data);
+                },
+                /*
+                //save stat
+                async function(call){
+                    if(new_view){
+                    const [error,data] = await Portal.update(database,DataType.STAT,cloud_data.stat);
+                    if(error){
+                        error=Log.append(error,error);
+                    }else{
+                        if(data.id){
+                            cloud_data.stat = data;
+                        }
+                    }
+                }
+                    Log.w('cloud',cloud_data);
+                },
+                 //update item
+                async function(call){
+                    if(new_view){
+                        cloud_data.item.view_count = cloud_data.item.view_count>0 ? (parseInt(cloud_data.item.view_count + 1)): 1;
+                    const [error,data] = await Portal.update(database,cloud_data.item.data_type,cloud_data.item);
+                    if(error){
+                        error=Log.append(error,error);
+                    }else{
+                        if(data.id){
+                            cloud_data.item = data;
+                        }
+                    }
+
+                    }
+            },
+            */
+            ]).then(result => {
+                callback([error,cloud_data]);
+            }).catch(error => {
+                Log.error("-Update-Item-View-Count-",error);
+                callback([error,[]]);
+            });
+        });
+    };
+
+    /*
+    static get = async (database,key,option) => {
+        return new Promise((callback) => {
+            let cloud_data = {};
+            cloud_data.blog_post = {data_type:DataType.BLOG_POST,id:0,photos:[],items:[]};
+            let error = null;
+            if(option == null){
+                option = {get_item:false,get_photo:false}
+            }
+            if(option.get_item==null){
+                option.get_item=false;
+            }
+            if(option.get_photo==null){
+                option.get_photo=false;
+            }
+            async.series([
+                async function(call){
+                    const [error,data] = await Portal.get(database,DataType.BLOG_POST,key,option);
+                    if(error){
+                        error=Log.append(error,error);
+                    }else{
+                        if(data.id){
+                            cloud_data.blog_post = data;
+                        }
+                    }
+                },
+            ]).then(result => {
+                callback([error,cloud_data]);
+            }).catch(error => {
+                Log.error("Blog_Post--Data-Get",error);
+                callback([error,[]]);
+            });
+        });
+    };
+    static get_list = (database,filter,sort_by,page_current,page_size,option) => {
+        return new Promise((callback) => {
+            let cloud_data = {item_list:[],item_count:0,page_count:0};
+            let error=null;
+            if(option==null){
+                option = {get_item:true};
+            }
+            async.series([
+                async function(call){
+                    const [error,data] = await List_Data.get_list(database,DataType.BLOG_POST,filter,sort_by,page_current,page_size,option);
+                    if(error){
+                        error=Log.append(error,error);
+                    }else{
+                        cloud_data = data;
+                    }
+                },
+
+            ]).then(result => {
+                callback([error,cloud_data]);
+            }).catch(error => {
+                Log.error("Blog_Post-Get-List",error);
+                callback([error,[]]);
+            });
+        });
+    };
+module.exports = function(){
+    // item = {item_data_type,item_tbl_id,customer_id,type_id}
+    STAT_VIEW_ID='1';
+    STAT_LIKE_ID='2';
+    STAT_POST_ID='3';
+    module.get_customer_item_like_list=function(customer_like_list,item_list,callback){
+        for(var a=0;a<customer_like_list.length;a++){
+            for(var b=0;b<item_list.length;b++){
+                if(customer_like_list[a].item_tbl_id==item_list[b].tbl_id){
+                    item_list[b].customer_like='true';
+                }
+            }
+        }
+            callback(null,item_list);
+    }
+    module.update_item_view_count=function(db,item_data_type,item_tbl_id,customer_id,callback){
+        var new_view=true;
+        var item_count=0;
+        var update_item = biz9.get_new_item(item_data_type,item_tbl_id);
+        var new_stat = biz9.get_new_item(DT_STAT,0);
+        var error=null;
+        async.series([
+            function(call){
+                if(customer_id){
+                    sql = {customer_id:customer_id,item_tbl_id:item_tbl_id,type_id:STAT_VIEW_ID};
+                    sort={};
+                    dataz.get_sql_cache(db,DT_STAT,sql,sort,function(error,data_list) {
+                        if(data_list.length>0){
+                            new_view=false;
+                        }
+                        call();
+                    });
+                }else{
+                    call();
+                }
+            },
+            function(call){
+                if(new_view){
+                    new_stat.item_data_type=item_data_type;
+                    new_stat.item_tbl_id=item_tbl_id;
+                    new_stat.customer_id=customer_id;
+                    new_stat.type_id=STAT_VIEW_ID;
+                    biz9.update_item(db,DT_STAT,new_stat,function(error,data) {
+                        call();
+                    });
+                }else{
+                    call();
+                }
+            },
+            function(call){
+                if(new_view){
+                    sql={type_id:STAT_VIEW_ID,item_tbl_id:item_tbl_id};
+                    biz9.count(db,DT_STAT,sql,function(error,data) {
+                        if(!data){
+                            item_count=0;
+                        }else if(data==STAT_VIEW_ID){
+                            item_count=0;//bug fix
+                        }else{
+                            item_count=parseInt(data);
+                        }
+                        call();
+                    });
+                }else{
+                    call();
+                }
+            },
+            function(call){
+                if(new_view){
+                    update_item.view_count=parseInt(item_count)+1;
+                    biz9.update_item(db,item_data_type,update_item,function(error,data) {
+                        update_item=data;
+                        call();
+                    });
+                }else{
+                    call();
+                }
+            },
+        ],
+            function(err, result){
+                update_item.new_view=new_view;
+                callback(error,update_item);
+            });
+    }
+    module.update_item_like_count=function(db,item_data_type,item_tbl_id,customer_id,callback){
+        var new_like=true;
+        var item_count=0;
+        var update_item = biz9.get_new_item(item_data_type,item_tbl_id);
+        var new_stat = biz9.get_new_item(DT_STAT,0);
+        var error=null;
+        async.series([
+            function(call){
+                if(customer_id){
+                    sql = {customer_id:customer_id,item_tbl_id:item_tbl_id,type_id:STAT_LIKE_ID};
+                    sort={};
+                    dataz.get_sql_cache(db,DT_STAT,sql,sort,function(error,data_list) {
+                        if(data_list.length>0){
+                            new_like=false;
+                        }
+                        call();
+                    });
+                }else{
+                    call();
+                }
+            },
+            function(call){
+                if(new_like){
+                    new_stat.item_data_type=item_data_type;
+                    new_stat.item_tbl_id=item_tbl_id;
+                    new_stat.customer_id=customer_id;
+                    new_stat.type_id=STAT_LIKE_ID;
+                    biz9.update_item(db,DT_STAT,new_stat,function(error,data) {
+                        call();
+                    });
+                }else{
+                    call();
+                }
+            },
+            function(call){
+                if(new_like){
+                    sql={type_id:STAT_LIKE_ID,item_tbl_id:item_tbl_id};
+                    biz9.count(db,DT_STAT,sql,function(error,data) {
+                        if(!data){
+                            item_count=1;
+                        }else{
+                            item_count=parseInt(data);
+                        }
+                        call();
+                    });
+                }else{
+                    item_count=1;
+                    call();
+                }
+            },
+            function(call){
+                update_item.like_count=item_count;
+                    biz9.update_item(db,item_data_type,update_item,function(error,data) {
+                        update_item=data;
+                        call();
+                    });
+            },
+        ],
+            function(err, result){
+                update_item.new_like=new_like;
+                callback(error,update_item);
+            });
+    }
+        return module;
+}
+    */
+}
+
 class Data {
     static open_db = async (data_config) => {
         return [error,data] = await get_db_connect_adapter(data_config);
@@ -1386,8 +1716,10 @@ module.exports = {
     Database,
     List_Data,
     Page_Data,
+    Template_Data,
     Portal,
     Product_Data,
     Blog_Post_Data,
     Event_Data,
+    Stat_Data,
 };
