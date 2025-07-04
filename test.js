@@ -1,6 +1,6 @@
 const async = require('async');
 const assert = require('node:assert');
-const {Data,Database,Portal,Category_Data,Product_Data,Page_Data,Blog_Post_Data,Content_Data,Stat_Data} = require(".");
+const {Data,Database,Portal,Category_Data,Product_Data,Page_Data,Blog_Post_Data,Content_Data,Stat_Data,List_Data} = require(".");
 const {Log,Number} = require("biz9-utility");
 const {DataType,DataItem,Item_Logic,Page_Logic,Template_Logic,Blog_Post_Logic,Content_Logic} = require("/home/think2/www/doqbox/biz9-framework/biz9-logic/code");
 /*
@@ -56,15 +56,25 @@ describe('connect', function(){ this.timeout(25000);
                 console.log('DATABASE-END');
         },
         async function(call){
+            /*
             console.log('STAT-START');
             let data_type = DataType.PRODUCT;
             let id = 344;
             let customer_id = 999;
             const [error,data] = await Stat_Data.update_item_view_count(database,data_type,id,customer_id);
             Log.w('data',data);
-
-
             console.log('STAT-END');
+            */
+            console.log('LIST-START');
+            //let query = {};
+            //query.application_development_template_type = "Website Application Template";
+            let search = Item_Logic.get_search(DataType.CATEGORY,{},{},1,90);
+            Log.w('search',search);
+            let option = {get_group:true,group_search:Item_Logic.get_search(DataType.PRODUCT,{},{},1,90),group_parent_field:'title',group_child_field:'category'};
+            const [error,data] = await List_Data.get_list(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option);
+            //Log.w('data',data);
+            console.log('LIST-END');
+
 
             /*
             console.log('SEARCH-START');
