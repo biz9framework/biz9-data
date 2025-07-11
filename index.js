@@ -177,7 +177,7 @@ class Search_Data {
             });
         });
     };
-   }
+}
 class Data_Logic {
     static get_parent_child_list = (full_item_list) => {
         /* option params
@@ -656,6 +656,101 @@ class Business_Data {
         });
     };
 }
+class Review_Data {
+    static update = async (database,parent_data_type,parent_id,user_id,review) => {
+        return new Promise((callback) => {
+            let error = null;
+            let cloud = {};
+            cloud.item = DataItem.get_new(parent_data_type,parent_id);
+            cloud.review = review;
+            let review_list = [];
+            let review_count = 0;
+            let review_avg = 0;
+            async.series([
+                //review_update
+                async function(call){
+                    const [error,data] = await Portal.update(database,DataType.REVIEW,cloud.review);
+                    if(error){
+                        cloud_error=Log.append(cloud_error,error);
+                    }else{
+                        cloud.review = data;
+                    }
+                },
+                //review_list
+                async function(call){
+                    let query = {parent_id:cloud.id};
+                    let review_search = Item_Logic.get_search(DataType.REVIEW,query,{},1,0);
+                    const [error,data] = await Portal.search(database,review_search.data_type,review_search.filter,review_search.sort_by,review_search.page_current,review_search.page_size);
+                    if(error){
+                        cloud_error=Log.append(cloud_error,error);
+                    }else{
+                        if(data.item_list.length>0){
+                            review_list = data.item_list;
+                        }
+                    }
+                },
+                function(call){
+                    let review_rating_total = 0;
+                    for(let a = 0; a < review_list.length;a++){
+                        review_rating_total = review_rating_total + parseInt(review_list[a].rating);
+                    }
+                    review_avg = !Str.check_is_null(review_rating_total) ? parseInt(review_rating_total/review_list.length) : 1;
+                    review_count = !Str.check_is_null(review_list.length) ? review_list.length : 1;
+                    call();
+                },
+                async function(call){
+                    cloud.item.review_count = review_count;
+                    cloud.item.review_avg = review_avg;
+                    const [error,data] = await Portal.update(database,cloud.item.data_type,cloud.item);
+                    if(error){
+                        cloud_error=Log.append(cloud_error,error);
+                    }else{
+                        cloud.item = data;
+                    }
+                },
+            ]).then(result => {
+                callback([error,cloud]);
+            }).catch(error => {
+                Log.error("Review-Data-Update",error);
+                callback([error,[]]);
+            });
+        });
+    };
+    static get_review_list = async (database,parent_id) => {
+        return new Promise((callback) => {
+            let error = null;
+            let cloud = {};
+            let item_list = [];
+            let review_list = [];
+            async.series([
+                //review_list
+                async function(call){
+                    let query = {parent_id:parent_id};
+                    let review_search = Item_Logic.get_search(DataType.REVIEW,query,{},1,0);
+                    const [error,data] = await Portal.search(database,review_search.data_type,review_search.filter,review_search.sort_by,review_search.page_current,review_search.page_size);
+                    if(error){
+                        cloud_error=Log.append(cloud_error,error);
+                    }else{
+                        if(data.item_list.length>0){
+                            review_list = data.item_list;
+                        }
+                    }
+                },
+                function(call){
+
+                },
+            ]).then(result => {
+                callback([error,cloud]);
+            }).catch(error => {
+                Log.error("Review-Data-Update",error);
+                callback([error,[]]);
+            });
+        });
+    };
+
+}
+
+
 class Admin_Data {
     static get = async (database,option) => {
         /* option params
@@ -755,20 +850,20 @@ class Portal {
                         switch(item.setting_sort_order)
                         {
                             case 'title asc':
-                            sort_order = {title:1};
-                            break;
+                                sort_order = {title:1};
+                                break;
                             case 'title desc':
-                            sort_order = {title:-1};
-                            break;
+                                sort_order = {title:-1};
+                                break;
                             case 'date asc':
-                            sort_order = {date_create:1};
-                            break;
+                                sort_order = {date_create:1};
+                                break;
                             case 'date desc':
-                            sort_order = {date_create:-1};
-                            break;
+                                sort_order = {date_create:-1};
+                                break;
                             default:
-                            sort_order = {};
-                            break;
+                                sort_order = {};
+                                break;
                         }
                         return sort_order;
                     }
@@ -1393,7 +1488,7 @@ class Faq{
     }
 }
 class Stat_Data {
-   static update_item_view_count = async (database,data_type,id,customer_id,option) => {
+    static update_item_view_count = async (database,data_type,id,customer_id,option) => {
         return new Promise((callback) => {
             let cloud_data = {};
             let new_view = false;
@@ -1402,15 +1497,15 @@ class Stat_Data {
             cloud_data.stat = DataItem.get_new(DataType.STAT,0,{count:0,parent_data_type:data_type,parent_id:id,customer_id:customer_id,type_id:FieldType.STAT_VIEW_ID});
             let error = null;
             async.series([
-               async function(call){
-                let filter = {
-                    $and: [
-                        { customer_id: { $regex:String(customer_id), $options: "i" } },
-                        { parent_id: { $regex:id, $options: "i" } },
-                        { parent_data_type: { $regex:data_type, $options: "i" } }
-                    ]
-                };
-                let search = Item_Logic.get_search(DataType.STAT,filter,{},1,1);
+                async function(call){
+                    let filter = {
+                        $and: [
+                            { customer_id: { $regex:String(customer_id), $options: "i" } },
+                            { parent_id: { $regex:id, $options: "i" } },
+                            { parent_data_type: { $regex:data_type, $options: "i" } }
+                        ]
+                    };
+                    let search = Item_Logic.get_search(DataType.STAT,filter,{},1,1);
                     const [error,data] = await Portal.count(database,search.data_type,search.filter);
                     if(error){
                         error=Log.append(error,error);
@@ -1422,40 +1517,40 @@ class Stat_Data {
                 //get item
                 async function(call){
                     if(new_view){
-                    const [error,data] = await Portal.get(database,cloud_data.item.data_type,cloud_data.item.id,{get_item:false});
-                    if(error){
-                        error=Log.append(error,error);
-                    }else{
-                        if(data.id){
-                            cloud_data.item = data;
+                        const [error,data] = await Portal.get(database,cloud_data.item.data_type,cloud_data.item.id,{get_item:false});
+                        if(error){
+                            error=Log.append(error,error);
+                        }else{
+                            if(data.id){
+                                cloud_data.item = data;
+                            }
                         }
-                    }
                     }
                 },
                 //save stat
                 async function(call){
                     if(new_view){
-                    const [error,data] = await Portal.update(database,DataType.STAT,cloud_data.stat);
-                    if(error){
-                        error=Log.append(error,error);
-                    }else{
-                        if(data.id){
-                            cloud_data.stat = data;
+                        const [error,data] = await Portal.update(database,DataType.STAT,cloud_data.stat);
+                        if(error){
+                            error=Log.append(error,error);
+                        }else{
+                            if(data.id){
+                                cloud_data.stat = data;
+                            }
                         }
                     }
-                }
                 },
                 //save item
                 async function(call){
                     if(new_view){
-                    cloud_data.item.view_count = !Str.check_is_null(cloud_data.item.view_count)  ?  parseInt(cloud_data.item.view_count)+1 : 1;
-                    const [error,data] = await Portal.update(database,cloud_data.item.data_type,cloud_data.item);
-                    if(error){
-                        error=Log.append(error,error);
-                    }
-                    else{
+                        cloud_data.item.view_count = !Str.check_is_null(cloud_data.item.view_count)  ?  parseInt(cloud_data.item.view_count)+1 : 1;
+                        const [error,data] = await Portal.update(database,cloud_data.item.data_type,cloud_data.item);
+                        if(error){
+                            error=Log.append(error,error);
+                        }
+                        else{
                             cloud_data.item = data;
-                    }
+                        }
                     }
                 },
             ]).then(result => {
@@ -1674,7 +1769,7 @@ module.exports = function(){
     }
         return module;
 }
-    */
+*/
 }
 
 class Data {
@@ -1716,15 +1811,16 @@ class Data {
 module.exports = {
     Admin_Data,
     Business_Data,
+    Blog_Post_Data,
     Category_Data,
     Content_Data,
     Database,
-    Search_Data,
+    Event_Data,
     Page_Data,
-    Template_Data,
     Portal,
     Product_Data,
-    Blog_Post_Data,
-    Event_Data,
-    Stat_Data,
+    Review_Data,
+    Search_Data,
+    Template_Data,
+   Stat_Data,
 };
