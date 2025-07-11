@@ -736,9 +736,28 @@ class Review_Data {
                         }
                     }
                 },
-                function(call){
+        async function(call){
+            var query = { $or: [] };
+            for(let a = 0;a < review_list.length;a++){
+                query.$or.push({id: { $regex:review_list[a].parent_id, $options: "i" }});
+            }
+            product_search = Item_Logic.get_search(DataType.PRODUCT,query,{date_create:-1},1,0);
+            const [error,data] = await Portal.search(database,product_search.data_type,product_search.filter,product_search.sort_by,product_search.page_current,product_search.page_size);
+            if(error){
+                cloud_error=Log.append(cloud_error,error);
+            }else{
+                if(data.item_list.length>0){
+                    item_list=data.item_list;
+                }
+            }
+        },
+        async function(call){
+            for(let a = 0;a<review_list.length;a++){
+                for(let b = 0;b<item_list.length;b++){
+                }
 
-                },
+            }
+        },
             ]).then(result => {
                 callback([error,cloud]);
             }).catch(error => {
