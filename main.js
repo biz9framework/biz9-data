@@ -1,4 +1,4 @@
-class Top_Item_Main{
+class Top_Item_Main_Old{
     static get = async (database, data_type, title_url, option) => {
         /* option params
          * Items
@@ -130,7 +130,7 @@ class Top_Item_Main{
     };
 }
 
-class Blank{
+class Blank_old{
     static get = async (database, title_url, option) => {
         /* option params
          * Items

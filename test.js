@@ -2,7 +2,7 @@ const async = require('async');
 const assert = require('node:assert');
 const {Data,Database,Portal,Category_Data,Product_Data,Page_Data,Blog_Post_Data,Content_Data,Stat_Data,List_Data} = require(".");
 const {Log,Number} = require("biz9-utility");
-const {DataType,DataItem,Item_Logic,Page_Logic,Template_Logic,Blog_Post_Logic,Content_Logic} = require("/home/think2/www/doqbox/biz9-framework/biz9-logic/code");
+const {DataType,DataItem,Item_Logic,Page_Logic,Template_Logic,Blog_Post_Logic,Content_Logic,Product_Logic} = require("/home/think2/www/doqbox/biz9-framework/biz9-logic/code");
 /*
  * availble tests
 - connect
@@ -23,7 +23,7 @@ const DATA_TYPE = DataType.PAGE;
 const OPTION = {};
 //const FILTER = {test_group_id:59367};
 const FILTER = {data_type:DATA_TYPE};
-const APP_ID = 'test-june30';
+const APP_ID = 'test-july10';
 const SQL = {};
 /* --- TEST CONFIG END --- */
 
@@ -59,34 +59,41 @@ describe('connect', function(){ this.timeout(25000);
             /*
             console.log('STAT-START');
             let data_type = DataType.PRODUCT;
-            let id = 344;
-            let customer_id = 999;
+            let id = 'a56d0911-71b4-4afe-a768-ad967588f86f';
+            let customer_id = Number.get_id();
             const [error,data] = await Stat_Data.update_item_view_count(database,data_type,id,customer_id);
             Log.w('data',data);
             console.log('STAT-END');
             */
+
+            /*
             console.log('LIST-START');
             //let query = {};
             //query.application_development_template_type = "Website Application Template";
+            /*
             let search = Item_Logic.get_search(DataType.CATEGORY,{},{},1,90);
             Log.w('search',search);
             let option = {get_group:true,group_search:Item_Logic.get_search(DataType.PRODUCT,{},{},1,90),group_parent_field:'title',group_child_field:'category'};
             const [error,data] = await List_Data.get_list(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option);
             Log.w('data',data);
             console.log('LIST-END');
+            */
 
 
-            /*
-            console.log('SEARCH-START');
-            let query = {};
+            //console.log('SEARCH-START');
+            //let query = {};
             //query.application_development_template_type = "Mobile Application Template";
             //query.application_development_template_type = "Website Application Template";
-            query.product_type = "Application Development Template";
-            query.featured = "true";
-            let search = Item_Logic.get_search(DataType.PRODUCT,query,{},1,30);
-            const [error,data] = await Product_Data.get_list(database,search.filter,search.sort_by,search.page_current,search.page_size);
-
-            Log.w('data',data);
+            //query.product_type = "Application Development Template";
+            //query.featured = "true";
+            /*
+            let user_id = 'ccdaa4d8-9aa0-499f-9249-dd70a6d675f9';
+            let search = Item_Logic.get_search(DataType.FAVORITE,{user_id:user_id},{},1,0);
+            Log.w('search',search);
+            const [error,data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size);
+            //Log.w('data',data);
+            Log.w('data_fuck',data.item_list);
+            Log.w('data_fuck',data.item_list.length);
             console.log('SEARCH-END');
             */
 
@@ -190,6 +197,19 @@ describe('connect', function(){ this.timeout(25000);
                 Log.w('data',data);
                 console.log('BUSINESS-END');
                 */
+
+            /*
+            console.log('PORTAL-GET-START');
+                let id = 0;
+                let data_type = DataType.PAGE;
+                let key = '750847fb-a7f9-4ac7-8a81-d0872aeb8777';
+                //let key = 'home';
+                const [error,data] = await Portal.get(database,data_type,key,{get_section:true});
+                Log.w('data',data);
+                console.log('PORTAL-GET-END');
+                */
+
+
             /*
             console.log('PORTAL-COUNT-LIST-START');
                 let id = 0;
@@ -230,24 +250,32 @@ describe('connect', function(){ this.timeout(25000);
                 //Log.w('database',database);
                 */
 
-            /*
-                console.log('PORTAL-START');
+                console.log('PRODUCT-START');
                 let data_type = DataType.PRODUCT;
                 //let filter = {title:'apple'};
-                let filter = { title: { $regex:'.*4', $options: "i" } }
-
-                let key = 'product_website_64';
+                let filter = {};
+                //let filter = { title: { $regex:'.*4', $options: "i" } }
+                let key = 'landing_page_5';
                 let sort_by = {};
                 let page_current = 1;
-                let page_size = 99;
-                const [error,data] = await Portal.get_list(database,data_type,filter,sort_by,page_current,page_size,{get_item:true,get_photo:true});
+                let page_size = 0;
+               let product = Product_Logic.get_test("Product 1 ");
+
+                //const [error,data] = await Portal.get(database,data_type,key,{get_photo:true,get_item:true});
+
+                //const [error,data] = await Portal.get(database,data_type,filter,sort_by,page_current,page_size,{get_item:false,get_photo:false});
+                //Log.w('error',error);
+               // Log.w('data',data);
+                Log.w('product',product);
+                console.log('PRODUCT-END');
+
+            /*
                 //const [error,data] = await Portal.get(database,cloud.product.data_type,cloud.product.key,{get_photo:true});
                 //const [error,data] = await Portal.get(database,data_type,key,{get_photo:true});
                 console.log(data);
                 console.log(data.title);
                 console.log(data.photos.length);
                 console.log('PORTAL-SUCCESS');
-                */
                 //database = data;
                 //Log.w('database',database);
     //

@@ -174,9 +174,10 @@ const update_item_adapter=(db_connect,data_type,item_data) => {
 const get_item_list_adapter = (db_connect,data_type,filter,sort_by,page_current,page_size) => {
     return new Promise((callback) => {
         let cache_connect = {};
-        let item_data_count = 0;
         let item_id_list = [];
         let item_data_list = [];
+        let item_count = 0;
+        let page_count = 0;
         async.series([
             function(call) {
                 get_cache_connect_main(db_connect.data_config).then(([error,data]) => {
@@ -193,7 +194,7 @@ const get_item_list_adapter = (db_connect,data_type,filter,sort_by,page_current,
                 }
                 get_id_list_main(db_connect,data_type,filter,sort_by,page_current,page_size).then(([error,total_count,data_list]) => {
                     error=error;
-                    item_data_count=total_count;
+                    item_count=total_count;
                     if(data_list.length>0){
                         item_id_list=data_list;
                     }
@@ -213,8 +214,13 @@ const get_item_list_adapter = (db_connect,data_type,filter,sort_by,page_current,
                     }
                 }
             },
+            function(call) {
+                page_count = !Str.check_is_null(Math.round(item_count/page_size+1)) ? Math.round(item_count/page_size+1) : 0;
+                page_count = page_count == "Infinity" ? 0 : page_count;
+                call();
+            }
         ]).then(result => {
-            callback([error,item_data_list,item_data_count,Math.round(item_data_count/page_size+1)]);
+            callback([error,item_data_list,item_count,page_count]);
         }).catch(error => {
             Log.error("Get-Item-List-Adapter-3",error);
             callback([error,[]]);
@@ -247,14 +253,12 @@ const get_item_adapter = (db_connect,data_type,key,option) => {
                     let filter={title_url:option.title_url};
                     let sort_by={};
                     let page_current=1;
-                    let page_size=3;
+                    let page_size=0;
                     get_item_list_adapter(db_connect,data_type,filter,sort_by,page_current,page_size).then(([error,data]) => {
                         if(data.length>0){
                             item_data = data[0];
                         }else{
                             item_data.source = NOT_FOUND_TITLE;
-                            item_data.items=[];
-                            item_data.photos=[];
                             item_data.app_id = db_connect.app_id;
                         }
                         call();
