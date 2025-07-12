@@ -980,7 +980,7 @@ class Portal {
          */
         return new Promise((callback) => {
             let error = null;
-            let cloud_data = {item:DataItem.get_new(data_type,0,{key:key,app_id:database.app_id})};
+            let cloud_data = {};
             let full_item_list = [];
             let new_item_list = [];
             option = !Obj.check_is_empty(option) ? option : {get_item:false,get_photo:false,title_url:null};
@@ -1116,7 +1116,7 @@ class Portal {
          *  - photo_sort_by / query obj / ex. {date_create:1}
          */
         return new Promise((callback) => {
-            let cloud_data = {item_list:[],item_count:0,page_count:0,app_id:database.app_id};
+            let cloud_data = {};
             let error=null;
             option = !Obj.check_is_empty(option) ? option : {get_item:false,get_photo:false};
             async.series([
@@ -1129,12 +1129,8 @@ class Portal {
                             cloud_data.page_count=page_count;
                             cloud_data.filter=filter;
                             cloud_data.data_type=data_type;
-                            if(data.length>0){
-                                cloud_data.item_list=data;
-                                call();
-                            }else{
-                                call();
-                            }
+                            cloud_data.item_list=data;
+                            call();
                         }
                     }).catch(error => {
                         error=Log.append(error,error);
@@ -1184,7 +1180,7 @@ class Portal {
             });
         });
     };
-    static delete_cache_item = async (database,data_type,key,option) => {
+    static delete_cache = async (database,data_type,id,option) => {
         /*
          * params
          * - title_tbd
@@ -1199,16 +1195,15 @@ class Portal {
          */
         return new Promise((callback) => {
             let error = null;
-            let cloud_data = {item:DataItem.get_new(data_type,0,{app_id:database.app_id})};
+            let cloud_data = {};
             option = !Obj.check_is_empty(option) ? option : {get_item:false,get_photo:false};
             async.series([
                 function(call){
-                    Data.delete_cache_item(database,data_type,item.id).then(([error,data])=> {
+                    Data.delete_cache_item(database,data_type,id).then(([error,data])=> {
                         if(error){
                             error=Log.append(error,error);
                         }else{
-                            cloud_data.item = data;
-                            cloud_data.app_id = database.app_id;
+                            cloud_data = data;
                         }
                         call();
                     }).catch(error => {
@@ -1217,7 +1212,7 @@ class Portal {
                     });
                 },
             ]).then(result => {
-                callback([error,item]);
+                callback([error,cloud_data]);
             }).catch(error => {
                 Log.error("Delete-Cache-Item",error);
                 callback([error,[]]);
@@ -1240,7 +1235,7 @@ class Portal {
          */
         return new Promise((callback) => {
             let error = null;
-            let cloud_data = {item:DataItem.get_new(data_type,id,{app_id:database.app_id,delete_items:false,delete_photos:false})};
+            let cloud_data = {};
             option = !Obj.check_is_empty(option) ? option : {get_item:false,get_photo:false,delete_items:false,delete_photos:false};
             async.series([
                 function(call){
@@ -1249,7 +1244,6 @@ class Portal {
                             error=Log.append(error,error);
                         }else{
                             cloud_data.item = data;
-                            cloud_data.app_id = database.app_id;
                         }
                         call();
                     }).catch(error => {
@@ -1359,31 +1353,27 @@ class Portal {
                 },
 
             ]).then(result => {
-                callback([error,item_list]);
+                callback([error,cloud_data]);
             }).catch(error => {
                 Log.error("Delete-List-Data",error);
                 callback([error,[]]);
             });
         });
     };
-    static count = async (database,data_type,filter,option) => {
+    static count = async (database,data_type,filter) => {
         /* option params
          * n/a
          */
         return new Promise((callback) => {
             let error = null;
-            let cloud_data = {count:0,app_id:datbase.app_id};
-            option = !Obj.check_is_empty(option) ? option : {get_item:false,get_photo:false};
+            let cloud_data = {};
             async.series([
                 function(call){
                     Data.count_list(database,data_type,filter).then(([error,data])=> {
                         if(error){
                             error=Log.append(error,error);
                         }else{
-                            if(data){
-                                cloud_data.count = data;
-                                cloud_data.app_id = datbase.app_id;
-                            }
+                                cloud_data = data;
                         }
                         call();
                     }).catch(error => {
@@ -1399,7 +1389,7 @@ class Portal {
             });
         });
     };
-    static copy = async (database,data_type,id,option) => {
+    static copy = async (database,data_type,id) => {
         /*
          * params
          * - title_tbd
@@ -1414,12 +1404,11 @@ class Portal {
          */
         return new Promise((callback) => {
             let error = null;
-            let cloud_data = {copy_success:false,app_id:database.id};
-            let top_item = {data_type:data_type,id:0};
-            let copy_top_item = {data_type:data_type,id:0};
+            let cloud_data = {copy_success:false,app_id:database.app_id};
+            let top_item = DataItem.get_new(data_type,0);
+            let copy_top_item = DataItem.get_new(data_type,0);
             let item_list = [];
             let copy_item_list = [];
-            option = !Obj.check_is_empty(option) ? option : {get_item:false,get_photo:false};
             async.series([
                 function(call){
                     Data.get_item(database,data_type,id).then(([error,data])=> {
@@ -1536,6 +1525,7 @@ class Portal {
             ]).then(result => {
                 if(copy_top_item.id){
                     cloud_data.copy_top_item = copy_top_item;
+                    cloud_data.copy_success = true;
                 }
                 callback([error,cloud_data]);
             }).catch(error => {

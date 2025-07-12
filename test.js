@@ -24,7 +24,7 @@ const DATA_TYPE = DataType.BLOG_POST;
 const OPTION = {};
 //const FILTER = {test_group_id:59367};
 const FILTER = {data_type:DATA_TYPE};
-const APP_ID = 'test-july11';
+const APP_ID = 'test-july12';
 const SQL = {};
 /* --- TEST CONFIG END --- */
 
@@ -81,6 +81,7 @@ describe('connect', function(){ this.timeout(25000);
             */
 
 
+                /*
         console.log('SEARCH-START');
         let query = {};
         //query.application_development_template_type = "Mobile Application Template";
@@ -96,6 +97,7 @@ describe('connect', function(){ this.timeout(25000);
             Log.w('data',data);
             //Log.w('data',data.item_list.length);
             console.log('SEARCH-END');
+            */
                 /*
         console.log('REVIEW-START');
         let parent_data_type = DataType.PRODUCT;
@@ -127,16 +129,18 @@ describe('connect', function(){ this.timeout(25000);
         console.log('FAVORITE-END');
         */
 
-        //console.log('PRODUCT-START');
+                /*
+        console.log('PRODUCT-START');
         //let key ="product_1";
         //const [error,data] = await Product_Data.get(database,key,{get_photo:true,get_item:true});
         //Log.w('error',error);
         //Log.w('data',data);
-        //let search = Obj.get_search(DataType.PRODUCT,{title:'Product 25'},{},1,20);
-        //const [error,data] = await Product_Data.get_list(database,search.filter,search.sort_by,search.page_current,search.page_size,{get_photo:true,get_item:true});
+        let search = Obj.get_search(DataType.PRODUCT,{},{},1,20);
+        const [error,data] = await Product_Data.get_list(database,search.filter,search.sort_by,search.page_current,search.page_size,{get_photo:true,get_item:true});
         //Log.w('error',error);
-        //Log.w('data',data);
-        //console.log('PRODUCT-END');
+        Log.w('data',data);
+        console.log('PRODUCT-END');
+        */
 
         //console.log('CONTENT-START');
         //let content = Content_Logic.get_test("Content " + String(Number.get_id()),{get_value:true,get_item:true});
@@ -227,56 +231,89 @@ describe('connect', function(){ this.timeout(25000);
                 */
 
                 /*
-            console.log('PORTAL-GET-START');
+                console.log('PORTAL-SEARCH-START');
                 let id = 0;
-                let data_type = DataType.PAGE;
-                let key = '750847fb-a7f9-4ac7-8a81-d0872aeb8777';
-                //let key = 'home';
-                const [error,data] = await Portal.get(database,data_type,key,{get_section:true});
+                let data_type = DataType.PRODUCT;
+                let search = Item_Logic.get_search(DataType.PRODUCT,{},{},1,0);
+                const [error,data] = await Search_Data.get(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size);
+                Log.w('data',data);
+                console.log('PORTAL-SEARCH-END');
+                */
+
+                /*
+                console.log('PORTAL-UPDATE-START');
+                let data_type = DataType.PRODUCT;
+                let item_update = Product_Logic.get_test();
+                const [error,data] = await Portal.update(database,data_type,item_update);
+                Log.w('data',data);
+                console.log('PORTAL-UPDATE-END');
+                */
+
+                /*
+                console.log('PORTAL-DELETE-START');
+                let id =  'c598a94e-a6ca-4379-81f0-b58130802152';
+                let data_type = DataType.PRODUCT;
+                const [error,data] = await Portal.delete(database,data_type,id);
+                Log.w('data',data);
+                console.log('PORTAL-DELETE-END');
+                */
+
+                /*
+                console.log('PORTAL-DELETE-CACHE-START');
+                let id =  'db4ce653-ed62-454a-b556-29dffd3940e6';
+                let data_type = DataType.PRODUCT;
+                const [error,data] = await Portal.delete_cache(database,data_type,id);
+                Log.w('data',data);
+                console.log('PORTAL-DELETE-CACHE-END');
+                */
+
+                /*
+                console.log('PORTAL-GET-START');
+                let data_type = DataType.PRODUCT;
+                let id =  'db4ce653-ed62-454a-b556-29dffd3940e6';
+                let key = 'test_10852';
+                const [error,data] = await Portal.get(database,data_type,id);
                 Log.w('data',data);
                 console.log('PORTAL-GET-END');
                 */
 
+                console.log('PORTAL-COPY-START');
+                let data_type = DataType.PRODUCT;
+                let id =  '75d329f8-8305-4eb4-8d03-ee732a4c7f4b';
+                const [error,data] = await Portal.copy(database,data_type,id);
+                Log.w('data',data);
+                console.log('PORTAL-COPY-END');
+
 
                 /*
             console.log('PORTAL-COUNT-LIST-START');
-                let id = 0;
-                let data_type = DataType.BLANK;
+                let data_type = DataType.PRODUCT;
                 let filter = {};
-                let item_list = [];
-                Log.w('data',item_list);
-                const [error,data] = await Portal.count(database,data_type,filter,{});
+                const [error,data] = await Portal.count(database,data_type,filter);
                 Log.w('data',data);
                 console.log('PORTAL-COUNT-LIST-END');
                 */
 
                 /*
-                console.log('PORTAL-DELETE-LIST-START');
+                console.log('PORTAL-DELETE-SEARCH-START');
                 let id = 0;
-                let data_type = DataType.BLANK;
+                let data_type = DataType.PRODUCT;
                 let filter = {};
-                let item_list = [];
-                Log.w('data',item_list);
-                const [error,data] = await Portal.delete_list(database,data_type,filter,{});
+                const [error,data] = await Portal.delete_search(database,data_type,filter);
                 Log.w('data',data);
-                console.log('PORTAL-DELETE-LIST-END');
+                console.log('PORTAL-DELETE-SEARCH-END');
                 */
 
                 /*
                 console.log('PORTAL-UPDATE-LIST-START');
                 let id = 0;
-                let data_type = DataType.BLANK;
-                let item = Test.get_item(data_type,id);
-                let item_list = [];
-                item_list.push(Test.get_item(data_type,id));
-                item_list.push(Test.get_item(data_type,id));
-                item_list.push(Test.get_item(data_type,id));
+                let data_type = DataType.PRODUCT;
+                let item_list = Product_Logic.get_test_list();
                 Log.w('data',item_list);
-                const [error,data] = await Portal.update_list(database,item_list,{});
+                const [error,data] = await Portal.update_list(database,item_list);
                 Log.w('data',data);
                 console.log('PORTAL-UPDATE-LIST-END');
-//Log.w('database',database);
-*/
+                */
 
                 /*
 console.log('PRODUCT-START');
