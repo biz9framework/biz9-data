@@ -1,6 +1,6 @@
 const async = require('async');
 const assert = require('node:assert');
-const {Data,Database,Portal,Category_Data,Product_Data,Page_Data,Blog_Post_Data,Content_Data,Stat_Data,List_Data,Review_Data,Favorite_Data} = require(".");
+const {Data,Database,Portal,Category_Data,Product_Data,Page_Data,Blog_Post_Data,Content_Data,Stat_Data,List_Data,Review_Data,Favorite_Data,Search_Data} = require(".");
 const {Log,Number} = require("biz9-utility");
 const {DataType,DataItem,Item_Logic,Page_Logic,Template_Logic,Blog_Post_Logic,Content_Logic,Product_Logic,Field_Logic} = require("/home/think2/www/doqbox/biz9-framework/biz9-logic/code");
 /*
@@ -18,8 +18,9 @@ const {DataType,DataItem,Item_Logic,Page_Logic,Template_Logic,Blog_Post_Logic,Co
 //const KEY = 'd220d962-4491-4022-b5be-374d8168d79b';
 //http://localhost:1904/main/crud/get_item_parent_top/blog_post_biz/27394892-8b61-4ddd-93d7-9251a45a652c?app_id=test-june11
 const KEY = 'title_5153';
-const ID = '27394892-8b61-4ddd-93d7-9251a45a652c';
-const DATA_TYPE = DataType.PAGE;
+//const ID = '27394892-8b61-4ddd-93d7-9251a45a652c';
+const ID = 0;
+const DATA_TYPE = DataType.BLOG_POST;
 const OPTION = {};
 //const FILTER = {test_group_id:59367};
 const FILTER = {data_type:DATA_TYPE};
@@ -80,22 +81,22 @@ describe('connect', function(){ this.timeout(25000);
             */
 
 
-        //console.log('SEARCH-START');
-        //let query = {};
+        console.log('SEARCH-START');
+        let query = {};
         //query.application_development_template_type = "Mobile Application Template";
         //query.application_development_template_type = "Website Application Template";
         //query.product_type = "Application Development Template";
         //query.featured = "true";
-        /*
-            let user_id = 'ccdaa4d8-9aa0-499f-9249-dd70a6d675f9';
-            let search = Item_Logic.get_search(DataType.FAVORITE,{user_id:user_id},{},1,0);
+            //let user_id = 'ccdaa4d8-9aa0-499f-9249-dd70a6d675f9';
+            let search = Item_Logic.get_search(DataType.PRODUCT,{title:'ffffffff'},{},1,0);
             Log.w('search',search);
-            const [error,data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size);
+            //const [error,data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size);
+            const [error,data] = await Search_Data.get(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size);
         //Log.w('data',data);
-            Log.w('data_fuck',data.item_list);
-            Log.w('data_fuck',data.item_list.length);
+            Log.w('data',data);
+            //Log.w('data',data.item_list.length);
             console.log('SEARCH-END');
-            */
+                /*
         console.log('REVIEW-START');
         let parent_data_type = DataType.PRODUCT;
         let parent_id= "de773692-104f-4d76-93c6-a79a03283261";
@@ -103,12 +104,16 @@ describe('connect', function(){ this.timeout(25000);
         let rating = Number.get_id(6);
         let comment = Field_Logic.get_test().note;
         let review = DataItem.get_new(DataType.REVIEW,0,{parent_data_type:parent_data_type,parent_id:parent_id,user_id:user_id,rating:rating,rating,comment:comment});
-        Log.w('review',review);
+        //Log.w('review',review);
         //const [error,data] = await Review_Data.update(database,review.parent_data_type,review.parent_id,review.user_id,review);
         //
-        const [error,data] = await Review_Data.search(database,parent_data_type,parent_id);
+        let query = {parent_id:parent_id};
+        let review_search = Item_Logic.get_search(DataType.REVIEW,query,{},1,0);
+        const [error,data] = await Review_Data.search(database,review_search.data_type,review_search.filter,review_search.sort_by,review_search.page_current,review_search.page_size);
         Log.w('data',data);
+        Log.w('dat_len',data.item_list.length);
         console.log('REVIEW-END');
+        */
 
                 /*
         console.log('FAVORITE-START');
@@ -139,15 +144,14 @@ describe('connect', function(){ this.timeout(25000);
         //Log.w('data',data);
         //console.log('CONTENT-END');
 
-        /*
-                console.log('BLOG-START');
+                //console.log('BLOG-START');
         //let blog = Blog_Post_Logic.get_test("Blog " + String(Number.get_id()),{get_value:true,get_item:true});
         //Log.w('blog_post',blog);
-                let search = Item_Logic.get_search(DataType.BLOG_POST,{},{},1,20);
-                const [error,data] = await Blog_Post_Data.get_list(database,search.filter,search.sort_by,search.page_current,search.page_size,{get_photo:true,get_item:true});
-                Log.w('data',data);
-                console.log('BLOG-END');
-                */
+                //let search = Item_Logic.get_search(DataType.BLOG_POST,{},{},1,0);
+                //const [error,data] = await Blog_Post_Data.search(database,search.filter,search.sort_by,search.page_current,search.page_size,{get_photo:true,get_item:true});
+                //const [error,data] = await Blog_Post_Data.get(database,'item_26124',{get_photo:false,get_item:false});
+                //Log.w('data',data);
+                //console.log('BLOG-END');
 
         //console.log('PAGE-START');
         //let page = Page_Logic.get_test("Page " + String(Number.get_id()),{get_value:true,get_item:true});
@@ -465,62 +469,9 @@ describe('item_update', function(){ this.timeout(25000);
     it("_item_update", function(done){
         let cloud_error=null;
         let database = {};
-        var item_test = Item_Logic.get_test_item(DATA_TYPE,0);
-        async.series([
-            async function(call){
-                console.log('DATABASE-START');
-                const [error,data] = await Database.get(DATA_CONFIG);
-                console.log(data);
-                if(error){
-                    cloud_error=Log.append(cloud_error,error);
-                }else{
-                    database = data;
-                    console.log(database);
-                    console.log('DATABASE-SUCCESS');
-                }
-                console.log('DATABASE-END');
-            },
-            async function(call){
-                console.log('UPDATE-START');
-                const [error,data] = await Portal.update(database,DATA_TYPE,item_test,{});
-                if(error){
-                    cloud_error=Log.append(cloud_error,error);
-                }else{
-                    item_test = data;
-                    assert.notEqual(item_test,null);
-                    console.log(item_test);
-                    console.log('UPDATE-SUCCESS');
-                }
-                console.log('UPDATE-END');
-            },
-            async function(call){
-                console.log('CLOSE-CLOSE');
-                const [error,data] = await Database.close(database,{});
-                if(error){
-                    cloud_error=Log.append(cloud_error,error);
-                }else{
-                    database = data;
-                    assert.Equal(data,null);
-                    console.log('CLOSE-SUCCESS');
-                }
-                console.log('CLOSE-END');
-            },
-        ],
-            function(error, result){
-                if(cloud_error){
-                    Log.error("UPDATE-ERROR-DONE",cloud_error);
-                }else{
-                    console.log('UPDATE-DONE');
-                }
-                done();
-            });
-    });
-});
-describe('item_update', function(){ this.timeout(25000);
-    it("_item_update", function(done){
-        let cloud_error=null;
-        let database = {};
-        var item_test = Item_Logic.get_test_item(DATA_TYPE,0);
+        var item_test = Item_Logic.get_test('Item '+Number.get_id(),DATA_TYPE,0);
+        //let item_test = Item_Logic.get_test("Item_" +Number.get_id(),DataType.BLOG_POST,0);
+        Log.w('item_test_44',item_test);
         async.series([
             async function(call){
                 console.log('DATABASE-START');
@@ -575,7 +526,7 @@ describe('item_delete', function(){ this.timeout(25000);
     it("_item_delete", function(done){
         let cloud_error=null;
         let database = {};
-        var item = Item_Logic.get_test_item(DATA_TYPE,ID);
+        var item = Item_Logic.get_test(DATA_TYPE,ID);
         async.series([
             async function(call){
                 console.log('DATABASE-START');

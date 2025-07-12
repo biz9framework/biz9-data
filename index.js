@@ -104,7 +104,8 @@ class Search_Data {
          *      - item_list
          */
         return new Promise((callback) => {
-            let cloud_data = {item_list:[],item_count:0,page_count:0,filter:filter,data_type:data_type,app_id:database.app_id};
+            //let cloud_data = {item_list:[],item_count:0,page_count:0,filter:filter,data_type:data_type,app_id:database.app_id};
+            let cloud_data = {};
             let group_item_list = [];
             let error=null;
             option = !Obj.check_is_empty(option) ? option : {get_item:false,get_photo:false};
@@ -289,7 +290,6 @@ class Blog_Post_Data {
     static get = async (database,key,option) => {
         return new Promise((callback) => {
             let cloud_data = {};
-            cloud_data.blog_post = {data_type:DataType.BLOG_POST,id:0};
             let error = null;
             option = !Obj.check_is_empty(option) ? option : {get_item:false,get_photo:false};
             async.series([
@@ -298,7 +298,7 @@ class Blog_Post_Data {
                     if(error){
                         error=Log.append(error,error);
                     }else{
-                        cloud_data.blog_post = data;
+                            cloud_data = data;
                     }
                 },
             ]).then(result => {
@@ -309,34 +309,33 @@ class Blog_Post_Data {
             });
         });
     };
-    static search = (database,filter,sort_by,page_current,page_size,option) => {
-        return new Promise((callback) => {
-            let cloud_data = {item_list:[],item_count:0,page_count:0};
-            let error=null;
-            option = !Obj.check_is_empty(option) ? option : {get_item:false,get_photo:false};
-            async.series([
-                async function(call){
-                    const [error,data] = await Search_Data.get(database,DataType.BLOG_POST,filter,sort_by,page_current,page_size,option);
-                    if(error){
-                        error=Log.append(error,error);
-                    }else{
-                        cloud_data = data;
-                    }
-                },
-            ]).then(result => {
-                callback([error,cloud_data]);
-            }).catch(error => {
-                Log.error("Blog_Post-Get-List",error);
-                callback([error,[]]);
-            });
+static search = (database,filter,sort_by,page_current,page_size,option) => {
+    return new Promise((callback) => {
+        let cloud_data = {item_list:[],item_count:0,page_count:0};
+        let error=null;
+        option = !Obj.check_is_empty(option) ? option : {get_item:false,get_photo:false};
+        async.series([
+            async function(call){
+                const [error,data] = await Search_Data.get(database,DataType.BLOG_POST,filter,sort_by,page_current,page_size,option);
+                if(error){
+                    error=Log.append(error,error);
+                }else{
+                    cloud_data = data;
+                }
+            },
+        ]).then(result => {
+            callback([error,cloud_data]);
+        }).catch(error => {
+            Log.error("Blog_Post-Get-List",error);
+            callback([error,[]]);
         });
-    };
+    });
+};
 }
 class Event_Data {
     static get = async (database,key,option) => {
         return new Promise((callback) => {
-            let cloud_data = {};
-            cloud_data.event = {data_type:DataType.EVENT,id:0};
+            let cloud_data = {item:DataItem.get_new(DataType.EVENT,0,{key:key})};
             let error = null;
             option = !Obj.check_is_empty(option) ? option : {get_item:false,get_photo:false};
             async.series([
@@ -345,7 +344,7 @@ class Event_Data {
                     if(error){
                         error=Log.append(error,error);
                     }else{
-                        cloud_data.event = data;
+                        cloud_data.item = data;
                     }
                 },
             ]).then(result => {
@@ -382,8 +381,7 @@ class Event_Data {
 class Content_Data {
     static get = async (database,key,option) => {
         return new Promise((callback) => {
-            let cloud_data = {};
-            cloud_data.content = {data_type:DataType.CONTENT,id:0};
+            let cloud_data = {item:{data_type:DataType.CONTENT,id:0}};
             let error = null;
             option = !Obj.check_is_empty(option) ? option : {get_item:false,get_photo:false};
             async.series([
@@ -392,7 +390,7 @@ class Content_Data {
                     if(error){
                         error=Log.append(error,error);
                     }else{
-                        cloud_data.content = data;
+                        cloud_data.item = data;
                     }
                 },
             ]).then(result => {
@@ -426,12 +424,10 @@ class Content_Data {
         });
     };
 }
-
 class Product_Data {
     static get = async (database,key,option) => {
         return new Promise((callback) => {
-            let cloud_data = {};
-            cloud_data.product = {data_type:DataType.PRODUCT,id:0};
+            let cloud_data = {item:{data_type:DataType.PRODUCT,id:0}};
             let error = null;
             option = !Obj.check_is_empty(option) ? option : {get_item:false,get_photo:false};
             async.series([
@@ -440,7 +436,7 @@ class Product_Data {
                     if(error){
                         error=Log.append(error,error);
                     }else{
-                        cloud_data.product = data;
+                        cloud_data.item = data;
                     }
                 },
             ]).then(result => {
@@ -473,13 +469,11 @@ class Product_Data {
             });
         });
     };
-
 }
 class Page_Data {
     static get = async (database,key,option) => {
         return new Promise((callback) => {
-            let cloud_data = {};
-            cloud_data.page = {data_type:DataType.PAGE,id:0};
+            let cloud_data = {item:{data_type:DataType.PAGE,id:0}};
             let error = null;
             option = !Obj.check_is_empty(option) ? option : {get_item:false,get_photo:false};
             async.series([
@@ -488,7 +482,7 @@ class Page_Data {
                     if(error){
                         error=Log.append(error,error);
                     }else{
-                        cloud_data.page = data;
+                        cloud_data.item = data;
                     }
                 },
             ]).then(result => {
@@ -503,8 +497,7 @@ class Page_Data {
 class Template_Data {
     static get = async (database,key,option) => {
         return new Promise((callback) => {
-            let cloud_data = {};
-            cloud_data.template = {data_type:DataType.TEMPLATE,id:0};
+            let cloud_data = {item:{data_type:DataType.TEMPLATE,id:0}};
             let error = null;
             option = !Obj.check_is_empty(option) ? option : {get_item:false,get_photo:false};
             async.series([
@@ -513,7 +506,7 @@ class Template_Data {
                     if(error){
                         error=Log.append(error,error);
                     }else{
-                        cloud_data.template = data;
+                        cloud_data.item = data;
                     }
                 },
             ]).then(result => {
@@ -623,7 +616,7 @@ class Business_Data {
         return new Promise((callback) => {
             let error = null;
             let data_type = DataType.BUSINESS;
-            let business = {data_type:DataType.BUSINESS,id:0};
+            let item = {data_type:DataType.BUSINESS,id:0};
             option = !Obj.check_is_empty(option) ? option : {get_item:false,get_photo:false};
             async.series([
                 function(call){
@@ -636,7 +629,7 @@ class Business_Data {
                             error=Log.append(error,error);
                         }else{
                             if(data.length>0){
-                                business = data[0];
+                                item = data[0];
                             }
                         }
                         call();
@@ -660,9 +653,9 @@ class Review_Data {
     static update = async (database,parent_data_type,parent_id,user_id,review) => {
         return new Promise((callback) => {
             let error = null;
-            let cloud = {};
-            cloud.item = DataItem.get_new(parent_data_type,parent_id,{parent_data_type:parent_data_type,parent_id:parent_id,user_id:user_id});
-            cloud.review = review;
+            let cloud_data = {};
+            cloud_data.parent_item = DataItem.get_new(parent_data_type,parent_id,{parent_data_type:parent_data_type,parent_id:parent_id,user_id:user_id});
+            cloud_data.review = review;
             let review_list = [];
             let review_count = 0;
             let review_avg = 0;
@@ -699,50 +692,45 @@ class Review_Data {
                     call();
                 },
                 async function(call){
-                    cloud.item.review_count = review_count;
-                    cloud.item.review_avg = review_avg;
-                    const [error,data] = await Portal.update(database,cloud.item.data_type,cloud.item);
+                    cloud_data.parent_item.review_count = review_count;
+                    cloud_data.parent_item.review_avg = review_avg;
+                    const [error,data] = await Portal.update(database,cloud.parent_item.data_type,cloud.parent_item);
                     if(error){
                         cloud_error=Log.append(cloud_error,error);
                     }else{
-                        cloud.item = data;
+                        cloud.parent_item = data;
                     }
                 },
             ]).then(result => {
-
-                callback([error,cloud]);
+                callback([error,cloud_data]);
             }).catch(error => {
                 Log.error("Review-Data-Update",error);
                 callback([error,[]]);
             });
         });
     };
-    static search = async (database,parent_data_type,parent_id) => {
+    static search = async (database,parent_data_type,filter,sort_by,page_current,page_size,option) => {
         return new Promise((callback) => {
-            let error = null;
-            let cloud = {};
-            cloud.review_list = [];
-            let item_list = [];
+            let error=null;
+            let cloud_data = {item_list:[],item_count:0,page_count:0};
+            option = !Obj.check_is_empty(option) ? option : {get_item:false,get_photo:false};
             let user_list = [];
+            let parent_item_list = [];
             async.series([
                 //review_list
                 async function(call){
-                    let query = {parent_id:parent_id};
-                    let review_search = Item_Logic.get_search(DataType.REVIEW,query,{},1,0);
-                    const [error,data] = await Portal.search(database,review_search.data_type,review_search.filter,review_search.sort_by,review_search.page_current,review_search.page_size);
+                    const [error,data] = await Portal.search(database,DataType.REVIEW,filter,sort_by,page_current,page_size);
                     if(error){
                         cloud_error=Log.append(cloud_error,error);
                     }else{
-                        if(data.item_list.length>0){
-                            cloud.review_list = data.item_list;
-                        }
+                        cloud_data = data;
                     }
                 },
-                //item_list
+                //parent_item_list
                 async function(call){
                     var query = { $or: [] };
-                    for(let a = 0;a < cloud.review_list.length;a++){
-                        query.$or.push({id: { $regex:cloud.review_list[a].parent_id, $options: "i" }});
+                    for(let a = 0;a < cloud_data.item_list.length;a++){
+                        query.$or.push({id: { $regex:cloud_data.item_list[a].parent_id, $options: "i" }});
                     }
                     let item_search = Item_Logic.get_search(parent_data_type,query,{},1,0);
                     const [error,data] = await Portal.search(database,item_search.data_type,item_search.filter,item_search.sort_by,item_search.page_current,item_search.page_size);
@@ -750,15 +738,15 @@ class Review_Data {
                         cloud_error=Log.append(cloud_error,error);
                     }else{
                         if(data.item_list.length>0){
-                            item_list=data.item_list;
+                            parent_item_list=data.item_list;
                         }
                     }
                 },
                 //user_list
                 async function(call){
                     var query = { $or: [] };
-                    for(let a = 0;a < cloud.review_list.length;a++){
-                        query.$or.push({id: { $regex:cloud.review_list[a].user_id, $options: "i" }});
+                    for(let a = 0;a < cloud_data.item_list.length;a++){
+                        query.$or.push({id: { $regex:cloud_data.item_list[a].user_id, $options: "i" }});
                     }
                     let user_search = Item_Logic.get_search(DataType.USER,query,{date_create:-1},1,0);
                     const [error,data] = await Portal.search(database,user_search.data_type,user_search.filter,user_search.sort_by,user_search.page_current,user_search.page_size);
@@ -770,13 +758,13 @@ class Review_Data {
                         }
                     }
                 },
-                //bind item_list
+                //bind parent_item_list
                 function(call){
-                    for(let a = 0;a<cloud.review_list.length;a++){
+                    for(let a = 0;a<cloud_data.item_list.length;a++){
                         for(let b = 0;b<item_list.length;b++){
-                            if(cloud.review_list[a].parent_id == item_list[b].id){
-                               cloud.review_list[a].parent_photo_data = !Str.check_is_null(item_list[b].photo_data) ? item_list[b].photo_data : "";
-                               cloud.review_list[a].parent_title = !Str.check_is_null(item_list[b].title) ? item_list[b].title : "N/A";
+                            if(cloud_data.item_list[a].parent_id == parent_item_list[b].id){
+                                cloud_data.item_list[a].parent_photo_data = !Str.check_is_null(parent_item_list[b].photo_data) ? parent_item_list[b].photo_data : "";
+                                cloud_data.item_list[a].parent_title = !Str.check_is_null(parent_item_list[b].title) ? parent_item_list[b].title : "N/A";
                             }
                         }
                     }
@@ -784,19 +772,19 @@ class Review_Data {
                 },
                 //bind user_list
                 function(call){
-                    for(let a = 0;a<cloud.review_list.length;a++){
+                    for(let a = 0;a<cloud_data.item_list.length;a++){
                         for(let b = 0;b<user_list.length;b++){
-                            if(cloud.review_list[a].user_id == user_list[b].id){
-                               cloud.review_list[a].user_photo_data = !Str.check_is_null(user_list[b].photo_data) ? user_list[b].photo_data : "";
-                               cloud.review_list[a].user_title = !Str.check_is_null(user_list[b].title) ? user_list[b].title : "N/A";
-                               cloud.review_list[a].user_location = User_Logic.get_user_country_state_city(user_list[b]);
+                            if(cloud_data.item_list[a].user_id == user_list[b].id){
+                                cloud_data.item_list[a].user_photo_data = !Str.check_is_null(user_list[b].photo_data) ? user_list[b].photo_data : "";
+                                cloud_data.item_list[a].user_title = !Str.check_is_null(user_list[b].title) ? user_list[b].title : "N/A";
+                                cloud_data.item_list[a].user_location = User_Logic.get_user_country_state_city(user_list[b]);
                             }
                         }
                     }
                     call();
                 },
             ]).then(result => {
-                callback([error,cloud.review_list]);
+                callback([error,cloud_data]);
             }).catch(error => {
                 Log.error("Review-Data-List",error);
                 callback([error,[]]);
@@ -808,33 +796,34 @@ class Favorite_Data {
     static update = async (database,parent_data_type,parent_id,user_id) => {
         return new Promise((callback) => {
             let error = null;
-            let favorite_found = false;
-            let favorite = DataItem.get_new(DataType.FAVORITE,0,{parent_data_type:parent_data_type,parent_id:parent_id,user_id:user_id});
+            let cloud_data = {};
+            cloud_data.favorite_found = false;
+            cloud_data.favorite = DataItem.get_new(DataType.FAVORITE,0,{parent_data_type:parent_data_type,parent_id:parent_id,user_id:user_id});
             async.series([
-        async function(call){
-            var query = { $and: [] };
-            query.$and.push({parent_id: { $regex:parent_id, $options: "i" }});
-            query.$and.push({user_id: { $regex:user_id, $options: "i" }});
-            let favorite_search = Item_Logic.get_search(DataType.FAVORITE,query,{},1,0);
-            const [error,data] = await Portal.count(database,favorite_search.data_type,favorite_search.filter,favorite_search.sort_by,favorite_search.page_current,favorite_search.page_size);
-            if(error){
-                cloud_error=Log.append(cloud_error,error);
-            }else{
-                if(data>0){
-                    favorite_found = true;
-                }
-            }
-        },
-        async function(call){
-            if(!favorite_found){
-            const [error,data] = await Portal.update(database,favorite.data_type,favorite);
-            if(error){
-                cloud_error=Log.append(cloud_error,error);
-            }else{
-                favorite = data;
-            }
-            }
-        },
+                async function(call){
+                    var query = { $and: [] };
+                    query.$and.push({parent_id: { $regex:parent_id, $options: "i" }});
+                    query.$and.push({user_id: { $regex:user_id, $options: "i" }});
+                    let favorite_search = Item_Logic.get_search(DataType.FAVORITE,query,{},1,0);
+                    const [error,data] = await Portal.count(database,favorite_search.data_type,favorite_search.filter,favorite_search.sort_by,favorite_search.page_current,favorite_search.page_size);
+                    if(error){
+                        cloud_error=Log.append(cloud_error,error);
+                    }else{
+                        if(data>0){
+                            cloud_data.favorite_found = true;
+                        }
+                    }
+                },
+                async function(call){
+                    if(!cloud_data.favorite_found){
+                        const [error,data] = await Portal.update(database,favorite.data_type,favorite);
+                        if(error){
+                            cloud_error=Log.append(cloud_error,error);
+                        }else{
+                            cloud_data.favorite = data;
+                        }
+                    }
+                },
             ]).then(result => {
                 callback([error,favorite]);
             }).catch(error => {
@@ -843,48 +832,44 @@ class Favorite_Data {
             });
         });
     };
-    static search = async (database,data_type,user_id) => {
+    static search = async (database,parent_data_type,filter,sort_by,page_current,page_size,option) => {
         return new Promise((callback) => {
             let error = null;
-            let cloud = {};
-            let favorite_list = [];
-            let item_list = [];
+            let cloud_data = {item_list:[],item_count:0,page_count:0};
+            option = !Obj.check_is_empty(option) ? option : {get_item:false,get_photo:false};
+            let parent_item_list = [];
             let user_list = [];
             async.series([
                 //favorite_list
                 async function(call){
-                    let query = {user_id:user_id};
-                    let favorite_search = Item_Logic.get_search(DataType.FAVORITE,query,{},1,0);
-                    const [error,data] = await Portal.search(database,favorite_search.data_type,favorite_search.filter,favorite_search.sort_by,favorite_search.page_current,favorite_search.page_size);
+                    const [error,data] = await Portal.search(database,data_type,filter,sort_by,page_current,page_size);
                     if(error){
                         cloud_error=Log.append(cloud_error,error);
                     }else{
-                        if(data.item_list.length>0){
-                            favorite_list = data.item_list;
-                        }
+                        cloud_data = data;
                     }
                 },
-                //item_list
+                //parent_item_list
                 async function(call){
                     var query = { $or: [] };
-                    for(let a = 0;a < favorite_list.length;a++){
-                        query.$or.push({id: { $regex:favorite_list[a].parent_id, $options: "i" }});
+                    for(let a = 0;a < cloud_data.item_list.length;a++){
+                        query.$or.push({id: { $regex:cloud_data.item_list[a].parent_id, $options: "i" }});
                     }
-                    let item_search = Item_Logic.get_search(data_type,query,{},1,0);
+                    let item_search = Item_Logic.get_search(parent_data_type,query,{},1,0);
                     const [error,data] = await Portal.search(database,item_search.data_type,item_search.filter,item_search.sort_by,item_search.page_current,item_search.page_size);
                     if(error){
                         cloud_error=Log.append(cloud_error,error);
                     }else{
                         if(data.item_list.length>0){
-                            item_list=data.item_list;
+                            parent_item_list=data.item_list;
                         }
                     }
                 },
                 //user_list
                 async function(call){
                     var query = { $or: [] };
-                    for(let a = 0;a < favorite_list.length;a++){
-                        query.$or.push({id: { $regex:favorite_list[a].user_id, $options: "i" }});
+                    for(let a = 0;a < cloud_data.item_list.length;a++){
+                        query.$or.push({id: { $regex:cloud_data.item_list[a].user_id, $options: "i" }});
                     }
                     let user_search = Item_Logic.get_search(DataType.USER,query,{date_create:-1},1,0);
                     const [error,data] = await Portal.search(database,user_search.data_type,user_search.filter,user_search.sort_by,user_search.page_current,user_search.page_size);
@@ -896,13 +881,13 @@ class Favorite_Data {
                         }
                     }
                 },
-                //bind item_list
+                //bind parent_item_list
                 function(call){
-                    for(let a = 0;a<favorite_list.length;a++){
+                    for(let a = 0;a<cloud_data.item_list.length;a++){
                         for(let b = 0;b<item_list.length;b++){
-                            if(favorite_list[a].parent_id == item_list[b].id){
-                                favorite_list[a].parent_photo_data = !Str.check_is_null(item_list[b].photo_data) ? item_list[b].photo_data : "";
-                                favorite_list[a].parent_title = !Str.check_is_null(item_list[b].title) ? item_list[b].title : "N/A";
+                            if(cloud_data.item_list[a].parent_id == parent_item_list[b].id){
+                                cloud_data.item_list[a].parent_photo_data = !Str.check_is_null(parent_item_list[b].photo_data) ? parent_item_list[b].photo_data : "";
+                                cloud_data.item_list[a].parent_title = !Str.check_is_null(parent_item_list[b].title) ? parent_item_list[b].title : "N/A";
                             }
                         }
                     }
@@ -910,15 +895,16 @@ class Favorite_Data {
                 },
                 //bind user_list
                 function(call){
-                    for(let a = 0;a<favorite_list.length;a++){
+                    for(let a = 0;a<cloud_data.item_list.length;a++){
                         for(let b = 0;b<user_list.length;b++){
-                            if(favorite_list[a].user_id == user_list[b].id){
-                                favorite_list[a].user_photo_data = !Str.check_is_null(user_list[b].photo_data) ? user_list[b].photo_data : "";
-                                favorite_list[a].user_title = !Str.check_is_null(user_list[b].title) ? user_list[b].title : "N/A";
-                                favorite_list[a].user_location = User_Logic.get_user_country_state_city(user_list[b]);
+                            if(cloud_data.item_list[a].user_id == user_list[b].id){
+                                cloud_data.item_list[a].user_photo_data = !Str.check_is_null(user_list[b].photo_data) ? user_list[b].photo_data : "";
+                                cloud_data.item_list[a].user_title = !Str.check_is_null(user_list[b].title) ? user_list[b].title : "N/A";
+                                cloud_data.item_list[a].user_location = User_Logic.get_user_country_state_city(user_list[b]);
                             }
                         }
                     }
+                    call();
                 },
             ]).then(result => {
                 callback([error,favorite_list]);
@@ -937,7 +923,7 @@ class Admin_Data {
         return new Promise((callback) => {
             let error = null;
             let data_type = DataType.ADMIN;
-            let admin = {data_type:DataType.ADMIN,id:0};
+            let item = {data_type:DataType.ADMIN,id:0};
             option = !Obj.check_is_empty(option) ? option : {get_item:false,get_photo:false};
             async.series([
                 function(call){
@@ -950,7 +936,7 @@ class Admin_Data {
                             error=Log.append(error,error);
                         }else{
                             if(data.length>0){
-                                admin = data[0];
+                                item = data[0];
                             }
                         }
                         call();
@@ -962,7 +948,7 @@ class Admin_Data {
                 },
 
             ]).then(result => {
-                callback([error,admin]);
+                callback([error,item]);
             }).catch(error => {
                 Log.error("Admin-Data-Get",error);
                 callback([error,[]]);
@@ -994,7 +980,7 @@ class Portal {
          */
         return new Promise((callback) => {
             let error = null;
-            let item = {data_type:data_type,id:0,app_id:database.app_id};
+            let cloud_data = {item:DataItem.get_new(data_type,0,{key:key,app_id:database.app_id})};
             let full_item_list = [];
             let new_item_list = [];
             option = !Obj.check_is_empty(option) ? option : {get_item:false,get_photo:false,title_url:null};
@@ -1005,13 +991,12 @@ class Portal {
                     }
                     call();
                 },
-
                 function(call){
                     Data.get_item(database,data_type,key,option).then(([error,data])=> {
                         if(error){
                             error=Log.append(error,error);
                         }else{
-                            item = data;
+                            cloud_data.item = data;
                         }
                         call();
                     }).catch(error => {
@@ -1020,7 +1005,6 @@ class Portal {
                         call();
                     });
                 },
-
                 function(call){
                     function get_sort(item){
                         let sort_order = {};
@@ -1045,14 +1029,14 @@ class Portal {
                         return sort_order;
                     }
                     let filter = {};
-                    if(item.id && option.get_item || option.get_section){
-                        if(Str.check_is_null(item.top_id)){
-                            filter={top_id:item.id};
+                    if(cloud_data.item.id && option.get_item || option.get_section){
+                        if(Str.check_is_null(cloud_data.item.top_id)){
+                            filter={top_id:cloud_data.item.id};
                         }else{
                             filter={top_id:item.top_id};
                         }
                         let data_type = DataType.ITEM;
-                        let sort_by=get_sort(item);
+                        let sort_by=get_sort(cloud_data.item);
                         let page_current = 1;
                         let page_size = 0;
                         Data.get_list(database,data_type,filter,sort_by,page_current,page_size).then(([error,data,item_count,page_count])=> {
@@ -1073,20 +1057,20 @@ class Portal {
                     }
                 },
                 async function(call){
-                    if(item.id && option.get_item || option.get_section){
+                    if(cloud_data.item.id && option.get_item || option.get_section){
                         const [error,data] = await Data_Logic.get_parent_child_list(full_item_list);
                         new_item_list = data;
                     }
                 },
                 function(call){
-                    if(item.id && option.get_item || option.get_section){
-                        item.items = [];
+                    if(cloud_data.item.id && option.get_item || option.get_section){
+                        cloud_data.item.items = [];
                         for(let a=0; a<new_item_list.length; a++){
-                            if(new_item_list[a].parent_id == item.id){
+                            if(new_item_list[a].parent_id == cloud_data.item.id){
                                 let item_title_url = Str.get_title_url(new_item_list[a].title);
-                                item[item_title_url] = new Object();
-                                item[item_title_url] = new_item_list[a];
-                                item.items.push(new_item_list[a]);
+                                cloud_data.item[item_title_url] = new Object();
+                                cloud_data.item[item_title_url] = new_item_list[a];
+                                cloud_data.item.items.push(new_item_list[a]);
                             }
                         }
                         call();
@@ -1097,25 +1081,25 @@ class Portal {
                 },
                 async function(call){
                     if(option.get_photo){
-                        item.photos = [];
+                        cloud_data.item.photos = [];
                         if(option.photo_count == null){
                             option.photo_count = 19;
                         }
                         if(option.photo_sort_by == null){
                             option.photo_sort_by = {date_create:1};
                         }
-                        let filter = {parent_id:item.id};
+                        let filter = {parent_id:cloud_data.item.id};
                         let sort_by = option.photo_sort_by;
                         let page_current = 1;
                         let page_size = option.photo_count;
                         const [error,data] = await Portal.search(database,DataType.PHOTO,filter,sort_by,page_current,page_size,option);
                         if(data.item_list.length > 0){
-                            item.photos = data.item_list;
+                            cloud_data.item.photos = data.item_list;
                         }
                     }
                 },
             ]).then(result => {
-                callback([error,item]);
+                callback([error,cloud_data]);
             }).catch(error => {
                 Log.error("Portal-Get",error);
                 callback([error,[]]);
@@ -1176,7 +1160,7 @@ class Portal {
          */
         return new Promise((callback) => {
             let error = null;
-            let item = DataItem.get_new(data_type,0);
+            let cloud_data = {item:DataItem.get_new(data_type,0)};
             option = !Obj.check_is_empty(option) ? option : {get_item:false,get_photo:false};
             async.series([
                 function(call){
@@ -1184,7 +1168,7 @@ class Portal {
                         if(error){
                             error=Log.append(error,error);
                         }else{
-                            item = data;
+                            cloud_data.item = data;
                         }
                         call();
                     }).catch(error => {
@@ -1193,7 +1177,7 @@ class Portal {
                     });
                 },
             ]).then(result => {
-                callback([error,item]);
+                callback([error,cloud_data]);
             }).catch(error => {
                 Log.error("Update-Item",error);
                 callback([error,[]]);
@@ -1215,53 +1199,16 @@ class Portal {
          */
         return new Promise((callback) => {
             let error = null;
-            let item = DataItem.get_new(data_type,0);
+            let cloud_data = {item:DataItem.get_new(data_type,0,{app_id:database.app_id})};
             option = !Obj.check_is_empty(option) ? option : {get_item:false,get_photo:false};
             async.series([
-                function(call){
-                    if(Number.check_is_guid(key)){
-                        Data.get_item(database,data_type,key).then(([error,data])=> {
-                            if(error){
-                                error=Log.append(error,error);
-                            }else{
-                                item = data;
-                            }
-                            call();
-                        }).catch(error => {
-                            Log.error("Delete-Cache-Item-A",error);
-                            error = Log.append(error,error);
-                            call();
-                        });
-                    }else{
-                        let filter = {};
-                        if(key){
-                            filter = {title_url:key};
-                        }
-                        let sort_by = {title:-1};
-                        let page_current = 1;
-                        let page_size = 0;
-                        Data.get_list(database,data_type,filter,sort_by,page_current,page_size).then(([error,data,item_count,page_count])=> {
-                            if(error){
-                                error=Log.append(error,error);
-                            }else{
-                                if(data.length>0){
-                                    item = data[0];
-                                }
-                            }
-                            call();
-                        }).catch(error => {
-                            Log.error("Delete-Cache-Item-B",error);
-                            error = Log.append(error,error);
-                            call();
-                        });
-                    }
-                },
                 function(call){
                     Data.delete_cache_item(database,data_type,item.id).then(([error,data])=> {
                         if(error){
                             error=Log.append(error,error);
                         }else{
-                            item = data;
+                            cloud_data.item = data;
+                            cloud_data.app_id = database.app_id;
                         }
                         call();
                     }).catch(error => {
@@ -1293,7 +1240,7 @@ class Portal {
          */
         return new Promise((callback) => {
             let error = null;
-            let item = DataItem.get_new(data_type,id,{delete_items:false,delete_photos:false});
+            let cloud_data = {item:DataItem.get_new(data_type,id,{app_id:database.app_id,delete_items:false,delete_photos:false})};
             option = !Obj.check_is_empty(option) ? option : {get_item:false,get_photo:false,delete_items:false,delete_photos:false};
             async.series([
                 function(call){
@@ -1301,7 +1248,8 @@ class Portal {
                         if(error){
                             error=Log.append(error,error);
                         }else{
-                            item = data;
+                            cloud_data.item = data;
+                            cloud_data.app_id = database.app_id;
                         }
                         call();
                     }).catch(error => {
@@ -1313,11 +1261,12 @@ class Portal {
                     if(option.delete_items){
                         let data_type = DataType.ITEM;
                         let filter = {parent_id:item.id};
+                        cloud_data.delete_items =false;
                         Data.delete_list(database,data_type,filter).then(([error,data])=> {
                             if(error){
                                 error=Log.append(error,error);
                             }else{
-                                item.delete_items = true;
+                                cloud_data.delete_items = true;
                             }
                             call();
                         }).catch(error => {
@@ -1332,11 +1281,12 @@ class Portal {
                     if(option.delete_photos){
                         let data_type = DataType.PHOTO;
                         let filter = {parent_id:item.id};
+                        cloud_data.delete_photos =false;
                         Data.delete_list(database,data_type,filter).then(([error,data])=> {
                             if(error){
                                 error=Log.append(error,error);
                             }else{
-                                item.delete_photos = true;
+                                cloud_data.delete_photos = true;
                             }
                             call();
                         }).catch(error => {
@@ -1348,7 +1298,7 @@ class Portal {
                     }
                 },
             ]).then(result => {
-                callback([error,item]);
+                callback([error,cloud_data]);
             }).catch(error => {
                 Log.error("Delete-Item",error);
                 callback([error,[]]);
@@ -1361,7 +1311,7 @@ class Portal {
          */
         return new Promise((callback) => {
             let error = null;
-            let item_list = [];
+            let cloud_data = {item_list:[]};
             option = !Obj.check_is_empty(option) ? option : {get_item:false,get_photo:false};
             async.series([
                 function(call){
@@ -1369,7 +1319,7 @@ class Portal {
                         if(error){
                             error=Log.append(error,error);
                         }else{
-                            item_list = data;
+                            cloud_data.item_list = data;
                         }
                         call();
                     }).catch(error => {
@@ -1378,7 +1328,7 @@ class Portal {
                     });
                 },
             ]).then(result => {
-                callback([error,item_list]);
+                callback([error,cloud_data]);
             }).catch(error => {
                 Log.error("Update-List-Data",error);
                 callback([error,[]]);
@@ -1391,7 +1341,7 @@ class Portal {
          */
         return new Promise((callback) => {
             let error = null;
-            let item_list = [];
+            let cloud_data = {item_list:[]};
             option = !Obj.check_is_empty(option) ? option : {get_item:false,get_photo:false};
             async.series([
                 function(call){
@@ -1399,7 +1349,7 @@ class Portal {
                         if(error){
                             error=Log.append(error,error);
                         }else{
-                            item_list = data;
+                            cloud_data.item_list = data;
                         }
                         call();
                     }).catch(error => {
@@ -1422,7 +1372,7 @@ class Portal {
          */
         return new Promise((callback) => {
             let error = null;
-            let count = 0;
+            let cloud_data = {count:0,app_id:datbase.app_id};
             option = !Obj.check_is_empty(option) ? option : {get_item:false,get_photo:false};
             async.series([
                 function(call){
@@ -1430,7 +1380,10 @@ class Portal {
                         if(error){
                             error=Log.append(error,error);
                         }else{
-                            count = data;
+                            if(data){
+                                cloud_data.count = data;
+                                cloud_data.app_id = datbase.app_id;
+                            }
                         }
                         call();
                     }).catch(error => {
@@ -1439,7 +1392,7 @@ class Portal {
                     });
                 },
             ]).then(result => {
-                callback([error,count]);
+                callback([error,cloud_data]);
             }).catch(error => {
                 Log.error("Count-List-Data",error);
                 callback([error,[]]);
@@ -1461,6 +1414,7 @@ class Portal {
          */
         return new Promise((callback) => {
             let error = null;
+            let cloud_data = {copy_success:false,app_id:database.id};
             let top_item = {data_type:data_type,id:0};
             let copy_top_item = {data_type:data_type,id:0};
             let item_list = [];
@@ -1580,53 +1534,10 @@ class Portal {
                     })
                 },
             ]).then(result => {
-                callback([error,copy_top_item]);
-            }).catch(error => {
-                Log.error("Blank-Get",error);
-                callback([error,[]]);
-            });
-        });
-    };
-}
-class Blank {
-    static get = async (database,data_type,title_url,option) => {
-        /*
-         *
-         * Params
-         * - title
-         *   - description: n/a / type: n/a / example: n/a / required: true
-         *
-         * Option
-         * - title
-         *   - description: n/a / type: n/a / example: n/a / required: false
-         *
-         * Return
-         * - title
-         *   - description: n/a / type: n/a
-         *
-         */
-        return new Promise((callback) => {
-            let error = null;
-            let top_item = {data_type:data_type,id:0};
-            option = !Obj.check_is_empty(option) ? option : {get_item:false,get_photo:false};
-            async.series([
-                function(call){
-                    Data.get(database).then(([error,data])=> {
-                        if(error){
-                            error=Log.append(error,error);
-                        }else{
-                            top_item = data;
-                        }
-                        call();
-                    }).catch(error => {
-                        error = Log.append(error,error);
-                        call();
-                    });
-                },
-                function(call){
-                },
-            ]).then(result => {
-                callback([error,item_data]);
+                if(copy_top_item.id){
+                    cloud_data.copy_top_item = copy_top_item;
+                }
+                callback([error,cloud_data]);
             }).catch(error => {
                 Log.error("Blank-Get",error);
                 callback([error,[]]);
@@ -1637,41 +1548,39 @@ class Blank {
 class Faq{
     static get = (database,title_url,option) => {
         return new Promise((callback) => {
-            let faq = DataItem.get_new(DataType.FAQ,0,{questions:[]});
+            let cloud_data = {item:DataItem.get_new(DataType.FAQ,0,{questions:[],app_id:database.app_id})};
             let error = null;
             let items = [];
             series([
                 async function(call){
                     const [error,data] = await Portal.get(database,DataType.FAQ,title_url,option);
-                    if(data.id){
-                        faq=data;
-                        faq.questions=[];
+                    if(data.item.id){
+                        cloud_data.item=data;
+                        cloud_data.item.questions=[];
                     }
                     call();
                 },
                 async function(call){
                     for(let a=0;a<19;a++){
-                        if(faq[faq["field_"+a]]){
-                            faq.questions.push({question:faq["field_"+a],answer:faq[faq["field_"+a]]});
+                        if(cloud_data.item[cloud_data.item["field_"+a]]){
+                            cloud_data.item.questions.push({question:cloud_data.item["field_"+a],answer:cloud_data.item[cloud_data.item["field_"+a]]});
                         }
                     }
                     call();
                 },
             ],
                 function(error, result){
-                    callback([error,faq]);
+                    callback([error,cloud_data]);
                 });
         });
     }
 }
 class Stat_Data {
-    static update_item_view_count = async (database,data_type,id,customer_id,option) => {
+    static update_item_view_count = async (database,parent_data_type,parent_id,customer_id,option) => {
         return new Promise((callback) => {
-            let cloud_data = {};
+            let cloud_data = {item: DataItem.get_new(parent_data_type,parent_id), stat:DataItem.get_new(DataType.STAT,0,{count:0,parent_data_type:parent_data_type,parent_id:parent_id,customer_id:customer_id,type_id:FieldType.STAT_VIEW_ID})};
             let new_view = false;
             let item_count = 0;
-            cloud_data.item = DataItem.get_new(data_type,id);
-            cloud_data.stat = DataItem.get_new(DataType.STAT,0,{count:0,parent_data_type:data_type,parent_id:id,customer_id:customer_id,type_id:FieldType.STAT_VIEW_ID});
             let error = null;
             async.series([
                 async function(call){
@@ -1679,7 +1588,7 @@ class Stat_Data {
                         $and: [
                             { customer_id: { $regex:String(customer_id), $options: "i" } },
                             { parent_id: { $regex:id, $options: "i" } },
-                            { parent_data_type: { $regex:data_type, $options: "i" } }
+                            { parent_data_type: { $regex:parent_data_type, $options: "i" } }
                         ]
                     };
                     let search = Item_Logic.get_search(DataType.STAT,filter,{},1,1);
