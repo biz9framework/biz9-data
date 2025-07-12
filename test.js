@@ -1,6 +1,6 @@
 const async = require('async');
 const assert = require('node:assert');
-const {Data,Database,Portal,Category_Data,Product_Data,Page_Data,Blog_Post_Data,Content_Data,Stat_Data,List_Data,Review_Data} = require(".");
+const {Data,Database,Portal,Category_Data,Product_Data,Page_Data,Blog_Post_Data,Content_Data,Stat_Data,List_Data,Review_Data,Favorite_Data} = require(".");
 const {Log,Number} = require("biz9-utility");
 const {DataType,DataItem,Item_Logic,Page_Logic,Template_Logic,Blog_Post_Logic,Content_Logic,Product_Logic,Field_Logic} = require("/home/think2/www/doqbox/biz9-framework/biz9-logic/code");
 /*
@@ -23,7 +23,7 @@ const DATA_TYPE = DataType.PAGE;
 const OPTION = {};
 //const FILTER = {test_group_id:59367};
 const FILTER = {data_type:DATA_TYPE};
-const APP_ID = 'test-july10';
+const APP_ID = 'test-july11';
 const SQL = {};
 /* --- TEST CONFIG END --- */
 
@@ -98,16 +98,29 @@ describe('connect', function(){ this.timeout(25000);
             */
         console.log('REVIEW-START');
         let parent_data_type = DataType.PRODUCT;
-        let parent_id= "9c787594-2cde-46f8-8cd6-5ee19261eab8";
-        let user_id = "bb6308fc-88ee-493f-a90a-ebc9d15c5753";
-        let rating = 4;
+        let parent_id= "de773692-104f-4d76-93c6-a79a03283261";
+        let user_id = "e58b52da-cba3-4ce6-a9d7-89cdcc826d85";
+        let rating = Number.get_id(6);
         let comment = Field_Logic.get_test().note;
         let review = DataItem.get_new(DataType.REVIEW,0,{parent_data_type:parent_data_type,parent_id:parent_id,user_id:user_id,rating:rating,rating,comment:comment});
         Log.w('review',review);
-        const [error,data] = await Review_Data.update(database,review.parent_data_type,review.parent_id,review.user_id,review);
+        //const [error,data] = await Review_Data.update(database,review.parent_data_type,review.parent_id,review.user_id,review);
+        //
+        const [error,data] = await Review_Data.search(database,parent_data_type,parent_id);
         Log.w('data',data);
         console.log('REVIEW-END');
 
+                /*
+        console.log('FAVORITE-START');
+        let parent_data_type = DataType.PRODUCT;
+        let parent_id= "de773692-104f-4d76-93c6-a79a03283261";
+        let user_id = "e58b52da-cba3-4ce6-a9d7-89cdcc826d85";
+        //const [error,data] = await Favorite_Data.update(database,parent_data_type,parent_id,user_id);
+        //
+        const [error,data] = await Favorite_Data.get_list(database,parent_data_type,user_id);
+        Log.w('data',data);
+        console.log('FAVORITE-END');
+        */
 
         //console.log('PRODUCT-START');
         //let key ="product_1";

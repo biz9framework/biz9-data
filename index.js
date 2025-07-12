@@ -8,7 +8,7 @@ const async = require('async');
 const {get_db_connect_main,check_db_connect_main,close_db_connect_main,update_item_main,get_item_main,delete_item_main,get_id_list_main,delete_item_list_main,count_item_list_main} = require('./mongo/index.js');
 const {Scriptz}=require("biz9-scriptz");
 const {Log,Str,Number,Obj}=require("/home/think2/www/doqbox/biz9-framework/biz9-utility/code");
-const {DataItem,DataType,FieldType,Item_Logic}=require("/home/think2/www/doqbox/biz9-framework/biz9-logic/code");
+const {DataItem,DataType,FieldType,Item_Logic,User_Logic}=require("/home/think2/www/doqbox/biz9-framework/biz9-logic/code");
 const { get_db_connect_adapter,check_db_connect_adapter,close_db_connect_adapter,update_item_adapter,update_item_list_adapter,get_item_adapter,delete_item_adapter,get_item_list_adapter,delete_item_list_adapter,count_item_list_adapter,delete_item_cache }  = require('./adapter.js');
 const {get_database_main} = require("./main");
 class Database {
@@ -661,7 +661,7 @@ class Review_Data {
         return new Promise((callback) => {
             let error = null;
             let cloud = {};
-            cloud.item = DataItem.get_new(parent_data_type,parent_id);
+            cloud.item = DataItem.get_new(parent_data_type,parent_id,{parent_data_type:parent_data_type,parent_id:parent_id,user_id:user_id});
             cloud.review = review;
             let review_list = [];
             let review_count = 0;
@@ -709,6 +709,7 @@ class Review_Data {
                     }
                 },
             ]).then(result => {
+
                 callback([error,cloud]);
             }).catch(error => {
                 Log.error("Review-Data-Update",error);
@@ -716,12 +717,13 @@ class Review_Data {
             });
         });
     };
-    static get_review_list = async (database,parent_id) => {
+    static search = async (database,parent_data_type,parent_id) => {
         return new Promise((callback) => {
             let error = null;
             let cloud = {};
+            cloud.review_list = [];
             let item_list = [];
-            let review_list = [];
+            let user_list = [];
             async.series([
                 //review_list
                 async function(call){
@@ -732,44 +734,201 @@ class Review_Data {
                         cloud_error=Log.append(cloud_error,error);
                     }else{
                         if(data.item_list.length>0){
-                            review_list = data.item_list;
+                            cloud.review_list = data.item_list;
                         }
                     }
                 },
-        async function(call){
-            var query = { $or: [] };
-            for(let a = 0;a < review_list.length;a++){
-                query.$or.push({id: { $regex:review_list[a].parent_id, $options: "i" }});
-            }
-            product_search = Item_Logic.get_search(DataType.PRODUCT,query,{date_create:-1},1,0);
-            const [error,data] = await Portal.search(database,product_search.data_type,product_search.filter,product_search.sort_by,product_search.page_current,product_search.page_size);
-            if(error){
-                cloud_error=Log.append(cloud_error,error);
-            }else{
-                if(data.item_list.length>0){
-                    item_list=data.item_list;
-                }
-            }
-        },
-        async function(call){
-            for(let a = 0;a<review_list.length;a++){
-                for(let b = 0;b<item_list.length;b++){
-                }
-
-            }
-        },
+                //item_list
+                async function(call){
+                    var query = { $or: [] };
+                    for(let a = 0;a < cloud.review_list.length;a++){
+                        query.$or.push({id: { $regex:cloud.review_list[a].parent_id, $options: "i" }});
+                    }
+                    let item_search = Item_Logic.get_search(parent_data_type,query,{},1,0);
+                    const [error,data] = await Portal.search(database,item_search.data_type,item_search.filter,item_search.sort_by,item_search.page_current,item_search.page_size);
+                    if(error){
+                        cloud_error=Log.append(cloud_error,error);
+                    }else{
+                        if(data.item_list.length>0){
+                            item_list=data.item_list;
+                        }
+                    }
+                },
+                //user_list
+                async function(call){
+                    var query = { $or: [] };
+                    for(let a = 0;a < cloud.review_list.length;a++){
+                        query.$or.push({id: { $regex:cloud.review_list[a].user_id, $options: "i" }});
+                    }
+                    let user_search = Item_Logic.get_search(DataType.USER,query,{date_create:-1},1,0);
+                    const [error,data] = await Portal.search(database,user_search.data_type,user_search.filter,user_search.sort_by,user_search.page_current,user_search.page_size);
+                    if(error){
+                        cloud_error=Log.append(cloud_error,error);
+                    }else{
+                        if(data.item_list.length>0){
+                            user_list=data.item_list;
+                        }
+                    }
+                },
+                //bind item_list
+                function(call){
+                    for(let a = 0;a<cloud.review_list.length;a++){
+                        for(let b = 0;b<item_list.length;b++){
+                            if(cloud.review_list[a].parent_id == item_list[b].id){
+                               cloud.review_list[a].parent_photo_data = !Str.check_is_null(item_list[b].photo_data) ? item_list[b].photo_data : "";
+                               cloud.review_list[a].parent_title = !Str.check_is_null(item_list[b].title) ? item_list[b].title : "N/A";
+                            }
+                        }
+                    }
+                    call();
+                },
+                //bind user_list
+                function(call){
+                    for(let a = 0;a<cloud.review_list.length;a++){
+                        for(let b = 0;b<user_list.length;b++){
+                            if(cloud.review_list[a].user_id == user_list[b].id){
+                               cloud.review_list[a].user_photo_data = !Str.check_is_null(user_list[b].photo_data) ? user_list[b].photo_data : "";
+                               cloud.review_list[a].user_title = !Str.check_is_null(user_list[b].title) ? user_list[b].title : "N/A";
+                               cloud.review_list[a].user_location = User_Logic.get_user_country_state_city(user_list[b]);
+                            }
+                        }
+                    }
+                    call();
+                },
             ]).then(result => {
-                callback([error,cloud]);
+                callback([error,cloud.review_list]);
             }).catch(error => {
-                Log.error("Review-Data-Update",error);
+                Log.error("Review-Data-List",error);
                 callback([error,[]]);
             });
         });
     };
-
 }
-
-
+class Favorite_Data {
+    static update = async (database,parent_data_type,parent_id,user_id) => {
+        return new Promise((callback) => {
+            let error = null;
+            let favorite_found = false;
+            let favorite = DataItem.get_new(DataType.FAVORITE,0,{parent_data_type:parent_data_type,parent_id:parent_id,user_id:user_id});
+            async.series([
+        async function(call){
+            var query = { $and: [] };
+            query.$and.push({parent_id: { $regex:parent_id, $options: "i" }});
+            query.$and.push({user_id: { $regex:user_id, $options: "i" }});
+            let favorite_search = Item_Logic.get_search(DataType.FAVORITE,query,{},1,0);
+            const [error,data] = await Portal.count(database,favorite_search.data_type,favorite_search.filter,favorite_search.sort_by,favorite_search.page_current,favorite_search.page_size);
+            if(error){
+                cloud_error=Log.append(cloud_error,error);
+            }else{
+                if(data>0){
+                    favorite_found = true;
+                }
+            }
+        },
+        async function(call){
+            if(!favorite_found){
+            const [error,data] = await Portal.update(database,favorite.data_type,favorite);
+            if(error){
+                cloud_error=Log.append(cloud_error,error);
+            }else{
+                favorite = data;
+            }
+            }
+        },
+            ]).then(result => {
+                callback([error,favorite]);
+            }).catch(error => {
+                Log.error("Favorite-Data-Update",error);
+                callback([error,[]]);
+            });
+        });
+    };
+    static search = async (database,data_type,user_id) => {
+        return new Promise((callback) => {
+            let error = null;
+            let cloud = {};
+            let favorite_list = [];
+            let item_list = [];
+            let user_list = [];
+            async.series([
+                //favorite_list
+                async function(call){
+                    let query = {user_id:user_id};
+                    let favorite_search = Item_Logic.get_search(DataType.FAVORITE,query,{},1,0);
+                    const [error,data] = await Portal.search(database,favorite_search.data_type,favorite_search.filter,favorite_search.sort_by,favorite_search.page_current,favorite_search.page_size);
+                    if(error){
+                        cloud_error=Log.append(cloud_error,error);
+                    }else{
+                        if(data.item_list.length>0){
+                            favorite_list = data.item_list;
+                        }
+                    }
+                },
+                //item_list
+                async function(call){
+                    var query = { $or: [] };
+                    for(let a = 0;a < favorite_list.length;a++){
+                        query.$or.push({id: { $regex:favorite_list[a].parent_id, $options: "i" }});
+                    }
+                    let item_search = Item_Logic.get_search(data_type,query,{},1,0);
+                    const [error,data] = await Portal.search(database,item_search.data_type,item_search.filter,item_search.sort_by,item_search.page_current,item_search.page_size);
+                    if(error){
+                        cloud_error=Log.append(cloud_error,error);
+                    }else{
+                        if(data.item_list.length>0){
+                            item_list=data.item_list;
+                        }
+                    }
+                },
+                //user_list
+                async function(call){
+                    var query = { $or: [] };
+                    for(let a = 0;a < favorite_list.length;a++){
+                        query.$or.push({id: { $regex:favorite_list[a].user_id, $options: "i" }});
+                    }
+                    let user_search = Item_Logic.get_search(DataType.USER,query,{date_create:-1},1,0);
+                    const [error,data] = await Portal.search(database,user_search.data_type,user_search.filter,user_search.sort_by,user_search.page_current,user_search.page_size);
+                    if(error){
+                        cloud_error=Log.append(cloud_error,error);
+                    }else{
+                        if(data.item_list.length>0){
+                            user_list=data.item_list;
+                        }
+                    }
+                },
+                //bind item_list
+                function(call){
+                    for(let a = 0;a<favorite_list.length;a++){
+                        for(let b = 0;b<item_list.length;b++){
+                            if(favorite_list[a].parent_id == item_list[b].id){
+                                favorite_list[a].parent_photo_data = !Str.check_is_null(item_list[b].photo_data) ? item_list[b].photo_data : "";
+                                favorite_list[a].parent_title = !Str.check_is_null(item_list[b].title) ? item_list[b].title : "N/A";
+                            }
+                        }
+                    }
+                    call();
+                },
+                //bind user_list
+                function(call){
+                    for(let a = 0;a<favorite_list.length;a++){
+                        for(let b = 0;b<user_list.length;b++){
+                            if(favorite_list[a].user_id == user_list[b].id){
+                                favorite_list[a].user_photo_data = !Str.check_is_null(user_list[b].photo_data) ? user_list[b].photo_data : "";
+                                favorite_list[a].user_title = !Str.check_is_null(user_list[b].title) ? user_list[b].title : "N/A";
+                                favorite_list[a].user_location = User_Logic.get_user_country_state_city(user_list[b]);
+                            }
+                        }
+                    }
+                },
+            ]).then(result => {
+                callback([error,favorite_list]);
+            }).catch(error => {
+                Log.error("Favorite-Data-List",error);
+                callback([error,[]]);
+            });
+        });
+    };
+}
 class Admin_Data {
     static get = async (database,option) => {
         /* option params
@@ -853,7 +1012,6 @@ class Portal {
                             error=Log.append(error,error);
                         }else{
                             item = data;
-                            Log.w('my_item',item);
                         }
                         call();
                     }).catch(error => {
@@ -1835,11 +1993,12 @@ module.exports = {
     Content_Data,
     Database,
     Event_Data,
+    Favorite_Data,
     Page_Data,
     Portal,
     Product_Data,
     Review_Data,
     Search_Data,
     Template_Data,
-   Stat_Data,
+    Stat_Data,
 };
