@@ -1,8 +1,8 @@
 const async = require('async');
 const assert = require('node:assert');
-const {Data,Database,Portal,Category_Data,Product_Data,Page_Data,Blog_Post_Data,Content_Data,Stat_Data,List_Data,Review_Data,Favorite_Data,Search_Data,Admin_Data,Business_Data,Order_Data} = require(".");
+const {Data,Database,Portal,Category_Data,Product_Data,Page_Data,Blog_Post_Data,Content_Data,Stat_Data,List_Data,Review_Data,Favorite_Data,Search_Data,Admin_Data,Business_Data,Order_Data,Cart_Data} = require(".");
 const {Log,Number} = require("biz9-utility");
-const {DataType,DataItem,Item_Logic,Page_Logic,Template_Logic,Blog_Post_Logic,Content_Logic,Product_Logic,Field_Logic,Admin_Logic,Business_Logic,Category_Logic,User_Logic,Order_Logic,FieldType} = require("/home/think2/www/doqbox/biz9-framework/biz9-logic/code");
+const {DataType,DataItem,Item_Logic,Page_Logic,Template_Logic,Blog_Post_Logic,Content_Logic,Product_Logic,Field_Logic,Admin_Logic,Business_Logic,Category_Logic,User_Logic,Order_Logic,FieldType,Cart_Logic} = require("/home/think2/www/doqbox/biz9-framework/biz9-logic/code");
 /*
  * availble tests
 - connect
@@ -24,7 +24,7 @@ const DATA_TYPE = DataType.BLOG_POST;
 const OPTION = {};
 //const FILTER = {test_group_id:59367};
 const FILTER = {data_type:DATA_TYPE};
-const APP_ID = 'test-july17';
+const APP_ID = 'test-july19';
 const SQL = {};
 /* --- TEST CONFIG END --- */
 
@@ -462,14 +462,14 @@ describe('item_get_data', function(){ this.timeout(25000);
                 let parent_data_type = DataType.PRODUCT;
                 let parent_id = "4302f956-f3e0-49d9-a1d0-6e776527dd57";
                 let user_id = "a83c80ed-a2bc-424f-9fba-71904c4253a2";
-                let cart_id = Order_Logic.get_cart_id();
+                let cart_number = Order_Logic.get_cart_number();
 
-                let cart = DataItem.get_new(DataType.CART,0, {cart_id:cart_id,user_id:user_id,cart_item_list:[]});
+                let cart = DataItem.get_new(DataType.CART,0, {cart_number:cart_number,user_id:user_id,cart_item_list:[]});
 
-                let cart_item = DataItem.get_new(DataType.CART_ITEM,0,{cart_id:cart_id,parent_data_type:parent_data_type,parent_id:parent_id,cart_sub_item_list:[]});
+                let cart_item = DataItem.get_new(DataType.CART_ITEM,0,{cart_number:cart_number,parent_data_type:parent_data_type,parent_id:parent_id,cart_sub_item_list:[]});
 
-                let cart_sub_item_1 = DataItem.get_new(DataType.CART_SUB_ITEM,0,{cart_id:cart_id,user_id:user_id,parent_data_type:DataType.ITEM,parent_id:"b5e2f647-5253-492a-b956-0fc8d7fa61b3"});
-                let cart_sub_item_2 = DataItem.get_new(DataType.CART_SUB_ITEM,0,{cart_id:cart_id,user_id:user_id,parent_data_type:DataType.ITEM,parent_id:"b52432a5-6a3d-41c4-a4ad-3193709bedf5"});
+                let cart_sub_item_1 = DataItem.get_new(DataType.CART_SUB_ITEM,0,{cart_number:cart_number,user_id:user_id,parent_data_type:DataType.ITEM,parent_id:"b5e2f647-5253-492a-b956-0fc8d7fa61b3"});
+                let cart_sub_item_2 = DataItem.get_new(DataType.CART_SUB_ITEM,0,{cart_number:cart_number,user_id:user_id,parent_data_type:DataType.ITEM,parent_id:"b52432a5-6a3d-41c4-a4ad-3193709bedf5"});
 
                 cart_item.cart_sub_item_list.push(cart_sub_item_1);
                 cart_item.cart_sub_item_list.push(cart_sub_item_2);
@@ -601,38 +601,42 @@ describe('item_update', function(){ this.timeout(25000);
                 let product = Product_Logic.get_test();
                 product.id = '5b3a17bb-725c-4456-8a36-daebb7ef0966';
                 //Log.w('product',product);
-                //let cart = Product_Logic.get_test_cart(Order_Logic.get_cart_id(),user.id,{generate_id:true});
-                //let cart = Product_Logic.get_test_cart(Order_Logic.get_cart_id(),user.id);
-                //let cart_item = Order_Logic.get_test_cart_item(cart.id,Order_Logic.get_cart_id(),user.id,product.data_type,product.id);
+                //let cart = Product_Logic.get_test_cart(Order_Logic.get_cart_number(),user.id,{generate_id:true});
+                //let cart = Product_Logic.get_test_cart(Order_Logic.get_cart_number(),user.id);
+                //let cart_item = Order_Logic.get_test_cart_item(cart.id,Order_Logic.get_cart_number(),user.id,product.data_type,product.id);
 
-                let cart = DataItem.get_new(DataType.CART,0,{user_id:user.id,cart_id:Order_Logic.get_cart_id()});
-                let cart_item = DataItem.get_new(DataType.CART_ITEM, 0,{user_id:user.id,cart_id:cart.cart_id});
+                let cart = DataItem.get_new(DataType.CART,0,{user_id:user.id,cart_number:Order_Logic.get_cart_number()});
+                let cart_item = DataItem.get_new(DataType.CART_ITEM, 0,{user_id:user.id,cart_number:cart.cart_number});
                 Log.w('cart',cart);
                 Log.w('cart_item',cart_item);
-                const [error,data] = await Order_Data.cart_item_update(database,cart_item.id,cart_item.cart_id,user.id,product.data_type,product.id,{});
+                const [error,data] = await Order_Data.cart_item_update(database,cart_item.id,cart_item.cart_number,user.id,product.data_type,product.id,{});
                 Log.w('data',data);
                 */
                 //stage data
+                console.log('aaaaaaaa');
                 let parent_data_type = DataType.PRODUCT;
-                let parent_id = "4302f956-f3e0-49d9-a1d0-6e776527dd57-ss";
-                let user_id = "1907e2df-45a5-46a3-aa8c-1b71735af6ba";
-                let cart_id = Order_Logic.get_cart_id();
+                let parent_id = "c61e71d2-9021-4bfa-a491-8bfce2b49e46";
+                let sub_item_1_id = "0c42dedb-22d1-4ff8-8148-1adc3da6bcf3";
+                let sub_item_2_id = "6f1c7269-8f4e-4dfb-8caf-0c911481e1b5";
+                let user_id = Number.get_id();
+                let cart_number = Cart_Logic.get_cart_number();
 
-                let cart = DataItem.get_new(DataType.CART,0, {cart_id:cart_id,user_id:user_id,cart_item_list:[]});
-
-                let cart_item = DataItem.get_new(DataType.CART_ITEM,0,{cart_id:cart_id,parent_data_type:parent_data_type,parent_id:parent_id,cart_sub_item_list:[]});
-
-                let cart_sub_item_1 = DataItem.get_new(DataType.CART_SUB_ITEM,0,{cart_id:cart_id,user_id:user_id,parent_data_type:DataType.ITEM,parent_id:"b5e2f647-5253-492a-b956-0fc8d7fa61b3--ss"});
-                let cart_sub_item_2 = DataItem.get_new(DataType.CART_SUB_ITEM,0,{cart_id:cart_id,user_id:user_id,parent_data_type:DataType.ITEM,parent_id:"b52432a5-6a3d-41c4-a4ad-3193709bedf5-dd"});
+                let cart = DataItem.get_new(DataType.CART,0, {cart_number:cart_number,user_id:user_id,cart_item_list:[]});
+                let cart_item = DataItem.get_new(DataType.CART_ITEM,0,{cart_number:cart_number,parent_data_type:parent_data_type,parent_id:parent_id,cart_sub_item_list:[]});
+                let cart_sub_item_1 = DataItem.get_new(DataType.CART_SUB_ITEM,0,{cart_number:cart_number,user_id:user_id,parent_data_type:DataType.CONTENT,parent_id:sub_item_1_id});
+                let cart_sub_item_2 = DataItem.get_new(DataType.CART_SUB_ITEM,0,{cart_number:cart_number,user_id:user_id,parent_data_type:DataType.CONTENT,parent_id:sub_item_2_id});
 
                 cart_item.cart_sub_item_list.push(cart_sub_item_1);
                 cart_item.cart_sub_item_list.push(cart_sub_item_2);
 
                 cart.cart_item_list.push(cart_item);
 
-                const [error,data] = await Order_Data.cart_item_update(database,parent_data_type,user_id,cart);
-                Log.w('data',data);
+
+                const [error,data] = await Cart_Data.update(database,parent_data_type,user_id,cart);
+
+                Log.w('cart_new',data.cart);
                 Log.w('data_cart',data.cart.cart_item_list);
+                Log.w('data_cart_bb',data.cart.cart_item_list[0]);
                 Log.w('data_cart_bb',data.cart.cart_item_list[0].cart_sub_item_list);
 
                 /*

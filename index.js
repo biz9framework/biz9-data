@@ -734,95 +734,90 @@ class Order_Data {
         });
     };
 }
-
 class Cart_Data {
-    static cart_item_update = async (database,data_type,user_id,cart,option) => {
+    static update = async (database,parent_data_type,user_id,cart,option) => {
         return new Promise((callback) => {
             let cloud_data = {};
             let error = null;
             option = !Obj.check_is_empty(option) ? option : {get_item:false,get_photo:false};
             cloud_data.cart = DataItem.get_new(DataType.CART,0);
+			cloud_data.publish_cart_item_list = [];
+			cloud_data.publish_cart_sub_item_list = [];
+
             cloud_data.cart_item_list = [];
             cloud_data.cart_sub_item_list = [];
             cloud_data.publish_stat_list = [];
             cloud_data.publish_parent_item_list = [];
             let cart_item_item_list = [];
             async.series([
+				//bind-update cart
                 async function(call){
-                    Object.keys(cart).forEach(key => {
-                        if(key!='cart_item_list'){
-                            cloud_data.cart[key] = cart[key]
-                        }
-                    });
-                },
-                //get cart
-                async function(call){
-                    if(Str.check_is_null(cloud_data.cart.id)){
-                        const [error,data] = await Portal.update(database,DataType.CART,cloud_data.cart);
-                        if(error){
-                            error=Log.append(error,error);
-                        }else{
+					let publish_cart = DataItem.get_new(DataType.CART,cart.id,{cart_number:cart.cart_number,user_id:user_id});
+              		const [error,data] = await Portal.update(database,DataType.CART,publish_cart);
+                    if(error){
+                        error=Log.append(error,error);
+                    }else{
                             cloud_data.cart = data.item;
-                        }
                     }
                 },
 
                 //bind cart_item_list
                 async function(call){
-                    for(let a = 0; a < cart.cart_item_list.length; a++){
-                        let cart_item = {};
-                        Object.keys(cart.cart_item_list[a]).forEach(key => {
-                            if(key!='cart_sub_item_list'){
-                                cart_item[key] = cart.cart_item_list[a][key];
-                            }
-                        });
-                        cart_item.cart_item_id = cloud_data.cart.id;
-                        cloud_data.cart_item_list.push(cart_item);
+					if(cart.cart_item_list.length>0){
+ 					for(let a=0;a<cart.cart_item_list.length;a++){
+						cloud_data.publish_cart_item_list.push(
+							DataItem.get_new(DataType.CART_ITEM,0,
+							{
+								cart_item_id:cart.id,
+								cart_number:cart.cart_number,
+								parent_data_type:cart.cart_item_list[a].parent_data_type,
+								user_id:user_id,
+								parent_id:cart.cart_item_list[a].parent_id
+							}));
+					}
+					const [error,data] = await Portal.update_list(database,cloud_data.publish_cart_item_list);
+                    if(error){
+                        error=Log.append(error,error);
+                    }else{
+                            cloud_data.publish_cart_item_list = data.item_list;
                     }
-                },
-                //update cart_item_list
-                async function(call){
-                    if(cloud_data.cart_item_list.length>0){
-                        const [error,data] = await Portal.update_list(database,cloud_data.cart_item_list);
-                        if(error){
-                            error=Log.append(error,error);
-                        }else{
-                            cloud_data.cart_item_list = data.item_list;
-                        }
-                    }
+					}
+					//Log.w('publish_cart_item_list',cloud_data.publish_cart_item_list);
+					//Log.w('cart_item_list22',cart.cart_item_list[0].cart_sub_item_list);
+					//Log.w('cart_2',cart);
                 },
                 //bind cart_sub_item_list
-                function(call){
-                    for(let a = 0; a < cart.cart_item_list.length; a++){
-                        for(let b = 0; b < cart.cart_item_list[a].cart_sub_item_list.length;b++){
-                            let cart_sub_item = {};
-                            Object.keys(cart.cart_item_list[a].cart_sub_item_list[b]).forEach(key => {
-                                cart_sub_item[key] =  cart.cart_item_list[a].cart_sub_item_list[b][key];
-                            });
-                            cart_sub_item.cart_item_data_type = cloud_data.cart_item_list[a].data_type;
-                            cart_sub_item.cart_item_id = cloud_data.cart_item_list[a].id;
-                            cloud_data.cart_sub_item_list.push(cart_sub_item);
-                        }
-                    }
-                    call();
-                },
-                //update cart_sub_item_list
                 async function(call){
-                    if(cloud_data.cart_sub_item_list.length>0){
-                        const [error,data] = await Portal.update_list(database,cloud_data.cart_sub_item_list);
-                        if(error){
-                            error=Log.append(error,error);
-                        }else{
-                            cloud_data.cart_sub_item_list = data.item_list;
-                        }
+					if(cart.cart_item_list.length>0){
+ 					for(let a=0;a<cloud_data.publish_cart_item_list.length;a++){
+						for(let b=0;b<cart.cart_item_list[a].cart_sub_item_list.length;b++){
+						cloud_data.publish_cart_sub_item_list.push(
+							DataItem.get_new(DataType.CART_SUB_ITEM,0,
+								{
+									cart_id:cloud_data.cart.id,
+									cart_number:cloud_data.cart.cart_number,
+									user_id:user_id,
+									parent_data_type:cart.cart_item_list[a].cart_sub_item_list[b].parent_data_type,
+									parent_id:cart.cart_item_list[a].cart_sub_item_list[b].parent_id,
+									cart_item_id:cloud_data.publish_cart_item_list[a].id
+							}));
+										}
+					}
+					const [error,data] = await Portal.update_list(database,cloud_data.publish_cart_sub_item_list);
+                    if(error){
+                        error=Log.append(error,error);
+                    }else{
+                            cloud_data.publish_cart_sub_item_list = data.item_list;
                     }
+						Log.w('rrrrrrrrr',cloud_data.publish_cart_sub_item_list);
+					}
                 },
                 async function(call){
                     let stat_list = [];
-                    for(let a = 0; a < cloud_data.cart_item_list.length; a++){
-                        stat_list.push(DataItem.get_new(DataType.STAT,0,{parent_id:cloud_data.cart_item_list[a].parent_id,parent_data_type:cloud_data.cart_item_list[a].parent_data_type}));
+                    for(let a = 0; a < cart.cart_item_list.length; a++){
+                        stat_list.push(DataItem.get_new(DataType.STAT,0,{parent_id:cart.cart_item_list[a].parent_id,parent_data_type:cart.cart_item_list[a].parent_data_type}));
                     }
-                    const [error,data] = await Stat_Data.update_item_list(database,data_type,user_id,FieldType.STAT_CART_ADD_ID,stat_list);
+                    const [error,data] = await Stat_Data.update_item_list(database,parent_data_type,user_id,FieldType.STAT_CART_ADD_ID,stat_list);
                     if(error){
                         error=Log.append(error,error);
                     }else{
@@ -832,7 +827,7 @@ class Cart_Data {
                 },
                 //get cart
                 async function(call){
-                        const [error,data] = await Order_Data.cart_get(database,data_type,cart.cart_id);
+                        const [error,data] = await Cart_Data.get(database,parent_data_type,cart.cart_number);
                         if(error){
                             error=Log.append(error,error);
                         }else{
@@ -847,9 +842,9 @@ class Cart_Data {
             });
         });
     };
-    static cart_get = (database,data_type,cart_id,option) => {
+    static get = (database,data_type,cart_number,option) => {
         return new Promise((callback) => {
-            let cloud_data = {cart:DataItem.get_new(DataType.CART,0,{cart_id:cart_id,cart_item_list:[]})};
+            let cloud_data = {cart:DataItem.get_new(DataType.CART,0,{cart_number:cart_number,cart_item_list:[]})};
             let cart_item_item_list_query = { $or: [] };
             let cart_sub_item_item_list_query = { $or: [] };
             cloud_data.user = DataItem.get_new(DataType.USER,0,
@@ -868,8 +863,8 @@ class Cart_Data {
             async.series([
                 //cart
                 async function(call){
-                    option.filter = { cart_id: { $regex:".*"+cart_id, $options: "i" } };
-                    const [error,data] = await Portal.get(database,DataType.CART,cart_id,option);
+                    option.filter = { cart_number: { $regex:".*"+cart_number, $options: "i" } };
+                    const [error,data] = await Portal.get(database,DataType.CART,cart_number,option);
                     if(error){
                         error=Log.append(error,error);
                     }else{
@@ -878,7 +873,7 @@ class Cart_Data {
                 },
                 //cart_item_list
                 async function(call){
-                    let filter = { cart_id: { $regex:".*"+cart_id, $options: "i" } };
+                    let filter = { cart_number: { $regex:".*"+cart_number, $options: "i" } };
                     let search = Item_Logic.get_search(DataType.CART_ITEM,filter,{},1,0);
                     const [error,data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,{});
                     if(error){
@@ -896,7 +891,6 @@ class Cart_Data {
                     }
                     let search = Item_Logic.get_search(data_type,cart_item_item_list_query,{},1,0);
                     const [error,data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size);
-                    Log.w('my_data',data);
                     if(error){
                         error=Log.append(error,error);
                     }else{
@@ -913,7 +907,7 @@ class Cart_Data {
                 },
                 //cart_sub_item_list
                 async function(call){
-                    let filter = { cart_id: { $regex:".*"+cart_id, $options: "i" } };
+                    let filter = { cart_number: { $regex:".*"+cart_number, $options: "i" } };
                     let search = Item_Logic.get_search(DataType.CART_SUB_ITEM,filter,{},1,0);
                     const [error,data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,{});
                     if(error){
@@ -930,14 +924,17 @@ class Cart_Data {
                         }
                     }
                 },
+
                 //cart_sub_item_item_list - parent_item_list
                 async function(call){
+					let parent_data_type = DataType.BLANK;
                     for(let a = 0; a < cart_sub_item_list.length; a++){
                         let query_field = {};
                         query_field['id'] = { $regex:cart_sub_item_list[a]['parent_id'], $options: "i" };
                         cart_sub_item_item_list_query.$or.push(query_field);
+						parent_data_type = cart_sub_item_list[a]['parent_data_type'];
                     }
-                    let search = Item_Logic.get_search(DataType.ITEM,cart_sub_item_item_list_query,{},1,0);
+                    let search = Item_Logic.get_search(parent_data_type,cart_sub_item_item_list_query,{},1,0);
                     const [error,data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size);
                     if(error){
                         error=Log.append(error,error);
@@ -962,7 +959,7 @@ class Cart_Data {
             });
         });
     };
-    static cart_delete = async (database,id,option) => {
+    static delete = async (database,id,option) => {
         return new Promise((callback) => {
             let cloud_data = {};
             let error = null;
@@ -1583,6 +1580,7 @@ class Portal {
                             cloud_data.filter=filter;
                             cloud_data.data_type=data_type;
                             cloud_data.item_list=data;
+							cloud_data.app_id = database.app_id;
                             call();
                         }
                     }).catch(error => {
