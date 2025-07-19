@@ -460,6 +460,7 @@ class Order_Data {
             cloud_data.cart_item_list = [];
             cloud_data.cart_sub_item_list = [];
             cloud_data.publish_stat_list = [];
+            cloud_data.publish_parent_item_list = [];
             let cart_item_item_list = [];
             async.series([
                 async function(call){
