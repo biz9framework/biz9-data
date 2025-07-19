@@ -451,6 +451,291 @@ class Event_Data {
     };
 }
 class Order_Data {
+    static order_item_update = async (database,data_type,user_id,order,option) => {
+        return new Promise((callback) => {
+            let cloud_data = {};
+            let error = null;
+            option = !Obj.check_is_empty(option) ? option : {get_item:false,get_photo:false};
+            cloud_data.order = DataItem.get_new(DataType.ORDER,0);
+            cloud_data.order_item_list = [];
+            cloud_data.order_sub_item_list = [];
+            cloud_data.publish_stat_list = [];
+            cloud_data.publish_parent_item_list = [];
+            let order_item_item_list = [];
+            async.series([
+                async function(call){
+                    Object.keys(order).forEach(key => {
+                        if(key!='order_item_list'){
+                            cloud_data.order[key] = order[key]
+                        }
+                    });
+                },
+                //get order
+                async function(call){
+                    if(Str.check_is_null(cloud_data.order.id)){
+                        const [error,data] = await Portal.update(database,DataType.ORDER,cloud_data.order);
+                        if(error){
+                            error=Log.append(error,error);
+                        }else{
+                            cloud_data.order = data.item;
+                        }
+                    }
+                },
+
+                //bind order_item_list
+                async function(call){
+                    for(let a = 0; a < order.order_item_list.length; a++){
+                        let order_item = {};
+                        Object.keys(order.order_item_list[a]).forEach(key => {
+                            if(key!='order_sub_item_list'){
+                                order_item[key] = order.order_item_list[a][key];
+                            }
+                        });
+                        order_item.order_item_id = cloud_data.order.id;
+                        cloud_data.order_item_list.push(order_item);
+                    }
+                },
+                //update order_item_list
+                async function(call){
+                    if(cloud_data.order_item_list.length>0){
+                        const [error,data] = await Portal.update_list(database,cloud_data.order_item_list);
+                        if(error){
+                            error=Log.append(error,error);
+                        }else{
+                            cloud_data.order_item_list = data.item_list;
+                        }
+                    }
+                },
+                //bind order_sub_item_list
+                function(call){
+                    for(let a = 0; a < order.order_item_list.length; a++){
+                        for(let b = 0; b < order.order_item_list[a].order_sub_item_list.length;b++){
+                            let order_sub_item = {};
+                            Object.keys(order.order_item_list[a].order_sub_item_list[b]).forEach(key => {
+                                order_sub_item[key] =  order.order_item_list[a].order_sub_item_list[b][key];
+                            });
+                            order_sub_item.order_item_data_type = cloud_data.order_item_list[a].data_type;
+                            order_sub_item.order_item_id = cloud_data.order_item_list[a].id;
+                            cloud_data.order_sub_item_list.push(order_sub_item);
+                        }
+                    }
+                    call();
+                },
+                //update order_sub_item_list
+                async function(call){
+                    if(cloud_data.order_sub_item_list.length>0){
+                        const [error,data] = await Portal.update_list(database,cloud_data.order_sub_item_list);
+                        if(error){
+                            error=Log.append(error,error);
+                        }else{
+                            cloud_data.order_sub_item_list = data.item_list;
+                        }
+                    }
+                },
+                async function(call){
+                    let stat_list = [];
+                    for(let a = 0; a < cloud_data.order_item_list.length; a++){
+                        stat_list.push(DataItem.get_new(DataType.STAT,0,{parent_id:cloud_data.order_item_list[a].parent_id,parent_data_type:cloud_data.order_item_list[a].parent_data_type}));
+                    }
+                    const [error,data] = await Stat_Data.update_item_list(database,data_type,user_id,FieldType.STAT_ORDER_ADD_ID,stat_list);
+                    if(error){
+                        error=Log.append(error,error);
+                    }else{
+                        cloud_data.publish_stat_list = data.publish_stat_list;
+                        cloud_data.publish_parent_item_list = data.publish_parent_item_list;
+                    }
+                },
+                //get order
+                async function(call){
+                        const [error,data] = await Order_Data.order_get(database,data_type,order.order_id);
+                        if(error){
+                            error=Log.append(error,error);
+                        }else{
+                                cloud_data.order = data.order;
+                        }
+                },
+            ]).then(result => {
+                callback([error,cloud_data]);
+            }).catch(error => {
+                Log.error("OrderData-Order-Item-Update",error);
+                callback([error,[]]);
+            });
+        });
+    };
+    static order_get = (database,data_type,order_id,option) => {
+        return new Promise((callback) => {
+            let cloud_data = {order:DataItem.get_new(DataType.ORDER,0,{order_id:order_id,order_item_list:[]})};
+            let order_item_item_list_query = { $or: [] };
+            let order_sub_item_item_list_query = { $or: [] };
+            cloud_data.user = DataItem.get_new(DataType.USER,0,
+                {
+                    title:"User Not Found",
+                    first_name:"First Name Not Found",
+                    last_name:"Last Name Not Found",
+                    app_id:database.app_id
+                });
+            let error = null;
+            let order_item_list = [];
+            let parent_item_list = [];
+            let order_sub_item_list = [];
+            let parent_sub_item_list = [];
+            option = !Obj.check_is_empty(option) ? option : {get_item:false,get_photo:false,get_order_item:true};
+            async.series([
+                //order
+                async function(call){
+                    option.filter = { order_id: { $regex:".*"+order_id, $options: "i" } };
+                    const [error,data] = await Portal.get(database,DataType.ORDER,order_id,option);
+                    if(error){
+                        error=Log.append(error,error);
+                    }else{
+                        cloud_data.order = data.item;
+                    }
+                },
+                //order_item_list
+                async function(call){
+                    let filter = { order_id: { $regex:".*"+order_id, $options: "i" } };
+                    let search = Item_Logic.get_search(DataType.ORDER_ITEM,filter,{},1,0);
+                    const [error,data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,{});
+                    if(error){
+                        error=Log.append(error,error);
+                    }else{
+                        cloud_data.order.order_item_list = data.item_list;
+                    }
+               },
+                //order_item_item_list - parent_item_list
+                async function(call){
+                    for(let a = 0;a < cloud_data.order.order_item_list.length; a++){
+                        let query_field = {};
+                        query_field['id'] = { $regex:cloud_data.order.order_item_list[a]['parent_id'], $options: "i" };
+                        order_item_item_list_query.$or.push(query_field);
+                    }
+                    let search = Item_Logic.get_search(data_type,order_item_item_list_query,{},1,0);
+                    const [error,data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size);
+                    Log.w('my_data',data);
+                    if(error){
+                        error=Log.append(error,error);
+                    }else{
+                        for(let a = 0; a < cloud_data.order.order_item_list.length; a++){
+                            cloud_data.order.order_item_list[a].parent_item = DataItem.get_new(cloud_data.order.order_item_list[a].parent_data_type,0,{title:'Item Not Found',parent_id: cloud_data.order.order_item_list[a].parent_id});
+                            for(let b = 0; b < data.item_list.length; b++){
+                                if(cloud_data.order.order_item_list[a].parent_id == data.item_list[b].id){
+                                    cloud_data.order.order_item_list[a].parent_item = data.item_list[b];
+                                }
+                            }
+                        }
+                    }
+
+                },
+                //order_sub_item_list
+                async function(call){
+                    let filter = { order_id: { $regex:".*"+order_id, $options: "i" } };
+                    let search = Item_Logic.get_search(DataType.ORDER_SUB_ITEM,filter,{},1,0);
+                    const [error,data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,{});
+                    if(error){
+                        error=Log.append(error,error);
+                    }else{
+                        order_sub_item_list = data.item_list;
+                        for(let a = 0; a < cloud_data.order.order_item_list.length; a++){
+                            cloud_data.order.order_item_list[a].order_sub_item_list = [];
+                            for(let b = 0; b < order_sub_item_list.length; b++){
+                                if(cloud_data.order.order_item_list[a].id == order_sub_item_list[b].order_item_id){
+                                    cloud_data.order.order_item_list[a].order_sub_item_list.push(order_sub_item_list[b]);
+                                }
+                            }
+                        }
+                    }
+                },
+                //order_sub_item_item_list - parent_item_list
+                async function(call){
+                    for(let a = 0; a < order_sub_item_list.length; a++){
+                        let query_field = {};
+                        query_field['id'] = { $regex:order_sub_item_list[a]['parent_id'], $options: "i" };
+                        order_sub_item_item_list_query.$or.push(query_field);
+                    }
+                    let search = Item_Logic.get_search(DataType.ITEM,order_sub_item_item_list_query,{},1,0);
+                    const [error,data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size);
+                    if(error){
+                        error=Log.append(error,error);
+                    }else{
+                        for(let a = 0; a < cloud_data.order.order_item_list.length; a++){
+                            for(let b = 0; b < cloud_data.order.order_item_list[a].order_sub_item_list.length; b++){
+                                cloud_data.order.order_item_list[a].order_sub_item_list[b].parent_item = DataItem.get_new(DataType.ITEM,0,{parent_id: cloud_data.order.order_item_list[a].order_sub_item_list[b].parent_id});
+                                for(let c = 0; c < data.item_list.length; c++){
+                                    if(cloud_data.order.order_item_list[a].order_sub_item_list[b].parent_id == data.item_list[c].id){
+                                        cloud_data.order.order_item_list[a].order_sub_item_list[b].parent_item = data.item_list[c];
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+            ]).then(result => {
+                callback([error,cloud_data]);
+            }).catch(error => {
+                Log.error("Order-Get",error);
+                callback([error,[]]);
+            });
+        });
+    };
+    static order_delete = async (database,id,option) => {
+        return new Promise((callback) => {
+            let cloud_data = {};
+            let error = null;
+            option = !Obj.check_is_empty(option) ? option : {get_item:false,get_photo:false};
+            cloud_data.order = DataItem.get_new(DataType.ORDER,id);
+            async.series([
+                async function(call){
+                    if(Str.check_is_null(cloud_data.order.id)){
+                        const [error,data] = await Portal.delete(database,DataType.ORDER,id);
+                        if(error){
+                            error=Log.append(error,error);
+                        }else{
+                            cloud_data.order = data.item;
+                        }
+                    }
+                },
+                async function(call){
+                    let search = Item_Logic.get_search(DataType.ORDER_ITEM,{order_item_id:id},{},1,0);
+                    const [error,data] = await Portal.delete_search(database,DataType.ORDER_ITEM,search.filter);
+                    if(error){
+                        error=Log.append(error,error);
+                    }else{
+                        cloud_data.delete_search = data;
+                    }
+                },
+            ]).then(result => {
+                callback([error,cloud_data]);
+            }).catch(error => {
+                Log.error("OrderData-Order-Item-Update",error);
+                callback([error,[]]);
+            });
+        });
+    };
+    static search = (database,filter,sort_by,page_current,page_size,option) => {
+        return new Promise((callback) => {
+            let cloud_data = {};
+            let error = null;
+            option = !Obj.check_is_empty(option) ? option : {get_item:false,get_photo:false};
+            async.series([
+                async function(call){
+                    const [error,data] = await Portal.search(database,DataType.ORDER,filter,sort_by,page_current,page_size,option);
+                    if(error){
+                        error=Log.append(error,error);
+                    }else{
+                        cloud_data = data;
+                    }
+                },
+            ]).then(result => {
+                callback([error,cloud_data]);
+            }).catch(error => {
+                Log.error("Product-Search",error);
+                callback([error,[]]);
+            });
+        });
+    };
+}
+
+class Cart_Data {
     static cart_item_update = async (database,data_type,user_id,cart,option) => {
         return new Promise((callback) => {
             let cloud_data = {};
@@ -579,7 +864,6 @@ class Order_Data {
             let parent_item_list = [];
             let cart_sub_item_list = [];
             let parent_sub_item_list = [];
-
             option = !Obj.check_is_empty(option) ? option : {get_item:false,get_photo:false,get_cart_item:true};
             async.series([
                 //cart
@@ -2030,6 +2314,7 @@ module.exports = {
     Business_Data,
     Blog_Post_Data,
     Category_Data,
+    Cart_Data,
     Content_Data,
     Database,
     Event_Data,
