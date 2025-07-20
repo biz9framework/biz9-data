@@ -2,7 +2,7 @@ const async = require('async');
 const assert = require('node:assert');
 const {Data,Database,Portal,Category_Data,Product_Data,Page_Data,Blog_Post_Data,Content_Data,Stat_Data,List_Data,Review_Data,Favorite_Data,Search_Data,Admin_Data,Business_Data,Order_Data,Cart_Data} = require(".");
 const {Log,Number} = require("biz9-utility");
-const {DataType,DataItem,Item_Logic,Page_Logic,Template_Logic,Blog_Post_Logic,Content_Logic,Product_Logic,Field_Logic,Admin_Logic,Business_Logic,Category_Logic,User_Logic,Order_Logic,FieldType,Cart_Logic} = require("/home/think2/www/doqbox/biz9-framework/biz9-logic/code");
+const {DataType,DataItem,Item_Logic,Page_Logic,Template_Logic,Blog_Post_Logic,Content_Logic,Product_Logic,Field_Logic,Admin_Logic,Business_Logic,Category_Logic,User_Logic,Order_Logic,FieldType,Cart_Logic,Stat_Logic} = require("/home/think2/www/doqbox/biz9-framework/biz9-logic/code");
 /*
  * availble tests
 - connect
@@ -59,11 +59,13 @@ describe('connect', function(){ this.timeout(25000);
             async function(call){
             console.log('STAT-START');
             let user_id = Number.get_id();
-            let item_1 = DataItem.get_new(DataType.PRODUCT,'7f3f7e91-b484-4eee-a75b-9e7b53d7c1ab');
-            let item_2 = DataItem.get_new(DataType.PRODUCT,'d08a3326-1e7b-4287-8e1d-6967d24a3eb7');
-            let item_list = [item_1,item_2];
-            Log.w('item_list',item_list);
-            const [error,data] = await Stat_Data.update_item_list(database,DataType.PRODUCT,user_id,FieldType.STAT_CART_ADD_ID,item_list,{});
+            let parent_data_type = 'product_biz';
+            let stat_type_id = FieldType.STAT_VIEW_ADD_ID;
+            let stat_list = [DataItem.get_new(DataType.STAT,0,{parent_data_type:parent_data_type,parent_id:'6952c3b8-b10b-48cb-8e42-ae3f3ef356c2'})];
+
+            let stat = Stat_Logic.get_new(parent_data_type,user_id,stat_type_id,stat_list);
+            Log.w('stat',stat);
+            const [error,data] = await Stat_Data.update(database,stat.parent_data_type,stat.user_id,stat.stat_type_id,stat.item_list,{});
             Log.w('data',data);
             console.log('STAT-END');
 
