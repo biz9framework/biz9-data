@@ -625,6 +625,8 @@ const count_item_list_adapter = (db_connect,data_type,filter) => {
                 count_item_list_main(db_connect,data_type,filter).then(([error,data]) => {
                     item_data.count = data;
                     item_data.app_id = db_connect.app_id;
+                    item_data.data_type = data_type;
+                    item_data.filter = filter;
                     call();
                 }).catch(error => {
                     Log.error("Data-Adapter-Count-Item-List",error);

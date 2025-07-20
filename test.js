@@ -24,7 +24,7 @@ const DATA_TYPE = DataType.BLOG_POST;
 const OPTION = {};
 //const FILTER = {test_group_id:59367};
 const FILTER = {data_type:DATA_TYPE};
-const APP_ID = 'test-july19';
+const APP_ID = 'test-july20';
 const SQL = {};
 /* --- TEST CONFIG END --- */
 
@@ -57,6 +57,7 @@ describe('connect', function(){ this.timeout(25000);
                 console.log('DATABASE-END');
             },
             async function(call){
+                /*
             console.log('STAT-START');
             let user_id = Number.get_id();
             let parent_data_type = 'product_biz';
@@ -68,6 +69,7 @@ describe('connect', function(){ this.timeout(25000);
             const [error,data] = await Stat_Data.update(database,stat.parent_data_type,stat.user_id,stat.stat_type_id,stat.item_list,{});
             Log.w('data',data);
             console.log('STAT-END');
+            */
 
                 /*
             console.log('LIST-START');
@@ -131,17 +133,14 @@ describe('connect', function(){ this.timeout(25000);
         console.log('REVIEW-SEARCH-END');
         */
 
-                /*
         console.log('FAVORITE-START');
         let parent_data_type = DataType.PRODUCT;
         let parent_id= '27cce0b4-7e2d-4884-b1db-5144e4081dc6';
-        let user_id = '485b4e78-11e1-42a3-9b7d-c0a5d69ec056';
+        let user_id = '21027';
         //const [error,data] = await Favorite_Data.update(database,parent_data_type,parent_id,user_id);
-        //
         const [error,data] = await Favorite_Data.search(database,parent_data_type,user_id,{},1,0);
-        Log.w('data',data);
+        //Log.w('data',data);
         console.log('FAVORITE-END');
-        */
 
                 /*
         console.log('CATEGORY-START');

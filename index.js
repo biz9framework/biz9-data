@@ -842,7 +842,7 @@ class Cart_Data {
             });
         });
     };
-    static get = (database,data_type,cart_number,option) => {
+    static get = (database,parent_data_type,cart_number,option) => {
         return new Promise((callback) => {
             let cloud_data = {cart:DataItem.get_new(DataType.CART,0,{cart_number:cart_number,cart_item_list:[]})};
             let cart_item_item_list_query = { $or: [] };
@@ -889,8 +889,8 @@ class Cart_Data {
                         query_field['id'] = { $regex:cloud_data.cart.cart_item_list[a]['parent_id'], $options: "i" };
                         cart_item_item_list_query.$or.push(query_field);
                     }
-                    let search = Item_Logic.get_search(data_type,cart_item_item_list_query,{},1,0);
-                    const [error,data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size);
+                    let search = Item_Logic.get_search(parent_data_type,cart_item_item_list_query,{},1,0);
+                    const [error,data] = await Portal.search(database,search.parent_data_type,search.filter,search.sort_by,search.page_current,search.page_size);
                     if(error){
                         error=Log.append(error,error);
                     }else{
@@ -903,7 +903,6 @@ class Cart_Data {
                             }
                         }
                     }
-
                 },
                 //cart_sub_item_list
                 async function(call){
@@ -1249,66 +1248,22 @@ class Favorite_Data {
                 //favorite_list
                 async function(call){
                     let query = {user_id:user_id,parent_data_type:parent_data_type};
-                    let search = Item_Logic.get_search(DataType.FAVORITE,query,{},1,0);
-                    const [error,data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size);
+                    let search = Item_Logic.get_search(DataType.FAVORITE,query,{},page_current,page_size);
+					let option = {get_item_search:true,item_search_data_type:parent_data_type,item_search_field:'id',item_search_value:'parent_id'};
+                    const [error,data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option);
                     if(error){
                         cloud_error=Log.append(cloud_error,error);
                     }else{
+						for(let a=0;a<data.item_list.length;a++){
+							data.item_list[a].parent_item = DataItem.get_new(parent_data_type,data.item_list[a].parent_item,{title:'Not Found'});
+							for(let b=0;b<data.item_search_list.length;b++){
+								if(data.item_list[a].parent_id == data.item_search_list[b].id){
+									data.item_list[a].parent_item = data.item_search_list[b];
+								}
+							}
+						}
                         cloud_data.item_list = data.item_list;
                     }
-                },
-                //parent_item_list
-                async function(call){
-                    var query = { $or: [] };
-                    for(let a = 0;a < cloud_data.item_list.length;a++){
-                        query.$or.push({id: { $regex:cloud_data.item_list[a].parent_id, $options: "i" }});
-                    }
-                    let search = Item_Logic.get_search(parent_data_type,query,{},1,0);
-                    const [error,data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size);
-                    if(error){
-                        cloud_error=Log.append(cloud_error,error);
-                    }else{
-                        parent_item_list=data.item_list;
-                    }
-                },
-                //user_list
-                async function(call){
-                    var query = { $or: [] };
-                    for(let a = 0;a < cloud_data.item_list.length;a++){
-                        query.$or.push({id: { $regex:cloud_data.item_list[a].user_id, $options: "i" }});
-                    }
-                    let search = Item_Logic.get_search(DataType.USER,query,{},1,0);
-                    const [error,data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size);
-                    if(error){
-                        cloud_error=Log.append(cloud_error,error);
-                    }else{
-                        user_list=data.item_list;
-                    }
-                },
-                //bind parent_item_list
-                function(call){
-                    for(let a = 0;a<cloud_data.item_list.length;a++){
-                        for(let b = 0;b<parent_item_list.length;b++){
-                            if(cloud_data.item_list[a].parent_id == parent_item_list[b].id){
-                                cloud_data.item_list[a].parent_photo_data = !Str.check_is_null(parent_item_list[b].photo_data) ? parent_item_list[b].photo_data : "";
-                                cloud_data.item_list[a].parent_title = !Str.check_is_null(parent_item_list[b].title) ? parent_item_list[b].title : "N/A";
-                            }
-                        }
-                    }
-                    call();
-                },
-                //bind user_list
-                function(call){
-                    for(let a = 0;a<cloud_data.item_list.length;a++){
-                        for(let b = 0;b<user_list.length;b++){
-                            if(cloud_data.item_list[a].user_id == user_list[b].id){
-                                cloud_data.item_list[a].user_photo_data = !Str.check_is_null(user_list[b].photo_data) ? user_list[b].photo_data : "";
-                                cloud_data.item_list[a].user_title = !Str.check_is_null(user_list[b].title) ? user_list[b].title : "N/A";
-                                cloud_data.item_list[a].user_location = User_Logic.get_user_country_state_city(user_list[b]);
-                            }
-                        }
-                    }
-                    call();
                 },
             ]).then(result => {
                 callback([error,cloud_data]);
@@ -1640,7 +1595,6 @@ class Portal {
                             query_field[option.item_search_field] = { $regex:cloud_data.item_list[a][option.item_search_value], $options: "i" };
                             query.$or.push(query_field);
                         }
-                        Log.w('rrr',query.$or);
                         let search = Item_Logic.get_search(option.item_search_data_type,query,{},1,0);
                         cloud_data.item_search_search = search;
 
@@ -1649,8 +1603,8 @@ class Portal {
                             if(error){
                                 error=Log.append(error,error);
                             }else{
-                                cloud_data.item_search_item_list = data;
-                                cloud_data.item_search_item_count = item_count;
+                                cloud_data.item_search_list = data;
+                                cloud_data.item_search_count = item_count;
                                 cloud_data.item_search_page_count = page_count;
                                 cloud_data.item_search_data_type = search.data_type;
                                 cloud_data.item_search_search = search;
@@ -1904,14 +1858,14 @@ class Portal {
          */
         return new Promise((callback) => {
             let error = null;
-            let cloud_data = {count:0};
+            let cloud_data = {};
             async.series([
                 function(call){
                     Data.count_list(database,data_type,filter).then(([error,data])=> {
                         if(error){
                             error=Log.append(error,error);
                         }else{
-                            cloud_data.count = data;
+                            cloud_data = data;
                         }
                         call();
                     }).catch(error => {
