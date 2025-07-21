@@ -5,6 +5,7 @@ License GNU General Public License v3.0
 Description: BiZ9 Framework: Data
 */
 const async = require('async');
+const moment = require('moment');
 const {get_db_connect_main,check_db_connect_main,close_db_connect_main,update_item_main,get_item_main,delete_item_main,get_id_list_main,delete_item_list_main,count_item_list_main} = require('./mongo/index.js');
 const {Scriptz}=require("biz9-scriptz");
 const {Log,Str,Number,Obj}=require("/home/think2/www/doqbox/biz9-framework/biz9-utility/code");
@@ -1205,36 +1206,37 @@ class User_Data {
             let cloud_data = {};
             cloud_data.email_found = false;
             cloud_data.title_found = false;
-			cloud_data.user = DataItem.get_new(DataType.USER,0);
+			cloud_data.user = user;
             async.series([
 				//check email
                 async function(call){
-                    let search = Item_Logic.get_search(DataType.USER,{email:user.email},{},1,0);
-                    const [error,data] = await Portal.count(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size);
+                    let search = Item_Logic.get_search(DataType.USER,{email:cloud_data.user.email},{},1,0);
+                    const [error,data] = await Portal.count(database,search.data_type,search.filter);
                     if(error){
                         cloud_error=Log.append(cloud_error,error);
                     }else{
-                        if(data.count>0 && !Str.check_is_null(user.id)){
+						if(data.count>0){
                             cloud_data.email_found = true;
-                        }
-                    }
-                },
+						}
+                	}
+				},
 				//check title
                 async function(call){
-                    let search = Item_Logic.get_search(DataType.USER,{title:user.title},{},1,0);
-                    const [error,data] = await Portal.count(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size);
+                    let search = Item_Logic.get_search(DataType.USER,{title:cloud_data.user.title},{},1,0);
+                    const [error,data] = await Portal.count(database,search.data_type,search.filter);
                     if(error){
                         cloud_error=Log.append(cloud_error,error);
                     }else{
-                        if(data.count>0 && !Str.check_is_null(user.id)){
+						if(data.count>0){
                             cloud_data.title_found = true;
-                        }
-                    }
-                },
+						}
+                	}
+				},
 				//update user
                 async function(call){
 					if(!cloud_data.email_found && !cloud_data.title_found){
-                    const [error,data] = await Portal.update(database,DataType.USER,user);
+						cloud_data.user.last_login =  new moment().toISOString();
+                    const [error,data] = await Portal.update(database,DataType.USER,cloud_data.user);
                     if(error){
                         cloud_error=Log.append(cloud_error,error);
                     }else{
@@ -1250,6 +1252,60 @@ class User_Data {
             });
         });
     };
+ 	static login = async (database,email,password) => {
+        return new Promise((callback) => {
+            let error = null;
+            let cloud_data = {};
+            cloud_data.user_found = false;
+			cloud_data.user = DataItem.get_new(DataType.USER,0,{email:email,password:password});
+            async.series([
+				//check email,passwrod
+                async function(call){
+                    let search = Item_Logic.get_search(DataType.USER,{email:cloud_data.user.email,password:cloud_data.user.password},{},1,0);
+                    const [error,data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size);
+                    if(error){
+                        cloud_error=Log.append(cloud_error,error);
+                    }else{
+						if(data.item_list.length>0){
+							cloud_data.user = data.item_list[0];
+                            cloud_data.user_found = true;
+						}
+                	}
+				},
+				//update user
+                async function(call){
+					if(!cloud_data.user_found){
+						cloud_data.user.last_login =  new moment().toISOString();
+                    const [error,data] = await Portal.update(database,DataType.USER,cloud_data.user);
+                    if(error){
+                        cloud_error=Log.append(cloud_error,error);
+                    }else{
+                            cloud_data.user = data.item;
+                    }
+					}
+                },
+				//get user
+                async function(call){
+					if(!cloud_data.user_found){
+                    const [error,data] = await Portal.get(database,DataType.USER,cloud_data.user.id);
+                    if(error){
+                        cloud_error=Log.append(cloud_error,error);
+                    }else{
+                            cloud_data.user = data.item;
+                    }
+					}
+                },
+
+
+            ]).then(result => {
+                callback([error,cloud_data]);
+            }).catch(error => {
+                Log.error("User-Data-Login",error);
+                callback([error,[]]);
+            });
+        });
+    };
+
     static get = async (database,parent_data_type,user_id,sort_by,page_current,page_size,option) => {
         return new Promise((callback) => {
             let error = null;
@@ -1459,6 +1515,7 @@ class Admin_Data {
     };
 }
 class Portal {
+	//portal_get
     static get = async (database,data_type,key,option) => {
         /* Options
          * Items
@@ -1588,6 +1645,7 @@ class Portal {
             });
         });
     };
+	//portal_search
     static search = (database,data_type,filter,sort_by,page_current,page_size,option) => {
         /* Options
          * Items
@@ -1732,6 +1790,7 @@ class Portal {
             });
         });
     };
+	//portal_update
     static update = async (database,data_type,item_data,option) => {
         /* option params
          * n/a
@@ -1762,6 +1821,7 @@ class Portal {
             });
         });
     };
+	//portal_delete_cache
     static delete_cache = async (database,data_type,id,option) => {
         /*
          * params
@@ -1801,6 +1861,7 @@ class Portal {
             });
         });
     };
+	//portal_delete
     static delete = async (database,data_type,id,option) => {
         /*
          * Params
@@ -1882,6 +1943,7 @@ class Portal {
             });
         });
     };
+	//portal_update_list
     static update_list = async (database,item_data_list,option) => {
         /* option params
          * n/a
@@ -1912,6 +1974,7 @@ class Portal {
             });
         });
     };
+	//portal_delete_search
     static delete_search = async (database,data_type,filter,option) => {
         /* option params
          * n/a
@@ -1943,6 +2006,7 @@ class Portal {
             });
         });
     };
+	//portal_count
     static count = async (database,data_type,filter) => {
         /* option params
          * n/a
@@ -1972,6 +2036,7 @@ class Portal {
             });
         });
     };
+	//portal_copy
     static copy = async (database,data_type,id) => {
         /*
          * params

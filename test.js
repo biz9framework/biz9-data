@@ -24,7 +24,7 @@ const DATA_TYPE = DataType.BLOG_POST;
 const OPTION = {};
 //const FILTER = {test_group_id:59367};
 const FILTER = {data_type:DATA_TYPE};
-const APP_ID = 'test-july20';
+const APP_ID = 'test-july21';
 const SQL = {};
 /* --- TEST CONFIG END --- */
 
@@ -267,9 +267,11 @@ describe('connect', function(){ this.timeout(25000);
                 console.log('USER-START');
                 let user = User_Logic.get_test();
                 //user.title = Str.get_title_url(user.title);
-                user.title = 'test_73135'
+                user.title = "test_32926";
+                user.email = "user5b@bossappz.com";
                 Log.w('user',user);
                 const [error,data] = await User_Data.register(database,user);
+                //const [error,data] = await User_Data.login(database,user.email,user.password);
                 Log.w('data',data);
                 console.log('USER-END');
                 //USER-END
