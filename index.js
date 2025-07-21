@@ -460,7 +460,7 @@ class Order_Data {
             cloud_data.order_item_list = [];
             cloud_data.order_sub_item_list = [];
             cloud_data.publish_stat_list = [];
-            cloud_data.publish_parent_item_list = [];
+            cloud_data.stat_parent_item_list = [];
             let order_item_item_list = [];
             async.series([
                 async function(call){
@@ -542,7 +542,7 @@ class Order_Data {
                         error=Log.append(error,error);
                     }else{
                         cloud_data.publish_stat_list = data.publish_stat_list;
-                        cloud_data.publish_parent_item_list = data.publish_parent_item_list;
+                        cloud_data.stat_parent_item_list = data.stat_parent_item_list;
                     }
                 },
                 //get order
@@ -611,7 +611,6 @@ class Order_Data {
                     }
                     let search = Item_Logic.get_search(data_type,order_item_item_list_query,{},1,0);
                     const [error,data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size);
-                    Log.w('my_data',data);
                     if(error){
                         error=Log.append(error,error);
                     }else{
@@ -747,7 +746,7 @@ class Cart_Data {
             cloud_data.cart_item_list = [];
             cloud_data.cart_sub_item_list = [];
             cloud_data.publish_stat_list = [];
-            cloud_data.publish_parent_item_list = [];
+            cloud_data.stat_parent_item_list = [];
             let cart_item_item_list = [];
             async.series([
 				//bind-update cart
@@ -782,9 +781,6 @@ class Cart_Data {
                             cloud_data.publish_cart_item_list = data.item_list;
                     }
 					}
-					//Log.w('publish_cart_item_list',cloud_data.publish_cart_item_list);
-					//Log.w('cart_item_list22',cart.cart_item_list[0].cart_sub_item_list);
-					//Log.w('cart_2',cart);
                 },
                 //bind cart_sub_item_list
                 async function(call){
@@ -809,7 +805,6 @@ class Cart_Data {
                     }else{
                             cloud_data.publish_cart_sub_item_list = data.item_list;
                     }
-						Log.w('rrrrrrrrr',cloud_data.publish_cart_sub_item_list);
 					}
                 },
                 async function(call){
@@ -822,7 +817,7 @@ class Cart_Data {
                         error=Log.append(error,error);
                     }else{
                         cloud_data.publish_stat_list = data.publish_stat_list;
-                        cloud_data.publish_parent_item_list = data.publish_parent_item_list;
+                        cloud_data.stat_parent_item_list = data.stat_parent_item_list;
                     }
                 },
                 //get cart
@@ -1066,7 +1061,7 @@ class Review_Data {
         return new Promise((callback) => {
             let error = null;
             let cloud_data = {};
-            cloud_data.parent_item = DataItem.get_new(parent_data_type,parent_id,{parent_data_type:parent_data_type,parent_id:parent_id,user_id:user_id});
+            cloud_data.parent_item = DataItem.get_new(parent_data_type,parent_id);
             cloud_data.review = review;
             let review_list = [];
             let review_count = 0;
@@ -1081,17 +1076,24 @@ class Review_Data {
                         cloud_data.review = data.item;
                     }
                 },
-                //review_list
+ 				//get_parent_item
                 async function(call){
-                    let query = {parent_id:parent_id};
-                    let search = Item_Logic.get_search(DataType.REVIEW,query,{},1,0);
-                    const [error,data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size);
+                    const [error,data] = await Portal.get(database,cloud_data.parent_item.data_type,cloud_data.parent_item.id);
                     if(error){
                         cloud_error=Log.append(cloud_error,error);
                     }else{
-                        if(data.item_list.length>0){
-                            review_list = data.item_list;
-                        }
+                        cloud_data.parent_item = data.item;
+                    }
+					Log.w('review_rating',cloud_data.review.rating);
+                },
+				//update_parent_item
+                async function(call){
+ 					cloud_data.parent_item.rating_count = !Str.check_is_null(cloud_data.parent_item.rating_count) ? parseInt(cloud_data.parent_item.rating_count) + parseInt(review.rating) :parseInt(review.rating);
+ 				   const [error,data] = await Portal.update(database,cloud_data.parent_item.data_type,cloud_data.parent_item);
+                    if(error){
+                        cloud_error=Log.append(cloud_error,error);
+                    }else{
+                        cloud_data.parent_item = data.item;
                     }
                 },
 				//update stat
@@ -1105,10 +1107,10 @@ class Review_Data {
                     if(error){
                         cloud_error=Log.append(cloud_error,error);
                     }else{
-  						cloud_data.new_stat = data.new_stat;
+  						cloud_data.stat_new = data.stat_new;
             			cloud_data.stat_count = data.stat_count;
-            			cloud_data.publish_parent_item_list = data.publish_parent_item_list;
-            			cloud_data.publish_item_list =data.publish_item_list;
+            			cloud_data.stat_parent_item_list = data.stat_parent_item_list;
+            			cloud_data.stat_item_list =data.stat_item_list;
                     }
                 },
 
@@ -1196,6 +1198,97 @@ class Review_Data {
         });
     };
 }
+class User_Data {
+    static register = async (database,user) => {
+        return new Promise((callback) => {
+            let error = null;
+            let cloud_data = {};
+            cloud_data.email_found = false;
+            cloud_data.title_found = false;
+			cloud_data.user = DataItem.get_new(DataType.USER,0);
+            async.series([
+				//check email
+                async function(call){
+                    let search = Item_Logic.get_search(DataType.USER,{email:user.email},{},1,0);
+                    const [error,data] = await Portal.count(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size);
+                    if(error){
+                        cloud_error=Log.append(cloud_error,error);
+                    }else{
+                        if(data.count>0 && !Str.check_is_null(user.id)){
+                            cloud_data.email_found = true;
+                        }
+                    }
+                },
+				//check title
+                async function(call){
+                    let search = Item_Logic.get_search(DataType.USER,{title:user.title},{},1,0);
+                    const [error,data] = await Portal.count(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size);
+                    if(error){
+                        cloud_error=Log.append(cloud_error,error);
+                    }else{
+                        if(data.count>0 && !Str.check_is_null(user.id)){
+                            cloud_data.title_found = true;
+                        }
+                    }
+                },
+				//update user
+                async function(call){
+					if(!cloud_data.email_found && !cloud_data.title_found){
+                    const [error,data] = await Portal.update(database,DataType.USER,user);
+                    if(error){
+                        cloud_error=Log.append(cloud_error,error);
+                    }else{
+                            cloud_data.user = data.item;
+                    }
+					}
+                },
+            ]).then(result => {
+                callback([error,cloud_data]);
+            }).catch(error => {
+                Log.error("User-Data-Register",error);
+                callback([error,[]]);
+            });
+        });
+    };
+    static get = async (database,parent_data_type,user_id,sort_by,page_current,page_size,option) => {
+        return new Promise((callback) => {
+            let error = null;
+            let cloud_data = {};
+            option = !Obj.check_is_empty(option) ? option : {get_item:false,get_photo:false};
+            let parent_item_list = [];
+            let user_list = [];
+            async.series([
+                //favorite_list
+                async function(call){
+                    let query = {user_id:user_id,parent_data_type:parent_data_type};
+                    let search = Item_Logic.get_search(DataType.FAVORITE,query,{},page_current,page_size);
+					let option = {get_item_search:true,item_search_data_type:parent_data_type,item_search_field:'id',item_search_value:'parent_id'};
+                    const [error,data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option);
+                    if(error){
+                        cloud_error=Log.append(cloud_error,error);
+                    }else{
+						for(let a=0;a<data.item_list.length;a++){
+							data.item_list[a].parent_item = DataItem.get_new(parent_data_type,data.item_list[a].parent_item,{title:'Not Found'});
+							for(let b=0;b<data.item_search_list.length;b++){
+								if(data.item_list[a].parent_id == data.item_search_list[b].id){
+									data.item_list[a].parent_item = data.item_search_list[b];
+								}
+							}
+						}
+                        cloud_data.item_list = data.item_list;
+                    }
+                },
+            ]).then(result => {
+                callback([error,cloud_data]);
+            }).catch(error => {
+                Log.error("Favorite-Data-List",error);
+                callback([error,[]]);
+            });
+        });
+    };
+}
+
+
 class Favorite_Data {
     static update = async (database,parent_data_type,parent_id,user_id) => {
         return new Promise((callback) => {
@@ -1271,6 +1364,7 @@ class Favorite_Data {
         });
     };
 }
+
 class Business_Data {
     static get = async (database,key,option) => {
         return new Promise((callback) => {
@@ -2050,16 +2144,12 @@ class Faq{
 }
 class Stat_Data {
     static update = (database,parent_data_type,user_id,stat_type_id,item_list,option) => {
-		Log.w('parent_data_type',parent_data_type);
-		Log.w('user_id',user_id);
-		Log.w('stat_type_id',stat_type_id);
-		Log.w('item_list',item_list);
         return new Promise((callback) => {
             let cloud_data = {};
-            cloud_data.new_stat = true;
+            cloud_data.stat_new = true;
             cloud_data.stat_count = 0;
-            cloud_data.publish_parent_item_list = [];
-            cloud_data.publish_item_list = [];
+            cloud_data.stat_parent_item_list = [];
+            cloud_data.stat_item_list = [];
             let error = null;
             if(!item_list){
                 item_list = [];
@@ -2105,12 +2195,13 @@ class Stat_Data {
                             error=Log.append(error,error);
                         }else{
                             for(let a = 0; a < item_list.length; a++){
-                                item_list[a][get_stat_type_id(stat_type_id)] = !Str.check_is_null(item_list[a].parent_item[get_stat_type_id(stat_type_id)]) ? parseInt(item_list[a].parent_item[get_stat_type_id(stat_type_id)]) + 1 : 1;
-                                item_list[a].parent_item[get_stat_type_id(stat_type_id)] = item_list[a][get_stat_type_id(stat_type_id)];
-                                item_list[a].new_stat = true;
+								let str = get_stat_str(stat_type_id);
+							item_list[a][str] = !Str.check_is_null(item_list[a].parent_item[str]) ? parseInt(item_list[a].parent_item[str]) + 1 : 1;
+                                item_list[a].parent_item[str] = item_list[a][str];
+                                item_list[a].stat_new = true;
                                 for(let b = 0; b < data.item_list.length; b++){
                                     if(item_list[a].id == data.item_list[b].parent_id && item_list[a].data_type == data.item_list[b].parent_data_type && stat_type_id== data.item_list[b].type_id){
-                                        item_list[a].new_stat = false;
+                                        item_list[a].stat_new = false;
                                     }
                                 }
                             }
@@ -2121,36 +2212,36 @@ class Stat_Data {
                async function(call){
                     if(item_list.length>0){
                         for(let a = 0; a < item_list.length; a++){
-                            if(item_list[a].new_stat){
-                                let stat_item = DataItem.get_new(item_list[a].data_type,0,{parent_data_type:item_list[a].parent_data_type,parent_id:item_list[a].parent_id,new_stat:item_list[a].new_stat});
-                                stat_item[get_stat_type_id(stat_type_id)] = item_list[a][get_stat_type_id(stat_type_id)];
-                                cloud_data.publish_item_list.push(stat_item);
+                            if(item_list[a].stat_new){
+                                let stat_item = DataItem.get_new(item_list[a].data_type,0,{parent_data_type:item_list[a].parent_data_type,parent_id:item_list[a].parent_id,stat_new:item_list[a].stat_new});
+                                stat_item[get_stat_str(stat_type_id)] = item_list[a][get_stat_str(stat_type_id)];
+                                cloud_data.stat_item_list.push(stat_item);
                             }
                         }
-                        const [error,data] = await Portal.update_list(database,cloud_data.publish_item_list);
+                        const [error,data] = await Portal.update_list(database,cloud_data.stat_item_list);
                         if(error){
                             error=Log.append(error,error);
                         }else{
-                            cloud_data.publish_item_list = data.item_list;
+                            cloud_data.stat_item_list = data.item_list;
                         }
                     }
                 },
                 //save parent_item list
                 async function(call){
                     if(item_list.length>0){
-                        let publish_parent_item_list = [];
+                        let stat_parent_item_list = [];
                         for(let a = 0; a < item_list.length; a++){
-                            if(item_list[a].new_stat){
+                            if(item_list[a].stat_new){
                                 let parent_item = DataItem.get_new(item_list[a].parent_item.data_type,item_list[a].parent_item.id);
-                                parent_item[get_stat_type_id(stat_type_id)] = item_list[a].parent_item[get_stat_type_id(stat_type_id)];
-                                cloud_data.publish_parent_item_list.push(parent_item);
+                                parent_item = get_stat_type_id(item_list[a].parent_item);
+                                cloud_data.stat_parent_item_list.push(parent_item);
                             }
                         }
-                        const [error,data] = await Portal.update_list(database,cloud_data.publish_parent_item_list);
+                        const [error,data] = await Portal.update_list(database,cloud_data.stat_parent_item_list);
                         if(error){
                             error=Log.append(error,error);
                         }else{
-                            cloud_data.publish_parent_item_list = data.item_list;
+                            cloud_data.stat_parent_item_list = data.item_list;
                         }
                     }
                 },
@@ -2160,7 +2251,35 @@ class Stat_Data {
                 Log.error("-Update-Item-View-Count-",error);
                 callback([error,[]]);
             });
-            function get_stat_type_id(stat_type_id){
+			function get_stat_str(stat_type_id){
+				let str = "";
+					switch(stat_type_id){
+									case FieldType.STAT_VIEW_ADD_ID:
+										str = 'view_count';
+										break;
+									case FieldType.STAT_LIKE_ADD_ID:
+										str = 'like_count';
+										break;
+									case FieldType.STAT_FAVORITE_ADD_ID:
+										str = 'favorite_count';
+										break;
+									case FieldType.STAT_CART_ADD_ID:
+										str = 'cart_count';
+										break;
+									case FieldType.STAT_ORDER_ADD_ID:
+										str = 'order_count';
+										break;
+									case FieldType.STAT_REVIEW_ADD_ID:
+										str = 'review_count';
+										break;
+									default:
+										str = 'view_count';
+										break;
+								}
+				return str;
+
+			}
+            function get_stat_type_id(parent_item){
                 const STAT_VIEW_ID='1';
                 const STAT_LIKE_ADD_ID='2';
                 const STAT_FAVORITE_ADD_ID='3';
@@ -2173,61 +2292,24 @@ class Stat_Data {
                         str = 'cart_count';
                         break;
                     case FieldType.STAT_VIEW_ADD_ID:
-                        str = 'view_count';
+						parent_item['view_count'] = !Str.check_is_null(parent_item['view_count']) ? parseInt(parent_item['view_count']) + 1 : 1;
                         break;
                     case FieldType.STAT_LIKE_ADD_ID:
-                        str = 'like_count';
+						parent_item['like_count'] = !Str.check_is_null(parent_item['like_count']) ? parseInt(parent_item['like_count']) + 1 : 1;
                         break;
                     case FieldType.STAT_FAVORITE_ADD_ID:
-                        str = 'favorite_count';
+						parent_item['favorite_count'] = !Str.check_is_null(parent_item['favorite_count']) ? parseInt(parent_item['favorite_count']) + 1 : 1;
                         break;
                     case FieldType.STAT_ORDER_ADD_ID:
-                        str = 'order_count';
+						parent_item['order_count'] = !Str.check_is_null(parent_item['order_count']) ? parseInt(parent_item['order_count']) + 1 : 1;
                         break;
  					case FieldType.STAT_REVIEW_ADD_ID:
-                        str = 'review_count';
-                        break;
-
-
-                };
-                return str;
-            }
-
-
-            function get_stat_type_id_old(stat_type_id,item){
-                item.parent_item.cart_add_count = '0';
-                const STAT_VIEW_ID='1';
-                const STAT_LIKE_ADD_ID='2';
-                const STAT_FAVORITE_ADD_ID='3';
-                const STAT_CART_ADD_ID='4';
-                const STAT_ORDER_ADD_ID='5';
-                const STAT_REVIEW_ADD_ID='6';
-                switch(stat_type_id){
-                    case FieldType.STAT_CART_ADD_ID:
-                        item.cart_add_count = !Str.check_is_null(item.parent_item.cart_add_count) ? parseInt(item.parent_item.cart_add_count) + 1 : 1;
-                        item.parent_item.cart_add_count = !Str.check_is_null(item.parent_item.cart_add_count)  ? parseInt(item.parent_item.cart_add_count) + 1 : 1;
-                        Log.w('item',item);
-                        break;
-                    case FieldType.STAT_VIEW_ADD_ID:
-                        item.view_add_count = !Str.check_is_null(item.parent_item.view_add_count) ? parseInt(item.parent_item.view_add_count) + 1 : 1;
-                        item.parent_item.view_add_count = !Str.check_is_null(item.parent_item.view_add_count)  ? parseInt(item.parent_item.view_add_count) + 1 : 1;
-                        break;
-                    case FieldType.STAT_LIKE_ADD_ID:
-                        item.like_add_count = !Str.check_is_null(item.parent_item.like_add_count) ? parseInt(item.parent_item.like_add_count) + 1 : 1;
-                        item.parent_item.like_add_count = !Str.check_is_null(item.parent_item.like_add_count)  ? parseInt(item.parent_item.like_add_count) + 1 : 1;
-                        break;
-                    case FieldType.STAT_FAVORITE_ADD_ID:
-                        item.favorite_add_count = !Str.check_is_null(item.parent_item.favorite_add_count) ? parseInt(item.parent_item.favorite_add_count) + 1 : 1;
-                        item.parent_item.favorite_add_count = !Str.check_is_null(item.parent_item.favorite_add_count)  ? parseInt(item.parent_item.favorite_add_count) + 1 : 1;
-                        break;
-                    case FieldType.STAT_ORDER_ADD_ID:
-                        item.order_add_count = !Str.check_is_null(item.parent_item.order_add_count) ? parseInt(item.parent_item.order_add_count) + 1 : 1;
-                        item.parent_item.order_add_count = !Str.check_is_null(item.parent_item.order_add_count)  ? parseInt(item.parent_item.order_add_count) + 1 : 1;
+						parent_item['review_count'] = !Str.check_is_null(parent_item['review_count']) ? parseInt(parent_item['review_count']) + 1 : 1;
+						parent_item['rating_avg'] = parseInt(parent_item['rating_count']) / parseInt(parent_item['review_count']);
                         break;
                 };
-                return item;
+                return parent_item;
             }
-
         });
     };
 }
@@ -2282,6 +2364,7 @@ module.exports = {
     Portal,
     Product_Data,
     Review_Data,
+	User_Data,
     Template_Data,
     Stat_Data,
 };
