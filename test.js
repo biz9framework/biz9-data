@@ -2,7 +2,7 @@ const async = require('async');
 const assert = require('node:assert');
 const {Data,Database,Portal,Category_Data,Product_Data,Page_Data,Blog_Post_Data,Content_Data,Stat_Data,List_Data,Review_Data,Favorite_Data,Search_Data,Admin_Data,Business_Data,Order_Data,Cart_Data} = require(".");
 const {Log,Number} = require("biz9-utility");
-const {DataType,DataItem,Item_Logic,Page_Logic,Template_Logic,Blog_Post_Logic,Content_Logic,Product_Logic,Field_Logic,Admin_Logic,Business_Logic,Category_Logic,User_Logic,Order_Logic,FieldType,Cart_Logic,Stat_Logic} = require("/home/think2/www/doqbox/biz9-framework/biz9-logic/code");
+const {DataType,DataItem,Item_Logic,Page_Logic,Template_Logic,Blog_Post_Logic,Content_Logic,Product_Logic,Field_Logic,Admin_Logic,Business_Logic,Category_Logic,User_Logic,Order_Logic,FieldType,Cart_Logic,Stat_Logic,Review_Logic} = require("/home/think2/www/doqbox/biz9-framework/biz9-logic/code");
 /*
  * availble tests
 - connect
@@ -110,19 +110,20 @@ describe('connect', function(){ this.timeout(25000);
         let user_id =  '40950776-ed58-4447-bd6a-00a5e0baff7c';
         console.log('REVIEW-INFO-END');
         */
-
-                /*
-        console.log('REVIEW-UPDATE-START');
+        console.log('REVIEW-START');
         //update
-        let rating = Number.get_id(6);
-        let comment = Field_Logic.get_test().note;
-        let review = DataItem.get_new(DataType.REVIEW,0,{parent_data_type:parent_data_type,parent_id:parent_id,user_id:user_id,rating:rating,rating,comment:comment});
+        let parent_data_type = DataType.PRODUCT;
+        let parent_id = '62b83ef9-e9c1-43f6-9771-58349dc85cda';
+        let user_id = Number.get_id();
+        //let review_src = Review_Logic.get_test(parent_data_type,parent_id,user_id);
+        //let review = Review_Logic.get_new(parent_data_type,parent_id,user_id,review_src);
+        //Log.w('review',review);
         //Log.w('review',review);
         //Log.w('review_rating',rating);
         const [error,data] = await Review_Data.update(database,review.parent_data_type,review.parent_id,review.user_id,review);
+        //const [error,data] = await Review_Data.get(database,parent_data_type,parent_id,{},1,0);
         Log.w('data',data);
-        console.log('REVIEW-UPDATE-END');
-        */
+        console.log('REVIEW-END');
 
                 /*
         console.log('REVIEW-SEARCH-START');
@@ -132,15 +133,16 @@ describe('connect', function(){ this.timeout(25000);
         //Log.w('dat_len',data.item_list.length);
         console.log('REVIEW-SEARCH-END');
         */
-
+        /*
         console.log('FAVORITE-START');
         let parent_data_type = DataType.PRODUCT;
         let parent_id= '27cce0b4-7e2d-4884-b1db-5144e4081dc6';
         let user_id = '21027';
         //const [error,data] = await Favorite_Data.update(database,parent_data_type,parent_id,user_id);
         const [error,data] = await Favorite_Data.search(database,parent_data_type,user_id,{},1,0);
-        //Log.w('data',data);
+        Log.w('data',data);
         console.log('FAVORITE-END');
+        */
 
                 /*
         console.log('CATEGORY-START');

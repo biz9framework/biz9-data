@@ -8,7 +8,7 @@ const async = require('async');
 const {get_db_connect_main,check_db_connect_main,close_db_connect_main,update_item_main,get_item_main,delete_item_main,get_id_list_main,delete_item_list_main,count_item_list_main} = require('./mongo/index.js');
 const {Scriptz}=require("biz9-scriptz");
 const {Log,Str,Number,Obj}=require("/home/think2/www/doqbox/biz9-framework/biz9-utility/code");
-const {DataItem,DataType,FieldType,Item_Logic,User_Logic}=require("/home/think2/www/doqbox/biz9-framework/biz9-logic/code");
+const {DataItem,DataType,FieldType,Item_Logic,User_Logic,Favorite_Logic,Stat_Logic}=require("/home/think2/www/doqbox/biz9-framework/biz9-logic/code");
 const { get_db_connect_adapter,check_db_connect_adapter,close_db_connect_adapter,update_item_adapter,update_item_list_adapter,get_item_adapter,delete_item_adapter,get_item_list_adapter,delete_item_list_adapter,count_item_list_adapter,delete_item_cache }  = require('./adapter.js');
 const {get_database_main} = require("./main");
 class Database {
@@ -1062,7 +1062,7 @@ class Product_Data {
     };
 }
 class Review_Data {
-    static update = async (database,parent_data_type,parent_id,user_id,review) => {
+    static update = async(database,parent_data_type,parent_id,user_id,review) => {
         return new Promise((callback) => {
             let error = null;
             let cloud_data = {};
@@ -1094,25 +1094,24 @@ class Review_Data {
                         }
                     }
                 },
-                function(call){
-                    let review_rating_total = 0;
-                    for(let a = 0; a < review_list.length;a++){
-                        review_rating_total = review_rating_total + parseInt(review_list[a].rating);
-                    }
-                    review_avg = !Str.check_is_null(review_rating_total) ? parseInt(review_rating_total/review_list.length) : 1;
-                    review_count = !Str.check_is_null(review_list.length) ? review_list.length : 1;
-                    call();
-                },
+				//update stat
                 async function(call){
-                    cloud_data.parent_item.review_count = review_count;
-                    cloud_data.parent_item.review_avg = review_avg;
-                    const [error,data] = await Portal.update(database,cloud_data.parent_item.data_type,cloud_data.parent_item);
+					let stat = Stat_Logic.get_new(parent_data_type,user_id,FieldType.STAT_REVIEW_ADD_ID,[DataItem.get_new(DataType.STAT,0,
+					{parent_data_type:cloud_data.parent_item.data_type,
+					 parent_id:cloud_data.parent_item.id,
+					user_id:user_id
+					})]);
+                    const [error,data] = await Stat_Data.update(database,stat.parent_data_type,stat.user_id,stat.stat_type_id,stat.item_list);
                     if(error){
                         cloud_error=Log.append(cloud_error,error);
                     }else{
-                        cloud_data.parent_item = data.item;
+  						cloud_data.new_stat = data.new_stat;
+            			cloud_data.stat_count = data.stat_count;
+            			cloud_data.publish_parent_item_list = data.publish_parent_item_list;
+            			cloud_data.publish_item_list =data.publish_item_list;
                     }
                 },
+
             ]).then(result => {
                 callback([error,cloud_data]);
             }).catch(error => {
@@ -1121,7 +1120,7 @@ class Review_Data {
             });
         });
     };
-    static search = async (database,parent_data_type,parent_id,sort_by,page_current,page_size,option) => {
+    static get = async (database,parent_data_type,parent_id,sort_by,page_current,page_size,option) => {
         return new Promise((callback) => {
             let error=null;
             let cloud_data = {item_list:0,item_count:0,page_count:1};
@@ -1178,7 +1177,7 @@ class Review_Data {
                             for(let b = 0;b<user_list.length;b++){
                                 if(cloud_data.item_list[a].user_id == user_list[b].id){
                                     cloud_data.item_list[a].user_photo_data = !Str.check_is_null(user_list[b].photo_data) ? user_list[b].photo_data : "";
-                                    cloud_data.item_list[a].user_title = !Str.check_is_null(user_list[b].title) ? user_list[b].title : "N/A";
+                                    cloud_data.item_list[a].user_title = !Str.check_is_null(user_list[b].title) ? user_list[b].title : "Not Found";
                                     cloud_data.item_list[a].user_location = User_Logic.get_user_country_state_city(user_list[b]);
                                 }
                             }
@@ -1206,10 +1205,8 @@ class Favorite_Data {
             cloud_data.favorite = DataItem.get_new(DataType.FAVORITE,0,{parent_data_type:parent_data_type,parent_id:parent_id,user_id:user_id});
             async.series([
                 async function(call){
-                    var query = { $and: [] };
-                    query.$and.push({parent_id: { $regex:parent_id, $options: "i" }});
-                    query.$and.push({user_id: { $regex:user_id, $options: "i" }});
-                    let search = Item_Logic.get_search(DataType.FAVORITE,query,{},1,0);
+					let favorite_filter = Favorite_Logic.get_search_filter(parent_data_type,parent_id,user_id);
+                    let search = Item_Logic.get_search(DataType.FAVORITE,favorite_filter,{},1,0);
                     const [error,data] = await Portal.count(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size);
                     if(error){
                         cloud_error=Log.append(cloud_error,error);
@@ -1237,7 +1234,7 @@ class Favorite_Data {
             });
         });
     };
-    static search = async (database,parent_data_type,user_id,sort_by,page_current,page_size,option) => {
+    static get = async (database,parent_data_type,user_id,sort_by,page_current,page_size,option) => {
         return new Promise((callback) => {
             let error = null;
             let cloud_data = {};
@@ -2053,6 +2050,10 @@ class Faq{
 }
 class Stat_Data {
     static update = (database,parent_data_type,user_id,stat_type_id,item_list,option) => {
+		Log.w('parent_data_type',parent_data_type);
+		Log.w('user_id',user_id);
+		Log.w('stat_type_id',stat_type_id);
+		Log.w('item_list',item_list);
         return new Promise((callback) => {
             let cloud_data = {};
             cloud_data.new_stat = true;
@@ -2169,20 +2170,25 @@ class Stat_Data {
                 let str = '';
                 switch(stat_type_id){
                     case FieldType.STAT_CART_ADD_ID:
-                        str = 'cart_add_count';
+                        str = 'cart_count';
                         break;
                     case FieldType.STAT_VIEW_ADD_ID:
-                        str = 'view_add_count';
+                        str = 'view_count';
                         break;
                     case FieldType.STAT_LIKE_ADD_ID:
-                        str = 'like_add_count';
+                        str = 'like_count';
                         break;
                     case FieldType.STAT_FAVORITE_ADD_ID:
-                        str = 'favorite_add_count';
+                        str = 'favorite_count';
                         break;
                     case FieldType.STAT_ORDER_ADD_ID:
-                        str = 'order_add_count';
+                        str = 'order_count';
                         break;
+ 					case FieldType.STAT_REVIEW_ADD_ID:
+                        str = 'review_count';
+                        break;
+
+
                 };
                 return str;
             }
