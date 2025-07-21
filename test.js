@@ -103,13 +103,11 @@ describe('connect', function(){ this.timeout(25000);
             //Log.w('data',data.item_list.length);
             console.log('SEARCH-END');
             */
-                /*
         console.log('REVIEW-INFO-START');
         let parent_data_type = DataType.PRODUCT;
-        let parent_id = '26a0f99e-424f-4082-9537-3a61aece8697';
+        let parent_id = '1ca608e4-498f-46f0-96f4-9d2943f3feeb';
         let user_id =  '40950776-ed58-4447-bd6a-00a5e0baff7c';
         console.log('REVIEW-INFO-END');
-        */
         //console.log('REVIEW-START');
         //update
         /*
@@ -123,18 +121,18 @@ describe('connect', function(){ this.timeout(25000);
         //Log.w('review',review);
         //Log.w('review_rating',rating);
         //const [error,data] = await Review_Data.update(database,review.parent_data_type,review.parent_id,review.user_id,review);
-        //const [error,data] = await Review_Data.get(database,parent_data_type,parent_id,{},1,0);
-        //iLog.w('data',data);
+        const [error,data] = await Review_Data.get(database,parent_data_type,parent_id,{},1,0);
+        Log.w('data',data);
+        Log.w('data_parent',data.item_list[0]);
         //console.log('REVIEW-END');
 
-                /*
-        console.log('REVIEW-SEARCH-START');
+        //console.log('REVIEW-SEARCH-START');
         //search
-        const [error,data] = await Review_Data.search(database,parent_data_type,parent_id,{},1,0);
-        Log.w('data',data);
+        //const [error,data] = await Review_Data.search(database,parent_data_type,parent_id,{},1,0);
+        //Log.w('data',data);
         //Log.w('dat_len',data.item_list.length);
-        console.log('REVIEW-SEARCH-END');
-        */
+        //console.log('REVIEW-SEARCH-END');
+                    //
         /*
         console.log('FAVORITE-START');
         let parent_data_type = DataType.PRODUCT;
@@ -264,6 +262,7 @@ describe('connect', function(){ this.timeout(25000);
 
 
                 //USER-START
+                /*
                 console.log('USER-START');
                 let user = User_Logic.get_test();
                 //user.title = Str.get_title_url(user.title);
@@ -274,6 +273,7 @@ describe('connect', function(){ this.timeout(25000);
                 //const [error,data] = await User_Data.login(database,user.email,user.password);
                 Log.w('data',data);
                 console.log('USER-END');
+                */
                 //USER-END
 
 
