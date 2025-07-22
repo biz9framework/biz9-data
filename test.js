@@ -74,38 +74,25 @@ describe('connect', function(){ this.timeout(25000);
                 console.log('CART-START');
                 let user_id = 'e1baf0b3-a226-45a9-99e2-67dcffb19a70';
                 let parent_data_type = DataType.PRODUCT;
-                let parent_id = '46b105f6-0be9-4753-8b93-418c6aba2c45';
+                let parent_id = '497498d9-43fb-4258-a927-386fb3281092';
                 let sub_1_data_type = DataType.ITEM;
                 let sub_1_id = '6084de0f-e50e-4fdb-b8be-734262e35b31';
                 let sub_2_data_type = DataType.ITEM;
                 let sub_2_id = 'c6210883-89f0-4265-a281-13f73efda9a0';
-
                 //get cart
-                let cart = get_new_cart(user_id);
 
+                let cart = Cart_Logic.get_cart(user_id);
                 //get cart item
-                let cart_item = get_new_cart_item(parent_data_type,parent_id,cart.cart_number,user_id,1);
+                let cart_item = Cart_Logic.get_cart_item(parent_data_type,parent_id,cart.cart_number,user_id,1);
                 cart.cart_item_list.push(cart_item);
-
                 //get cart item
-                let cart_sub_item_1 = get_new_cart_item(sub_1_data_type,sub_1_id,cart.cart_number,user_id,1);
+                let cart_sub_item_1 = Cart_Logic.get_cart_item(sub_1_data_type,sub_1_id,cart.cart_number,user_id,1);
+                let cart_sub_item_2 = Cart_Logic.get_cart_item(sub_2_data_type,sub_2_id,cart.cart_number,user_id,1);
                 cart_item.cart_sub_item_list.push(cart_sub_item_1);
-
+                cart_item.cart_sub_item_list.push(cart_sub_item_2);
                 Log.w('cart',cart);
-
                 const [error,data] = await Cart_Data.update(database,parent_data_type,user_id,cart);
                 Log.w('data',data);
-
-                function get_new_cart(user_id){
-                    return DataItem.get_new(DataType.CART,0,{user_id:user_id,cart_number:Cart_Logic.get_cart_number(),quanity:1,cart_item_list:[]});
-                }
-                function get_new_cart_item(parent_data_type,parent_id,cart_number,user_id,quanity){
-                    return DataItem.get_new(DataType.CART_ITEM,0,{parent_data_type:parent_data_type,parent_id:parent_id,cart_number:cart_number,user_id:user_id,quanity:quanity,cart_sub_item_list:[]});
-                }
-                function get_new_cart_sub_item(parent_data_type,parent_id,cart_number,user_id,quanity){
-                    return DataItem.get_new(DataType.CART_SUB_ITEM,0,{parent_data_type:parent_data_type,parent_id:parent_id,cart_number:cart_number,user_id:user_id,quanity:quanity});
-                }
-
                 console.log('CART-END');
                 //CART-END
 
