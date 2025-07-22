@@ -105,34 +105,22 @@ describe('connect', function(){ this.timeout(25000);
             */
         console.log('REVIEW-INFO-START');
         let parent_data_type = DataType.PRODUCT;
-        let parent_id = '1ca608e4-498f-46f0-96f4-9d2943f3feeb';
-        let user_id =  '40950776-ed58-4447-bd6a-00a5e0baff7c';
+        let parent_id = '56899ff7-bc11-4004-8e3b-f1688b9e0ba1';
+        let user_id =  '3b11900c-49b3-4934-80ab-dccd884ba53b';
         console.log('REVIEW-INFO-END');
-        //console.log('REVIEW-START');
-        //update
-        /*
-        let parent_data_type = DataType.PRODUCT;
-        let parent_id = 'dcd1a9d0-0553-4f01-97c9-80b6e63e0240';
-        let user_id = Number.get_id();
-        let review_src = Review_Logic.get_test(parent_data_type,parent_id,user_id);
-        let review = Review_Logic.get_new(parent_data_type,parent_id,user_id,review_src);
-        */
-        //Log.w('review',review);
+        let product_review = Review_Logic.get_test(parent_data_type,parent_id,user_id);
+        let review = Review_Logic.get_new(parent_data_type,parent_id,user_id,product_review.title,product_review.comment,product_review.rating);
+        review.rating = 4;
+        //Log.w('product_review',product_review);
         //Log.w('review',review);
         //Log.w('review_rating',rating);
-        //const [error,data] = await Review_Data.update(database,review.parent_data_type,review.parent_id,review.user_id,review);
-        const [error,data] = await Review_Data.get(database,parent_data_type,parent_id,{},1,0);
+        const [error,data] = await Review_Data.update(database,review.parent_data_type,review.parent_id,review.user_id,review);
+        //const [error,data] = await Review_Data.get(database,parent_data_type,parent_id,{},1,0);
         Log.w('data',data);
         Log.w('data_parent',data.item_list[0]);
+        //Log.w('data_parent',data.item_list[1]);
         //console.log('REVIEW-END');
 
-        //console.log('REVIEW-SEARCH-START');
-        //search
-        //const [error,data] = await Review_Data.search(database,parent_data_type,parent_id,{},1,0);
-        //Log.w('data',data);
-        //Log.w('dat_len',data.item_list.length);
-        //console.log('REVIEW-SEARCH-END');
-                    //
         /*
         console.log('FAVORITE-START');
         let parent_data_type = DataType.PRODUCT;

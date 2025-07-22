@@ -775,12 +775,14 @@ class Product_Data {
     };
 }
 class Review_Data {
+	//review_data_update
     static update = async(database,parent_data_type,parent_id,user_id,review) => {
         return new Promise((callback) => {
             let error = null;
             let cloud_data = {};
             cloud_data.parent_item = DataItem.get_new(parent_data_type,parent_id);
             cloud_data.review = review;
+			cloud_data.review.parent_user = DataItem.get_new(DataType.USER,0);
             let review_list = [];
             let review_count = 0;
             let review_avg = 0;
@@ -800,27 +802,32 @@ class Review_Data {
                     if(error){
                         cloud_error=Log.append(cloud_error,error);
                     }else{
-                        cloud_data.parent_item = data.item;
+                        	cloud_data.parent_item = data.item;
                     }
-					Log.w('review_rating',cloud_data.review.rating);
                 },
 				//update_parent_item
                 async function(call){
+					if(!Str.check_is_null(cloud_data.parent_item.id)){
+						//rating_count
  					cloud_data.parent_item.rating_count = !Str.check_is_null(cloud_data.parent_item.rating_count) ? parseInt(cloud_data.parent_item.rating_count) + parseInt(review.rating) :parseInt(review.rating);
+						//review_count
+ 					cloud_data.parent_item.review_count = !Str.check_is_null(cloud_data.parent_item.review_count) ? parseInt(cloud_data.parent_item.review_count) + 1 : 1;
+						//rating_avg
+						cloud_data.parent_item.rating_avg = !Str.check_is_null(cloud_data.parent_item.rating_avg) ? parseInt(cloud_data.parent_item.rating_count)  /  parseInt(cloud_data.parent_item.review_count) :parseInt(review.rating);
+
  				   const [error,data] = await Portal.update(database,cloud_data.parent_item.data_type,cloud_data.parent_item);
                     if(error){
                         cloud_error=Log.append(cloud_error,error);
                     }else{
-                        cloud_data.parent_item = data.item;
+                        	cloud_data.parent_item = data.item;
                     }
+					}
                 },
 				//update stat
                 async function(call){
-					let stat = Stat_Logic.get_new(parent_data_type,user_id,FieldType.STAT_REVIEW_ADD_ID,[DataItem.get_new(DataType.STAT,0,
-					{parent_data_type:cloud_data.parent_item.data_type,
-					 parent_id:cloud_data.parent_item.id,
-					user_id:user_id
-					})]);
+					if(!Str.check_is_null(cloud_data.parent_item.id)){
+ 					let stat = Stat_Logic.get_new(parent_data_type,user_id,FieldType.STAT_REVIEW_ADD_ID,[DataItem.get_new(DataType.STAT,0,
+					{parent_data_type:cloud_data.parent_item.data_type,parent_id:cloud_data.parent_item.id,user_id:user_id})]);
                     const [error,data] = await Stat_Data.update(database,stat.parent_data_type,stat.user_id,stat.stat_type_id,stat.item_list);
                     if(error){
                         cloud_error=Log.append(cloud_error,error);
@@ -830,8 +837,19 @@ class Review_Data {
             			cloud_data.stat_parent_item_list = data.stat_parent_item_list;
             			cloud_data.stat_item_list =data.stat_item_list;
                     }
+					}
                 },
-
+				//get_parent_user
+                async function(call){
+					if(!Str.check_is_null(cloud_data.parent_item.id)){
+                    const [error,data] = await Portal.get(database,DataType.USER,user_id);
+                    if(error){
+                        cloud_error=Log.append(cloud_error,error);
+                    }else{
+                        	cloud_data.review.parent_user = data.item;
+                    }
+					}
+                },
             ]).then(result => {
                 callback([error,cloud_data]);
             }).catch(error => {
@@ -840,6 +858,7 @@ class Review_Data {
             });
         });
     };
+	//review_data_get
     static get = async (database,parent_data_type,parent_id,sort_by,page_current,page_size,option) => {
         return new Promise((callback) => {
             let error=null;
@@ -851,19 +870,20 @@ class Review_Data {
                 //review_list
                 async function(call){
                     let search = Item_Logic.get_search(DataType.REVIEW,{parent_id:parent_id},sort_by,page_current,page_size);
-					let option = {get_item_search:true,item_search_data_type:DataType.USER,item_search_field:'user_id',item_search_value:'id'};
+					let option = {get_item_search:true,item_search_data_type:DataType.USER,item_search_field:'id',item_search_value:'user_id'};
                     const [error,data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option);
                     if(error){
                         cloud_error=Log.append(cloud_error,error);
                      }else{
 						for(let a=0;a<data.item_list.length;a++){
-							data.item_list[a].parent_item = User_Logic.get_test('User Not Found',{get_blank:true});
-							data.item_list[a].parent_item.id = data.item_list[a].user_id;
-							data.item_list[a].parent_item.title = 'User Not Found';
+							data.item_list[a].parent_user = DataItem.get_new(DataType.USER,0);
 							for(let b=0;b<data.item_search_list.length;b++){
-								if(data.item_list[a].parent_id == data.item_search_list[b].id){
-									data.item_list[a].parent_item = data.item_search_list[b];
+								if(data.item_list[a].user_id == data.item_search_list[b].id){
+									data.item_list[a].parent_user = data.item_search_list[b];
 								}
+							}
+							if(Str.check_is_null(data.item_list[a].parent_user.id)){
+								data.item_list[a].parent_user = User_Logic.get_not_found(data.item_list[a].user_id);
 							}
 						}
                         cloud_data.item_list = data.item_list;
@@ -1226,7 +1246,11 @@ class Portal {
                         if(error){
                             error=Log.append(error,error);
                         }else{
-                            cloud_data.item = data;
+							if(!Str.check_is_null(data.id)){
+                            	cloud_data.item = data;
+							}else{
+								cloud_data.item = data_type != DataType.USER  ? Item_Logic.get_not_found(data_type,key,database.app_id) : User_Logic.get_not_found(data_type,key,database.app_id);
+							}
                         }
                         call();
                     }).catch(error => {
@@ -1256,7 +1280,7 @@ class Portal {
                         return sort_order;
                     }
                     let filter = {};
-                    if(cloud_data.item.id && option.get_item || option.get_section){
+                    if(!Str.check_is_null(cloud_data.item.id) && option.get_item || option.get_section){
                         if(Str.check_is_null(cloud_data.item.top_id)){
                             filter={top_id:cloud_data.item.id};
                         }else{
@@ -1279,13 +1303,13 @@ class Portal {
                     }
                 },
                 async function(call){
-                    if(cloud_data.item.id && option.get_item || option.get_section){
+                    if(!Str.check_is_null(cloud_data.item.id) && option.get_item || option.get_section){
                         const [error,data] = await Data_Logic.get_parent_child_list(full_item_list);
                         new_item_list = data;
                     }
                 },
                 function(call){
-                    if(cloud_data.item.id && option.get_item || option.get_section){
+                     if(!Str.check_is_null(cloud_data.item.id) && option.get_item || option.get_section){
                         cloud_data.item.items = [];
                         for(let a=0; a<new_item_list.length; a++){
                             if(new_item_list[a].parent_id == cloud_data.item.id){
@@ -1302,7 +1326,7 @@ class Portal {
                     }
                 },
                 async function(call){
-                    if(option.get_photo){
+                     if(!Str.check_is_null(cloud_data.item.id) && option.get_photo){
                         cloud_data.item.photos = [];
                         if(option.photo_count == null){
                             option.photo_count = 19;
@@ -1420,7 +1444,7 @@ class Portal {
                     }
                 },
                 function(call){
-                    if(option.get_item_search){
+                    if(option.get_item_search && cloud_data.item_list.length>0){
                         let query = { $or: [] };
                         for(let a = 0;a < cloud_data.item_list.length;a++){
                             let query_field = {};
@@ -1429,9 +1453,7 @@ class Portal {
                         }
                         let search = Item_Logic.get_search(option.item_search_data_type,query,{},1,0);
                         cloud_data.item_search_search = search;
-
                         Data.get_list(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size).then(([error,data,item_count,page_count])=> {
-
                             if(error){
                                 error=Log.append(error,error);
                             }else{
@@ -1891,6 +1913,7 @@ class Faq{
     }
 }
 class Stat_Data {
+	//stat_data_update
     static update = (database,parent_data_type,user_id,stat_type_id,item_list,option) => {
         return new Promise((callback) => {
             let cloud_data = {};
@@ -1905,6 +1928,7 @@ class Stat_Data {
             async.series([
 				//get parent items
                 async function(call){
+					console.log('11111111111111111');
                     if(item_list.length>0){
                         let query = { $or: [] };
                         for(let a = 0;a < item_list.length;a++){
@@ -1930,6 +1954,7 @@ class Stat_Data {
                 },
                 //get user stats
                 async function(call){
+					console.log('222222222222222');
                     if(item_list.length>0){
                         let query = { $or: [] };
                         for(let a = 0;a < item_list.length;a++){
@@ -1958,6 +1983,7 @@ class Stat_Data {
                 },
                 //save stat list
                async function(call){
+				   console.log('3333333333333333333');
                     if(item_list.length>0){
                         for(let a = 0; a < item_list.length; a++){
                             if(item_list[a].stat_new){
@@ -1979,18 +2005,20 @@ class Stat_Data {
                     if(item_list.length>0){
                         let stat_parent_item_list = [];
                         for(let a = 0; a < item_list.length; a++){
-                            if(item_list[a].stat_new){
+                            if(item_list[a].stat_new && stat_type_id != FieldType.STAT_REVIEW_ADD_ID){
                                 let parent_item = DataItem.get_new(item_list[a].parent_item.data_type,item_list[a].parent_item.id);
                                 parent_item = get_stat_type_id(item_list[a].parent_item);
                                 cloud_data.stat_parent_item_list.push(parent_item);
                             }
                         }
+						if(cloud_data.stat_parent_item_list.length>0){
                         const [error,data] = await Portal.update_list(database,cloud_data.stat_parent_item_list);
                         if(error){
                             error=Log.append(error,error);
                         }else{
                             cloud_data.stat_parent_item_list = data.item_list;
                         }
+						}
                     }
                 },
               ]).then(result => {
@@ -2028,6 +2056,7 @@ class Stat_Data {
 
 			}
             function get_stat_type_id(parent_item){
+				/*
                 const STAT_VIEW_ID='1';
                 const STAT_LIKE_ADD_ID='2';
                 const STAT_FAVORITE_ADD_ID='3';
@@ -2035,6 +2064,7 @@ class Stat_Data {
                 const STAT_ORDER_ADD_ID='5';
                 const STAT_REVIEW_ADD_ID='6';
                 let str = '';
+				*/
                 switch(stat_type_id){
                     case FieldType.STAT_CART_ADD_ID:
                         str = 'cart_count';
@@ -2052,9 +2082,8 @@ class Stat_Data {
 						parent_item['order_count'] = !Str.check_is_null(parent_item['order_count']) ? parseInt(parent_item['order_count']) + 1 : 1;
                         break;
  					case FieldType.STAT_REVIEW_ADD_ID:
-						parent_item['review_count'] = !Str.check_is_null(parent_item['review_count']) ? parseInt(parent_item['review_count']) + 1 : 1;
-						parent_item['rating_avg'] = parseInt(parent_item['rating_count']) / parseInt(parent_item['review_count']);
-                        break;
+						//update happens on review_data_update
+					break;
                 };
                 return parent_item;
             }

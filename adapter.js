@@ -235,7 +235,7 @@ const get_item_adapter = (db_connect,data_type,key,option) => {
             option = {};
         }
         let cache_connect = {};
-        let item_data = {};
+        item_data = DataItem.get_new(data_type,0,{app_id:db_connect.app_id,key:key});
         async.series([
             function(call) {
                 get_cache_connect_main(db_connect.data_config).then(([error,data]) => {
@@ -248,7 +248,6 @@ const get_item_adapter = (db_connect,data_type,key,option) => {
             },
             function(call) {
                if(option.filter){
-                    item_data = DataItem.get_new(data_type,0,{app_id:db_connect.app_id});
                     let sort_by={};
                     let page_current=1;
                     let page_size=0;
@@ -267,7 +266,8 @@ const get_item_adapter = (db_connect,data_type,key,option) => {
                     });
                 }
                 else if(option.title_url && !Number.check_is_guid(option.title_url)){
-                    item_data = DataItem.get_new(data_type,0,{title_url:option.title_url,app_id:db_connect.app_id});
+                    item_data.title_url = option.title_url;
+                    item_data.key = option.title_url;
                     let filter={title_url:option.title_url};
                     let sort_by={};
                     let page_current=1;
@@ -285,8 +285,7 @@ const get_item_adapter = (db_connect,data_type,key,option) => {
                         callback([error,null]);
                     });
                 }else{
-                    item_data = DataItem.get_new(data_type,key,{app_id:db_connect.app_id});
-                    get_item_cache_db(cache_connect,db_connect,item_data.data_type,item_data.id).then(([error,data]) => {
+                    get_item_cache_db(cache_connect,db_connect,item_data.data_type,item_data.key).then(([error,data]) => {
                         if(data){
                             item_data = data;
                         }else{
