@@ -24,7 +24,7 @@ const DATA_TYPE = DataType.BLOG_POST;
 const OPTION = {};
 //const FILTER = {test_group_id:59367};
 const FILTER = {data_type:DATA_TYPE};
-const APP_ID = 'test-july21';
+const APP_ID = 'test-july22';
 const SQL = {};
 /* --- TEST CONFIG END --- */
 
@@ -70,6 +70,44 @@ describe('connect', function(){ this.timeout(25000);
             Log.w('data',data);
             console.log('STAT-END');
             */
+                //CART-START
+                console.log('CART-START');
+                let user_id = 'e1baf0b3-a226-45a9-99e2-67dcffb19a70';
+                let parent_data_type = DataType.PRODUCT;
+                let parent_id = '46b105f6-0be9-4753-8b93-418c6aba2c45';
+                let sub_1_data_type = DataType.ITEM;
+                let sub_1_id = '6084de0f-e50e-4fdb-b8be-734262e35b31';
+                let sub_2_data_type = DataType.ITEM;
+                let sub_2_id = 'c6210883-89f0-4265-a281-13f73efda9a0';
+
+                //get cart
+                let cart = get_new_cart(user_id);
+
+                //get cart item
+                let cart_item = get_new_cart_item(parent_data_type,parent_id,cart.cart_number,user_id,1);
+                cart.cart_item_list.push(cart_item);
+
+                //get cart item
+                let cart_sub_item_1 = get_new_cart_item(sub_1_data_type,sub_1_id,cart.cart_number,user_id,1);
+                cart_item.cart_sub_item_list.push(cart_sub_item_1);
+
+                Log.w('cart',cart);
+
+                const [error,data] = await Cart_Data.update(database,parent_data_type,user_id,cart);
+                Log.w('data',data);
+
+                function get_new_cart(user_id){
+                    return DataItem.get_new(DataType.CART,0,{user_id:user_id,cart_number:Cart_Logic.get_cart_number(),quanity:1,cart_item_list:[]});
+                }
+                function get_new_cart_item(parent_data_type,parent_id,cart_number,user_id,quanity){
+                    return DataItem.get_new(DataType.CART_ITEM,0,{parent_data_type:parent_data_type,parent_id:parent_id,cart_number:cart_number,user_id:user_id,quanity:quanity,cart_sub_item_list:[]});
+                }
+                function get_new_cart_sub_item(parent_data_type,parent_id,cart_number,user_id,quanity){
+                    return DataItem.get_new(DataType.CART_SUB_ITEM,0,{parent_data_type:parent_data_type,parent_id:parent_id,cart_number:cart_number,user_id:user_id,quanity:quanity});
+                }
+
+                console.log('CART-END');
+                //CART-END
 
                 /*
             console.log('LIST-START');
@@ -86,23 +124,24 @@ describe('connect', function(){ this.timeout(25000);
             */
 
 
-                /*
+        /*
         console.log('SEARCH-START');
         let query = {};
         //query.application_development_template_type = "Mobile Application Template";
         //query.application_development_template_type = "Website Application Template";
         //query.product_type = "Application Development Template";
         //query.featured = "true";
-            //let user_id = 'ccdaa4d8-9aa0-499f-9249-dd70a6d675f9';
+        //let user_id = 'ccdaa4d8-9aa0-499f-9249-dd70a6d675f9';
             let search = Item_Logic.get_search(DataType.PRODUCT,{title:'ffffffff'},{},1,0);
             Log.w('search',search);
-            //const [error,data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size);
+//const [error,data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size);
             const [error,data] = await Search_Data.get(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size);
-        //Log.w('data',data);
+//Log.w('data',data);
             Log.w('data',data);
-            //Log.w('data',data.item_list.length);
+//Log.w('data',data.item_list.length);
             console.log('SEARCH-END');
             */
+/*
         console.log('REVIEW-INFO-START');
         let parent_data_type = DataType.PRODUCT;
         let parent_id = '56899ff7-bc11-4004-8e3b-f1688b9e0ba1';
@@ -111,22 +150,23 @@ describe('connect', function(){ this.timeout(25000);
         let product_review = Review_Logic.get_test(parent_data_type,parent_id,user_id);
         let review = Review_Logic.get_new(parent_data_type,parent_id,user_id,product_review.title,product_review.comment,product_review.rating);
         review.rating = 4;
-        //Log.w('product_review',product_review);
-        //Log.w('review',review);
-        //Log.w('review_rating',rating);
-        const [error,data] = await Review_Data.update(database,review.parent_data_type,review.parent_id,review.user_id,review);
-        //const [error,data] = await Review_Data.get(database,parent_data_type,parent_id,{},1,0);
-        Log.w('data',data);
-        Log.w('data_parent',data.item_list[0]);
-        //Log.w('data_parent',data.item_list[1]);
-        //console.log('REVIEW-END');
+        */
+//Log.w('product_review',product_review);
+//Log.w('review',review);
+//Log.w('review_rating',rating);
+//const [error,data] = await Review_Data.update(database,review.parent_data_type,review.parent_id,review.user_id,review);
+//const [error,data] = await Review_Data.get(database,parent_data_type,parent_id,{},1,0);
+//Log.w('data',data);
+//Log.w('data_parent',data.item_list[0]);
+//Log.w('data_parent',data.item_list[1]);
+//console.log('REVIEW-END');
 
-        /*
+/*
         console.log('FAVORITE-START');
         let parent_data_type = DataType.PRODUCT;
         let parent_id= '27cce0b4-7e2d-4884-b1db-5144e4081dc6';
         let user_id = '21027';
-        //const [error,data] = await Favorite_Data.update(database,parent_data_type,parent_id,user_id);
+                //const [error,data] = await Favorite_Data.update(database,parent_data_type,parent_id,user_id);
         const [error,data] = await Favorite_Data.search(database,parent_data_type,user_id,{},1,0);
         Log.w('data',data);
         console.log('FAVORITE-END');
@@ -149,24 +189,24 @@ describe('connect', function(){ this.timeout(25000);
         };
         Log.w('option',option);
         const [error,data] = await Category_Data.search(database,search.filter,search.sort_by,search.page_current,search.page_size,option);
-        //const [error,data] = await Category_Data.get(database,key,);
+    //const [error,data] = await Category_Data.get(database,key,);
         Log.w('data',data);
         Log.w('data_1',data.item_list[0]);
         Log.w('data_2',data.item_list[0].item_search_list);
         console.log('CATEGORY-END');
         */
 
-        /*
+    /*
         console.log('PRODUCT-START');
         let key = "copy_test_91963";
         let search = Item_Logic.get_search(DataType.PRODUCT,{title:'Test 91963'},{},1,0);
         const [error,data] = await Product_Data.search(database,search.filter,search.sort_by,search.page_current,search.page_size);
-        //const [error,data] = await Product_Data.get(database,key);
+    //const [error,data] = await Product_Data.get(database,key);
         Log.w('error',error);
         Log.w('data',data);
         console.log('PRODUCT-END');
         */
-            /*
+    /*
         console.log('CONTENT-START');
         //let content = Content_Logic.get_test("Content " + String(Number.get_id()),{get_value:true,get_item:true});
         let key = "product_hosting_type";
@@ -207,7 +247,7 @@ describe('connect', function(){ this.timeout(25000);
                 */
 
 
-                /*
+/*
                 console.log('PORTAL-SEARCH-START');
                 let id = 0;
                 let data_type = DataType.PRODUCT;
@@ -217,20 +257,20 @@ describe('connect', function(){ this.timeout(25000);
                 console.log('PORTAL-SEARCH-END');
                 */
 
-                /*
+/*
                 console.log('ADMIN-START');
                 let key = 'test_53555';
-                //let search = Item_Logic.get_search(DataType.ADMIN,{},{},1,0);
-                //const [error,data] = await Admin_Data.get(database,key);
+        //let search = Item_Logic.get_search(DataType.ADMIN,{},{},1,0);
+        //const [error,data] = await Admin_Data.get(database,key);
                 const [error,data] = await Admin_Data.search(database,search.filter,search.sort_by,search.page_current,search.page_size);
                 Log.w('data',data);
                 console.log('ADMIN-END');
                 */
 
-                /*
+        /*
                 console.log('BLOG-DATA-START');
                 let key = 'test_39058';
-                //let search = Item_Logic.get_search(DataType.BLOG_POST,{},{},1,0);
+        //let search = Item_Logic.get_search(DataType.BLOG_POST,{},{},1,0);
                 const [error,data] = await Blog_Post_Data.get(database,key);
                 //const [error,data] = await Business_Data.search(database,search.filter,search.sort_by,search.page_current,search.page_size);
                 Log.w('data',data);
@@ -253,19 +293,19 @@ describe('connect', function(){ this.timeout(25000);
                 /*
                 console.log('USER-START');
                 let user = User_Logic.get_test();
-                //user.title = Str.get_title_url(user.title);
+        //user.title = Str.get_title_url(user.title);
                 user.title = "test_32926";
                 user.email = "user5b@bossappz.com";
                 Log.w('user',user);
                 const [error,data] = await User_Data.register(database,user);
-                //const [error,data] = await User_Data.login(database,user.email,user.password);
+    //const [error,data] = await User_Data.login(database,user.email,user.password);
                 Log.w('data',data);
                 console.log('USER-END');
                 */
-                //USER-END
+    //USER-END
 
 
-                /*
+    /*
                 console.log('PORTAL-DELETE-START');
                 let id = 'c3b33a03-9af8-43ec-9878-31cba4ba2588';
                 let data_type = DataType.PRODUCT;
@@ -274,7 +314,7 @@ describe('connect', function(){ this.timeout(25000);
                 console.log('PORTAL-DELETE-END');
                 */
 
-                /*
+    /*
                 console.log('PORTAL-DELETE-CACHE-START');
                 let id =  'db4ce653-ed62-454a-b556-29dffd3940e6';
                 let data_type = DataType.PRODUCT;
@@ -283,7 +323,7 @@ describe('connect', function(){ this.timeout(25000);
                 console.log('PORTAL-DELETE-CACHE-END');
                 */
 
-                /*
+    /*
                 console.log('PORTAL-GET-START');
                 let data_type = DataType.PRODUCT;
                 let id =  'db4ce653-ed62-454a-b556-29dffd3940e6';
@@ -293,7 +333,7 @@ describe('connect', function(){ this.timeout(25000);
                 console.log('PORTAL-GET-END');
                 */
 
-                /*
+    /*
                 console.log('PORTAL-COPY-START');
                 let data_type = DataType.PRODUCT;
                 let id = 'ef923dd8-7f40-4833-af16-0b4e7fb22869';
@@ -303,7 +343,7 @@ describe('connect', function(){ this.timeout(25000);
                 */
 
 
-                /*
+    /*
             console.log('PORTAL-COUNT-LIST-START');
                 let data_type = DataType.PRODUCT;
                 let filter = {};
@@ -312,7 +352,7 @@ describe('connect', function(){ this.timeout(25000);
                 console.log('PORTAL-COUNT-LIST-END');
                 */
 
-                /*
+    /*
                 console.log('PORTAL-DELETE-SEARCH-START');
                 let id = 0;
                 let data_type = DataType.PRODUCT;
@@ -322,7 +362,7 @@ describe('connect', function(){ this.timeout(25000);
                 console.log('PORTAL-DELETE-SEARCH-END');
                 */
 
-                /*
+    /*
                 console.log('PORTAL-UPDATE-LIST-START');
                 let id = 0;
                 let data_type = DataType.PRODUCT;
@@ -333,7 +373,7 @@ describe('connect', function(){ this.timeout(25000);
                 console.log('PORTAL-UPDATE-LIST-END');
                 */
 
-        /*
+    /*
                 console.log('PORTAL-DELETE-START');
                 let data_type = DataType.BLANK;
                 let key = "1d5e10eb-8927-442d-83ae-52f2e156daad";
@@ -342,8 +382,8 @@ describe('connect', function(){ this.timeout(25000);
                 const [error,data] = await Portal.delete(database,data_type,key,{get_item:true,get_photo:true});
                 console.log(data);
                 console.log('PORTAL-DELETE-SUCCESS');
-//database = data;
-//Log.w('database',database);
+    //database = data;
+    //Log.w('database',database);
                 console.log('PORTAL-DELETE-END');
                 */
 
@@ -480,7 +520,7 @@ describe('item_get_data', function(){ this.timeout(25000);
 
 
                 /*
-                //const [error,data] = await Portal.get(database,item.data_type,KEY,{});
+                    //const [error,data] = await Portal.get(database,item.data_type,KEY,{});
                 if(error){
                     cloud_error=Log.append(cloud_error,error);
                 }else{
@@ -536,7 +576,7 @@ describe('item_get', function(){ this.timeout(25000);
             },
             async function(call){
                 console.log('GET-START');
-                //const [error,data] = await Portal.get(database,item.data_type,ID,{});
+//const [error,data] = await Portal.get(database,item.data_type,ID,{});
                 const [error,data] = await Portal.get(database,item.data_type,KEY,{});
                 if(error){
                     cloud_error=Log.append(cloud_error,error);
@@ -677,7 +717,7 @@ describe('old_update_old', function(){ this.timeout(25000);
         let cloud_error=null;
         let database = {};
         var item_test = Item_Logic.get_test('Item '+Number.get_id(),DATA_TYPE,0);
-        //let item_test = Item_Logic.get_test("Item_" +Number.get_id(),DataType.BLOG_POST,0);
+//let item_test = Item_Logic.get_test("Item_" +Number.get_id(),DataType.BLOG_POST,0);
         Log.w('item_test_44',item_test);
         async.series([
             async function(call){
@@ -798,12 +838,12 @@ describe('get_data', function(){ this.timeout(25000);
         async.series([
             async function(call){
                 console.log('TEST-CONNECT-START');
-                //const [error,data] = await Database.get(DATA_CONFIG,{biz9_config_file:"/home/think2/www/doqbox/biz9-framework/biz9-service/code/biz9_config"});
-                //const [error,data] = await Database.get(DATA_CONFIG,{biz9_config_file:"/home/think2/www/doqbox/biz9-framework/biz9-service/code/biz9_config",app_id:"cool_apple"});
-                //const [error,data] = await Database.get(DATA_CONFIG,{biz9_config_file:"/home/think2/www/doqbox/biz9-framework/biz9-service/code/biz9_config"});
-                //const [error,data] = await Database.get(DATA_CONFIG,{app_id:'cool_work'});
-                //const [error,data] = await Database.get(DATA_CONFIG,{app_id:'cool_work',biz9_config_file:"/home/think2/www/doqbox/biz9-framework/biz9-service/code/biz9_config"});
-                //const [error,data] = await Database.get({},{app_id:"cool_work",biz9_config_file:"/home/think2/www/doqbox/biz9-framework/biz9-service/code/biz9_config"});
+        //const [error,data] = await Database.get(DATA_CONFIG,{biz9_config_file:"/home/think2/www/doqbox/biz9-framework/biz9-service/code/biz9_config"});
+        //const [error,data] = await Database.get(DATA_CONFIG,{biz9_config_file:"/home/think2/www/doqbox/biz9-framework/biz9-service/code/biz9_config",app_id:"cool_apple"});
+        //const [error,data] = await Database.get(DATA_CONFIG,{biz9_config_file:"/home/think2/www/doqbox/biz9-framework/biz9-service/code/biz9_config"});
+        //const [error,data] = await Database.get(DATA_CONFIG,{app_id:'cool_work'});
+        //const [error,data] = await Database.get(DATA_CONFIG,{app_id:'cool_work',biz9_config_file:"/home/think2/www/doqbox/biz9-framework/biz9-service/code/biz9_config"});
+        //const [error,data] = await Database.get({},{app_id:"cool_work",biz9_config_file:"/home/think2/www/doqbox/biz9-framework/biz9-service/code/biz9_config"});
                 const [error,data] = await Database.get(DATA_CONFIG);
                 database = data;
                 Log.w('database',database);
@@ -830,91 +870,91 @@ describe('get_data', function(){ this.timeout(25000);
     });
 });
 */
-describe('item_list_update', function(){ this.timeout(25000);
-    it("_item_list_update", function(done){
-        let cloud_error=null;
-        let db_connect = {};
-        let item_test_list = [];
-        async.series([
-            function(call){
-                console.log('TEST-LIST-ITEM-UPDATE-CONNECT-START');
-                Data.open_db(data_config).then(([error,data])=> {
-                    if(error){
-                        cloud_error=Log.append(cloud_error,error);
-                        Log.error('error',error);
-                    }
-                    db_connect = data;
-                    assert.notEqual(db_connect,null);
-                    console.log('TEST-LIST-ITEM-UPDATE-CONNECT-SUCCESS');
-                    call();
-                }).catch(error => {
-                    cloud_error=Log.append(cloud_error,error);
-                    call();
-                });
-            },
-            function(call){
-                console.log('TEST-LIST-ITEM-UPDATE-UPDATE-START');
-                let test_group_id=Number.get_id();
-                for(a=0;a<10;a++){
-                    item_test=Test.get_item('dt_blank',0);
-                    item_test.test_group_id=test_group_id;
-                    item_test_list.push(item_test);
-                }
-                Data.update_list(db_connect,item_test_list).then(([error,data])=> {
-                    if(error){
-                        cloud_error=Log.append(cloud_error,error);
-                    }
-                    console.log(data);
-                    assert.notEqual(0,data.length);
-                    assert.strictEqual(10,data.length);
-                    assert.notEqual(0,data[0].id);
-                    console.log('TEST-LIST-ITEM-UPDATE-UPDATE-SUCCESS');
-                    call();
-                }).catch(error => {
-                    cloud_error=Log.append(cloud_error,error);
-                    call();
-                });
-            },
-            function(call){
-                console.log('TEST-LIST-ITEM-UPDATE-CLOSE-START');
-                Data.close_db(db_connect).then(([error,data])=> {
-                    if(error){
-                        cloud_error=Log.append(cloud_error,error);
-                    }
-                    db_connect=data;
-                    assert.equal(data,null);
-                    console.log('TEST-LIST-ITEM-UPDATE-CLOSE-SUCCESS');
-                    call();
-                }).catch(error => {
-                    cloud_error=Log.append(cloud_error,error);
-                    call();
-                });
-            },
-            function(call){
-                console.log('TEST-LIST-ITEM-UPDATE-ASSERT-START');
-                assert.notEqual(item_test.first_name,0);
-                assert.notEqual(item_test.first_name,null);
-                assert.notEqual(item_test.id,0);
-                assert.notEqual(item_test.id,null);
-                assert.equal(null,db_connect);
-                console.log('TEST-LIST-ITEM-UPDATE-ASSERT-SUCCESS');
-                call();
-            },
-        ],
-            function(error, result){
-                if(cloud_error){
-                    Log.error("TEST-LIST-ITEM-UPDATE-ERROR-DONE",cloud_error);
-                }else{
-                    console.log('TEST-LIST-ITEM-UPDATE-CONNECT-SUCCESS-DONE');
-                    console.log('TEST-LIST-ITEM-UPDATE-UPDATE-SUCCESS-DONE');
-                    console.log('TEST-LIST-ITEM-UPDATE-CLOSE-SUCCESS-DONE');
-                    console.log('TEST-LIST-ITEM-UPDATE-ASSERT-SUCCESS-DONE');
-                    console.log('TEST-LIST-ITEM-UPDATE-DONE');
-                }
-                done();
+        describe('item_list_update', function(){ this.timeout(25000);
+            it("_item_list_update", function(done){
+                let cloud_error=null;
+                let db_connect = {};
+                let item_test_list = [];
+                async.series([
+                    function(call){
+                        console.log('TEST-LIST-ITEM-UPDATE-CONNECT-START');
+                        Data.open_db(data_config).then(([error,data])=> {
+                            if(error){
+                                cloud_error=Log.append(cloud_error,error);
+                                Log.error('error',error);
+                            }
+                            db_connect = data;
+                            assert.notEqual(db_connect,null);
+                            console.log('TEST-LIST-ITEM-UPDATE-CONNECT-SUCCESS');
+                            call();
+                        }).catch(error => {
+                            cloud_error=Log.append(cloud_error,error);
+                            call();
+                        });
+                    },
+                    function(call){
+                        console.log('TEST-LIST-ITEM-UPDATE-UPDATE-START');
+                        let test_group_id=Number.get_id();
+                        for(a=0;a<10;a++){
+                            item_test=Test.get_item('dt_blank',0);
+                            item_test.test_group_id=test_group_id;
+                            item_test_list.push(item_test);
+                        }
+                        Data.update_list(db_connect,item_test_list).then(([error,data])=> {
+                            if(error){
+                                cloud_error=Log.append(cloud_error,error);
+                            }
+                            console.log(data);
+                            assert.notEqual(0,data.length);
+                            assert.strictEqual(10,data.length);
+                            assert.notEqual(0,data[0].id);
+                            console.log('TEST-LIST-ITEM-UPDATE-UPDATE-SUCCESS');
+                            call();
+                        }).catch(error => {
+                            cloud_error=Log.append(cloud_error,error);
+                            call();
+                        });
+                    },
+                    function(call){
+                        console.log('TEST-LIST-ITEM-UPDATE-CLOSE-START');
+                        Data.close_db(db_connect).then(([error,data])=> {
+                            if(error){
+                                cloud_error=Log.append(cloud_error,error);
+                            }
+                            db_connect=data;
+                            assert.equal(data,null);
+                            console.log('TEST-LIST-ITEM-UPDATE-CLOSE-SUCCESS');
+                            call();
+                        }).catch(error => {
+                            cloud_error=Log.append(cloud_error,error);
+                            call();
+                        });
+                    },
+                    function(call){
+                        console.log('TEST-LIST-ITEM-UPDATE-ASSERT-START');
+                        assert.notEqual(item_test.first_name,0);
+                        assert.notEqual(item_test.first_name,null);
+                        assert.notEqual(item_test.id,0);
+                        assert.notEqual(item_test.id,null);
+                        assert.equal(null,db_connect);
+                        console.log('TEST-LIST-ITEM-UPDATE-ASSERT-SUCCESS');
+                        call();
+                    },
+                ],
+                    function(error, result){
+                        if(cloud_error){
+                            Log.error("TEST-LIST-ITEM-UPDATE-ERROR-DONE",cloud_error);
+                        }else{
+                            console.log('TEST-LIST-ITEM-UPDATE-CONNECT-SUCCESS-DONE');
+                            console.log('TEST-LIST-ITEM-UPDATE-UPDATE-SUCCESS-DONE');
+                            console.log('TEST-LIST-ITEM-UPDATE-CLOSE-SUCCESS-DONE');
+                            console.log('TEST-LIST-ITEM-UPDATE-ASSERT-SUCCESS-DONE');
+                            console.log('TEST-LIST-ITEM-UPDATE-DONE');
+                        }
+                        done();
+                    });
             });
-    });
-});
+        });
 describe('item_list_get', function(){ this.timeout(25000);
     it("_item_list_get", function(done){
         let cloud_error = null;
