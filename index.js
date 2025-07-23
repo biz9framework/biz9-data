@@ -11,7 +11,6 @@ const {Scriptz}=require("biz9-scriptz");
 const {Log,Str,Number,Obj}=require("/home/think2/www/doqbox/biz9-framework/biz9-utility/code");
 const {DataItem,DataType,FieldType,Item_Logic,User_Logic,Favorite_Logic,Stat_Logic}=require("/home/think2/www/doqbox/biz9-framework/biz9-logic/code");
 const { get_db_connect_adapter,check_db_connect_adapter,close_db_connect_adapter,update_item_adapter,update_item_list_adapter,get_item_adapter,delete_item_adapter,get_item_list_adapter,delete_item_list_adapter,count_item_list_adapter,delete_item_cache }  = require('./adapter.js');
-const {get_database_main} = require("./main");
 class Database {
 	static get = async (data_config,option) => {
 		/* return
@@ -467,8 +466,7 @@ class Cart_Data {
 			async.series([
 				//bind-update cart
 				async function(call){
-					console.log('333333333333333333');
-					let publish_cart = DataItem.get_new(DataType.CART,cart.id,{cart_number:cart.cart_number,user_id:user_id});
+					let publish_cart = DataItem.get_new(DataType.CART,cart.id,{cart_number:cart.cart_number,user_id:user_id,parent_data_type:parent_data_type});
 					const [error,data] = await Portal.update(database,DataType.CART,publish_cart);
 					if(error){
 						error=Log.append(error,error);
@@ -479,7 +477,6 @@ class Cart_Data {
 				},
 				//bind cart_item_list
 				async function(call){
-					console.log('44444444444444');
 					if(cart.cart_item_list.length>0){
 						for(let a=0;a<cart.cart_item_list.length;a++){
 							cart.cart_item_list[a].cart_id = cloud_data.cart.id;
@@ -506,7 +503,6 @@ class Cart_Data {
 				},
 				//bind cart_sub_item_list
 				async function(call){
-					console.log('55555555555555555');
 					if(cart.cart_item_list.length>0){
 					for(let a=0;a<cloud_data.publish_cart_item_list.length;a++){
 						for(let b=0;b<cart.cart_item_list[a].cart_sub_item_list.length;b++){
@@ -534,9 +530,6 @@ class Cart_Data {
 					}
 				},
 				async function(call){
-					console.log('666666666666666666666666');
-					console.log('cart',cart);
-					console.log('cart_item_list',cart.cart_item_list);
 					let stat_list = [];
 					for(let a = 0; a < cart.cart_item_list.length; a++){
 						stat_list.push(DataItem.get_new(DataType.STAT,0,{parent_id:cart.cart_item_list[a].parent_id,parent_data_type:cart.cart_item_list[a].parent_data_type}));
@@ -553,7 +546,6 @@ class Cart_Data {
 				},
 				//get cart
 				async function(call){
-					console.log('77777777777777777');
 						const [error,data] = await Cart_Data.get(database,parent_data_type,cart.cart_number);
 						if(error){
 							error=Log.append(error,error);
@@ -571,7 +563,7 @@ class Cart_Data {
 		});
 	};
 	//cart_data_get
-	static get = (database,parent_data_type,cart_number,option) => {
+	static get = (database,cart_number,option) => {
 		return new Promise((callback) => {
 			let cloud_data = {cart:DataItem.get_new(DataType.CART,0,{cart_number:cart_number,cart_item_list:[]})};
 			let cart_item_item_list_query = { $or: [] };
@@ -592,6 +584,7 @@ class Cart_Data {
 				},
 				//cart_item_list
 				async function(call){
+					if(!Str.check_is_null(cloud_data.cart.id)){
 					let filter = { cart_number: { $regex:String(cart_number), $options: "i" } };
 					let search = Item_Logic.get_search(DataType.CART_ITEM,filter,{},1,0);
 					const [error,data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,{});
@@ -600,15 +593,17 @@ class Cart_Data {
 					}else{
 						cloud_data.cart.cart_item_list = data.item_list;
 					}
+					}
 				},
 				//cart_item_item_list - parent_item_list
 				async function(call){
+					if(!Str.check_is_null(cloud_data.cart.id)){
 					for(let a = 0;a < cloud_data.cart.cart_item_list.length; a++){
 						let query_field = {};
 						query_field['id'] = { $regex:String(cloud_data.cart.cart_item_list[a].parent_id), $options: "i" };
 						cart_item_item_list_query.$or.push(query_field);
 					}
-					let search = Item_Logic.get_search(parent_data_type,cart_item_item_list_query,{},1,0);
+					let search = Item_Logic.get_search(cloud_data.cart.parent_data_type,cart_item_item_list_query,{},1,0);
 
 					const [error,data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size);
 					if(error){
@@ -626,9 +621,11 @@ class Cart_Data {
 							}
 						}
 					}
+					}
 				},
 				//cart_sub_item_list
 				async function(call){
+				if(!Str.check_is_null(cloud_data.cart.id)){
 					let filter = { cart_number: { $regex:".*"+String(cart_number), $options: "i" } };
 					let search = Item_Logic.get_search(DataType.CART_SUB_ITEM,filter,{},1,0);
 					const [error,data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,{});
@@ -645,9 +642,11 @@ class Cart_Data {
 							}
 						}
 					}
+					}
 				},
 				//cart_sub_item_item_list - parent_item_list
 				async function(call){
+				if(!Str.check_is_null(cloud_data.cart.id)){
 					let parent_data_type = DataType.BLANK;
 					for(let a = 0; a < cart_sub_item_list.length; a++){
 						let query_field = {};
@@ -671,9 +670,12 @@ class Cart_Data {
 							}
 						}
 					}
+				}
 				},
 				//sub_total - grand_total
 				async function(call){
+				if(!Str.check_is_null(cloud_data.cart.id)){
+
 					let grand_total = 0;
 					for(let a = 0; a < cloud_data.cart.cart_item_list.length; a++){
 						let sub_total = 0;
@@ -693,7 +695,7 @@ class Cart_Data {
 					}
 					cloud_data.cart.grand_total = grand_total;
 				}
-
+				}
 			]).then(result => {
 				callback([error,cloud_data]);
 			}).catch(error => {
@@ -710,22 +712,29 @@ class Cart_Data {
 			cloud_data.cart = DataItem.get_new(DataType.CART,id);
 			async.series([
 				async function(call){
-					if(Str.check_is_null(cloud_data.cart.id)){
 						const [error,data] = await Portal.delete(database,DataType.CART,id);
 						if(error){
 							error=Log.append(error,error);
 						}else{
 							cloud_data.cart = data.item;
 						}
-					}
 				},
 				async function(call){
-					let search = Item_Logic.get_search(DataType.CART_ITEM,{cart_item_id:id},{},1,0);
-					const [error,data] = await Portal.delete_search(database,DataType.CART_ITEM,search.filter);
+					let search = Item_Logic.get_search(DataType.CART_ITEM,{cart_id:id},{},1,0);
+					const [error,data] = await Portal.delete_search(database,search.data_type,search.filter);
 					if(error){
 						error=Log.append(error,error);
 					}else{
-						cloud_data.delete_search = data;
+						cloud_data.delete_cart_item_search = data;
+					}
+				},
+				async function(call){
+					let search = Item_Logic.get_search(DataType.CART_SUB_ITEM,{cart_id:id},{},1,0);
+					const [error,data] = await Portal.delete_search(database,search.data_type,search.filter);
+					if(error){
+						error=Log.append(error,error);
+					}else{
+						cloud_data.delete_cart_sub_item_search = data;
 					}
 				},
 			]).then(result => {
@@ -1280,7 +1289,7 @@ class Portal {
 							if(!Str.check_is_null(data.id)){
 								cloud_data.item = data;
 							}else{
-								cloud_data.item = data_type != DataType.USER  ? Item_Logic.get_not_found(data_type,key,database.app_id) : User_Logic.get_not_found(data_type,key,database.app_id);
+								cloud_data.item = data_type != DataType.USER  ? Item_Logic.get_not_found(data_type,key,{app_id:database.app_id}) : User_Logic.get_not_found(data_type,key,{app_id:database.app_id});
 							}
 						}
 						call();
@@ -1958,7 +1967,6 @@ class Stat_Data {
 			async.series([
 				//get parent items
 				async function(call){
-					console.log('6666666666666666');
 					if(item_list.length>0){
 						let query = { $or: [] };
 						for(let a = 0;a < item_list.length;a++){
@@ -1967,8 +1975,6 @@ class Stat_Data {
 							query.$or.push(query_field);
 						}
 						let search = Item_Logic.get_search(parent_data_type,query,{},1,0);
-						Log.w('query',query);
-						Log.w('search',search);
 						const [error,data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size);
 						if(error){
 							error=Log.append(error,error);
@@ -1986,7 +1992,6 @@ class Stat_Data {
 				},
 				//get user stats
 				async function(call){
-					console.log('7777777777777777');
 					if(item_list.length>0){
 						let query = { $or: [] };
 						for(let a = 0;a < item_list.length;a++){
@@ -2015,7 +2020,6 @@ class Stat_Data {
 				},
 				//save stat list
 				async function(call){
-					console.log('88888888888888888888');
 					if(item_list.length>0){
 						let str = get_stat_str(stat_type_id);
 						for(let a = 0; a < item_list.length; a++){
@@ -2035,7 +2039,6 @@ class Stat_Data {
 				},
 				//save parent_item list
 				async function(call){
-					console.log('99999999999999999999');
 					if(item_list.length>0){
 						let stat_parent_item_list = [];
 						let str = get_stat_str(stat_type_id);
@@ -2057,7 +2060,6 @@ class Stat_Data {
 					}
 				},
 			]).then(result => {
-				console.log('dooooooooooonnnnnnnnnnneeeeeeeeeeee');
 				callback([error,cloud_data]);
 			}).catch(error => {
 				Log.error("-Update-Item-View-Count-",error);

@@ -1,6 +1,6 @@
 const async = require('async');
 const assert = require('node:assert');
-const {Data,Database,Portal,Category_Data,Product_Data,Page_Data,Blog_Post_Data,Content_Data,Stat_Data,List_Data,Review_Data,Favorite_Data,Search_Data,Admin_Data,Business_Data,Order_Data,Cart_Data,User_Data} = require(".");
+const {Data,Database,Category_Data,Product_Data,Page_Data,Blog_Post_Data,Content_Data,Stat_Data,List_Data,Review_Data,Favorite_Data,Search_Data,Admin_Data,Business_Data,Order_Data,Cart_Data,User_Data} = require(".");
 const {Log,Number,Str} = require("biz9-utility");
 const {DataType,DataItem,Item_Logic,Page_Logic,Template_Logic,Blog_Post_Logic,Content_Logic,Product_Logic,Field_Logic,Admin_Logic,Business_Logic,Category_Logic,User_Logic,Order_Logic,FieldType,Cart_Logic,Stat_Logic,Review_Logic} = require("/home/think2/www/doqbox/biz9-framework/biz9-logic/code");
 /*
@@ -24,7 +24,7 @@ const DATA_TYPE = DataType.BLOG_POST;
 const OPTION = {};
 //const FILTER = {test_group_id:59367};
 const FILTER = {data_type:DATA_TYPE};
-const APP_ID = 'test-july22';
+const APP_ID = 'test-july23';
 const SQL = {};
 /* --- TEST CONFIG END --- */
 
@@ -57,8 +57,9 @@ describe('connect', function(){ this.timeout(25000);
                 console.log('DATABASE-END');
             },
             async function(call){
+                //STAT-START
                 /*
-            console.log('STAT-START');
+                console.log('STAT-START');
             let user_id = Number.get_id();
             let parent_data_type = 'product_biz';
             let stat_type_id = FieldType.STAT_VIEW_ADD_ID;
@@ -70,17 +71,50 @@ describe('connect', function(){ this.timeout(25000);
             Log.w('data',data);
             console.log('STAT-END');
             */
+            //STAT-END
+
+                //ORDER-START
+                console.log('ORDER-START');
+                let parent_data_type =DataType.PRODUCT;
+                let user_id = 'f7765250-75bf-4d43-b17e-5f01154acad0';
+                let cart_number = 'CA-86876';
+                //get cart
+                const [error,data] = await Cart_Data.get(database,cart_number);
+                Log.w('data',data);
+                /*
+                //get cart item
+                let cart_item = Cart_Logic.get_cart_item(parent_data_type,parent_id,cart.cart_number,user_id,1);
+                cart.cart_item_list.push(cart_item);
+                //get cart item
+                let cart_sub_item_1 = Cart_Logic.get_cart_item(sub_1_data_type,sub_1_id,cart.cart_number,user_id,1);
+                let cart_sub_item_2 = Cart_Logic.get_cart_item(sub_2_data_type,sub_2_id,cart.cart_number,user_id,1);
+                cart_item.cart_sub_item_list.push(cart_sub_item_1);
+                cart_item.cart_sub_item_list.push(cart_sub_item_2);
+                Log.w('cart',cart);
+                const [error,data] = await Cart_Data.update(database,parent_data_type,user_id,cart);
+                console.log('ORDER-END');
+                */
+                //ORDER-END
+
                 //CART-START
+                /*
                 console.log('CART-START');
                 let user_id = 'e1baf0b3-a226-45a9-99e2-67dcffb19a70';
+                let cart_id = "9b57d001-6d22-4e68-b411-e979bdc87064";
                 let parent_data_type = DataType.PRODUCT;
                 let parent_id = '497498d9-43fb-4258-a927-386fb3281092';
                 let sub_1_data_type = DataType.ITEM;
                 let sub_1_id = '6084de0f-e50e-4fdb-b8be-734262e35b31';
                 let sub_2_data_type = DataType.ITEM;
                 let sub_2_id = 'c6210883-89f0-4265-a281-13f73efda9a0';
-                //get cart
+                */
 
+                //CART-GET-START
+
+                //CART-GET-END
+
+                //CART-UPDATE-START
+                /*
                 let cart = Cart_Logic.get_cart(user_id);
                 //get cart item
                 let cart_item = Cart_Logic.get_cart_item(parent_data_type,parent_id,cart.cart_number,user_id,1);
@@ -93,7 +127,15 @@ describe('connect', function(){ this.timeout(25000);
                 Log.w('cart',cart);
                 const [error,data] = await Cart_Data.update(database,parent_data_type,user_id,cart);
                 Log.w('data',data);
-                console.log('CART-END');
+                */
+                //CART-UPDATE-END
+
+                //CART-DELETE-START
+                //const [error,data] = await Cart_Data.delete(database,cart_id);
+                //Log.w('data',data);
+
+                //CART-DELETE-END
+                //console.log('CART-END');
                 //CART-END
 
                 /*
