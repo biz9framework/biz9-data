@@ -471,6 +471,11 @@ class Order_Data {
 							user_id:cart.user_id,
 							parent_data_type:cart.parent_data_type,
 							grand_total:cart.grand_total,
+
+							payment_plan:cart.payment_plan,
+							pay_now_amount:cart.pay_now_amount,
+							order_status:cart.cart_status
+
 						});
 					const [error,data] = await Portal.update(database,DataType.ORDER,cloud_data.order);
 					if(error){
@@ -785,7 +790,17 @@ class Cart_Data {
 			async.series([
 				//bind-update cart
 				async function(call){
-					let publish_cart = DataItem.get_new(DataType.CART,cart.id,{cart_number:cart.cart_number,user_id:user_id,parent_data_type:parent_data_type});
+					let publish_cart = DataItem.get_new(DataType.CART,cart.id,
+						{
+							cart_number:cart.cart_number,
+							user_id:user_id,
+							parent_data_type:parent_data_type,
+
+							payment_plan:cart.payment_plan,
+							pay_now_amount:cart.pay_now_amount,
+							order_status:cart.order_status
+
+						});
 					const [error,data] = await Portal.update(database,DataType.CART,publish_cart);
 					if(error){
 						error=Log.append(error,error);
