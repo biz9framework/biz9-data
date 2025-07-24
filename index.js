@@ -507,17 +507,19 @@ class Order_Data {
 				//bind order_item_list - order_sub_item_list
 				async function(call){
 					if(cart.cart_item_list.length>0){
-						for(let a=0;a<cart.cart_item_list.length;a++){
+						for(let a=0;a<cloud_data.publish_order_item_list.length;a++){
 							for(let b=0;b<cart.cart_item_list[a].cart_sub_item_list.length;b++){
 							cloud_data.publish_order_sub_item_list.push(
 								DataItem.get_new(DataType.ORDER_SUB_ITEM,0,{
+									quanity:cart.cart_item_list[a].cart_sub_item_list[b].quanity,
+									order_id:cloud_data.order.id,
+									order_number:cloud_data.order.order_number,
+									cart_number:cart.cart_item_list[a].cart_sub_item_list[b].cart_number,
+									user_id:cart.cart_item_list[a].user_id,
 									parent_data_type:cart.cart_item_list[a].cart_sub_item_list[b].parent_data_type,
 									parent_id:cart.cart_item_list[a].cart_sub_item_list[b].parent_id,
-									cart_number:cart.cart_item_list[a].cart_sub_item_list[b].cart_number,
-									order_number:cloud_data.order.order_number,
-									user_id:cart.cart_item_list[a].user_id,
-									quanity:cart.cart_item_list[a].cart_sub_item_list[b].quanity,
-									order_id:cloud_data.order.id
+									order_item_id:cloud_data.publish_order_item_list[a].id
+
 									}));
 							}
 						}
@@ -562,7 +564,7 @@ class Order_Data {
 			});
 		});
 	};
-	//order_data_get
+//order_data_get
 	static get = (database,order_number,option) => {
 		return new Promise((callback) => {
 			let cloud_data = {order:DataItem.get_new(DataType.ORDER,0,{order_number:order_number,order_item_list:[]})};
@@ -628,24 +630,21 @@ class Order_Data {
 					let filter = { order_number: { $regex:String(order_number), $options: "i" } };
 					let search = Item_Logic.get_search(DataType.ORDER_SUB_ITEM,filter,{},1,0);
 					const [error,data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,{});
-					Log.w('rrrrrrr',data);
-					/*
 					if(error){
 						error=Log.append(error,error);
 					}else{
+						order_sub_item_list = data.item_list;
 						for(let a = 0; a < cloud_data.order.order_item_list.length; a++){
 							cloud_data.order.order_item_list[a].order_sub_item_list = [];
-							for(let b = 0; b < data.item_list.length; b++){
-								if(cloud_data.order.order_item_list[a].id == data.item_list[b].order_item_id){
-									cloud_data.order.order_item_list[a].order_sub_item_list.push(data.item_list[b]);
+							for(let b = 0; b < order_sub_item_list.length; b++){
+								if(cloud_data.order.order_item_list[a].id == order_sub_item_list[b].order_item_id){
+									cloud_data.order.order_item_list[a].order_sub_item_list.push(order_sub_item_list[b]);
 								}
 							}
 						}
 					}
-					*/
 					}
 				},
-				/*
 				//order_sub_item_item_list - parent_item_list
 				async function(call){
 				if(!Str.check_is_null(cloud_data.order.id)){
@@ -697,7 +696,6 @@ class Order_Data {
 					cloud_data.order.grand_total = grand_total;
 				}
 				}
-				*/
 			]).then(result => {
 				callback([error,cloud_data]);
 			}).catch(error => {
@@ -706,7 +704,7 @@ class Order_Data {
 			});
 		});
 	};
-	static delete = async (database,id,option) => {
+		static delete = async (database,id,option) => {
 		return new Promise((callback) => {
 			let cloud_data = {};
 			let error = null;
@@ -866,14 +864,13 @@ class Cart_Data {
 				},
 				//get cart
 				async function(call){
-						const [error,data] = await Cart_Data.get(database,parent_data_type,cart.cart_number);
+						const [error,data] = await Cart_Data.get(database,cart.cart_number);
 						if(error){
 							error=Log.append(error,error);
 						}else{
 								cloud_data.cart = data.cart;
 						}
 				},
-
 			]).then(result => {
 				callback([error,cloud_data]);
 			}).catch(error => {
@@ -1240,7 +1237,7 @@ class Review_Data {
 								}
 							}
 							if(Str.check_is_null(data.item_list[a].parent_user.id)){
-								data.item_list[a].parent_user = User_Logic.get_not_found(data.item_list[a].user_id);
+								data.item_list[a].parent_user = User_Logic.get_not_found(data.item_list[a].user_id,{app_id:database.app_id});
 							}
 						}
 						cloud_data.item_list = data.item_list;
@@ -1606,7 +1603,7 @@ class Portal {
 							if(!Str.check_is_null(data.id)){
 								cloud_data.item = data;
 							}else{
-								cloud_data.item = data_type != DataType.USER  ? Item_Logic.get_not_found(data_type,key,{app_id:database.app_id}) : User_Logic.get_not_found(data_type,key,{app_id:database.app_id});
+								cloud_data.item = data_type != DataType.USER  ? Item_Logic.get_not_found(data_type,key,{app_id:database.app_id}) : User_Logic.get_not_found(key,{app_id:database.app_id});
 							}
 						}
 						call();
