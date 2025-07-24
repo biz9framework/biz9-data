@@ -458,6 +458,7 @@ class Order_Data {
 			let error = null;
 			option = !Obj.check_is_empty(option) ? option : {get_item:false,get_photo:false};
 			cloud_data.order = DataItem.get_new(DataType.ORDER,0);
+			cloud_data.order_payment = DataItem.get_new(DataType.ORDER_PAYMENT,0);
 			cloud_data.publish_order_item_list = [];
 			cloud_data.publish_order_sub_item_list = [];
 			cloud_data.stat_parent_item_list = [];
@@ -474,7 +475,7 @@ class Order_Data {
 
 							payment_plan:cart.payment_plan,
 							pay_now_amount:cart.pay_now_amount,
-							order_status:cart.cart_status
+							order_status:cart.order_status
 
 						});
 					const [error,data] = await Portal.update(database,DataType.ORDER,cloud_data.order);
@@ -482,6 +483,24 @@ class Order_Data {
 						error=Log.append(error,error);
 					}else{
 						cloud_data.order = data.item;
+					}
+				},
+				//if new order update ORDER_PAYMENT
+				async function(call){
+					cloud_data.order_payment = DataItem.get_new(DataType.ORDER_PAYMENT,0,
+						{
+							order_id: cloud_data.order.order_id,
+							pay_now_amount:cloud_data.order.pay_now_amount,
+
+							order_payment_type:cart.order_payment_type,
+							payment_plan:cart.payment_plan,
+							transaction_id:cart.transaction_id,
+						});
+					const [error,data] = await Portal.update(database,DataType.ORDER_PAYMENT,cloud_data.order_payment);
+					if(error){
+						error=Log.append(error,error);
+					}else{
+						cloud_data.order_payment = data.item;
 					}
 				},
 				//bind order_item_list
@@ -524,8 +543,7 @@ class Order_Data {
 									parent_data_type:cart.cart_item_list[a].cart_sub_item_list[b].parent_data_type,
 									parent_id:cart.cart_item_list[a].cart_sub_item_list[b].parent_id,
 									order_item_id:cloud_data.publish_order_item_list[a].id
-
-									}));
+								}));
 							}
 						}
 						if(cloud_data.publish_order_sub_item_list.length>0){
@@ -1270,6 +1288,7 @@ class Review_Data {
 	};
 }
 class User_Data {
+	//user_data_register
 	static register = async (database,user) => {
 		return new Promise((callback) => {
 			let error = null;
@@ -1322,6 +1341,7 @@ class User_Data {
 			});
 		});
 	};
+	//user_data_login
 	static login = async (database,email,password) => {
 		return new Promise((callback) => {
 			let error = null;
@@ -1344,7 +1364,7 @@ class User_Data {
 				},
 				//update user
 				async function(call){
-					if(!cloud_data.user_found){
+					if(cloud_data.user_found){
 						cloud_data.user.last_login =  new moment().toISOString();
 						const [error,data] = await Portal.update(database,DataType.USER,cloud_data.user);
 						if(error){
@@ -1356,7 +1376,7 @@ class User_Data {
 				},
 				//get user
 				async function(call){
-					if(!cloud_data.user_found){
+					if(cloud_data.user_found){
 						const [error,data] = await Portal.get(database,DataType.USER,cloud_data.user.id);
 						if(error){
 							cloud_error=Log.append(cloud_error,error);
@@ -1365,8 +1385,6 @@ class User_Data {
 						}
 					}
 				},
-
-
 			]).then(result => {
 				callback([error,cloud_data]);
 			}).catch(error => {
