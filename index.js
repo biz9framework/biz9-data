@@ -71,6 +71,7 @@ class Database {
 	}
 }
 class Data_Logic {
+	//9_data_logic
 	static get_parent_child_list = (full_item_list) => {
 		/* option params
 		 * - full_item_list
@@ -137,8 +138,8 @@ class Data_Logic {
 			 *    - group_parent_field / field_title /
 			 *    - group_child_field / field_title /
 			 *    */
-
 			let error=null;
+			let cloud_data = {};
 			let child_item_list = [];
 			async.series([
 				function(call){
@@ -163,10 +164,11 @@ class Data_Logic {
 							}
 						}
 					}
+					cloud_data.item_list = item_list;
 					call();
 				}
 			]).then(result => {
-				callback([error,item_list]);
+				callback([error,cloud_data]);
 			}).catch(error => {
 				Log.error("Get-Child-List",error);
 				callback([error,[]]);
@@ -175,6 +177,7 @@ class Data_Logic {
 	};
 }
 class Blog_Post_Data {
+	//9_blog_post_get
 	static get = async (database,key,option) => {
 		return new Promise((callback) => {
 			let cloud_data = {};
@@ -197,6 +200,7 @@ class Blog_Post_Data {
 			});
 		});
 	};
+	//9_blog_post_search
 	static search = (database,filter,sort_by,page_current,page_size,option) => {
 		return new Promise((callback) => {
 			let cloud_data = {};
@@ -221,6 +225,7 @@ class Blog_Post_Data {
 	};
 }
 class Category_Data {
+	//9_category_get
 	static get = async (database,key,option) => {
 		return new Promise((callback) => {
 			let cloud_data = {};
@@ -243,6 +248,7 @@ class Category_Data {
 			});
 		});
 	};
+	//9_category_search
 	static search = (database,filter,sort_by,page_current,page_size,option) => {
 		return new Promise((callback) => {
 			let cloud_data = {};
@@ -267,6 +273,7 @@ class Category_Data {
 	};
 }
 class Content_Data {
+	//9_content_get
 	static get = async (database,key,option) => {
 		return new Promise((callback) => {
 			let cloud_data = {};
@@ -289,6 +296,7 @@ class Content_Data {
 			});
 		});
 	};
+	//9_content_search
 	static search = (database,filter,sort_by,page_current,page_size,option) => {
 		return new Promise((callback) => {
 			let cloud_data = {};
@@ -313,6 +321,7 @@ class Content_Data {
 	};
 }
 class Page_Data {
+	//9_page_data_get
 	static get = async (database,key,option) => {
 		return new Promise((callback) => {
 			let cloud_data = {};
@@ -335,6 +344,7 @@ class Page_Data {
 			});
 		});
 	};
+	//9_page_data_search
 	static search = (database,filter,sort_by,page_current,page_size,option) => {
 		return new Promise((callback) => {
 			let cloud_data = {};
@@ -359,6 +369,7 @@ class Page_Data {
 	};
 }
 class Template_Data {
+	//9_template_data_get
 	static get = async (database,key,option) => {
 		return new Promise((callback) => {
 			let cloud_data = {};
@@ -381,6 +392,7 @@ class Template_Data {
 			});
 		});
 	};
+	//9_template_data_search
 	static search = (database,filter,sort_by,page_current,page_size,option) => {
 		return new Promise((callback) => {
 			let cloud_data = {};
@@ -405,6 +417,7 @@ class Template_Data {
 	};
 }
 class Event_Data {
+	//9_event_data_get
 	static get = async (database,key,option) => {
 		return new Promise((callback) => {
 			let cloud_data = {};
@@ -427,6 +440,7 @@ class Event_Data {
 			});
 		});
 	};
+	//9_event_data_search
 	static search = (database,filter,sort_by,page_current,page_size,option) => {
 		return new Promise((callback) => {
 			let cloud_data = {};
@@ -451,7 +465,7 @@ class Event_Data {
 	};
 }
 class Order_Data {
-	//order_data_update
+	//9_order_data_update
 	static update = async (database,cart,option) => {
 		return new Promise((callback) => {
 			let cloud_data = {};
@@ -587,7 +601,7 @@ class Order_Data {
 			});
 		});
 	};
-//order_data_get
+	//9_order_get
 	static get = (database,order_number,option) => {
 		return new Promise((callback) => {
 			let cloud_data = {order:DataItem.get_new(DataType.ORDER,0,{order_number:order_number,order_item_list:[]})};
@@ -727,6 +741,7 @@ class Order_Data {
 			});
 		});
 	};
+	//9_order_delete
 		static delete = async (database,id,option) => {
 		return new Promise((callback) => {
 			let cloud_data = {};
@@ -769,6 +784,7 @@ class Order_Data {
 		});
 	};
 	static search = (database,filter,sort_by,page_current,page_size,option) => {
+		//9_order_search
 		return new Promise((callback) => {
 			let cloud_data = {};
 			let error = null;
@@ -793,7 +809,7 @@ class Order_Data {
 }
 
 class Cart_Data {
-	//cart_data_update
+	//cart_update
 	static update = async (database,parent_data_type,user_id,cart,option) => {
 		return new Promise((callback) => {
 			let cloud_data = {};
@@ -912,7 +928,7 @@ class Cart_Data {
 			});
 		});
 	};
-	//cart_data_get
+	//9_cart_get
 	static get = (database,cart_number,option) => {
 		return new Promise((callback) => {
 			let cloud_data = {cart:DataItem.get_new(DataType.CART,0,{cart_number:cart_number,cart_item_list:[]})};
@@ -1052,6 +1068,7 @@ class Cart_Data {
 			});
 		});
 	};
+	//9_cart_delete
 	static delete = async (database,id,option) => {
 		return new Promise((callback) => {
 			let cloud_data = {};
@@ -1093,6 +1110,7 @@ class Cart_Data {
 			});
 		});
 	};
+	//9_cart_search
 	static search = (database,filter,sort_by,page_current,page_size,option) => {
 		return new Promise((callback) => {
 			let cloud_data = {};
@@ -1117,6 +1135,7 @@ class Cart_Data {
 	};
 }
 class Product_Data {
+	//9_product_get
 	static get = async (database,key,option) => {
 		return new Promise((callback) => {
 			let cloud_data = {};
@@ -1139,6 +1158,7 @@ class Product_Data {
 			});
 		});
 	};
+	//9_product_search
 	static search = (database,filter,sort_by,page_current,page_size,option) => {
 		return new Promise((callback) => {
 			let cloud_data = {};
@@ -1163,7 +1183,7 @@ class Product_Data {
 	};
 }
 class Review_Data {
-	//review_data_update
+	//9_review_update
 	static update = async(database,parent_data_type,parent_id,user_id,review) => {
 		return new Promise((callback) => {
 			let error = null;
@@ -1245,7 +1265,7 @@ class Review_Data {
 			});
 		});
 	};
-	//review_data_get
+	//9_review_get
 	static get = async (database,parent_data_type,parent_id,sort_by,page_current,page_size,option) => {
 		return new Promise((callback) => {
 			let error=null;
@@ -1288,7 +1308,7 @@ class Review_Data {
 	};
 }
 class User_Data {
-	//user_data_register
+	//9_user_register
 	static register = async (database,user) => {
 		return new Promise((callback) => {
 			let error = null;
@@ -1341,7 +1361,7 @@ class User_Data {
 			});
 		});
 	};
-	//user_data_login
+	//9_user_login
 	static login = async (database,email,password) => {
 		return new Promise((callback) => {
 			let error = null;
@@ -1393,49 +1413,9 @@ class User_Data {
 			});
 		});
 	};
-
-	static get = async (database,parent_data_type,user_id,sort_by,page_current,page_size,option) => {
-		return new Promise((callback) => {
-			let error = null;
-			let cloud_data = {};
-			option = !Obj.check_is_empty(option) ? option : {get_item:false,get_photo:false};
-			let parent_item_list = [];
-			let user_list = [];
-			async.series([
-				//favorite_list
-				async function(call){
-					let query = {user_id:user_id,parent_data_type:parent_data_type};
-					let search = Item_Logic.get_search(DataType.FAVORITE,query,{},page_current,page_size);
-					let option = {get_item_search:true,item_search_data_type:parent_data_type,item_search_field:'id',item_search_value:'parent_id'};
-					const [error,data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option);
-					if(error){
-						cloud_error=Log.append(cloud_error,error);
-					}else{
-						for(let a=0;a<data.item_list.length;a++){
-							data.item_list[a].parent_item = DataItem.get_new(parent_data_type,data.item_list[a].parent_item,{title:'Not Found'});
-							for(let b=0;b<data.item_search_list.length;b++){
-								if(data.item_list[a].parent_id == data.item_search_list[b].id){
-									data.item_list[a].parent_item = data.item_search_list[b];
-								}
-							}
-						}
-						cloud_data.item_list = data.item_list;
-						cloud_data.item_count = data.item_count;
-						cloud_data.page_count = data.page_count;
-					}
-				},
-			]).then(result => {
-				callback([error,cloud_data]);
-			}).catch(error => {
-				Log.error("Favorite-Data-List",error);
-				callback([error,[]]);
-			});
-		});
-	};
 }
-
-
 class Favorite_Data {
+	//9_favorite_update
 	static update = async (database,parent_data_type,parent_id,user_id) => {
 		return new Promise((callback) => {
 			let error = null;
@@ -1473,6 +1453,7 @@ class Favorite_Data {
 			});
 		});
 	};
+	//9_favorite_get
 	static get = async (database,parent_data_type,user_id,sort_by,page_current,page_size,option) => {
 		return new Promise((callback) => {
 			let error = null;
@@ -1512,6 +1493,7 @@ class Favorite_Data {
 }
 
 class Business_Data {
+	//9_business_get
 	static get = async (database,key,option) => {
 		return new Promise((callback) => {
 			let cloud_data = {};
@@ -1534,6 +1516,7 @@ class Business_Data {
 			});
 		});
 	};
+	//9_business_search
 	static search = (database,filter,sort_by,page_current,page_size,option) => {
 		return new Promise((callback) => {
 			let cloud_data = {};
@@ -1557,8 +1540,8 @@ class Business_Data {
 		});
 	};
 }
-
 class Admin_Data {
+	//9_admin_get
 	static get = async (database,key,option) => {
 		return new Promise((callback) => {
 			let cloud_data = {};
@@ -1581,6 +1564,7 @@ class Admin_Data {
 			});
 		});
 	};
+	//9_admin_search
 	static search = (database,filter,sort_by,page_current,page_size,option) => {
 		return new Promise((callback) => {
 			let cloud_data = {};
@@ -1605,7 +1589,7 @@ class Admin_Data {
 	};
 }
 class Portal {
-	//portal_get
+	//9_portal_get
 	static get = async (database,data_type,key,option) => {
 		/* Options
 		 * Items
@@ -1739,7 +1723,7 @@ class Portal {
 			});
 		});
 	};
-	//portal_search
+	//9_portal_search
 	static search = (database,data_type,filter,sort_by,page_current,page_size,option) => {
 		/* Options
 		 * Items
@@ -1792,7 +1776,7 @@ class Portal {
 					}
 				},
 				function(call){
-					if(option.get_item_count){
+					if(option.get_item_count && cloud_data.item_list.length>0){
 						let query = { $or: [] };
 						for(let a = 0;a < cloud_data.item_list.length;a++){
 							let query_field = {};
@@ -1816,7 +1800,7 @@ class Portal {
 					}
 				},
 				function(call){
-					if(option.get_item_count){
+					if(option.get_item_count && cloud_data.item_list.length>0){
 						for(let a = 0; a < cloud_data.item_list.length; a++){
 							cloud_data.item_list[a].item_count = 0;
 							for(let b = 0; b < item_count_list.length; b++){
@@ -1882,7 +1866,7 @@ class Portal {
 			});
 		});
 	};
-	//portal_update
+	//9_portal_update
 	static update = async (database,data_type,item_data,option) => {
 		/* option params
 		 * n/a
@@ -1913,7 +1897,7 @@ class Portal {
 			});
 		});
 	};
-	//portal_delete_cache
+	//9_portal_delete_cache
 	static delete_cache = async (database,data_type,id,option) => {
 		/*
 		 * params
@@ -1953,7 +1937,7 @@ class Portal {
 			});
 		});
 	};
-	//portal_delete
+	//9_portal_delete
 	static delete = async (database,data_type,id,option) => {
 		/*
 		 * Params
@@ -2034,7 +2018,7 @@ class Portal {
 			});
 		});
 	};
-	//portal_update_list
+	//9_portal_update_list
 	static update_list = async (database,item_data_list,option) => {
 		/* option params
 		 * n/a
@@ -2065,7 +2049,7 @@ class Portal {
 			});
 		});
 	};
-	//portal_delete_search
+	//9_portal_delete_search
 	static delete_search = async (database,data_type,filter,option) => {
 		/* option params
 		 * n/a
@@ -2097,7 +2081,7 @@ class Portal {
 			});
 		});
 	};
-	//portal_count
+	//9_portal_count
 	static count = async (database,data_type,filter) => {
 		/* option params
 		 * n/a
@@ -2127,7 +2111,7 @@ class Portal {
 			});
 		});
 	};
-	//portal_copy
+	//9_portal_copy
 	static copy = async (database,data_type,id) => {
 		/*
 		 * params
@@ -2269,6 +2253,7 @@ class Portal {
 	};
 }
 class Faq{
+	//9_faq_get
 	static get = (database,title_url,option) => {
 		return new Promise((callback) => {
 			let cloud_data = {item:DataItem.get_new(DataType.FAQ,0,{questions:[],app_id:database.app_id})};
@@ -2299,7 +2284,7 @@ class Faq{
 	}
 }
 class Stat_Data {
-	//stat_data_update
+	//9_stat_update
 	static update = (database,parent_data_type,user_id,stat_type_id,item_list,option) => {
 		return new Promise((callback) => {
 			let cloud_data = {};
@@ -2448,6 +2433,7 @@ class Stat_Data {
 	};
 }
 class Data {
+	//9_data
 	static open_db = async (data_config) => {
 		return [error,data] = await get_db_connect_adapter(data_config);
 	};
@@ -2491,6 +2477,7 @@ module.exports = {
 	Cart_Data,
 	Content_Data,
 	Database,
+	Data_Logic,
 	Event_Data,
 	Favorite_Data,
 	Order_Data,

@@ -73,21 +73,6 @@ describe('connect', function(){ this.timeout(25000);
             */
                 //STAT-END
 
-                /*
-            console.log('LIST-START');
-        //let query = {};
-        //query.application_development_template_type = "Website Application Template";
-        /*
-            let search = Item_Logic.get_search(DataType.CATEGORY,{},{},1,90);
-            Log.w('search',search);
-
-            let option = {get_group:true,group_search:Item_Logic.get_search(DataType.PRODUCT,{},{},1,90),group_parent_field:'title',group_child_field:'category'};
-            const [error,data] = await List_Data.get_list(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option);
-            Log.w('data',data);
-            console.log('LIST-END');
-            */
-
-
         /*
         console.log('SEARCH-START');
         let query = {};
@@ -136,29 +121,28 @@ describe('connect', function(){ this.timeout(25000);
         console.log('FAVORITE-END');
         */
 
-                /*
         console.log('CATEGORY-START');
         let data_type = DataType.CATEGORY;
         //let id =  'db4ce653-ed62-454a-b556-29dffd3940e6';
         let key = 'cool';
         let search = Item_Logic.get_search(data_type,{},{},1,0);
         let option = {
+            //count--start
             get_item_count:true,
             item_count_data_type:DataType.PRODUCT,
             item_count_field:'category',
             item_count_value:'title',
-            get_item_search:true,
-            item_search_data_type:DataType.PRODUCT,
-            item_search_filter:{category:'Cool'},
+            //count--end
+            //get_item_search:true,
+            //item_search_data_type:DataType.PRODUCT,
+            //item_search_filter:{category:'Cool'},
         };
-        Log.w('option',option);
+        //Log.w('option',option);
         const [error,data] = await Category_Data.search(database,search.filter,search.sort_by,search.page_current,search.page_size,option);
-    //const [error,data] = await Category_Data.get(database,key,);
         Log.w('data',data);
-        Log.w('data_1',data.item_list[0]);
-        Log.w('data_2',data.item_list[0].item_search_list);
+        //Log.w('data_1',data.item_list[0]);
+        //Log.w('data_2',data.item_list[0].item_search_list);
         console.log('CATEGORY-END');
-        */
 
     /*
         console.log('PRODUCT-START');
