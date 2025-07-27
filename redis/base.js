@@ -1,5 +1,5 @@
 const redis = require('redis');
-const {Log,Number} = require("biz9-utility");
+const {Log} = require("biz9-utility");
 const get_cache_connect_base = (data_config) => {
 	return new Promise((callback) => {
 		let error = null;

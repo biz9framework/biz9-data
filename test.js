@@ -1,7 +1,7 @@
 const async = require('async');
 const assert = require('node:assert');
-const {Data,Database,Category_Data,Product_Data,Page_Data,Blog_Post_Data,Content_Data,Stat_Data,List_Data,Review_Data,Favorite_Data,Search_Data,Admin_Data,Business_Data,Order_Data,Cart_Data,User_Data} = require(".");
-const {Log,Number,Str} = require("biz9-utility");
+const {Data,Database,Category_Data,Product_Data,Page_Data,Blog_Post_Data,Content_Data,Stat_Data,List_Data,Review_Data,Favorite_Data,Search_Data,Admin_Data,Business_Data,Order_Data,Cart_Data,User_Data,Faq_Data} = require(".");
+const {Log,Num,Str} = require("biz9-utility");
 const {DataType,DataItem,Item_Logic,Page_Logic,Template_Logic,Blog_Post_Logic,Content_Logic,Product_Logic,Field_Logic,Admin_Logic,Business_Logic,Category_Logic,User_Logic,Order_Logic,FieldType,Cart_Logic,Stat_Logic,Review_Logic} = require("/home/think2/www/doqbox/biz9-framework/biz9-logic/code");
 /*
  * availble tests
@@ -24,7 +24,7 @@ const DATA_TYPE = DataType.BLOG_POST;
 const OPTION = {};
 //const FILTER = {test_group_id:59367};
 const FILTER = {data_type:DATA_TYPE};
-const APP_ID = 'test-july23';
+const APP_ID = 'test-july27';
 const SQL = {};
 /* --- TEST CONFIG END --- */
 
@@ -57,10 +57,18 @@ describe('connect', function(){ this.timeout(25000);
                 console.log('DATABASE-END');
             },
             async function(call){
+                //FAQ-START
+                console.log('FAQ-START');
+                let key = 'primary';
+                const [error,data] = await Faq_Data.get(database,key,{question_count:4});
+                Log.w('data',data.item.questions);
+                console.log('FAQ-END');
+                //FAQ-END
+
                 //STAT-START
                 /*
                 console.log('STAT-START');
-            let user_id = Number.get_id();
+            let user_id = Num.get_id();
             let parent_data_type = 'product_biz';
             let stat_type_id = FieldType.STAT_VIEW_ADD_ID;
             let stat_list = [DataItem.get_new(DataType.STAT,0,{parent_data_type:parent_data_type,parent_id:'6952c3b8-b10b-48cb-8e42-ae3f3ef356c2'})];
@@ -121,6 +129,7 @@ describe('connect', function(){ this.timeout(25000);
         console.log('FAVORITE-END');
         */
 
+        /*
         console.log('CATEGORY-START');
         let data_type = DataType.CATEGORY;
         //let id =  'db4ce653-ed62-454a-b556-29dffd3940e6';
@@ -143,6 +152,7 @@ describe('connect', function(){ this.timeout(25000);
         //Log.w('data_1',data.item_list[0]);
         //Log.w('data_2',data.item_list[0].item_search_list);
         console.log('CATEGORY-END');
+        */
 
     /*
         console.log('PRODUCT-START');
@@ -156,7 +166,7 @@ describe('connect', function(){ this.timeout(25000);
         */
     /*
         console.log('CONTENT-START');
-        //let content = Content_Logic.get_test("Content " + String(Number.get_id()),{get_value:true,get_item:true});
+        //let content = Content_Logic.get_test("Content " + String(Num.get_id()),{get_value:true,get_item:true});
         let key = "product_hosting_type";
         const [error,data] = await Content_Data.get(database,key,{get_item:true,get_order_item:true,order_item_count:3});
         Log.w('data',data);
@@ -167,7 +177,7 @@ describe('connect', function(){ this.timeout(25000);
         */
 
         //console.log('PAGE-START');
-        //let page = Page_Logic.get_test("Page " + String(Number.get_id()),{get_value:true,get_item:true});
+        //let page = Page_Logic.get_test("Page " + String(Num.get_id()),{get_value:true,get_item:true});
         //Log.w('page',page);
         //const [error,data] = await Page_Data.get(database,'home',{get_business:true,get_section:true});
         //Log.w('data',data);
@@ -229,9 +239,7 @@ describe('connect', function(){ this.timeout(25000);
                 /*
                 console.log('BUSINESS-START');
                 let key = 'test_34003';
-                let search = Item_Logic.get_search(DataType.BUSINESS,{},{},1,0);
-                //const [error,data] = await Business_Data.get(database,key);
-                const [error,data] = await Business_Data.search(database,search.filter,search.sort_by,search.page_current,search.page_size);
+                const [error,data] = await Business_Data.get(database);
                 Log.w('data',data);
                 console.log('BUSINESS-END');
                 */
@@ -711,8 +719,8 @@ describe('old_update_old', function(){ this.timeout(25000);
     it("old_update_old", function(done){
         let cloud_error=null;
         let database = {};
-        var item_test = Item_Logic.get_test('Item '+Number.get_id(),DATA_TYPE,0);
-//let item_test = Item_Logic.get_test("Item_" +Number.get_id(),DataType.BLOG_POST,0);
+        var item_test = Item_Logic.get_test('Item '+Num.get_id(),DATA_TYPE,0);
+//let item_test = Item_Logic.get_test("Item_" +Num.get_id(),DataType.BLOG_POST,0);
         Log.w('item_test_44',item_test);
         async.series([
             async function(call){
@@ -889,7 +897,7 @@ describe('get_data', function(){ this.timeout(25000);
                     },
                     function(call){
                         console.log('TEST-LIST-ITEM-UPDATE-UPDATE-START');
-                        let test_group_id=Number.get_id();
+                        let test_group_id=Num.get_id();
                         for(a=0;a<10;a++){
                             item_test=Test.get_item('dt_blank',0);
                             item_test.test_group_id=test_group_id;

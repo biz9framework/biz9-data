@@ -8,7 +8,7 @@ const async = require('async');
 const moment = require('moment');
 const {get_db_connect_main,check_db_connect_main,close_db_connect_main,update_item_main,get_item_main,delete_item_main,get_id_list_main,delete_item_list_main,count_item_list_main} = require('./mongo/index.js');
 const {Scriptz}=require("biz9-scriptz");
-const {Log,Str,Number,Obj}=require("/home/think2/www/doqbox/biz9-framework/biz9-utility/code");
+const {Log,Str,Num,Obj}=require("/home/think2/www/doqbox/biz9-framework/biz9-utility/code");
 const {DataItem,DataType,FieldType,Item_Logic,User_Logic,Favorite_Logic,Stat_Logic,Order_Logic}=require("/home/think2/www/doqbox/biz9-framework/biz9-logic/code");
 const { get_db_connect_adapter,check_db_connect_adapter,close_db_connect_adapter,update_item_adapter,update_item_list_adapter,get_item_adapter,delete_item_adapter,get_item_list_adapter,delete_item_list_adapter,count_item_list_adapter,delete_item_cache }  = require('./adapter.js');
 class Database {
@@ -1494,41 +1494,23 @@ class Favorite_Data {
 
 class Business_Data {
 	//9_business_get
-	static get = async (database,key,option) => {
+	static get = (database,option) => {
 		return new Promise((callback) => {
-			let cloud_data = {};
-			let error = null;
+		let cloud_data = {};
+				let error = null;
 			option = !Obj.check_is_empty(option) ? option : {get_item:false,get_photo:false};
 			async.series([
 				async function(call){
-					const [error,data] = await Portal.get(database,DataType.BUSINESS,key,option);
+					let search = Item_Logic.get_search(DataType.BUSINESS,{},{},0,1);
+					const [error,data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option);
 					if(error){
 						error=Log.append(error,error);
 					}else{
-						cloud_data = data;
-					}
-				},
-			]).then(result => {
-				callback([error,cloud_data]);
-			}).catch(error => {
-				Log.error("Business-Get",error);
-				callback([error,[]]);
-			});
-		});
-	};
-	//9_business_search
-	static search = (database,filter,sort_by,page_current,page_size,option) => {
-		return new Promise((callback) => {
-			let cloud_data = {};
-			let error = null;
-			option = !Obj.check_is_empty(option) ? option : {get_item:false,get_photo:false};
-			async.series([
-				async function(call){
-					const [error,data] = await Portal.search(database,DataType.BUSINESS,filter,sort_by,page_current,page_size,option);
-					if(error){
-						error=Log.append(error,error);
-					}else{
-						cloud_data = data;
+						if(data.item_list.length>0){
+							cloud_data.item = data.item_list[0];
+						}else{
+							cloud_data.item = Item_Logic.get_not_found(DataType.BUSINESS,0,{app_id:data.app_id});
+						}
 					}
 				},
 			]).then(result => {
@@ -1607,7 +1589,7 @@ class Portal {
 			option = !Obj.check_is_empty(option) ? option : {get_item:false,get_photo:false,title_url:null,get_group:false,filter:false};
 			async.series([
 				function(call){
-					if(!Number.check_is_guid(key)){
+					if(!Num.check_is_guid(key)){
 						option.title_url = key;
 					}
 					call();
@@ -2252,29 +2234,35 @@ class Portal {
 		});
 	};
 }
-class Faq{
+class Faq_Data{
 	//9_faq_get
-	static get = (database,title_url,option) => {
+	static get = (database,key,option) => {
 		return new Promise((callback) => {
-			let cloud_data = {item:DataItem.get_new(DataType.FAQ,0,{questions:[],app_id:database.app_id})};
+			let cloud_data = {item:DataItem.get_new(DataType.FAQ,0,{questions:[]})};
+			let faq = {};
 			let error = null;
+			option = !Obj.check_is_empty(option) ? option : {question_count:19};
 			let items = [];
-			series([
+				async.series([
 				async function(call){
-					const [error,data] = await Portal.get(database,DataType.FAQ,title_url,option);
-					if(!Str.check_is_null(data.item.id)){
-						cloud_data.item=data;
-						cloud_data.item.questions=[];
-					}
-					call();
+					const [error,data] = await Portal.get(database,DataType.FAQ,key,option);
+					faq=data.item;
 				},
 				async function(call){
-					for(let a=0;a<19;a++){
-						if(cloud_data.item[cloud_data.item["field_"+a]]){
-							cloud_data.item.questions.push({question:cloud_data.item["field_"+a],answer:cloud_data.item[cloud_data.item["field_"+a]]});
+					if(!Str.check_is_null(faq.id)){
+						cloud_data.item.id = faq.id;
+						cloud_data.item.title = faq.title;
+						cloud_data.item.title_url = faq.title_url;
+						cloud_data.item.date_create = faq.date_create;
+					for(let a=0;a<option.question_count+1;a++){
+						if(faq["field_"+a]){
+							cloud_data.item.questions.push({id:a,question:faq["field_"+a],answer:faq["faq_question_"+a]});
 						}
 					}
-					call();
+					}else{
+						cloud_data.item = faq;
+						cloud_data.item.questions = [];
+					}
 				},
 			],
 				function(error, result){
@@ -2480,6 +2468,7 @@ module.exports = {
 	Data_Logic,
 	Event_Data,
 	Favorite_Data,
+	Faq_Data,
 	Order_Data,
 	Page_Data,
 	Portal,

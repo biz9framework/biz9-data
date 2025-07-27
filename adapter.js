@@ -8,7 +8,7 @@ const async = require('async');
 const {get_db_connect_main,check_db_connect_main,close_db_connect_main,update_item_main,get_item_main,delete_item_main,get_id_list_main,delete_item_list_main,count_item_list_main} = require('./mongo/index.js');
 const {get_cache_connect_main,close_cache_connect_main,get_cache_string_main,delete_cache_string_main,set_cache_string_main} = require('./redis/index.js');
 const {DataItem}=require("biz9-logic");
-const {Log,Str,Number}=require("biz9-utility");
+const {Log,Str,Num}=require("biz9-utility");
 const DB_TITLE='DB';
 const CACHE_TITLE='CACHE';
 const NOT_FOUND_TITLE='NOT-FOUND';
@@ -265,7 +265,7 @@ const get_item_adapter = (db_connect,data_type,key,option) => {
                         callback([error,null]);
                     });
                 }
-                else if(option.title_url && !Number.check_is_guid(option.title_url)){
+                else if(option.title_url && !Num.check_is_guid(option.title_url)){
                     item_data.title_url = option.title_url;
                     item_data.key = option.title_url;
                     let filter={title_url:option.title_url};

@@ -6,7 +6,7 @@
  */
 const async = require('async');
 const moment = require('moment');
-const {Number,Log} = require("biz9-utility");
+const {Num,Log} = require("biz9-utility");
 const { MongoClient } = require("mongodb");
 let client_db = {};
 const get_db_connect_base = (data_config) => {
@@ -81,7 +81,7 @@ const update_item_base = (db_connect,data_type,item) => {
 	return new Promise((callback) => {
 		let collection = db_connect.collection(data_type);
 		if (String(item.id)=='0') {//insert
-			item.id = Number.get_guid();
+			item.id = Num.get_guid();
 			item.date_create = new moment().toISOString();
 			item.date_save = new moment().toISOString();
 			if(check_db_connect_base(db_connect)){

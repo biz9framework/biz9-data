@@ -1,6 +1,6 @@
 const async = require('async');
 const {Scriptz}=require("biz9-scriptz");
-const {Log,Str,Number,Obj}=require("/home/think2/www/doqbox/biz9-framework/biz9-utility/code");
+const {Log,Str,Obj}=require("/home/think2/www/doqbox/biz9-framework/biz9-utility/code");
 const {Portal} = require("../index.js");
 Log.w('fffff',Portal);
 const {DataItem,DataType,FieldType,Item_Logic,User_Logic,Favorite_Logic,Stat_Logic}=require("/home/think2/www/doqbox/biz9-framework/biz9-logic/code");
