@@ -57,6 +57,11 @@ describe('connect', function(){ this.timeout(25000);
                 console.log('DATABASE-END');
             },
             async function(call){
+                //APP-START
+                //APP-END
+
+
+                /*
                 //FAQ-START
                 console.log('FAQ-START');
                 let key = 'primary';
@@ -64,6 +69,7 @@ describe('connect', function(){ this.timeout(25000);
                 Log.w('data',data.item.questions);
                 console.log('FAQ-END');
                 //FAQ-END
+                */
 
                 //STAT-START
                 /*
