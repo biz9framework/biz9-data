@@ -119,7 +119,7 @@ const update_item_list_adapter=(db_connect,item_data_list)=>{
         });
     });
 }
-const update_item_adapter=(db_connect,data_type,item_data) => {
+const update_item_adapter=(db_connect,data_type,item_data,option) => {
     return new Promise((callback) => {
         let cache_connect={};
         async.series([
@@ -133,7 +133,7 @@ const update_item_adapter=(db_connect,data_type,item_data) => {
                 });
             },
             function(call){
-                update_item_main(db_connect,data_type,item_data).then(([error,data])=>{
+                update_item_main(db_connect,data_type,item_data,option).then(([error,data])=>{
                     call();
                 }).catch(error=>{
                     Log.error("Data-Adapter-Update-Item-Adapter-2",error);
@@ -162,7 +162,7 @@ const update_item_adapter=(db_connect,data_type,item_data) => {
                     Log.error("Data-Adapter-Update-Item-Adapter-4",error);
                     callback([error,[]]);
                 });
-            },
+           },
         ]).then(result => {
             callback([error,item_data]);
         }).catch(error => {

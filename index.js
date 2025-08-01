@@ -1849,7 +1849,7 @@ class Portal {
 			option = !Obj.check_is_empty(option) ? option : {get_item:false,get_photo:false};
 			async.series([
 				function(call){
-					Data.update_item(database,data_type,item_data).then(([error,data])=> {
+					Data.update_item(database,data_type,item_data,option).then(([error,data])=> {
 						if(error){
 							error=Log.append(error,error);
 						}else{
@@ -2421,8 +2421,8 @@ class Data {
 	static check_db = async (db_connect) => {
 		return check_db_connect_adapter(db_connect);
 	};
-	static update_item = async (db_connect,data_type,item_data) => {
-		return [error,data] = await update_item_adapter(db_connect,data_type,item_data);
+	static update_item = async (db_connect,data_type,item_data,option) => {
+		return [error,data] = await update_item_adapter(db_connect,data_type,item_data,option);
 	};
 	static get_item = async (db_connect,data_type,key,option) => {
 		return [error,data] = await get_item_adapter(db_connect,data_type,key,option);

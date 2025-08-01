@@ -15,8 +15,8 @@ const close_db_connect_main = async (db_connect) => {
 const check_db_connect_main = async (db_connect) => {
     return data = await check_db_connect_base(db_connect);
 }
-const update_item_main = async (db_connect,data_type,item_data) => {
-    return [error,data] = await update_item_base(db_connect,data_type,item_data);
+const update_item_main = async (db_connect,data_type,item_data,option) => {
+    return [error,data] = await update_item_base(db_connect,data_type,item_data,option);
 }
 const delete_item_main = async (db_connect,data_type,id) => {
     return [error,data] = await delete_item_base(db_connect,data_type,id);
