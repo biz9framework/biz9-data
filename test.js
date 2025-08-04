@@ -1,6 +1,6 @@
 const async = require('async');
 const assert = require('node:assert');
-const {Data,Database,Category_Data,Product_Data,Page_Data,Blog_Post_Data,Content_Data,Stat_Data,List_Data,Review_Data,Favorite_Data,Search_Data,Admin_Data,Business_Data,Order_Data,Cart_Data,User_Data,Faq_Data} = require(".");
+const {Data,Database,Category_Data,Product_Data,Page_Data,Blog_Post_Data,Content_Data,Stat_Data,List_Data,Review_Data,Favorite_Data,Search_Data,Admin_Data,Business_Data,Order_Data,Cart_Data,User_Data,Faq_Data,Portal} = require(".");
 const {Log,Num,Str} = require("biz9-utility");
 const {DataType,DataItem,Item_Logic,Page_Logic,Template_Logic,Blog_Post_Logic,Content_Logic,Product_Logic,Field_Logic,Admin_Logic,Business_Logic,Category_Logic,User_Logic,Order_Logic,FieldType,Cart_Logic,Stat_Logic,Review_Logic} = require("/home/think2/www/doqbox/biz9-framework/biz9-logic/code");
 /*
@@ -24,7 +24,7 @@ const DATA_TYPE = DataType.BLOG_POST;
 const OPTION = {};
 //const FILTER = {test_group_id:59367};
 const FILTER = {data_type:DATA_TYPE};
-const APP_ID = 'test-july27';
+const APP_ID = 'test-stage';
 const SQL = {};
 /* --- TEST CONFIG END --- */
 
@@ -285,15 +285,13 @@ describe('connect', function(){ this.timeout(25000);
                 console.log('PORTAL-DELETE-CACHE-END');
                 */
 
-    /*
                 console.log('PORTAL-GET-START');
-                let data_type = DataType.PRODUCT;
-                let id =  'db4ce653-ed62-454a-b556-29dffd3940e6';
-                let key = 'test_10852';
-                const [error,data] = await Portal.get(database,data_type,id);
+                let data_type = DataType.BLOG_POST;
+                let key =  '56708c79-6750-4d51-b85d-bc25bf5d3fc9';
+                //let key = 'test_10852';
+                const [error,data] = await Portal.get(database,data_type,key,{get_item:true});
                 Log.w('data',data);
                 console.log('PORTAL-GET-END');
-                */
 
     /*
                 console.log('PORTAL-COPY-START');
