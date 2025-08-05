@@ -182,13 +182,13 @@ describe('connect', function(){ this.timeout(25000);
         console.log('CONTENT-END');
         */
 
-        //console.log('PAGE-START');
+        console.log('PAGE-START');
         //let page = Page_Logic.get_test("Page " + String(Num.get_id()),{get_value:true,get_item:true});
-        //Log.w('page',page);
-        //const [error,data] = await Page_Data.get(database,'home',{get_business:true,get_section:true});
-        //Log.w('data',data);
-        //Log.w('data_section_1',data.page.section_1);
-        //console.log('PAGE-END');
+        let key = 'home';
+        const [error,data] = await Page_Data.get(database,key,{get_section:true});
+        Log.w('data',data);
+        Log.w('data_section_1',data.page.section_1);
+        console.log('PAGE-END');
 
         /*
                 console.log('TEMPLATE-START');
@@ -295,12 +295,14 @@ describe('connect', function(){ this.timeout(25000);
                 console.log('PORTAL-GET-END');
                 */
 
+                /*
                 console.log('PORTAL-COPY-START');
                 let data_type = DataType.BLOG_POST;
                 let id = '2e196e65-c862-4a15-ab49-719857b18410';
                 const [error,data] = await Portal.copy(database,data_type,id);
                 Log.w('data',data);
                 console.log('PORTAL-COPY-END');
+                */
 
 
     /*
