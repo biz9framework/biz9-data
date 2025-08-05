@@ -285,6 +285,7 @@ describe('connect', function(){ this.timeout(25000);
                 console.log('PORTAL-DELETE-CACHE-END');
                 */
 
+                /*
                 console.log('PORTAL-GET-START');
                 let data_type = DataType.BLOG_POST;
                 let key =  '56708c79-6750-4d51-b85d-bc25bf5d3fc9';
@@ -292,15 +293,14 @@ describe('connect', function(){ this.timeout(25000);
                 const [error,data] = await Portal.get(database,data_type,key,{get_item:true});
                 Log.w('data',data);
                 console.log('PORTAL-GET-END');
+                */
 
-    /*
                 console.log('PORTAL-COPY-START');
-                let data_type = DataType.PRODUCT;
-                let id = 'ef923dd8-7f40-4833-af16-0b4e7fb22869';
+                let data_type = DataType.BLOG_POST;
+                let id = '2e196e65-c862-4a15-ab49-719857b18410';
                 const [error,data] = await Portal.copy(database,data_type,id);
                 Log.w('data',data);
                 console.log('PORTAL-COPY-END');
-                */
 
 
     /*

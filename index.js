@@ -2111,15 +2111,30 @@ class Portal {
 							error=Log.append(error,error);
 						}
 						top_item=data;
+						//Log.w('top_item',top_item);
 						call();
 					})
+				},
+				function(call){
+						let search = Item_Logic.get_search(DataType.ITEM,{top_id:top_item.id},{title:-1},1,0);
+						Data.get_list(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size).then(([error,data,item_count,page_count])=> {
+							if(error){
+								error=Log.append(error,error);
+							}else{
+								item_list = data;
+							}
+							//Log.w('item_list',item_list);
+							call();
+						}).catch(error => {
+							error = Log.append(error,error);
+							call();
+						});
 				},
 				function(call){
 					copy_item[FieldType.TITLE] = 'Copy '+top_item[FieldType.TITLE];
 					copy_item[FieldType.TITLE_URL] = 'copy_'+top_item[FieldType.TITLE_URL];
 					copy_item[FieldType.SOURCE_ID] = top_item.id;
 					copy_item[FieldType.SOURCE_DATA_TYPE] = top_item.data_type;
-
 					for(const key in top_item) {
 						if(key!=FieldType.ID&&key!=FieldType.SOURCE&&key!=FieldType.TITLE&&key!=FieldType.TITLE_URL){
 							copy_item[key]=top_item[key];
@@ -2141,40 +2156,27 @@ class Portal {
 					});
 				},
 				function(call){
-					if(top_item.id){
-						let search = Item_Logic.get_search(DataType.ITEM,{top_id:top_item.id},{title:-1},1,0);
-						Data.get_list(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size).then(([error,data,item_count,page_count])=> {
-							if(error){
-								error=Log.append(error,error);
-							}else{
-								item_list = data;
-							}
-							call();
-						}).catch(error => {
-							error = Log.append(error,error);
-							call();
-						});
-					}else{
-						call();
-					}
-				},
-				function(call){
 					let source_top_items = [];
 					for(let a=0;a<item_list.length;a++){
-						let copy_sub_item={data_type:DataType.ITEM,id:0,top_id:copy_item.id,top_data_type:copy_item.data_type};
+						let copy_sub_item=DataItem.get_new(copy_item.data_type,0,{top_id:copy_item.id,top_data_type:copy_item.data_type});
+
 						copy_sub_item[FieldType.SOURCE_ID] = item_list[a].id;
 						copy_sub_item[FieldType.SOURCE_DATA_TYPE] = item_list[a].data_type;
+
 						copy_sub_item[FieldType.SOURCE_PARENT_ID] = item_list[a].parent_id;
 						copy_sub_item[FieldType.SOURCE_PARENT_DATA_TYPE] = item_list[a].parent_data_type;
+
 						copy_sub_item[FieldType.SOURCE_TOP_ID] = item_list[a].top_id;
 						copy_sub_item[FieldType.SOURCE_TOP_DATA_TYPE] = item_list[a].top_data_type;
+
 						for(const key in item_list[a]) {
-							if( key != FieldType.ID && key != FieldType.SOURCE && key != FieldType.PARENT_ID && key != FieldType.PARENT_DATA_TYPE ){
+							if( key != FieldType.ID && key != FieldType.SOURCE && key != FieldType.PARENT_ID && key != FieldType.PARENT_DATA_TYPE  && key != FieldType.TOP_ID && key != FieldType.TOP_DATA_TYPE ){
 								copy_sub_item[key] = item_list[a][key];
 							}
 						}
 						copy_item_list.push(copy_sub_item);
 					}
+					Log.w('copy_item_list',copy_item_list);
 					call();
 				},
 				function(call){
@@ -2187,6 +2189,24 @@ class Portal {
 					})
 				},
 				function(call){
+					for(let a=0;a<copy_item_list.length;a++){
+						//if(copy_item_list[a][FieldType.SOURCE_PARENT_ID] == top_item.id && copy_item_list[a][FieldType.SOURCE_PARENT_DATA_TYPE] == top_item.data_type){
+						if(copy_item_list[a][FieldType.SOURCE_PARENT_ID] == top_item.id){
+								copy_item_list[a].parent_id = copy_item.id;
+								copy_item_list[a].parent_data_type = copy_item.data_type;
+						}else{
+							for(let b=0;b<copy_item_list.length;b++){
+								//if(copy_item_list[a][FieldType.SOURCE_PARENT_ID] == copy_item_list[b][FieldType.SOURCE_ID] && copy_item_list[a][FieldType.SOURCE_PARENT_DATA_TYPE] == copy_item_list[b][FieldType.SOURCE_DATA_TYPE]){
+								if(copy_item_list[a][FieldType.SOURCE_PARENT_ID] == copy_item_list[b][FieldType.SOURCE_ID]){
+									copy_item_list[a].parent_id = copy_item_list[b].id;
+									copy_item_list[a].parent_data_type = copy_item_list[b].data_type;
+								}
+							}
+						}
+					}
+					call();
+
+					/*
 					for(let a=0;a<copy_item_list.length;a++){
 						if(copy_item_list[a][FieldType.SOURCE_PARENT_ID] == top_item.id){
 							copy_item_list[a][FieldType.PARENT_ID] = copy_item[FieldType.ID];
@@ -2201,6 +2221,7 @@ class Portal {
 						}
 					}
 					call();
+					*/
 				},
 				function(call){
 					Data.update_list(database,copy_item_list).then(([error,data])=> {
@@ -2214,6 +2235,7 @@ class Portal {
 			]).then(result => {
 				if(copy_item.id){
 					cloud_data.copy_item = copy_item;
+					cloud_data.copy_item_list = copy_item_list;
 					cloud_data.copy_success = true;
 				}
 				callback([error,cloud_data]);
