@@ -24,7 +24,8 @@ const DATA_TYPE = DataType.BLOG_POST;
 const OPTION = {};
 //const FILTER = {test_group_id:59367};
 const FILTER = {data_type:DATA_TYPE};
-const APP_ID = 'test-stage';
+//const APP_ID = 'test-stage';
+const APP_ID = 'app_id_98230';
 const SQL = {};
 /* --- TEST CONFIG END --- */
 
@@ -182,6 +183,7 @@ describe('connect', function(){ this.timeout(25000);
         console.log('CONTENT-END');
         */
 
+        /*
         console.log('PAGE-START');
         //let page = Page_Logic.get_test("Page " + String(Num.get_id()),{get_value:true,get_item:true});
         let key = 'home';
@@ -189,6 +191,7 @@ describe('connect', function(){ this.timeout(25000);
         Log.w('data',data);
         Log.w('data_section_1',data.page.section_1);
         console.log('PAGE-END');
+        */
 
         /*
                 console.log('TEMPLATE-START');
@@ -285,15 +288,13 @@ describe('connect', function(){ this.timeout(25000);
                 console.log('PORTAL-DELETE-CACHE-END');
                 */
 
-                /*
                 console.log('PORTAL-GET-START');
                 let data_type = DataType.BLOG_POST;
-                let key =  '56708c79-6750-4d51-b85d-bc25bf5d3fc9';
-                //let key = 'test_10852';
+                //let key =  '56708c79-6750-4d51-b85d-bc25bf5d3fc9';
+                let key = '1111111111';
                 const [error,data] = await Portal.get(database,data_type,key,{get_item:true});
                 Log.w('data',data);
                 console.log('PORTAL-GET-END');
-                */
 
                 /*
                 console.log('PORTAL-COPY-START');

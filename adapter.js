@@ -485,7 +485,7 @@ const delete_item_cache=(db_connect,data_type,id)=>{
         let cache_connect = {};
         let cache_key_list = '';
         let cache_string_list = '';
-        let item_data = DataItem.get_new(data_type,id);
+        let item_data = DataItem.get_new(data_type,id,{app_id:db_connect.app_id});
         async.series([
             function(call) {
                 get_cache_connect_main(db_connect.data_config).then(([error,data]) => {
@@ -548,7 +548,7 @@ const delete_item_cache_db = (db_connect,data_type,id) => {
         let cache_connect = {};
         let cache_key_list = '';
         let cache_string_list = '';
-        let item_data = DataItem.get_new(data_type,id);
+        let item_data = DataItem.get_new(data_type,id,{app_id:db_connect.app_id});
         async.series([
             function(call) {
                 get_cache_connect_main(db_connect.data_config).then(([error,data]) => {

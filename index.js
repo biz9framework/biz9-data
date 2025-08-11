@@ -72,7 +72,7 @@ class Database {
 }
 class Data_Logic {
 	//9_data_logic
-	static get_parent_child_list = (full_item_list) => {
+	static get_parent_child_list_old = (full_item_list) => {
 		/* option params
 		 * - full_item_list
 		 *      - List of objects. Bind all child id values to matching parent id. / list / ex. Products and child attributes items.
@@ -81,32 +81,38 @@ class Data_Logic {
 		 *      - Binded list of objects. / list / ex. Products now binded to child items.
 		 */
 		return new Promise((callback) => {
-			let new_item_list=[];
 			async.series([
 				function(call){
 					for(let a=0; a<full_item_list.length; a++){
 						let item_title_url = Str.get_title_url(full_item_list[a].title);
+						Log.w('item_title_url',item_title_url);
 						let new_item = full_item_list[a];
 						new_item.items = [];
-						new_item_list[item_title_url] = full_item_list[a];
-						new_item_list[item_title_url].items = [];
+						//new_item_list[item_title_url] = full_item_list[a];
+						//new_item_list[item_title_url].items = [];
 						for(let b=0;b<full_item_list.length;b++){
 							if(full_item_list[a].id == full_item_list[b].parent_id){
 								new_item.items.push(full_item_list[b]);
 							}
 						}
-						new_item_list.push(new_item);
+						if(!Obj.check_is_empty(new_item)){
+							new_item_list.push(new_item);
+						}
 					}
-					call();
+					Log.w('new_item_list_len',new_item_list.length);
+					Log.w('new_item_list',new_item_list);
+					//call();
 				},
 				function(call){
 					for(let a=0; a<new_item_list.length; a++){
-						let item_title_url = Str.get_title_url(new_item_list[a].title);
+						if(!Obj.check_is_empty(new_item_list[a])){
+						let item_title_url = !Str.check_is_null(new_item_list[a].title) ? Str.get_title_url(new_item_list[a].title) : "not_found";
 						let new_item = new_item_list[a];
 						new_item.items=[];
 						new_item_list[item_title_url] = new_item_list[a];
 						new_item_list[item_title_url].items =[];
 						for(let b=0;b<new_item_list.length;b++){
+							//console.log(new_item_list[b]);
 							let sub_item_title_url = Str.get_title_url(new_item_list[b].title);
 							if(new_item_list[a].id == new_item_list[b].parent_id){
 								let sub_item = new_item_list[b];
@@ -117,10 +123,12 @@ class Data_Logic {
 							}
 						}
 					}
-					call();
+					Log.w('new_item_list',new_item_list);
+					}
+					//call();
 				},
 			]).then(result => {
-				callback([error,new_item_list]);
+				//callback([error,new_item_list]);
 			}).catch(error => {
 				Log.error("Portal-Get",error);
 				callback([error,[]]);
@@ -1645,13 +1653,34 @@ class Portal {
 						call();
 					}
 				},
-				async function(call){
+				function(call){
 					if(!Str.check_is_null(cloud_data.item.id) && option.get_item || option.get_section){
-						const [error,data] = await Data_Logic.get_parent_child_list(full_item_list);
-						new_item_list = data;
+						cloud_data.item.items = [];
+						for(let a=0; a<full_item_list.length; a++){
+							if(full_item_list[a].parent_id == cloud_data.item.id){
+								let item_title_url = Str.get_title_url(full_item_list[a].title);
+								cloud_data.item[item_title_url] = new Object();
+								cloud_data.item[item_title_url] = full_item_list[a];
+								cloud_data.item.items.push(full_item_list[a]);
+							}
+						}
+						call();
+					}
+					else{
+						call();
 					}
 				},
+				/*
+				async function(call){
+					//old
+					//Log.w('rrrrr',full_item_list);
+					//if(!Str.check_is_null(cloud_data.item.id) && option.get_item || option.get_section){
+						//const [error,data] = await Data_Logic.get_parent_child_list(full_item_list);
+						//new_item_list = data;
+					//}
+				},
 				function(call){
+					//old
 					if(!Str.check_is_null(cloud_data.item.id) && option.get_item || option.get_section){
 						cloud_data.item.items = [];
 						for(let a=0; a<new_item_list.length; a++){
@@ -1662,12 +1691,15 @@ class Portal {
 								cloud_data.item.items.push(new_item_list[a]);
 							}
 						}
-						call();
+						Log.w('cloud_data',cloud_data.item);
+
+						//call();
 					}
 					else{
-						call();
+						//call();
 					}
 				},
+				*/
 				async function(call){
 					if(!Str.check_is_null(cloud_data.item.id) && option.get_photo){
 						cloud_data.item.photos = [];
@@ -1741,12 +1773,15 @@ class Portal {
 						error=Log.append(error,error);
 					});
 				},
+				//old
+				/*
 				async function(call){
 					if(option.get_item){
 						const [error,data] = await Data_Logic.get_parent_child_list(cloud_data.item_list);
 						cloud_data.item_list = data;
 					}
 				},
+				*/
 				function(call){
 					if(option.get_item_count && cloud_data.item_list.length>0){
 						let query = { $or: [] };
@@ -2115,7 +2150,9 @@ class Portal {
 					})
 				},
 				function(call){
-						let search = Item_Logic.get_search(DataType.ITEM,{top_id:top_item.id},{title:-1},1,0);
+						//let filter = data_type != DataType.ITEM ? {top_id:top_item.id} : {$and:[{ top_id:{$regex:top_item.top_id, $options:"i"}},{parent_id:{$regex:top_item.id,$options:"i"}}]}; // not working
+						let filter = {top_id:top_item.id};
+						let search = Item_Logic.get_search(DataType.ITEM,filter,{},1,0);
 						Data.get_list(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size).then(([error,data,item_count,page_count])=> {
 							if(error){
 								error=Log.append(error,error);
@@ -2157,153 +2194,14 @@ class Portal {
 					let source_top_items = [];
 					for(let a=0;a<item_list.length;a++){
 						let copy_sub_item=DataItem.get_new(copy_item.data_type,0,{top_id:copy_item.id,top_data_type:copy_item.data_type});
-						copy_sub_item[FieldType.SOURCE_ID] = item_list[a].id;
-						copy_sub_item[FieldType.SOURCE_DATA_TYPE] = item_list[a].data_type;
+						copy_sub_item[FieldType.SOURCE_ID] = item_list[a][FieldType.ID];
+						copy_sub_item[FieldType.SOURCE_DATA_TYPE] = item_list[a][FieldType.DATA_TYPE];
 
-						copy_sub_item[FieldType.SOURCE_PARENT_ID] = item_list[a].parent_id;
-						copy_sub_item[FieldType.SOURCE_PARENT_DATA_TYPE] = item_list[a].parent_data_type;
+						copy_sub_item[FieldType.SOURCE_PARENT_ID] = item_list[a][FieldType.PARENT_ID];
+						copy_sub_item[FieldType.SOURCE_PARENT_DATA_TYPE] = item_list[a][FieldType.PARENT_DATA_TYPE][FieldType.PARENT_DATA_TYPE];
 
-						copy_sub_item[FieldType.SOURCE_TOP_ID] = item_list[a].top_id;
-						copy_sub_item[FieldType.SOURCE_TOP_DATA_TYPE] = item_list[a].top_data_type;
-
-						for(const key in item_list[a]) {
-							if( key != FieldType.ID && key != FieldType.SOURCE && key != FieldType.PARENT_ID && key != FieldType.PARENT_DATA_TYPE  && key != FieldType.TOP_ID && key != FieldType.TOP_DATA_TYPE ){
-								copy_sub_item[key] = item_list[a][key];
-							}
-						}
-						copy_item_list.push(copy_sub_item);
-					}
-					call();
-				},
-				function(call){
-					Data.update_list(database,copy_item_list).then(([error,data])=> {
-						if(error){
-							error=Log.append(error,error);
-						}
-						copy_item_list=data;
-						call();
-					})
-				},
-				function(call){
-					for(let a=0;a<copy_item_list.length;a++){
-						if(copy_item_list[a][FieldType.SOURCE_PARENT_ID] == top_item.id){
-								copy_item_list[a][FieldType.PARENT_ID] = copy_item.id;
-								copy_item_list[a][FieldType.PARENT_DATA_TYPE]  = copy_item.data_type;
-						}else{
-							for(let b=0;b<copy_item_list.length;b++){
-								if(copy_item_list[a][FieldType.SOURCE_PARENT_ID] == copy_item_list[b][FieldType.SOURCE_ID]){
-									copy_item_list[a][FieldType.PARENT_ID] = copy_item_list[b].id;
-									copy_item_list[a][FieldType.PARENT_DATA_TYPE] = copy_item_list[b].data_type;
-								}
-							}
-						}
-					}
-					call();
-				},
-				function(call){
-					Data.update_list(database,copy_item_list).then(([error,data])=> {
-						if(error){
-							error=Log.append(error,error);
-						}
-						copy_item_list=data;
-						call();
-					})
-				},
-			]).then(result => {
-				if(copy_item.id){
-					cloud_data.copy_item = copy_item;
-					cloud_data.copy_item_list = copy_item_list;
-					cloud_data.copy_success = true;
-				}
-				callback([error,cloud_data]);
-			}).catch(error => {
-				Log.error("Copy",error);
-				callback([error,[]]);
-			});
-		});
-	};
-	//9_portal_copy_sub_item
-	static copy_sub_item = async (database,data_type,id) => {
-		/*
-		 * params
-		 * - title_tbd
-		 *   - description. / type / ex.
-		 * options
-		 * - title_tbd
-		 *   - description. / type / ex.
-		 * return
-		 * - title_tbd
-		 *   - description. / type / ex.
-		 *
-		 */
-		return new Promise((callback) => {
-			let error = null;
-			let cloud_data = {copy_success:false,app_id:database.app_id};
-			let sub_item = DataItem.get_new(data_type,0);
-			let copy_item = DataItem.get_new(data_type,0);
-			let item_list = [];
-			let copy_item_list = [];
-			async.series([
-				function(call){
-					Data.get_item(database,data_type,id).then(([error,data])=> {
-						if(error){
-							error=Log.append(error,error);
-						}
-						sub_item=data;
-						call();
-					})
-				},
-				function(call){
-						let search = Item_Logic.get_search(DataType.ITEM,{parent_id:sub_item.id},{title:-1},1,0);
-						Data.get_list(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size).then(([error,data,item_count,page_count])=> {
-							if(error){
-								error=Log.append(error,error);
-							}else{
-								item_list = data;
-							}
-							call();
-						}).catch(error => {
-							error = Log.append(error,error);
-							call();
-						});
-				},
-				function(call){
-					copy_item[FieldType.TITLE] = 'Copy '+sub_item[FieldType.TITLE];
-					copy_item[FieldType.TITLE_URL] = 'copy_'+sub_item[FieldType.TITLE_URL];
-					copy_item[FieldType.SOURCE_ID] = sub_item.id;
-					copy_item[FieldType.SOURCE_DATA_TYPE] = sub_item.data_type;
-					for(const key in sub_item) {
-						if(key!=FieldType.ID&&key!=FieldType.SOURCE&&key!=FieldType.TITLE&&key!=FieldType.TITLE_URL){
-							copy_item[key]=sub_item[key];
-						}
-					}
-					call();
-				},
-				function(call){
-					Data.update_item(database,copy_item.data_type,copy_item).then(([error,data])=> {
-						if(error){
-							error=Log.append(error,error);
-						}else{
-							copy_item=data;
-						}
-						call();
-					}).catch(error => {
-						error=Log.append(error,error);
-						call();
-					});
-				},
-				function(call){
-					let source_top_items = [];
-					for(let a=0;a<item_list.length;a++){
-						let copy_sub_item=DataItem.get_new(copy_item.data_type,0,{top_id:sub_item.top_id,top_data_type:sub_item.top_data_type});
-						copy_sub_item[FieldType.SOURCE_ID] = item_list[a].id;
-						copy_sub_item[FieldType.SOURCE_DATA_TYPE] = item_list[a].data_type;
-
-						copy_sub_item[FieldType.SOURCE_PARENT_ID] = item_list[a].parent_id;
-						copy_sub_item[FieldType.SOURCE_PARENT_DATA_TYPE] = item_list[a].parent_data_type;
-
-						copy_sub_item[FieldType.SOURCE_TOP_ID] = item_list[a].top_id;
-						copy_sub_item[FieldType.SOURCE_TOP_DATA_TYPE] = item_list[a].top_data_type;
+						copy_sub_item[FieldType.SOURCE_TOP_ID] = item_list[a][FieldType.TOP_ID];
+						copy_sub_item[FieldType.SOURCE_TOP_DATA_TYPE] = item_list[a][FieldType.TOP_DATA_TYPE];
 
 						for(const key in item_list[a]) {
 							if( key != FieldType.ID && key != FieldType.SOURCE && key != FieldType.PARENT_ID && key != FieldType.PARENT_DATA_TYPE  && key != FieldType.TOP_ID && key != FieldType.TOP_DATA_TYPE ){
@@ -2325,14 +2223,14 @@ class Portal {
 				},
 				function(call){
 					for(let a=0;a<copy_item_list.length;a++){
-						if(copy_item_list[a][FieldType.SOURCE_PARENT_ID] == sub_item.id){
-								copy_item_list[a][FieldType.PARENT_ID] = copy_item.id;
-								copy_item_list[a][FieldType.PARENT_DATA_TYPE]  = copy_item.data_type;
+						if(copy_item_list[a][FieldType.SOURCE_PARENT_ID] == top_item[FieldType.ID]){
+								copy_item_list[a][FieldType.PARENT_ID] = copy_item[FieldType.ID];
+								copy_item_list[a][FieldType.PARENT_DATA_TYPE]  = copy_item[FieldType.DATA_TYPE];
 						}else{
 							for(let b=0;b<copy_item_list.length;b++){
 								if(copy_item_list[a][FieldType.SOURCE_PARENT_ID] == copy_item_list[b][FieldType.SOURCE_ID]){
-									copy_item_list[a][FieldType.PARENT_ID] = copy_item_list[b].id;
-									copy_item_list[a][FieldType.PARENT_DATA_TYPE] = copy_item_list[b].data_type;
+									copy_item_list[a][FieldType.PARENT_ID] = copy_item_list[b][FieldType.ID];
+									copy_item_list[a][FieldType.PARENT_DATA_TYPE] = copy_item_list[b][FieldType.DATA_TYPE];
 								}
 							}
 						}
