@@ -64,13 +64,11 @@ describe('connect', function(){ this.timeout(25000);
                 //APP-START
                 //APP-END
 
-
+                /*
                 var https = require('https');
                 var key = '4A2F0395D906CA7E334C0A332E06F473';
                 var ip = '168.244.193.23';
-
                 let url = 'https://api.ip2location.io/?key=' + key + '&ip=' + ip + '&format=json';
-
                 let response = '';
                 let req = https.get(url, function (res) {
                     res.on('data', (chunk) => (response = response + chunk));
@@ -80,7 +78,6 @@ describe('connect', function(){ this.timeout(25000);
                             console.log('aaaaaaa');
                             myobj = JSON.parse(response);
                             console.log(myobj);
-
                             Log.w('country_name',myobj.country_name);
                             Log.w('region_name',myobj.region_name);
                             Log.w('district',myobj.district);
@@ -89,7 +86,6 @@ describe('connect', function(){ this.timeout(25000);
                             Log.w('longitude',myobj.longitude);
                             Log.w('zip_code',myobj.zip_code);
                             Log.w('isp',myobj.isp);
-
                             console.log('bbbbbb');
                             if (myobj['error']) {
                                 console.log('ERROR: ' + myobj['error']['error_message']);
@@ -111,6 +107,7 @@ describe('connect', function(){ this.timeout(25000);
                         }
                     });
                 });
+                */
 
                 /*
                     //FAQ-START
@@ -136,6 +133,7 @@ describe('connect', function(){ this.timeout(25000);
             Log.w('data',data);
             console.log('STAT-END');
             */
+
 //STAT-END
 
 /*
@@ -304,22 +302,20 @@ describe('connect', function(){ this.timeout(25000);
                 */
 
 
-                /*
                 //USER-START
                 console.log('USER-START');
-                let user = User_Logic.get_test();
+                let user = User_Logic.get_test('UserCool'+Num.get_id());
                 //user.title = Str.get_title_url(user.title);
-                user.title = "test_32926";
-                user.email = "user5"+Num.get_id()+"@bossappz.com";
+                ip_address = "168.244.193.23";
+                geo_key = "4A2F0395D906CA7E334C0A332E06F473";
+                //user.title = "test_32926";
+                //user.email = "user5"+Num.get_id()+"@bossappz.com";
                 Log.w('user',user);
-                const [error,data] = await User_Data.register(database,user);
+                const [error,data] = await User_Data.register(database,user,ip_address,geo_key);
                 //const [error,data] = await User_Data.login(database,user.email,user.password);
                 Log.w('data',data);
                 console.log('USER-END');
                 //USER-END
-                */
-
-
                 /*
                 console.log('PORTAL-DELETE-START');
                 let id = 'c3b33a03-9af8-43ec-9878-31cba4ba2588';

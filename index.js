@@ -1308,10 +1308,45 @@ class Review_Data {
 class User_Data {
 	static get_ip_info = async (ip_address,geo_key) => {
 		return new Promise((callback) => {
-			console.log('aaaaaaaaaaaa');
-			console.log('aaaaaaaaaaaa');
-			console.log('aaaaaaaaaaaa');
-			callback('apple');
+			let error = null;
+			let ip_info ={country_name:"",region_name:"",district:"",city_name:"",latitude:"",longitude:"",zip_code:"",isp:"",ip_address:""};
+					var https = require('https');
+                	let url = 'https://api.ip2location.io/?key=' + geo_key + '&ip=' + ip_address + '&format=json';
+                	let response = '';
+                		let req = https.get(url, function (res) {
+                    	res.on('error', (e) => console.log('GEO_LOCATION ERROR: ' + e));
+							var https = require('https');
+							var key = geo_key;
+							var ip = ip_address;
+							let url = 'https://api.ip2location.io/?key=' + key + '&ip=' + ip + '&format=json';
+							let response = '';
+							let req = https.get(url, function (res) {
+							res.on('data', (chunk) => (response = response + chunk));
+							res.on('error', (e) => console.log('ERROR: ' + e));
+							res.on("end", function () {
+							try {
+									let geo_data = JSON.parse(response);
+									ip_info =
+									{
+										country_name:geo_data.country_name,
+										region_name:geo_data.region_name,
+										district:geo_data.district,
+										city_name:geo_data.city_name,
+										latitude:geo_data.latitude,
+										longitude:geo_data.longitude,
+										zip_code:geo_data.zip_code,
+										isp:geo_data.isp,
+										ip_address:geo_data.ip
+									};
+									callback([error,ip_info]);
+						}
+						catch (e) {
+							error = e;
+							callback([error,ip_info]);
+						}
+					});
+				});
+		});
 		});
 	};
 	//9_user_register
@@ -1322,6 +1357,7 @@ class User_Data {
 			cloud_data.email_found = false;
 			cloud_data.title_found = false;
 			cloud_data.user = user;
+			cloud_data.activity = DataItem.get_new(DataType.ACTIVITY,0);
 			async.series([
 				//check email
 				async function(call){
@@ -1359,33 +1395,23 @@ class User_Data {
 						}
 					}
 				},
+				//get activity
 				async function(call){
-					const [error,data] = await User_Data.get_ip_info('aa','bb');
-					console.log('fffff');
-					console.log(data);
-					console.log('dddddd');
-
-					/*
-					Data.get_list().then(([error,data])=> {
-					}).catch(error => {
-						error = Log.append(error,error);
-						call();
-					});
-					*/
-
-					/*
-					//if(!Str.check_is_null(ip_address) && !cloud_data.email_found && !cloud_data.title_found){
-					const [error,data] = await get_ip_info(ip_address,geo_key);
-					if(error){
-						cloud_error=Log.append(cloud_error,error);
-					}else{
-						console.log('done');
-						//Log.w('aaaaa',data);
+					if(!cloud_data.email_found && !cloud_data.title_found){
+						const [error,data] = await User_Data.get_ip_info(ip_address,geo_key);
+						cloud_data.activity = DataItem.get_new(DataType.ACTIVITY,0,data);
+						cloud_data.activity.user_id = cloud_data.user.id;
 					}
-					*/
+				},
+				//update activity
+				async function(call){
+					if(!cloud_data.email_found && !cloud_data.title_found){
+						const [error,data] = await Portal.update(database,DataType.ACTIVITY,cloud_data.activity);
+						cloud_data.activity = data.item;
+					}
 				},
 			]).then(result => {
-				//callback([error,cloud_data]);
+				callback([error,cloud_data]);
 			}).catch(error => {
 				Log.error("User-Data-Register",error);
 				callback([error,[]]);
@@ -1426,44 +1452,6 @@ class User_Data {
 						}
 					}
 				},
-				async function(call){
-					/*
-					Log.w('ip_address',ip_address);
-					console.log('aaaaaaa');
-					if(!Str.check_is_null(ip_address)){
-						console.log('bbbbbbbb');
-		   			var https = require('https');
-                	let url = 'https://api.ip2location.io/?key=' + geo_key + '&ip=' + ip_address + '&format=json';
-                	let response = '';
-                	let req = https.get(url, function (res) {
-                    	res.on('error', (e) => console.log('GEO_LOCATION ERROR: ' + e));
-                    	res.on("end", function () {
-							console.log('cccccccc');
-                        	try {
-                            	let geo_data = JSON.parse(response);
-								cloud_data.ip_info =
-									{
-										country_name:geo_data.country_name,
-										region_name:geo_data.region_name,
-										district:geo_data.district,
-										city_name:geo_data.city_name,
-										latitude:geo_data.latitude,
-										longitude:geo_data.longitude,
-										zip_code:geo_data.zip_code,
-										isp:geo_data.isp,
-										ip_address:geo_data.ip_address
-									};
-								Log.w('geo_data',cloud_data.ip_info);
-                        	}
-                        	catch (e) {
-								console.log('dddddddd');
-                            	Log.w("GEO_LOCATION_ERROR",e);
-                        	}
-                    	});
-                	});
-					}
-					*/
-				},
 				//get user
 				async function(call){
 					if(cloud_data.user_found){
@@ -1473,6 +1461,21 @@ class User_Data {
 						}else{
 							cloud_data.user = data.item;
 						}
+					}
+				},
+				//get activity
+				async function(call){
+					if(cloud_data.user_found){
+						const [error,data] = await User_Data.get_ip_info(ip_address,geo_key);
+						cloud_data.activity = DataItem.get_new(DataType.ACTIVITY,0,data);
+					}
+				},
+				//update activity
+				async function(call){
+					if(cloud_data.user_found){
+						const [error,data] = await Portal.update(database,DataType.ACTIVITY,cloud_data.activity);
+						cloud_data.activity = data.item;
+						cloud_data.activity.user_id = cloud_data.user.id;
 					}
 				},
 			]).then(result => {
