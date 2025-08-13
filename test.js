@@ -1,6 +1,9 @@
 const async = require('async');
 const assert = require('node:assert');
+
 const {Data,Database,Category_Data,Product_Data,Page_Data,Blog_Post_Data,Content_Data,Stat_Data,List_Data,Review_Data,Favorite_Data,Search_Data,Admin_Data,Business_Data,Order_Data,Cart_Data,User_Data,Faq_Data,Portal} = require(".");
+
+
 const {Log,Num,Str} = require("biz9-utility");
 const {DataType,DataItem,Item_Logic,Page_Logic,Template_Logic,Blog_Post_Logic,Content_Logic,Product_Logic,Field_Logic,Admin_Logic,Business_Logic,Category_Logic,User_Logic,Order_Logic,FieldType,Cart_Logic,Stat_Logic,Review_Logic} = require("/home/think2/www/doqbox/biz9-framework/biz9-logic/code");
 /*
@@ -62,18 +65,65 @@ describe('connect', function(){ this.timeout(25000);
                 //APP-END
 
 
+                var https = require('https');
+                var key = '4A2F0395D906CA7E334C0A332E06F473';
+                var ip = '168.244.193.23';
+
+                let url = 'https://api.ip2location.io/?key=' + key + '&ip=' + ip + '&format=json';
+
+                let response = '';
+                let req = https.get(url, function (res) {
+                    res.on('data', (chunk) => (response = response + chunk));
+                    res.on('error', (e) => console.log('ERROR: ' + e));
+                    res.on("end", function () {
+                        try {
+                            console.log('aaaaaaa');
+                            myobj = JSON.parse(response);
+                            console.log(myobj);
+
+                            Log.w('country_name',myobj.country_name);
+                            Log.w('region_name',myobj.region_name);
+                            Log.w('district',myobj.district);
+                            Log.w('city_name',myobj.city_name);
+                            Log.w('latitude',myobj.latitude);
+                            Log.w('longitude',myobj.longitude);
+                            Log.w('zip_code',myobj.zip_code);
+                            Log.w('isp',myobj.isp);
+
+                            console.log('bbbbbb');
+                            if (myobj['error']) {
+                                console.log('ERROR: ' + myobj['error']['error_message']);
+                            }
+                            else if (myobj['proxy']) {
+                                if (myobj['proxy']['is_vpn']) {
+                                    console.log('The IP ' + ip + ' is a VPN.');
+                                }
+                                else {
+                                    console.log('The IP ' + ip + ' is NOT a VPN.');
+                                }
+                            }
+                            else {
+                                console.log('ERROR: The is_vpn field requires a paid subscription to the Security plan.');
+                            }
+                        }
+                        catch (e) {
+                            console.log('ERROR: Invalid JSON in response.')
+                        }
+                    });
+                });
+
                 /*
-                //FAQ-START
+                    //FAQ-START
                 console.log('FAQ-START');
                 let key = 'primary';
                 const [error,data] = await Faq_Data.get(database,key,{question_count:4});
                 Log.w('data',data.item.questions);
                 console.log('FAQ-END');
-                //FAQ-END
-                */
+//FAQ-END
+*/
 
-                //STAT-START
-                /*
+//STAT-START
+/*
                 console.log('STAT-START');
             let user_id = Num.get_id();
             let parent_data_type = 'product_biz';
@@ -86,9 +136,9 @@ describe('connect', function(){ this.timeout(25000);
             Log.w('data',data);
             console.log('STAT-END');
             */
-                //STAT-END
+//STAT-END
 
-        /*
+/*
         console.log('SEARCH-START');
         let query = {};
         //query.application_development_template_type = "Mobile Application Template";
@@ -136,7 +186,7 @@ describe('connect', function(){ this.timeout(25000);
         console.log('FAVORITE-END');
         */
 
-        /*
+                /*
         console.log('CATEGORY-START');
         let data_type = DataType.CATEGORY;
         //let id =  'db4ce653-ed62-454a-b556-29dffd3940e6';
@@ -153,11 +203,11 @@ describe('connect', function(){ this.timeout(25000);
             //item_search_data_type:DataType.PRODUCT,
             //item_search_filter:{category:'Cool'},
         };
-        //Log.w('option',option);
+                //Log.w('option',option);
         const [error,data] = await Category_Data.search(database,search.filter,search.sort_by,search.page_current,search.page_size,option);
         Log.w('data',data);
-        //Log.w('data_1',data.item_list[0]);
-        //Log.w('data_2',data.item_list[0].item_search_list);
+    //Log.w('data_1',data.item_list[0]);
+    //Log.w('data_2',data.item_list[0].item_search_list);
         console.log('CATEGORY-END');
         */
 
@@ -254,23 +304,23 @@ describe('connect', function(){ this.timeout(25000);
                 */
 
 
-                //USER-START
                 /*
+                //USER-START
                 console.log('USER-START');
                 let user = User_Logic.get_test();
-        //user.title = Str.get_title_url(user.title);
+                //user.title = Str.get_title_url(user.title);
                 user.title = "test_32926";
-                user.email = "user5b@bossappz.com";
+                user.email = "user5"+Num.get_id()+"@bossappz.com";
                 Log.w('user',user);
                 const [error,data] = await User_Data.register(database,user);
-    //const [error,data] = await User_Data.login(database,user.email,user.password);
+                //const [error,data] = await User_Data.login(database,user.email,user.password);
                 Log.w('data',data);
                 console.log('USER-END');
+                //USER-END
                 */
-    //USER-END
 
 
-    /*
+                /*
                 console.log('PORTAL-DELETE-START');
                 let id = 'c3b33a03-9af8-43ec-9878-31cba4ba2588';
                 let data_type = DataType.PRODUCT;
@@ -279,7 +329,7 @@ describe('connect', function(){ this.timeout(25000);
                 console.log('PORTAL-DELETE-END');
                 */
 
-    /*
+                /*
                 console.log('PORTAL-DELETE-CACHE-START');
                 let id =  'db4ce653-ed62-454a-b556-29dffd3940e6';
                 let data_type = DataType.PRODUCT;
@@ -287,16 +337,17 @@ describe('connect', function(){ this.timeout(25000);
                 Log.w('data',data);
                 console.log('PORTAL-DELETE-CACHE-END');
                 */
-
+                /*
                 console.log('PORTAL-GET-START');
                 let data_type = DataType.BLOG_POST;
-                //let key =  '56708c79-6750-4d51-b85d-bc25bf5d3fc9';
+        //let key =  '56708c79-6750-4d51-b85d-bc25bf5d3fc9';
                 let key = '1111111111';
                 const [error,data] = await Portal.get(database,data_type,key,{get_item:true});
                 Log.w('data',data);
                 console.log('PORTAL-GET-END');
+                */
 
-                /*
+        /*
                 console.log('PORTAL-COPY-START');
                 let data_type = DataType.BLOG_POST;
                 let id = '2e196e65-c862-4a15-ab49-719857b18410';
@@ -306,7 +357,7 @@ describe('connect', function(){ this.timeout(25000);
                 */
 
 
-    /*
+        /*
             console.log('PORTAL-COUNT-LIST-START');
                 let data_type = DataType.PRODUCT;
                 let filter = {};
@@ -315,7 +366,7 @@ describe('connect', function(){ this.timeout(25000);
                 console.log('PORTAL-COUNT-LIST-END');
                 */
 
-    /*
+        /*
                 console.log('PORTAL-DELETE-SEARCH-START');
                 let id = 0;
                 let data_type = DataType.PRODUCT;
@@ -325,7 +376,7 @@ describe('connect', function(){ this.timeout(25000);
                 console.log('PORTAL-DELETE-SEARCH-END');
                 */
 
-    /*
+        /*
                 console.log('PORTAL-UPDATE-LIST-START');
                 let id = 0;
                 let data_type = DataType.PRODUCT;
@@ -336,7 +387,7 @@ describe('connect', function(){ this.timeout(25000);
                 console.log('PORTAL-UPDATE-LIST-END');
                 */
 
-    /*
+        /*
                 console.log('PORTAL-DELETE-START');
                 let data_type = DataType.BLANK;
                 let key = "1d5e10eb-8927-442d-83ae-52f2e156daad";

@@ -1306,8 +1306,16 @@ class Review_Data {
 	};
 }
 class User_Data {
+	static get_ip_info = async (ip_address,geo_key) => {
+		return new Promise((callback) => {
+			console.log('aaaaaaaaaaaa');
+			console.log('aaaaaaaaaaaa');
+			console.log('aaaaaaaaaaaa');
+			callback('apple');
+		});
+	};
 	//9_user_register
-	static register = async (database,user) => {
+	static register = async (database,user,ip_address,geo_key) => {
 		return new Promise((callback) => {
 			let error = null;
 			let cloud_data = {};
@@ -1351,8 +1359,33 @@ class User_Data {
 						}
 					}
 				},
+				async function(call){
+					const [error,data] = await User_Data.get_ip_info('aa','bb');
+					console.log('fffff');
+					console.log(data);
+					console.log('dddddd');
+
+					/*
+					Data.get_list().then(([error,data])=> {
+					}).catch(error => {
+						error = Log.append(error,error);
+						call();
+					});
+					*/
+
+					/*
+					//if(!Str.check_is_null(ip_address) && !cloud_data.email_found && !cloud_data.title_found){
+					const [error,data] = await get_ip_info(ip_address,geo_key);
+					if(error){
+						cloud_error=Log.append(cloud_error,error);
+					}else{
+						console.log('done');
+						//Log.w('aaaaa',data);
+					}
+					*/
+				},
 			]).then(result => {
-				callback([error,cloud_data]);
+				//callback([error,cloud_data]);
 			}).catch(error => {
 				Log.error("User-Data-Register",error);
 				callback([error,[]]);
@@ -1360,12 +1393,13 @@ class User_Data {
 		});
 	};
 	//9_user_login
-	static login = async (database,email,password) => {
+	static login = async (database,email,password,ip_address,geo_key) => {
 		return new Promise((callback) => {
 			let error = null;
 			let cloud_data = {};
 			cloud_data.user_found = false;
 			cloud_data.user = DataItem.get_new(DataType.USER,0,{email:email,password:password});
+			cloud_data.ip_info = {country_name:"N/A",region_name:"N/A",district:"N/A",city_name:"N/A",latitude:"N/A",longitude:"N/A",zip_code:'N/A',isp:"N/A",ip_address:"N/A"};
 			async.series([
 				//check email,passwrod
 				async function(call){
@@ -1391,6 +1425,44 @@ class User_Data {
 							cloud_data.user = data.item;
 						}
 					}
+				},
+				async function(call){
+					/*
+					Log.w('ip_address',ip_address);
+					console.log('aaaaaaa');
+					if(!Str.check_is_null(ip_address)){
+						console.log('bbbbbbbb');
+		   			var https = require('https');
+                	let url = 'https://api.ip2location.io/?key=' + geo_key + '&ip=' + ip_address + '&format=json';
+                	let response = '';
+                	let req = https.get(url, function (res) {
+                    	res.on('error', (e) => console.log('GEO_LOCATION ERROR: ' + e));
+                    	res.on("end", function () {
+							console.log('cccccccc');
+                        	try {
+                            	let geo_data = JSON.parse(response);
+								cloud_data.ip_info =
+									{
+										country_name:geo_data.country_name,
+										region_name:geo_data.region_name,
+										district:geo_data.district,
+										city_name:geo_data.city_name,
+										latitude:geo_data.latitude,
+										longitude:geo_data.longitude,
+										zip_code:geo_data.zip_code,
+										isp:geo_data.isp,
+										ip_address:geo_data.ip_address
+									};
+								Log.w('geo_data',cloud_data.ip_info);
+                        	}
+                        	catch (e) {
+								console.log('dddddddd');
+                            	Log.w("GEO_LOCATION_ERROR",e);
+                        	}
+                    	});
+                	});
+					}
+					*/
 				},
 				//get user
 				async function(call){
