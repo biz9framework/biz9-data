@@ -1306,6 +1306,16 @@ class Review_Data {
 	};
 }
 class User_Data {
+	static get_device_info = async (activity,device) => {
+		return new Promise((callback) => {
+			activity.platform_name = !Str.check_is_null(device.name) ? device.name : 'N/A';
+			activity.platform_version = !Str.check_is_null(device.version) ? device.version : 'N/A';
+			activity.platform_layout = !Str.check_is_null(device.layout) ? device.layout : 'N/A';
+			activity.platform_os = !Str.check_is_null(device.os) ? device.os : 'N/A';
+			activity.platform_description = !Str.check_is_null(device.description) ? device.description : 'N/A';
+			callback([null,activity]);
+		});
+	}
 	static get_ip_info = async (ip_address,geo_key) => {
 		return new Promise((callback) => {
 			let error = null;
@@ -1350,7 +1360,7 @@ class User_Data {
 		});
 	};
 	//9_user_register
-	static register = async (database,user,ip_address,geo_key) => {
+	static register = async (database,user,ip_address,geo_key,device) => {
 		return new Promise((callback) => {
 			let error = null;
 			let cloud_data = {};
@@ -1358,6 +1368,7 @@ class User_Data {
 			cloud_data.title_found = false;
 			cloud_data.user = user;
 			cloud_data.activity = DataItem.get_new(DataType.ACTIVITY,0);
+			cloud_data.device = DataItem.get_new(DataType.BLANK,0,device);
 			async.series([
 				//check email
 				async function(call){
@@ -1395,12 +1406,19 @@ class User_Data {
 						}
 					}
 				},
-				//get activity
+				//get activity - ip
 				async function(call){
 					if(!cloud_data.email_found && !cloud_data.title_found){
 						const [error,data] = await User_Data.get_ip_info(ip_address,geo_key);
 						cloud_data.activity = DataItem.get_new(DataType.ACTIVITY,0,data);
 						cloud_data.activity.user_id = cloud_data.user.id;
+					}
+				},
+				//get activity - device
+				async function(call){
+					if(!cloud_data.email_found && !cloud_data.title_found){
+						const [error,data] = await User_Data.get_device_info(cloud_data.activity,cloud_data.device);
+						cloud_data.activity = data;
 					}
 				},
 				//update activity
@@ -1427,7 +1445,7 @@ class User_Data {
 			cloud_data.user = DataItem.get_new(DataType.USER,0,{email:email,password:password});
 			cloud_data.ip_info = {country_name:"N/A",region_name:"N/A",district:"N/A",city_name:"N/A",latitude:"N/A",longitude:"N/A",zip_code:'N/A',isp:"N/A",ip_address:"N/A"};
 			async.series([
-				//check email,passwrod
+				//check email,password
 				async function(call){
 					let search = Item_Logic.get_search(DataType.USER,{email:cloud_data.user.email,password:cloud_data.user.password},{},1,0);
 					const [error,data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size);

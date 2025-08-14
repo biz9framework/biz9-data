@@ -256,6 +256,8 @@ const get_item_adapter = (db_connect,data_type,key,option) => {
                             item_data = data[0];
                         }else{
                             item_data.source = NOT_FOUND_TITLE;
+                            item_data.photos = [];
+                            item_data.items = [];
                             item_data.filter = option.filter;
                         }
                         item_data.app_id = db_connect.app_id;
@@ -275,8 +277,12 @@ const get_item_adapter = (db_connect,data_type,key,option) => {
                     get_item_list_adapter(db_connect,data_type,filter,sort_by,page_current,page_size).then(([error,data]) => {
                         if(data.length>0){
                             item_data = data[0];
+                            item_data.photos = [];
+                            item_data.items = [];
                         }else{
                             item_data.source = NOT_FOUND_TITLE;
+                            item_data.photos = [];
+                            item_data.items = [];
                         }
                         item_data.app_id = db_connect.app_id;
                         call();
@@ -290,6 +296,8 @@ const get_item_adapter = (db_connect,data_type,key,option) => {
                             item_data = data;
                         }else{
                             item_data.source = NOT_FOUND_TITLE;
+                            item_data.photos = [];
+                            item_data.items = [];
                         }
                          item_data.app_id = db_connect.app_id;
                         call();
@@ -421,6 +429,8 @@ const get_item_cache_db = (cache_connect,db_connect,data_type,id) => {
                             });
                         }else{
                             item_data.source = NOT_FOUND_TITLE;
+                            item_data.photos = [];
+                            item_data.items = [];
                             call();
                         }
                     }).catch(error => {
