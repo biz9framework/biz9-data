@@ -1264,36 +1264,32 @@ class Review_Data {
 		});
 	};
 	//9_review_get
-	static get = async (database,parent_data_type,parent_id,sort_by,page_current,page_size,option) => {
+	static get = async (database,parent_data_type,user_id,sort_by,page_current,page_size,option) => {
 		return new Promise((callback) => {
-			let error=null;
-			let cloud_data = {item_list:0,item_count:0,page_count:1};
+			let error = null;
+			let cloud_data = {};
 			option = !Obj.check_is_empty(option) ? option : {get_item:false,get_photo:false};
-			let parent_item = [];
+			let parent_item_list = [];
 			let user_list = [];
 			async.series([
 				//review_list
 				async function(call){
-					let search = Item_Logic.get_search(DataType.REVIEW,{parent_id:parent_id},sort_by,page_current,page_size);
-					let option = {get_item_search:true,item_search_data_type:DataType.USER,item_search_field:'id',item_search_value:'user_id'};
+					let query = {user_id:user_id,parent_data_type:parent_data_type};
+					let search = Item_Logic.get_search(DataType.REVIEW,query,{},page_current,page_size);
+					let option = {get_item_search:true,item_search_data_type:parent_data_type,item_search_field:'id',item_search_value:'parent_id'};
 					const [error,data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option);
 					if(error){
 						cloud_error=Log.append(cloud_error,error);
 					}else{
 						for(let a=0;a<data.item_list.length;a++){
-							data.item_list[a].parent_user = DataItem.get_new(DataType.USER,0);
+							data.item_list[a].parent_item = DataItem.get_new(parent_data_type,data.item_list[a].parent_item,{title:'Not Found'});
 							for(let b=0;b<data.item_search_list.length;b++){
-								if(data.item_list[a].user_id == data.item_search_list[b].id){
-									data.item_list[a].parent_user = data.item_search_list[b];
+								if(data.item_list[a].parent_id == data.item_search_list[b].id){
+									data.item_list[a].parent_item = data.item_search_list[b];
 								}
-							}
-							if(Str.check_is_null(data.item_list[a].parent_user.id)){
-								data.item_list[a].parent_user = User_Logic.get_not_found(data.item_list[a].user_id,{app_id:database.app_id});
 							}
 						}
 						cloud_data.item_list = data.item_list;
-						cloud_data.item_count = data.item_count;
-						cloud_data.page_count = data.page_count;
 					}
 				},
 			]).then(result => {
@@ -1694,6 +1690,8 @@ class Portal {
 								cloud_data.item = data;
 							}else{
 								cloud_data.item = data_type != DataType.USER  ? Item_Logic.get_not_found(data_type,key,{app_id:database.app_id}) : User_Logic.get_not_found(key,{app_id:database.app_id});
+								cloud_data.item.photos = [];
+								cloud_data.item.items = [];
 							}
 						}
 						call();
@@ -1866,15 +1864,6 @@ class Portal {
 						error=Log.append(error,error);
 					});
 				},
-				//old
-				/*
-				async function(call){
-					if(option.get_item){
-						const [error,data] = await Data_Logic.get_parent_child_list(cloud_data.item_list);
-						cloud_data.item_list = data;
-					}
-				},
-				*/
 				function(call){
 					if(option.get_item_count && cloud_data.item_list.length>0){
 						let query = { $or: [] };

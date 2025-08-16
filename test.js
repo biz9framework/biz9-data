@@ -303,6 +303,7 @@ describe('connect', function(){ this.timeout(25000);
 
 
                 //USER-START
+                /*
                 console.log('USER-START');
                 let user = User_Logic.get_test('UserCool'+Num.get_id());
                 //user.title = Str.get_title_url(user.title);
@@ -316,6 +317,7 @@ describe('connect', function(){ this.timeout(25000);
                 Log.w('data',data);
                 console.log('USER-END');
                 //USER-END
+                */
                 /*
                 console.log('PORTAL-DELETE-START');
                 let id = 'c3b33a03-9af8-43ec-9878-31cba4ba2588';
@@ -333,15 +335,13 @@ describe('connect', function(){ this.timeout(25000);
                 Log.w('data',data);
                 console.log('PORTAL-DELETE-CACHE-END');
                 */
-                /*
                 console.log('PORTAL-GET-START');
                 let data_type = DataType.BLOG_POST;
         //let key =  '56708c79-6750-4d51-b85d-bc25bf5d3fc9';
-                let key = '1111111111';
-                const [error,data] = await Portal.get(database,data_type,key,{get_item:true});
+                let key = 'apple';
+                const [error,data] = await Portal.get(database,data_type,key,{get_item:true,get_photo:true});
                 Log.w('data',data);
                 console.log('PORTAL-GET-END');
-                */
 
         /*
                 console.log('PORTAL-COPY-START');
