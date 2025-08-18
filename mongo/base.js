@@ -77,7 +77,7 @@ const check_db_connect_base = (db_connect) => {
 const check_db_client_connected = (db_connect) => {
     return !!db_connect && !!db_connect.topology && !!db_connect.topology.isConnected()
 }
-const update_item_base = (db_connect,data_type,item,option) => {
+const post_item_base = (db_connect,data_type,item,option) => {
     return new Promise((callback) => {
         let collection = db_connect.collection(data_type);
 		option = !Obj.check_is_empty(option) ? option : {overwrite_obj:false};
@@ -205,7 +205,7 @@ const get_id_list_base = (db_connect,data_type,filter,sort_by,page_current,page_
         });
     });
 }
-const count_item_list_base = async (db_connect,data_type,filter) => {
+const get_count_item_list_base = async (db_connect,data_type,filter) => {
     return new Promise((callback) => {
         let data = 0;
         db_connect.collection(data_type).countDocuments(filter).then((data) => {
@@ -224,10 +224,10 @@ module.exports = {
     get_db_connect_base,
     check_db_connect_base,
     close_db_connect_base,
-    update_item_base,
+    post_item_base,
     get_item_base,
     delete_item_base,
     delete_item_list_base,
-    count_item_list_base,
+    get_count_item_list_base,
     get_id_list_base
 };

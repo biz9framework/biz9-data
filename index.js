@@ -6,11 +6,11 @@ Description: BiZ9 Framework: Data
 */
 const async = require('async');
 const moment = require('moment');
-const {get_db_connect_main,check_db_connect_main,close_db_connect_main,update_item_main,get_item_main,delete_item_main,get_id_list_main,delete_item_list_main,count_item_list_main} = require('./mongo/index.js');
+const {get_db_connect_main,check_db_connect_main,close_db_connect_main,post_item_main,get_item_main,delete_item_main,get_id_list_main,delete_item_list_main,get_count_item_list_main} = require('./mongo/index.js');
 const {Scriptz}=require("biz9-scriptz");
 const {Log,Str,Num,Obj}=require("/home/think2/www/doqbox/biz9-framework/biz9-utility/code");
 const {DataItem,DataType,FieldType,Item_Logic,User_Logic,Favorite_Logic,Stat_Logic,Order_Logic}=require("/home/think2/www/doqbox/biz9-framework/biz9-logic/code");
-const { get_db_connect_adapter,check_db_connect_adapter,close_db_connect_adapter,update_item_adapter,update_item_list_adapter,get_item_adapter,delete_item_adapter,get_item_list_adapter,delete_item_list_adapter,count_item_list_adapter,delete_item_cache }  = require('./adapter.js');
+const { get_db_connect_adapter,check_db_connect_adapter,close_db_connect_adapter,post_item_adapter,post_item_list_adapter,get_item_adapter,delete_item_adapter,get_item_list_adapter,delete_item_list_adapter,get_count_item_list_adapter,delete_item_cache }  = require('./adapter.js');
 class Database {
 	static get = async (data_config,option) => {
 		/* return
@@ -473,8 +473,8 @@ class Event_Data {
 	};
 }
 class Order_Data {
-	//9_order_data_update
-	static update = async (database,cart,option) => {
+	//9_order_data_post
+	static post = async (database,cart,option) => {
 		return new Promise((callback) => {
 			let cloud_data = {};
 			let error = null;
@@ -485,7 +485,7 @@ class Order_Data {
 			cloud_data.publish_order_sub_item_list = [];
 			cloud_data.stat_parent_item_list = [];
 			async.series([
-				//bind-update order
+				//bind-post order
 				async function(call){
 					cloud_data.order = DataItem.get_new(DataType.ORDER,0,
 						{
@@ -502,14 +502,14 @@ class Order_Data {
 							order_number:cart.order_number,
 
 						});
-					const [error,data] = await Portal.update(database,DataType.ORDER,cloud_data.order);
+					const [error,data] = await Portal.post(database,DataType.ORDER,cloud_data.order);
 					if(error){
 						error=Log.append(error,error);
 					}else{
 						cloud_data.order = data.item;
 					}
 				},
-				//if new order update ORDER_PAYMENT
+				//if new order post ORDER_PAYMENT
 				async function(call){
 					cloud_data.order_payment = DataItem.get_new(DataType.ORDER_PAYMENT,0,
 						{
@@ -522,7 +522,7 @@ class Order_Data {
 							payment_plan:cart.payment_plan,
 							transaction_id:cart.transaction_id,
 						});
-					const [error,data] = await Portal.update(database,DataType.ORDER_PAYMENT,cloud_data.order_payment);
+					const [error,data] = await Portal.post(database,DataType.ORDER_PAYMENT,cloud_data.order_payment);
 					if(error){
 						error=Log.append(error,error);
 					}else{
@@ -545,7 +545,7 @@ class Order_Data {
 								}));
 						}
 						if(cloud_data.publish_order_item_list.length>0){
-							const [error,data] = await Portal.update_list(database,cloud_data.publish_order_item_list);
+							const [error,data] = await Portal.post_list(database,cloud_data.publish_order_item_list);
 							if(error){
 								error=Log.append(error,error);
 							}else{
@@ -573,7 +573,7 @@ class Order_Data {
 							}
 						}
 						if(cloud_data.publish_order_sub_item_list.length>0){
-							const [error,data] = await Portal.update_list(database,cloud_data.publish_order_sub_item_list);
+							const [error,data] = await Portal.post_list(database,cloud_data.publish_order_sub_item_list);
 							if(error){
 								error=Log.append(error,error);
 							}else{
@@ -587,7 +587,7 @@ class Order_Data {
 					for(let a = 0; a < cloud_data.publish_order_item_list.length; a++){
 						stat_list.push(DataItem.get_new(DataType.STAT,0,{parent_id:cloud_data.publish_order_item_list[a].parent_id,parent_data_type:cloud_data.publish_order_item_list[a].parent_data_type}));
 					}
-					const [error,data] = await Stat_Data.update(database,cloud_data.order.parent_data_type,cloud_data.order.user_id,FieldType.STAT_ORDER_ADD_ID,stat_list);
+					const [error,data] = await Stat_Data.post(database,cloud_data.order.parent_data_type,cloud_data.order.user_id,FieldType.STAT_ORDER_ADD_ID,stat_list);
 					if(error){
 						error=Log.append(error,error);
 					}else{
@@ -812,8 +812,8 @@ class Order_Data {
 }
 
 class Cart_Data {
-	//cart_update
-	static update = async (database,parent_data_type,user_id,cart,option) => {
+	//cart_post
+	static post = async (database,parent_data_type,user_id,cart,option) => {
 		return new Promise((callback) => {
 			let cloud_data = {};
 			let error = null;
@@ -825,7 +825,7 @@ class Cart_Data {
 			cloud_data.stat_parent_item_list = [];
 			let cart_item_item_list = [];
 			async.series([
-				//bind-update cart
+				//bind-post cart
 				async function(call){
 					let publish_cart = DataItem.get_new(DataType.CART,cart.id,
 						{
@@ -833,7 +833,7 @@ class Cart_Data {
 							user_id:user_id,
 							parent_data_type:parent_data_type
 						});
-					const [error,data] = await Portal.update(database,DataType.CART,publish_cart);
+					const [error,data] = await Portal.post(database,DataType.CART,publish_cart);
 					if(error){
 						error=Log.append(error,error);
 					}else{
@@ -858,7 +858,7 @@ class Cart_Data {
 									}));
 						}
 						if(cloud_data.publish_cart_item_list.length>0){
-							const [error,data] = await Portal.update_list(database,cloud_data.publish_cart_item_list);
+							const [error,data] = await Portal.post_list(database,cloud_data.publish_cart_item_list);
 							if(error){
 								error=Log.append(error,error);
 							}else{
@@ -886,7 +886,7 @@ class Cart_Data {
 							}
 						}
 						if(cloud_data.publish_cart_sub_item_list.length>0){
-							const [error,data] = await Portal.update_list(database,cloud_data.publish_cart_sub_item_list);
+							const [error,data] = await Portal.post_list(database,cloud_data.publish_cart_sub_item_list);
 							if(error){
 								error=Log.append(error,error);
 							}else{
@@ -900,7 +900,7 @@ class Cart_Data {
 					for(let a = 0; a < cart.cart_item_list.length; a++){
 						stat_list.push(DataItem.get_new(DataType.STAT,0,{parent_id:cart.cart_item_list[a].parent_id,parent_data_type:cart.cart_item_list[a].parent_data_type}));
 					}
-					const [error,data] = await Stat_Data.update(database,parent_data_type,user_id,FieldType.STAT_CART_ADD_ID,stat_list);
+					const [error,data] = await Stat_Data.post(database,parent_data_type,user_id,FieldType.STAT_CART_ADD_ID,stat_list);
 					if(error){
 						error=Log.append(error,error);
 					}else{
@@ -1181,8 +1181,8 @@ class Product_Data {
 	};
 }
 class Review_Data {
-	//9_review_update
-	static update = async(database,parent_data_type,parent_id,user_id,review) => {
+	//9_review_post
+	static post = async(database,parent_data_type,parent_id,user_id,review) => {
 		return new Promise((callback) => {
 			let error = null;
 			let cloud_data = {};
@@ -1193,13 +1193,13 @@ class Review_Data {
 			let review_count = 0;
 			let review_avg = 0;
 			async.series([
-				//review_update
+				//review_post
 				async function(call){
-					const [error,data] = await Portal.update(database,DataType.REVIEW,cloud_data.review);
+					const [error,data] = await Portal.post(database,DataType.REVIEW,cloud_data.review);
 					if(error){
 						cloud_error=Log.append(cloud_error,error);
 					}else{
-						cloud_data.review = data.item;
+						cloud_data.item = data.item;
 					}
 				},
 				//get_parent_item
@@ -1211,7 +1211,7 @@ class Review_Data {
 						cloud_data.parent_item = data.item;
 					}
 				},
-				//update_parent_item
+				//post_parent_item
 				async function(call){
 					if(!Str.check_is_null(cloud_data.parent_item.id)){
 						//rating_count
@@ -1221,7 +1221,7 @@ class Review_Data {
 						//rating_avg
 						cloud_data.parent_item.rating_avg = !Str.check_is_null(cloud_data.parent_item.rating_avg) ? parseInt(cloud_data.parent_item.rating_count)  /  parseInt(cloud_data.parent_item.review_count) :parseInt(review.rating);
 
-						const [error,data] = await Portal.update(database,cloud_data.parent_item.data_type,cloud_data.parent_item);
+						const [error,data] = await Portal.post(database,cloud_data.parent_item.data_type,cloud_data.parent_item);
 						if(error){
 							cloud_error=Log.append(cloud_error,error);
 						}else{
@@ -1229,12 +1229,12 @@ class Review_Data {
 						}
 					}
 				},
-				//update stat
+				//post stat
 				async function(call){
 					if(!Str.check_is_null(cloud_data.parent_item.id)){
 						let stat = Stat_Logic.get_new(parent_data_type,user_id,FieldType.STAT_REVIEW_ADD_ID,[DataItem.get_new(DataType.STAT,0,
 							{parent_data_type:cloud_data.parent_item.data_type,parent_id:cloud_data.parent_item.id,user_id:user_id})]);
-						const [error,data] = await Stat_Data.update(database,stat.parent_data_type,stat.user_id,stat.stat_type_id,stat.item_list);
+						const [error,data] = await Stat_Data.post(database,stat.parent_data_type,stat.user_id,stat.stat_type_id,stat.item_list);
 						if(error){
 							cloud_error=Log.append(cloud_error,error);
 						}else{
@@ -1390,11 +1390,11 @@ class User_Data {
 						}
 					}
 				},
-				//update user
+				//post user
 				async function(call){
 					if(!cloud_data.email_found && !cloud_data.title_found){
 						cloud_data.user.last_login =  new moment().toISOString();
-						const [error,data] = await Portal.update(database,DataType.USER,cloud_data.user);
+						const [error,data] = await Portal.post(database,DataType.USER,cloud_data.user);
 						if(error){
 							cloud_error=Log.append(cloud_error,error);
 						}else{
@@ -1417,10 +1417,10 @@ class User_Data {
 						cloud_data.activity = data;
 					}
 				},
-				//update activity
+				//post activity
 				async function(call){
 					if(!cloud_data.email_found && !cloud_data.title_found){
-						const [error,data] = await Portal.update(database,DataType.ACTIVITY,cloud_data.activity);
+						const [error,data] = await Portal.post(database,DataType.ACTIVITY,cloud_data.activity);
 						cloud_data.activity = data.item;
 					}
 				},
@@ -1454,11 +1454,11 @@ class User_Data {
 						}
 					}
 				},
-				//update user
+				//post user
 				async function(call){
 					if(cloud_data.user_found){
 						cloud_data.user.last_login =  new moment().toISOString();
-						const [error,data] = await Portal.update(database,DataType.USER,cloud_data.user);
+						const [error,data] = await Portal.post(database,DataType.USER,cloud_data.user);
 						if(error){
 							cloud_error=Log.append(cloud_error,error);
 						}else{
@@ -1484,10 +1484,10 @@ class User_Data {
 						cloud_data.activity = DataItem.get_new(DataType.ACTIVITY,0,data);
 					}
 				},
-				//update activity
+				//post activity
 				async function(call){
 					if(cloud_data.user_found){
-						const [error,data] = await Portal.update(database,DataType.ACTIVITY,cloud_data.activity);
+						const [error,data] = await Portal.post(database,DataType.ACTIVITY,cloud_data.activity);
 						cloud_data.activity = data.item;
 						cloud_data.activity.user_id = cloud_data.user.id;
 					}
@@ -1502,8 +1502,8 @@ class User_Data {
 	};
 }
 class Favorite_Data {
-	//9_favorite_update
-	static update = async (database,parent_data_type,parent_id,user_id) => {
+	//9_favorite_post
+	static post = async (database,parent_data_type,parent_id,user_id) => {
 		return new Promise((callback) => {
 			let error = null;
 			let cloud_data = {};
@@ -1524,7 +1524,7 @@ class Favorite_Data {
 				},
 				async function(call){
 					if(!cloud_data.favorite_found){
-						const [error,data] = await Portal.update(database,cloud_data.favorite.data_type,cloud_data.favorite);
+						const [error,data] = await Portal.post(database,cloud_data.favorite.data_type,cloud_data.favorite);
 						if(error){
 							cloud_error=Log.append(cloud_error,error);
 						}else{
@@ -1552,7 +1552,7 @@ class Favorite_Data {
 				//favorite_list
 				async function(call){
 					let query = {user_id:user_id,parent_data_type:parent_data_type};
-					let search = Item_Logic.get_search(DataType.FAVORITE,query,{},page_current,page_size);
+					let search = Item_Logic.get_search(DataType.FAVORITE,query,{date_create:-1},page_current,page_size);
 					let option = {get_item_search:true,item_search_data_type:parent_data_type,item_search_field:'id',item_search_value:'parent_id'};
 					const [error,data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option);
 					if(error){
@@ -1955,8 +1955,8 @@ class Portal {
 			});
 		});
 	};
-	//9_portal_update
-	static update = async (database,data_type,item_data,option) => {
+	//9_portal_post
+	static post = async (database,data_type,item_data,option) => {
 		/* option params
 		 * n/a
 		 */
@@ -1966,7 +1966,7 @@ class Portal {
 			option = !Obj.check_is_empty(option) ? option : {get_item:false,get_photo:false};
 			async.series([
 				function(call){
-					Data.update_item(database,data_type,item_data,option).then(([error,data])=> {
+					Data.post_item(database,data_type,item_data,option).then(([error,data])=> {
 						if(error){
 							error=Log.append(error,error);
 						}else{
@@ -2107,8 +2107,8 @@ class Portal {
 			});
 		});
 	};
-	//9_portal_update_list
-	static update_list = async (database,item_data_list,option) => {
+	//9_portal_post_list
+	static post_list = async (database,item_data_list,option) => {
 		/* option params
 		 * n/a
 		 */
@@ -2118,7 +2118,7 @@ class Portal {
 			option = !Obj.check_is_empty(option) ? option : {get_item:false,get_photo:false};
 			async.series([
 				function(call){
-					Data.update_list(database,item_data_list).then(([error,data])=> {
+					Data.post_list(database,item_data_list).then(([error,data])=> {
 						if(error){
 							error=Log.append(error,error);
 						}else{
@@ -2260,7 +2260,7 @@ class Portal {
 					call();
 				},
 				function(call){
-					Data.update_item(database,copy_item.data_type,copy_item).then(([error,data])=> {
+					Data.post_item(database,copy_item.data_type,copy_item).then(([error,data])=> {
 						if(error){
 							error=Log.append(error,error);
 						}else{
@@ -2295,7 +2295,7 @@ class Portal {
 					call();
 				},
 				function(call){
-					Data.update_list(database,copy_item_list).then(([error,data])=> {
+					Data.post_list(database,copy_item_list).then(([error,data])=> {
 						if(error){
 							error=Log.append(error,error);
 						}
@@ -2320,7 +2320,7 @@ class Portal {
 					call();
 				},
 				function(call){
-					Data.update_list(database,copy_item_list).then(([error,data])=> {
+					Data.post_list(database,copy_item_list).then(([error,data])=> {
 						if(error){
 							error=Log.append(error,error);
 						}
@@ -2380,8 +2380,8 @@ class Faq_Data{
 	}
 }
 class Stat_Data {
-	//9_stat_update
-	static update = (database,parent_data_type,user_id,stat_type_id,item_list,option) => {
+	//9_stat_post
+	static post = (database,parent_data_type,user_id,stat_type_id,item_list,option) => {
 		return new Promise((callback) => {
 			let cloud_data = {};
 			cloud_data.stat_new = true;
@@ -2461,7 +2461,7 @@ class Stat_Data {
 								cloud_data.stat_item_list.push(stat_item);
 							}
 						}
-						const [error,data] = await Portal.update_list(database,cloud_data.stat_item_list);
+						const [error,data] = await Portal.post_list(database,cloud_data.stat_item_list);
 						if(error){
 							error=Log.append(error,error);
 						}else{
@@ -2482,7 +2482,7 @@ class Stat_Data {
 							}
 						}
 						if(cloud_data.stat_parent_item_list.length>0){
-							const [error,data] = await Portal.update_list(database,cloud_data.stat_parent_item_list);
+							const [error,data] = await Portal.post_list(database,cloud_data.stat_parent_item_list);
 							if(error){
 								error=Log.append(error,error);
 							}else{
@@ -2539,8 +2539,8 @@ class Data {
 	static check_db = async (db_connect) => {
 		return check_db_connect_adapter(db_connect);
 	};
-	static update_item = async (db_connect,data_type,item_data,option) => {
-		return [error,data] = await update_item_adapter(db_connect,data_type,item_data,option);
+	static post_item = async (db_connect,data_type,item_data,option) => {
+		return [error,data] = await post_item_adapter(db_connect,data_type,item_data,option);
 	};
 	static get_item = async (db_connect,data_type,key,option) => {
 		return [error,data] = await get_item_adapter(db_connect,data_type,key,option);
@@ -2551,8 +2551,8 @@ class Data {
 	static delete_cache_item = async (db_connect,data_type,id) => {
 		return [error,data] = await delete_item_cache(db_connect,data_type,id);
 	};
-	static update_list = async (db_connect,item_data_list) => {
-		return [error,data] = await update_item_list_adapter(db_connect,item_data_list);
+	static post_list = async (db_connect,item_data_list) => {
+		return [error,data] = await post_item_list_adapter(db_connect,item_data_list);
 	};
 	static get_list = async (db_connect,data_type,filter,sort_by,page_current,page_size) => {
 		const [error,data,item_count,page_count] = await get_item_list_adapter(db_connect,data_type,filter,sort_by,page_current,page_size);
