@@ -5,8 +5,8 @@ License GNU General Public License v3.0
 Description: BiZ9 Framework: Data - Mongo - Adapter
 */
 const async = require('async');
-const {get_db_connect_main,check_db_connect_main,close_db_connect_main,post_item_main,get_item_main,delete_item_main,get_id_list_main,delete_item_list_main,count_item_list_main} = require('./mongo/index.js');
-const {get_cache_connect_main,close_cache_connect_main,get_cache_string_main,delete_cache_string_main,post_cache_string_main} = require('./redis/index.js');
+const {get_db_connect_main,check_db_connect_main,delete_db_connect_main,post_item_main,get_item_main,delete_item_main,get_id_list_main,delete_item_list_main,get_count_item_list_main} = require('./mongo/index.js');
+const {get_cache_connect_main,delete_cache_connect_main,get_cache_string_main,delete_cache_string_main,post_cache_string_main} = require('./redis/index.js');
 const {DataItem}=require("biz9-logic");
 const {Log,Str,Num}=require("biz9-utility");
 const DB_TITLE='DB';
@@ -23,9 +23,9 @@ const get_db_connect_adapter=(data_config)=>{
         });
     });
 }
-const close_db_connect_adapter=(db_connect)=>{
+const delete_db_connect_adapter=(db_connect)=>{
     return new Promise((callback) => {
-        close_db_connect_main(db_connect).then(([error,data])=>{
+        delete_db_connect_main(db_connect).then(([error,data])=>{
             callback([error,data]);
         }).catch(error => {
             Log.error("Data-Adapter-Close-DB-Connect-Adapter",error);
@@ -104,7 +104,7 @@ const post_item_list_adapter=(db_connect,item_data_list)=>{
                 }
             },
             function(call){
-                close_cache_connect_main(cache_connect).then(([error,data])=>{
+                delete_cache_connect_main(cache_connect).then(([error,data])=>{
                     call();
                 }).catch(error => {
                     Log.error("Data-Adapter-Update-Item-List-4-Error",error);
@@ -156,7 +156,7 @@ const post_item_adapter=(db_connect,data_type,item_data,option) => {
                 });
             },
             function(call) {
-                close_cache_connect_main(cache_connect).then(([error,data]) => {
+                delete_cache_connect_main(cache_connect).then(([error,data]) => {
                     call();
                 }).catch(error => {
                     Log.error("Data-Adapter-Update-Item-Adapter-4",error);
@@ -300,7 +300,7 @@ const get_item_adapter = (db_connect,data_type,key,option) => {
                 }
             },
             function(call) {
-                close_cache_connect_main(cache_connect).then(([error,data]) => {
+                delete_cache_connect_main(cache_connect).then(([error,data]) => {
                     call();
                 }).catch(error => {
                     Log.error("Adapter-Get-Item-Adapter-4",error);
@@ -525,7 +525,7 @@ const delete_item_cache=(db_connect,data_type,id)=>{
                 });
             },
             function(call) {
-                close_cache_connect_main(cache_connect).then(([error,data]) => {
+                delete_cache_connect_main(cache_connect).then(([error,data]) => {
                     call();
                 }).catch(error => {
                     Log.error("Data-Adapter-Delete-Item-Cache-DB-4",error);
@@ -597,7 +597,7 @@ const delete_item_cache_db = (db_connect,data_type,id) => {
                 });
             },
             function(call) {
-                close_cache_connect_main(cache_connect).then(([error,data]) => {
+                delete_cache_connect_main(cache_connect).then(([error,data]) => {
                     call();
                 }).catch(error => {
                     Log.error("Data-Adapter-Delete-Item-Cache-DB-4",error);
@@ -621,7 +621,7 @@ const get_count_item_list_adapter = (db_connect,data_type,filter) => {
         let item_data = {};
         async.series([
             function(call) {
-                count_item_list_main(db_connect,data_type,filter).then(([error,data]) => {
+                get_count_item_list_main(db_connect,data_type,filter).then(([error,data]) => {
                     item_data.count = data;
                     item_data.app_id = db_connect.app_id;
                     item_data.data_type = data_type;
@@ -649,7 +649,7 @@ const get_cache_item_attr_list_key = (data_type,id) => {
 module.exports = {
     get_db_connect_adapter,
     check_db_connect_adapter,
-    close_db_connect_adapter,
+    delete_db_connect_adapter,
     post_item_adapter,
     post_item_list_adapter,
     get_item_adapter,

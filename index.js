@@ -6,11 +6,11 @@ Description: BiZ9 Framework: Data
 */
 const async = require('async');
 const moment = require('moment');
-const {get_db_connect_main,check_db_connect_main,close_db_connect_main,post_item_main,get_item_main,delete_item_main,get_id_list_main,delete_item_list_main,get_count_item_list_main} = require('./mongo/index.js');
+const {get_db_connect_main,check_db_connect_main,delete_db_connect_main,post_item_main,get_item_main,delete_item_main,get_id_list_main,delete_item_list_main,get_count_item_list_main} = require('./mongo/index.js');
 const {Scriptz}=require("biz9-scriptz");
 const {Log,Str,Num,Obj}=require("/home/think2/www/doqbox/biz9-framework/biz9-utility/code");
 const {DataItem,DataType,FieldType,Item_Logic,User_Logic,Favorite_Logic,Stat_Logic,Order_Logic}=require("/home/think2/www/doqbox/biz9-framework/biz9-logic/code");
-const { get_db_connect_adapter,check_db_connect_adapter,close_db_connect_adapter,post_item_adapter,post_item_list_adapter,get_item_adapter,delete_item_adapter,get_item_list_adapter,delete_item_list_adapter,get_count_item_list_adapter,delete_item_cache }  = require('./adapter.js');
+const { get_db_connect_adapter,check_db_connect_adapter,delete_db_connect_adapter,post_item_adapter,post_item_list_adapter,get_item_adapter,delete_item_adapter,get_item_list_adapter,delete_item_list_adapter,get_count_item_list_adapter,delete_item_cache }  = require('./adapter.js');
 class Database {
 	static get = async (data_config,option) => {
 		/* return
@@ -47,7 +47,7 @@ class Database {
 			});
 		});
 	}
-	static close = async (database) => {
+	static delete = async (database) => {
 		/* option params
 		 * - database
 		 *      - connected database. / obj / ex. mongo db connection.
@@ -59,7 +59,7 @@ class Database {
 		 */
 		let cloud_error=null;
 		return new Promise((callback) => {
-			Data.close_db(database).then(([error,data])=>{
+			Data.delete_db(database).then(([error,data])=>{
 				cloud_error=Log.append(cloud_error,error);
 				callback([error,data]);
 			}).catch(error => {
@@ -1507,8 +1507,8 @@ class Favorite_Data {
 		return new Promise((callback) => {
 			let error = null;
 			let cloud_data = {};
-			cloud_data.favorite_found = false;
-			cloud_data.favorite = DataItem.get_new(DataType.FAVORITE,0,{parent_data_type:parent_data_type,parent_id:parent_id,user_id:user_id});
+			cloud_data.is_unique = false;
+			cloud_data.item = DataItem.get_new(DataType.FAVORITE,0,{parent_data_type:parent_data_type,parent_id:parent_id,user_id:user_id});
 			async.series([
 				async function(call){
 					let favorite_filter = Favorite_Logic.get_search_filter(parent_data_type,parent_id,user_id);
@@ -1517,18 +1517,18 @@ class Favorite_Data {
 					if(error){
 						cloud_error=Log.append(cloud_error,error);
 					}else{
-						if(data.count>0){
-							cloud_data.favorite_found = true;
+						if(data.count<=0){
+							cloud_data.is_unique = true;
 						}
 					}
 				},
 				async function(call){
-					if(!cloud_data.favorite_found){
-						const [error,data] = await Portal.post(database,cloud_data.favorite.data_type,cloud_data.favorite);
+					if(cloud_data.is_unique){
+						const [error,data] = await Portal.post(database,cloud_data.item.data_type,cloud_data.item);
 						if(error){
 							cloud_error=Log.append(cloud_error,error);
 						}else{
-							cloud_data.favorite = data.item;
+							cloud_data.item = data.item;
 						}
 					}
 				},
@@ -2533,8 +2533,8 @@ class Data {
 	static open_db = async (data_config) => {
 		return [error,data] = await get_db_connect_adapter(data_config);
 	};
-	static close_db = async (db_connect) => {
-		return [error,data] = await close_db_connect_adapter(db_connect);
+	static delete_db = async (db_connect) => {
+		return [error,data] = await delete_db_connect_adapter(db_connect);
 	};
 	static check_db = async (db_connect) => {
 		return check_db_connect_adapter(db_connect);
@@ -2562,7 +2562,7 @@ class Data {
 		return [error,data_list] = await delete_item_list_adapter(db_connect,data_type,filter);
 	};
 	static count_list = async (db_connect,data_type,filter) => {
-		return [error,data] = await count_item_list_adapter(db_connect,data_type,filter);
+		return [error,data] = await get_count_item_list_adapter(db_connect,data_type,filter);
 	};
 }
 module.exports = {

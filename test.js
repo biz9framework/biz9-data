@@ -27,8 +27,8 @@ const DATA_TYPE = DataType.BLOG_POST;
 const OPTION = {};
 //const FILTER = {test_group_id:59367};
 const FILTER = {data_type:DATA_TYPE};
-//const APP_ID = 'test-stage';
-const APP_ID = 'app_id_98230';
+const APP_ID = 'test-stage';
+//const APP_ID = 'app_id_98230';
 const SQL = {};
 /* --- TEST CONFIG END --- */
 
@@ -173,16 +173,13 @@ describe('connect', function(){ this.timeout(25000);
 //Log.w('data_parent',data.item_list[1]);
 //console.log('REVIEW-END');
 
-/*
         console.log('FAVORITE-START');
         let parent_data_type = DataType.PRODUCT;
-        let parent_id= '27cce0b4-7e2d-4884-b1db-5144e4081dc6';
-        let user_id = '21027';
-                //const [error,data] = await Favorite_Data.update(database,parent_data_type,parent_id,user_id);
-        const [error,data] = await Favorite_Data.search(database,parent_data_type,user_id,{},1,0);
+        //let parent_id= '27cce0b4-7e2d-4884-b1db-5144e4081dc6';
+        let user_id = '12ea029a-b893-4b17-be24-2d6ef2feae25';
+        const [error,data] = await Favorite_Data.get(database,parent_data_type,user_id,{},1,0);
         Log.w('data',data);
         console.log('FAVORITE-END');
-        */
 
                 /*
         console.log('CATEGORY-START');
@@ -335,6 +332,7 @@ describe('connect', function(){ this.timeout(25000);
                 Log.w('data',data);
                 console.log('PORTAL-DELETE-CACHE-END');
                 */
+                /*
                 console.log('PORTAL-GET-START');
                 let data_type = DataType.BLOG_POST;
         //let key =  '56708c79-6750-4d51-b85d-bc25bf5d3fc9';
@@ -342,6 +340,7 @@ describe('connect', function(){ this.timeout(25000);
                 const [error,data] = await Portal.get(database,data_type,key,{get_item:true,get_photo:true});
                 Log.w('data',data);
                 console.log('PORTAL-GET-END');
+                */
 
         /*
                 console.log('PORTAL-COPY-START');
@@ -353,8 +352,8 @@ describe('connect', function(){ this.timeout(25000);
                 */
 
 
-        /*
-            console.log('PORTAL-COUNT-LIST-START');
+                /*
+                console.log('PORTAL-COUNT-LIST-START');
                 let data_type = DataType.PRODUCT;
                 let filter = {};
                 const [error,data] = await Portal.count(database,data_type,filter);

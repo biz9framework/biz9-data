@@ -5,12 +5,12 @@
  * Data-Mongo
  */
 const async = require("async");
-const { get_db_connect_base,check_db_connect_base,close_db_connect_base,post_item_base,get_item_base,delete_item_base,get_id_list_base,delete_item_list_base,get_count_item_list_base}= require("./base.js");
+const { get_db_connect_base,check_db_connect_base,delete_db_connect_base,post_item_base,get_item_base,delete_item_base,get_id_list_base,delete_item_list_base,get_count_item_list_base}= require("./base.js");
 const get_db_connect_main = async (data_config) => {
     return [error,data] = await get_db_connect_base(data_config);
 }
-const close_db_connect_main = async (db_connect) => {
-    return [error,data] = await close_db_connect_base(db_connect);
+const delete_db_connect_main = async (db_connect) => {
+    return [error,data] = await delete_db_connect_base(db_connect);
 }
 const check_db_connect_main = async (db_connect) => {
     return data = await check_db_connect_base(db_connect);
@@ -36,7 +36,7 @@ const get_count_item_list_main = async (db_connect,data_type,filter) => {
 module.exports = {
 	get_db_connect_main,
 	get_item_main,
-	close_db_connect_main,
+	delete_db_connect_main,
 	check_db_connect_main,
 	post_item_main,
 	delete_item_main,

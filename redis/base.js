@@ -13,7 +13,7 @@ const get_cache_connect_base = (data_config) => {
 		});
 	});
 }
-const close_cache_connect_base = (cache_connect) => {
+const delete_cache_connect_base = (cache_connect) => {
 	return new Promise((callback) => {
 		let error = null;
         let set_cache=false;
@@ -67,6 +67,6 @@ module.exports = {
 	get_cache_connect_base,
 	get_cache_string_base,
 	post_cache_string_base,
-	close_cache_connect_base,
+	delete_cache_connect_base,
 	delete_cache_string_base,
 };

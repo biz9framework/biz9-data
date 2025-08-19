@@ -34,7 +34,7 @@ const get_db_connect_base = (data_config) => {
         });
     });
 }
-const close_db_connect_base = (db_connect) => {
+const delete_db_connect_base = (db_connect) => {
     return new Promise((callback) => {
         client_db.close().then((data)=> {
             callback([error,null]);
@@ -223,7 +223,7 @@ const get_count_item_list_base = async (db_connect,data_type,filter) => {
 module.exports = {
     get_db_connect_base,
     check_db_connect_base,
-    close_db_connect_base,
+    delete_db_connect_base,
     post_item_base,
     get_item_base,
     delete_item_base,
