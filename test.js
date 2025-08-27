@@ -5,7 +5,7 @@ const {Data,Database,Category_Data,Product_Data,Page_Data,Blog_Post_Data,Content
 
 
 const {Log,Num,Str} = require("biz9-utility");
-const {DataType,DataItem,Item_Logic,Page_Logic,Template_Logic,Blog_Post_Logic,Content_Logic,Product_Logic,Field_Logic,Admin_Logic,Business_Logic,Category_Logic,User_Logic,Order_Logic,FieldType,Cart_Logic,Stat_Logic,Review_Logic} = require("/home/think2/www/doqbox/biz9-framework/biz9-logic/code");
+const {DataType,DataItem,Item_Logic,Page_Logic,Template_Logic,Blog_Post_Logic,Content_Logic,Product_Logic,Field_Logic,Admin_Logic,Business_Logic,Category_Logic,User_Logic,Order_Logic,FieldType,Cart_Logic,Stat_Logic,Review_Logic,PageType} = require("/home/think2/www/doqbox/biz9-framework/biz9-logic/code");
 /*
  * availble tests
 - connect
@@ -173,13 +173,13 @@ describe('connect', function(){ this.timeout(25000);
 //Log.w('data_parent',data.item_list[1]);
 //console.log('REVIEW-END');
 
-        console.log('FAVORITE-START');
-        let parent_data_type = DataType.PRODUCT;
+        //console.log('FAVORITE-START');
+        //let parent_data_type = DataType.PRODUCT;
         //let parent_id= '27cce0b4-7e2d-4884-b1db-5144e4081dc6';
-        let user_id = '12ea029a-b893-4b17-be24-2d6ef2feae25';
-        const [error,data] = await Favorite_Data.get(database,parent_data_type,user_id,{},1,0);
-        Log.w('data',data);
-        console.log('FAVORITE-END');
+        //let user_id = '12ea029a-b893-4b17-be24-2d6ef2feae25';
+        //const [error,data] = await Favorite_Data.get(database,parent_data_type,user_id,{},1,0);
+        //Log.w('data',data);
+        //console.log('FAVORITE-END');
 
                 /*
         console.log('CATEGORY-START');
@@ -228,15 +228,13 @@ describe('connect', function(){ this.timeout(25000);
         console.log('CONTENT-END');
         */
 
-        /*
         console.log('PAGE-START');
         //let page = Page_Logic.get_test("Page " + String(Num.get_id()),{get_value:true,get_item:true});
-        let key = 'home';
-        const [error,data] = await Page_Data.get(database,key,{get_section:true});
+        //let key = PageType.GALLERY;
+        let key = 'Gallery';
+        const [error,data] = await Page_Data.get(database,key);
         Log.w('data',data);
-        Log.w('data_section_1',data.page.section_1);
         console.log('PAGE-END');
-        */
 
         /*
                 console.log('TEMPLATE-START');

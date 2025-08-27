@@ -268,7 +268,7 @@ const get_item_adapter = (db_connect,data_type,key,option) => {
                 else if(option.title_url && !Num.check_is_guid(option.title_url)){
                     item_data.title_url = option.title_url;
                     item_data.key = option.title_url;
-                    let filter={title_url:option.title_url};
+                    let filter={title_url:{ $regex: item_data.key, $options: 'i' }};
                     let sort_by={};
                     let page_current=1;
                     let page_size=0;

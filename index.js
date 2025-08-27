@@ -5,7 +5,7 @@ License GNU General Public License v3.0
 Description: BiZ9 Framework: Data
 */
 const async = require('async');
-const moment = require('moment');
+const dayjs = require('dayjs');
 const {get_db_connect_main,check_db_connect_main,delete_db_connect_main,post_item_main,get_item_main,delete_item_main,get_id_list_main,delete_item_list_main,get_count_item_list_main} = require('./mongo/index.js');
 const {Scriptz}=require("biz9-scriptz");
 const {Log,Str,Num,Obj}=require("/home/think2/www/doqbox/biz9-framework/biz9-utility/code");
@@ -1186,6 +1186,7 @@ class Review_Data {
 		return new Promise((callback) => {
 			let error = null;
 			let cloud_data = {};
+			cloud_data.item = DataItem.get_new(parent_data_type,parent_id);
 			cloud_data.parent_item = DataItem.get_new(parent_data_type,parent_id);
 			cloud_data.review = review;
 			cloud_data.review.parent_user = DataItem.get_new(DataType.USER,0);
@@ -1393,7 +1394,7 @@ class User_Data {
 				//post user
 				async function(call){
 					if(!cloud_data.email_found && !cloud_data.title_found){
-						cloud_data.user.last_login =  new moment().toISOString();
+						cloud_data.user.last_login = dayjs().toISOString();
 						const [error,data] = await Portal.post(database,DataType.USER,cloud_data.user);
 						if(error){
 							cloud_error=Log.append(cloud_error,error);
@@ -1408,6 +1409,7 @@ class User_Data {
 						const [error,data] = await User_Data.get_ip_info(ip_address,geo_key);
 						cloud_data.activity = DataItem.get_new(DataType.ACTIVITY,0,data);
 						cloud_data.activity.user_id = cloud_data.user.id;
+						cloud_data.activity.type = FieldType.ACTIVITY_TYPE_REGISTER;
 					}
 				},
 				//get activity - device
@@ -1433,13 +1435,14 @@ class User_Data {
 		});
 	};
 	//9_user_login
-	static login = async (database,email,password,ip_address,geo_key) => {
+	static login = async (database,user,ip_address,geo_key,device) => {
 		return new Promise((callback) => {
 			let error = null;
 			let cloud_data = {};
 			cloud_data.user_found = false;
-			cloud_data.user = DataItem.get_new(DataType.USER,0,{email:email,password:password});
-			cloud_data.ip_info = {country_name:"N/A",region_name:"N/A",district:"N/A",city_name:"N/A",latitude:"N/A",longitude:"N/A",zip_code:'N/A',isp:"N/A",ip_address:"N/A"};
+			cloud_data.user = user;
+			cloud_data.activity = DataItem.get_new(DataType.ACTIVITY,0);
+			cloud_data.device = DataItem.get_new(DataType.BLANK,0,device);
 			async.series([
 				//check email,password
 				async function(call){
@@ -1457,7 +1460,7 @@ class User_Data {
 				//post user
 				async function(call){
 					if(cloud_data.user_found){
-						cloud_data.user.last_login =  new moment().toISOString();
+						cloud_data.user.last_login = dayjs().toISOString();
 						const [error,data] = await Portal.post(database,DataType.USER,cloud_data.user);
 						if(error){
 							cloud_error=Log.append(cloud_error,error);
@@ -1477,11 +1480,20 @@ class User_Data {
 						}
 					}
 				},
-				//get activity
+				//get activity - ip
 				async function(call){
-					if(cloud_data.user_found){
+					if(!cloud_data.email_found && !cloud_data.title_found){
 						const [error,data] = await User_Data.get_ip_info(ip_address,geo_key);
 						cloud_data.activity = DataItem.get_new(DataType.ACTIVITY,0,data);
+						cloud_data.activity.user_id = cloud_data.user.id;
+						cloud_data.activity.type = FieldType.ACTIVITY_TYPE_LOGIN;
+					}
+				},
+				//get activity - device
+				async function(call){
+					if(cloud_data.user_found){
+						const [error,data] = await User_Data.get_device_info(cloud_data.activity,cloud_data.device);
+						cloud_data.activity = data;
 					}
 				},
 				//post activity
@@ -1489,7 +1501,6 @@ class User_Data {
 					if(cloud_data.user_found){
 						const [error,data] = await Portal.post(database,DataType.ACTIVITY,cloud_data.activity);
 						cloud_data.activity = data.item;
-						cloud_data.activity.user_id = cloud_data.user.id;
 					}
 				},
 			]).then(result => {
