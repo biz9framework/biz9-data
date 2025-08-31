@@ -71,70 +71,6 @@ class Database {
 	}
 }
 class Data_Logic {
-	//9_data_logic
-	static get_parent_child_list_old = (full_item_list) => {
-		/* option params
-		 * - full_item_list
-		 *      - List of objects. Bind all child id values to matching parent id. / list / ex. Products and child attributes items.
-		 * return objects
-		 * - full_item_list
-		 *      - Binded list of objects. / list / ex. Products now binded to child items.
-		 */
-		return new Promise((callback) => {
-			async.series([
-				function(call){
-					for(let a=0; a<full_item_list.length; a++){
-						let item_title_url = Str.get_title_url(full_item_list[a].title);
-						Log.w('item_title_url',item_title_url);
-						let new_item = full_item_list[a];
-						new_item.items = [];
-						//new_item_list[item_title_url] = full_item_list[a];
-						//new_item_list[item_title_url].items = [];
-						for(let b=0;b<full_item_list.length;b++){
-							if(full_item_list[a].id == full_item_list[b].parent_id){
-								new_item.items.push(full_item_list[b]);
-							}
-						}
-						if(!Obj.check_is_empty(new_item)){
-							new_item_list.push(new_item);
-						}
-					}
-					Log.w('new_item_list_len',new_item_list.length);
-					Log.w('new_item_list',new_item_list);
-					//call();
-				},
-				function(call){
-					for(let a=0; a<new_item_list.length; a++){
-						if(!Obj.check_is_empty(new_item_list[a])){
-						let item_title_url = !Str.check_is_null(new_item_list[a].title) ? Str.get_title_url(new_item_list[a].title) : "not_found";
-						let new_item = new_item_list[a];
-						new_item.items=[];
-						new_item_list[item_title_url] = new_item_list[a];
-						new_item_list[item_title_url].items =[];
-						for(let b=0;b<new_item_list.length;b++){
-							//console.log(new_item_list[b]);
-							let sub_item_title_url = Str.get_title_url(new_item_list[b].title);
-							if(new_item_list[a].id == new_item_list[b].parent_id){
-								let sub_item = new_item_list[b];
-								sub_item.items = [];
-								new_item.items.push(sub_item);
-								new_item_list[a][sub_item_title_url] = sub_item;
-								new_item_list[a][sub_item_title_url].items = [];
-							}
-						}
-					}
-					Log.w('new_item_list',new_item_list);
-					}
-					//call();
-				},
-			]).then(result => {
-				//callback([error,new_item_list]);
-			}).catch(error => {
-				Log.error("Portal-Get",error);
-				callback([error,[]]);
-			});
-		});
-	};
 	static get_child_list = (database,item_list,data_type,filter,sort_by,page_current,page_size,option) => {
 		return new Promise((callback) => {
 			/*
@@ -483,7 +419,7 @@ class Order_Data {
 			cloud_data.order_payment = DataItem.get_new(DataType.ORDER_PAYMENT,0);
 			cloud_data.publish_order_item_list = [];
 			cloud_data.publish_order_sub_item_list = [];
-			cloud_data.stat_parent_item_list = [];
+			cloud_data.stat_item_list = [];
 			async.series([
 				//bind-post order
 				async function(call){
@@ -492,7 +428,7 @@ class Order_Data {
 							//cart
 							cart_number:cart.cart_number,
 							user_id:cart.user_id,
-							parent_data_type:cart.parent_data_type,
+							item_data_type:cart.item_data_type,
 
 							payment_plan:cart.payment_plan,
 							grand_total:cart.grand_total,
@@ -535,8 +471,8 @@ class Order_Data {
 						for(let a=0;a<cart.cart_item_list.length;a++){
 							cloud_data.publish_order_item_list.push(
 								DataItem.get_new(DataType.ORDER_ITEM,0,{
-									parent_data_type:cart.cart_item_list[a].parent_data_type,
-									parent_id:cart.cart_item_list[a].parent_id,
+									item_data_type:cart.cart_item_list[a].item_data_type,
+									item_id:cart.cart_item_list[a].item_id,
 									cart_number:cart.cart_item_list[a].cart_number,
 									order_number:cloud_data.order.order_number,
 									user_id:cart.cart_item_list[a].user_id,
@@ -566,8 +502,8 @@ class Order_Data {
 										order_number:cloud_data.order.order_number,
 										cart_number:cart.cart_item_list[a].cart_sub_item_list[b].cart_number,
 										user_id:cart.cart_item_list[a].user_id,
-										parent_data_type:cart.cart_item_list[a].cart_sub_item_list[b].parent_data_type,
-										parent_id:cart.cart_item_list[a].cart_sub_item_list[b].parent_id,
+										item_data_type:cart.cart_item_list[a].cart_sub_item_list[b].item_data_type,
+										item_id:cart.cart_item_list[a].cart_sub_item_list[b].item_id,
 										order_item_id:cloud_data.publish_order_item_list[a].id
 									}));
 							}
@@ -585,14 +521,14 @@ class Order_Data {
 				async function(call){
 					let stat_list = [];
 					for(let a = 0; a < cloud_data.publish_order_item_list.length; a++){
-						stat_list.push(DataItem.get_new(DataType.STAT,0,{parent_id:cloud_data.publish_order_item_list[a].parent_id,parent_data_type:cloud_data.publish_order_item_list[a].parent_data_type}));
+						stat_list.push(DataItem.get_new(DataType.STAT,0,{item_id:cloud_data.publish_order_item_list[a].item_id,item_data_type:cloud_data.publish_order_item_list[a].item_data_type}));
 					}
-					const [error,data] = await Stat_Data.post(database,cloud_data.order.parent_data_type,cloud_data.order.user_id,FieldType.STAT_ORDER_ADD_ID,stat_list);
+					const [error,data] = await Stat_Data.post(database,cloud_data.order.item_data_type,cloud_data.order.user_id,FieldType.STAT_ORDER_ADD_ID,stat_list);
 					if(error){
 						error=Log.append(error,error);
 					}else{
 						cloud_data.stat_new = data.stat_new;
-						cloud_data.stat_parent_item_list = data.stat_parent_item_list;
+						cloud_data.stat_item_list = data.stat_item_list;
 						cloud_data.stat_item_list = data.stat_item_list;
 					}
 				},
@@ -646,28 +582,28 @@ class Order_Data {
 						}
 					}
 				},
-				//order_item_item_list - parent_item_list
+				//order_item_item_list - item_list
 				async function(call){
 					if(!Str.check_is_null(cloud_data.order.id)){
 						for(let a = 0;a < cloud_data.order.order_item_list.length; a++){
 							let query_field = {};
-							query_field['id'] = { $regex:String(cloud_data.order.order_item_list[a].parent_id), $options: "i" };
+							query_field['id'] = { $regex:String(cloud_data.order.order_item_list[a].item_id), $options: "i" };
 							order_item_item_list_query.$or.push(query_field);
 						}
-						let search = Item_Logic.get_search(cloud_data.order.parent_data_type,order_item_item_list_query,{},1,0);
+						let search = Item_Logic.get_search(cloud_data.order.item_data_type,order_item_item_list_query,{},1,0);
 						const [error,data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size);
 						if(error){
 							error=Log.append(error,error);
 						}else{
 							for(let a = 0; a < cloud_data.order.order_item_list.length; a++){
-								cloud_data.order.order_item_list[a].parent_item = DataItem.get_new(cloud_data.order.order_item_list[a].parent_data_type,0);
+								cloud_data.order.order_item_list[a].item_item = DataItem.get_new(cloud_data.order.order_item_list[a].item_data_type,0);
 								for(let b = 0; b < data.item_list.length; b++){
-									if(cloud_data.order.order_item_list[a].parent_id == data.item_list[b].id){
-										cloud_data.order.order_item_list[a].parent_item = data.item_list[b];
+									if(cloud_data.order.order_item_list[a].item_id == data.item_list[b].id){
+										cloud_data.order.order_item_list[a].item_item = data.item_list[b];
 									}
 								}
-								if(Str.check_is_null(cloud_data.order.order_item_list[a].parent_item.id)){
-									cloud_data.order.order_item_list[a].parent_item = Item_Logic.get_not_found(cloud_data.order.order_item_list[a].data_type,cloud_data.order.order_item_list[a].id,{app_id:database.app_id});
+								if(Str.check_is_null(cloud_data.order.order_item_list[a].item.id)){
+									cloud_data.order.order_item_list[a].item = Item_Logic.get_not_found(cloud_data.order.order_item_list[a].data_type,cloud_data.order.order_item_list[a].id,{app_id:database.app_id});
 								}
 							}
 						}
@@ -694,27 +630,27 @@ class Order_Data {
 						}
 					}
 				},
-				//order_sub_item_item_list - parent_item_list
+				//order_sub_item_item_list - item_item_list
 				async function(call){
 					if(!Str.check_is_null(cloud_data.order.id)){
-						let parent_data_type = DataType.BLANK;
+						let item_data_type = DataType.BLANK;
 						for(let a = 0; a < order_sub_item_list.length; a++){
 							let query_field = {};
-							query_field['id'] = { $regex:String(order_sub_item_list[a]['parent_id']), $options: "i" };
+							query_field['id'] = { $regex:String(order_sub_item_list[a]['item_id']), $options: "i" };
 							order_sub_item_item_list_query.$or.push(query_field);
-							parent_data_type = order_sub_item_list[a]['parent_data_type'];
+							item_data_type = order_sub_item_list[a]['item_data_type'];
 						}
-						let search = Item_Logic.get_search(parent_data_type,order_sub_item_item_list_query,{},1,0);
+						let search = Item_Logic.get_search(item_data_type,order_sub_item_item_list_query,{},1,0);
 						const [error,data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size);
 						if(error){
 							error=Log.append(error,error);
 						}else{
 							for(let a = 0; a < cloud_data.order.order_item_list.length; a++){
 								for(let b = 0; b < cloud_data.order.order_item_list[a].order_sub_item_list.length; b++){
-									cloud_data.order.order_item_list[a].order_sub_item_list[b].parent_item = DataItem.get_new(DataType.ITEM,0,{parent_id: cloud_data.order.order_item_list[a].order_sub_item_list[b].parent_id});
+									cloud_data.order.order_item_list[a].order_sub_item_list[b].item_item = DataItem.get_new(DataType.ITEM,0,{item_id: cloud_data.order.order_item_list[a].order_sub_item_list[b].item_id});
 									for(let c = 0; c < data.item_list.length; c++){
-										if(cloud_data.order.order_item_list[a].order_sub_item_list[b].parent_id == data.item_list[c].id){
-											cloud_data.order.order_item_list[a].order_sub_item_list[b].parent_item = data.item_list[c];
+										if(cloud_data.order.order_item_list[a].order_sub_item_list[b].item_id == data.item_list[c].id){
+											cloud_data.order.order_item_list[a].order_sub_item_list[b].item_item = data.item_list[c];
 										}
 									}
 								}
@@ -813,7 +749,7 @@ class Order_Data {
 
 class Cart_Data {
 	//cart_post
-	static post = async (database,parent_data_type,user_id,cart,option) => {
+	static post = async (database,item_data_type,user_id,cart,option) => {
 		return new Promise((callback) => {
 			let cloud_data = {};
 			let error = null;
@@ -822,8 +758,8 @@ class Cart_Data {
 			cloud_data.publish_cart_item_list = [];
 			cloud_data.publish_cart_sub_item_list = [];
 			cloud_data.cart_sub_item_list = [];
-			cloud_data.stat_parent_item_list = [];
-			let cart_item_item_list = [];
+			cloud_data.stat_item_list = [];
+			let cart_item_list = [];
 			async.series([
 				//bind-post cart
 				async function(call){
@@ -831,7 +767,7 @@ class Cart_Data {
 						{
 							cart_number:cart.cart_number,
 							user_id:user_id,
-							parent_data_type:parent_data_type
+							item_data_type:item_data_type
 						});
 					const [error,data] = await Portal.post(database,DataType.CART,publish_cart);
 					if(error){
@@ -853,8 +789,8 @@ class Cart_Data {
 										cart_id:cloud_data.cart.id,
 										cart_number:cart.cart_number,
 										user_id:user_id,
-										parent_data_type:cart.cart_item_list[a].parent_data_type,
-										parent_id:cart.cart_item_list[a].parent_id,
+										item_data_type:cart.cart_item_list[a].item_data_type,
+										item_id:cart.cart_item_list[a].item_id,
 									}));
 						}
 						if(cloud_data.publish_cart_item_list.length>0){
@@ -879,8 +815,8 @@ class Cart_Data {
 											cart_id:cloud_data.cart.id,
 											cart_number:cloud_data.cart.cart_number,
 											user_id:user_id,
-											parent_data_type:cart.cart_item_list[a].cart_sub_item_list[b].parent_data_type,
-											parent_id:cart.cart_item_list[a].cart_sub_item_list[b].parent_id,
+											item_data_type:cart.cart_item_list[a].cart_sub_item_list[b].item_data_type,
+											item_id:cart.cart_item_list[a].cart_sub_item_list[b].item_id,
 											cart_item_id:cloud_data.publish_cart_item_list[a].id
 										}));
 							}
@@ -898,14 +834,14 @@ class Cart_Data {
 				async function(call){
 					let stat_list = [];
 					for(let a = 0; a < cart.cart_item_list.length; a++){
-						stat_list.push(DataItem.get_new(DataType.STAT,0,{parent_id:cart.cart_item_list[a].parent_id,parent_data_type:cart.cart_item_list[a].parent_data_type}));
+						stat_list.push(DataItem.get_new(DataType.STAT,0,{item_id:cart.cart_item_list[a].item_id,item_data_type:cart.cart_item_list[a].item_data_type}));
 					}
-					const [error,data] = await Stat_Data.post(database,parent_data_type,user_id,FieldType.STAT_CART_ADD_ID,stat_list);
+					const [error,data] = await Stat_Data.post(database,item_data_type,user_id,FieldType.STAT_CART_ADD_ID,stat_list);
 					if(error){
 						error=Log.append(error,error);
 					}else{
 						cloud_data.stat_new = data.stat_new;
-						cloud_data.stat_parent_item_list = data.stat_parent_item_list;
+						cloud_data.stat_item_list = data.stat_item_list;
 						cloud_data.stat_item_list = data.stat_item_list;
 					}
 				},
@@ -959,28 +895,28 @@ class Cart_Data {
 						}
 					}
 				},
-				//cart_item_item_list - parent_item_list
+				//cart_item_item_list - item_list
 				async function(call){
 					if(!Str.check_is_null(cloud_data.cart.id)){
 						for(let a = 0;a < cloud_data.cart.cart_item_list.length; a++){
 							let query_field = {};
-							query_field['id'] = { $regex:String(cloud_data.cart.cart_item_list[a].parent_id), $options: "i" };
+							query_field['id'] = { $regex:String(cloud_data.cart.cart_item_list[a].item_id), $options: "i" };
 							cart_item_item_list_query.$or.push(query_field);
 						}
-						let search = Item_Logic.get_search(cloud_data.cart.parent_data_type,cart_item_item_list_query,{},1,0);
+						let search = Item_Logic.get_search(cloud_data.cart.item_data_type,cart_item_item_list_query,{},1,0);
 						const [error,data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size);
 						if(error){
 							error=Log.append(error,error);
 						}else{
 							for(let a = 0; a < cloud_data.cart.cart_item_list.length; a++){
-								cloud_data.cart.cart_item_list[a].parent_item = DataItem.get_new(cloud_data.cart.cart_item_list[a].parent_data_type,0);
+								cloud_data.cart.cart_item_list[a].item_item = DataItem.get_new(cloud_data.cart.cart_item_list[a].item_data_type,0);
 								for(let b = 0; b < data.item_list.length; b++){
-									if(cloud_data.cart.cart_item_list[a].parent_id == data.item_list[b].id){
-										cloud_data.cart.cart_item_list[a].parent_item = data.item_list[b];
+									if(cloud_data.cart.cart_item_list[a].item_id == data.item_list[b].id){
+										cloud_data.cart.cart_item_list[a].item = data.item_list[b];
 									}
 								}
-								if(Str.check_is_null(cloud_data.cart.cart_item_list[a].parent_item.id)){
-									cloud_data.cart.cart_item_list[a].parent_item = Item_Logic.get_not_found(cloud_data.cart.cart_item_list[a].data_type,cloud_data.cart.cart_item_list[a].id,{app_id:database.app_id});
+								if(Str.check_is_null(cloud_data.cart.cart_item_list[a].item.id)){
+									cloud_data.cart.cart_item_list[a].item = Item_Logic.get_not_found(cloud_data.cart.cart_item_list[a].data_type,cloud_data.cart.cart_item_list[a].id,{app_id:database.app_id});
 								}
 							}
 						}
@@ -1007,27 +943,27 @@ class Cart_Data {
 						}
 					}
 				},
-				//cart_sub_item_item_list - parent_item_list
+				//cart_sub_item_item_list - item_list
 				async function(call){
 					if(!Str.check_is_null(cloud_data.cart.id)){
-						let parent_data_type = DataType.BLANK;
+						let item_data_type = DataType.BLANK;
 						for(let a = 0; a < cart_sub_item_list.length; a++){
 							let query_field = {};
-							query_field['id'] = { $regex:String(cart_sub_item_list[a]['parent_id']), $options: "i" };
+							query_field['id'] = { $regex:String(cart_sub_item_list[a]['item_id']), $options: "i" };
 							cart_sub_item_item_list_query.$or.push(query_field);
-							parent_data_type = cart_sub_item_list[a]['parent_data_type'];
+							item_data_type = cart_sub_item_list[a]['item_data_type'];
 						}
-						let search = Item_Logic.get_search(parent_data_type,cart_sub_item_item_list_query,{},1,0);
+						let search = Item_Logic.get_search(item_data_type,cart_sub_item_item_list_query,{},1,0);
 						const [error,data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size);
 						if(error){
 							error=Log.append(error,error);
 						}else{
 							for(let a = 0; a < cloud_data.cart.cart_item_list.length; a++){
 								for(let b = 0; b < cloud_data.cart.cart_item_list[a].cart_sub_item_list.length; b++){
-									cloud_data.cart.cart_item_list[a].cart_sub_item_list[b].parent_item = DataItem.get_new(DataType.ITEM,0,{parent_id: cloud_data.cart.cart_item_list[a].cart_sub_item_list[b].parent_id});
+									cloud_data.cart.cart_item_list[a].cart_sub_item_list[b].item = DataItem.get_new(DataType.ITEM,0,{item_id: cloud_data.cart.cart_item_list[a].cart_sub_item_list[b].item_id});
 									for(let c = 0; c < data.item_list.length; c++){
-										if(cloud_data.cart.cart_item_list[a].cart_sub_item_list[b].parent_id == data.item_list[c].id){
-											cloud_data.cart.cart_item_list[a].cart_sub_item_list[b].parent_item = data.item_list[c];
+										if(cloud_data.cart.cart_item_list[a].cart_sub_item_list[b].item_id == data.item_list[c].id){
+											cloud_data.cart.cart_item_list[a].cart_sub_item_list[b].item = data.item_list[c];
 										}
 									}
 								}
@@ -1041,15 +977,15 @@ class Cart_Data {
 						let grand_total = 0;
 						for(let a = 0; a < cloud_data.cart.cart_item_list.length; a++){
 							let sub_total = 0;
-							if(!isNaN(cloud_data.cart.cart_item_list[a].parent_item.cost)){
-								sub_total = (sub_total + cloud_data.cart.cart_item_list[a].parent_item.cost) * cloud_data.cart.cart_item_list[a].quanity;
+							if(!isNaN(cloud_data.cart.cart_item_list[a].item.cost)){
+								sub_total = (sub_total + cloud_data.cart.cart_item_list[a].item.cost) * cloud_data.cart.cart_item_list[a].quanity;
 								grand_total = grand_total + sub_total;
 							}
 							cloud_data.cart.cart_item_list[a].sub_total = sub_total;
 							for(let b = 0; b < cloud_data.cart.cart_item_list[a].cart_sub_item_list.length; b++){
 								let sub_total = 0;
-								if(!isNaN(cloud_data.cart.cart_item_list[a].cart_sub_item_list[b].parent_item.cost)){
-									sub_total = (sub_total + cloud_data.cart.cart_item_list[a].cart_sub_item_list[b].parent_item.cost) * cloud_data.cart.cart_item_list[a].cart_sub_item_list[b].quanity;
+								if(!isNaN(cloud_data.cart.cart_item_list[a].cart_sub_item_list[b].item.cost)){
+									sub_total = (sub_total + cloud_data.cart.cart_item_list[a].cart_sub_item_list[b].item.cost) * cloud_data.cart.cart_item_list[a].cart_sub_item_list[b].quanity;
 									grand_total = grand_total + sub_total;
 								}
 								cloud_data.cart.cart_item_list[a].cart_sub_item_list[b].sub_total = sub_total;
@@ -1182,14 +1118,14 @@ class Product_Data {
 }
 class Review_Data {
 	//9_review_post
-	static post = async(database,parent_data_type,parent_id,user_id,review) => {
+	static post = async(database,item_data_type,item_id,user_id,review) => {
 		return new Promise((callback) => {
 			let error = null;
 			let cloud_data = {};
-			cloud_data.item = DataItem.get_new(parent_data_type,parent_id);
-			cloud_data.parent_item = DataItem.get_new(parent_data_type,parent_id);
+			cloud_data.item = DataItem.get_new(item_data_type,item_id);
+			cloud_data.item_item = DataItem.get_new(item_data_type,item_id);
 			cloud_data.review = review;
-			cloud_data.review.parent_user = DataItem.get_new(DataType.USER,0);
+			cloud_data.review.user = DataItem.get_new(DataType.USER,0);
 			let review_list = [];
 			let review_count = 0;
 			let review_avg = 0;
@@ -1203,56 +1139,56 @@ class Review_Data {
 						cloud_data.item = data.item;
 					}
 				},
-				//get_parent_item
+				//get_item
 				async function(call){
-					const [error,data] = await Portal.get(database,cloud_data.parent_item.data_type,cloud_data.parent_item.id);
+					const [error,data] = await Portal.get(database,cloud_data.item.data_type,cloud_data.item.id);
 					if(error){
 						cloud_error=Log.append(cloud_error,error);
 					}else{
-						cloud_data.parent_item = data.item;
+						cloud_data.item = data.item;
 					}
 				},
-				//post_parent_item
+				//post_item
 				async function(call){
-					if(!Str.check_is_null(cloud_data.parent_item.id)){
+					if(!Str.check_is_null(cloud_data.item.id)){
 						//rating_count
-						cloud_data.parent_item.rating_count = !Str.check_is_null(cloud_data.parent_item.rating_count) ? parseInt(cloud_data.parent_item.rating_count) + parseInt(review.rating) :parseInt(review.rating);
+						cloud_data.item.rating_count = !Str.check_is_null(cloud_data.item.rating_count) ? parseInt(cloud_data.item.rating_count) + parseInt(review.rating) :parseInt(review.rating);
 						//review_count
-						cloud_data.parent_item.review_count = !Str.check_is_null(cloud_data.parent_item.review_count) ? parseInt(cloud_data.parent_item.review_count) + 1 : 1;
+						cloud_data.item.review_count = !Str.check_is_null(cloud_data.item.review_count) ? parseInt(cloud_data.item.review_count) + 1 : 1;
 						//rating_avg
-						cloud_data.parent_item.rating_avg = !Str.check_is_null(cloud_data.parent_item.rating_avg) ? parseInt(cloud_data.parent_item.rating_count)  /  parseInt(cloud_data.parent_item.review_count) :parseInt(review.rating);
+						cloud_data.item.rating_avg = !Str.check_is_null(cloud_data.item.rating_avg) ? parseInt(cloud_data.item.rating_count)  /  parseInt(cloud_data.item.review_count) :parseInt(review.rating);
 
-						const [error,data] = await Portal.post(database,cloud_data.parent_item.data_type,cloud_data.parent_item);
+						const [error,data] = await Portal.post(database,cloud_data.item.data_type,cloud_data.item);
 						if(error){
 							cloud_error=Log.append(cloud_error,error);
 						}else{
-							cloud_data.parent_item = data.item;
+							cloud_data.item = data.item;
 						}
 					}
 				},
 				//post stat
 				async function(call){
-					if(!Str.check_is_null(cloud_data.parent_item.id)){
-						let stat = Stat_Logic.get_new(parent_data_type,user_id,FieldType.STAT_REVIEW_ADD_ID,[DataItem.get_new(DataType.STAT,0,
-							{parent_data_type:cloud_data.parent_item.data_type,parent_id:cloud_data.parent_item.id,user_id:user_id})]);
-						const [error,data] = await Stat_Data.post(database,stat.parent_data_type,stat.user_id,stat.stat_type_id,stat.item_list);
+					if(!Str.check_is_null(cloud_data.item.id)){
+						let stat = Stat_Logic.get_new(item_data_type,user_id,FieldType.STAT_REVIEW_ADD_ID,[DataItem.get_new(DataType.STAT,0,
+							{item_data_type:cloud_data.item.data_type,item_id:cloud_data.item.id,user_id:user_id})]);
+						const [error,data] = await Stat_Data.post(database,stat.item_data_type,stat.user_id,stat.stat_type_id,stat.item_list);
 						if(error){
 							cloud_error=Log.append(cloud_error,error);
 						}else{
 							cloud_data.stat_new = data.stat_new;
-							cloud_data.stat_parent_item_list = data.stat_parent_item_list;
+							cloud_data.stat_item_list = data.stat_item_list;
 							cloud_data.stat_item_list =data.stat_item_list;
 						}
 					}
 				},
-				//get_parent_user
+				//get_user
 				async function(call){
-					if(!Str.check_is_null(cloud_data.parent_item.id)){
+					if(!Str.check_is_null(cloud_data.item.id)){
 						const [error,data] = await Portal.get(database,DataType.USER,user_id);
 						if(error){
 							cloud_error=Log.append(cloud_error,error);
 						}else{
-							cloud_data.review.parent_user = data.item;
+							cloud_data.review.user = data.item;
 						}
 					}
 				},
@@ -1265,28 +1201,28 @@ class Review_Data {
 		});
 	};
 	//9_review_get
-	static get = async (database,parent_data_type,user_id,sort_by,page_current,page_size,option) => {
+	static get = async (database,item_data_type,user_id,sort_by,page_current,page_size,option) => {
 		return new Promise((callback) => {
 			let error = null;
 			let cloud_data = {};
 			option = !Obj.check_is_empty(option) ? option : {get_item:false,get_photo:false};
-			let parent_item_list = [];
+			let item_item_list = [];
 			let user_list = [];
 			async.series([
 				//review_list
 				async function(call){
-					let query = {user_id:user_id,parent_data_type:parent_data_type};
+					let query = {user_id:user_id,item_data_type:item_data_type};
 					let search = Item_Logic.get_search(DataType.REVIEW,query,{},page_current,page_size);
-					let option = {get_item_search:true,item_search_data_type:parent_data_type,item_search_field:'id',item_search_value:'parent_id'};
+					let option = {get_item_search:true,item_search_data_type:item_data_type,item_search_field:'id',item_search_value:'item_id'};
 					const [error,data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option);
 					if(error){
 						cloud_error=Log.append(cloud_error,error);
 					}else{
 						for(let a=0;a<data.item_list.length;a++){
-							data.item_list[a].parent_item = DataItem.get_new(parent_data_type,data.item_list[a].parent_item,{title:'Not Found'});
+							data.item_list[a].item = DataItem.get_new(item_data_type,data.item_list[a].item,{title:'Not Found'});
 							for(let b=0;b<data.item_search_list.length;b++){
-								if(data.item_list[a].parent_id == data.item_search_list[b].id){
-									data.item_list[a].parent_item = data.item_search_list[b];
+								if(data.item_list[a].item_id == data.item_search_list[b].id){
+									data.item_list[a].item_item = data.item_search_list[b];
 								}
 							}
 						}
@@ -1514,15 +1450,15 @@ class User_Data {
 }
 class Favorite_Data {
 	//9_favorite_post
-	static post = async (database,parent_data_type,parent_id,user_id) => {
+	static post = async (database,item_data_type,item_id,user_id) => {
 		return new Promise((callback) => {
 			let error = null;
 			let cloud_data = {};
 			cloud_data.is_unique = false;
-			cloud_data.item = DataItem.get_new(DataType.FAVORITE,0,{parent_data_type:parent_data_type,parent_id:parent_id,user_id:user_id});
+			cloud_data.item = DataItem.get_new(DataType.FAVORITE,0,{item_data_type:item_data_type,item_id:item_id,user_id:user_id});
 			async.series([
 				async function(call){
-					let favorite_filter = Favorite_Logic.get_search_filter(parent_data_type,parent_id,user_id);
+					let favorite_filter = Favorite_Logic.get_search_filter(item_data_type,item_id,user_id);
 					let search = Item_Logic.get_search(DataType.FAVORITE,favorite_filter,{},1,0);
 					const [error,data] = await Portal.count(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size);
 					if(error){
@@ -1552,28 +1488,26 @@ class Favorite_Data {
 		});
 	};
 	//9_favorite_get
-	static get = async (database,parent_data_type,user_id,sort_by,page_current,page_size,option) => {
+	static get = async (database,item_data_type,user_id,sort_by,page_current,page_size,option) => {
 		return new Promise((callback) => {
 			let error = null;
 			let cloud_data = {};
 			option = !Obj.check_is_empty(option) ? option : {get_item:false,get_photo:false};
-			let parent_item_list = [];
-			let user_list = [];
 			async.series([
 				//favorite_list
 				async function(call){
-					let query = {user_id:user_id,parent_data_type:parent_data_type};
+					let query = {user_id:user_id,item_data_type:item_data_type};
 					let search = Item_Logic.get_search(DataType.FAVORITE,query,{date_create:-1},page_current,page_size);
-					let option = {get_item_search:true,item_search_data_type:parent_data_type,item_search_field:'id',item_search_value:'parent_id'};
+					let option = {get_item_search:true,item_search_data_type:item_data_type,item_search_field:'id',item_search_value:'item_id'};
 					const [error,data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option);
 					if(error){
 						cloud_error=Log.append(cloud_error,error);
 					}else{
 						for(let a=0;a<data.item_list.length;a++){
-							data.item_list[a].parent_item = DataItem.get_new(parent_data_type,data.item_list[a].parent_item,{title:'Not Found'});
+							data.item_list[a].item = DataItem.get_new(item_data_type,data.item_list[a].item,{title:'Not Found'});
 							for(let b=0;b<data.item_search_list.length;b++){
-								if(data.item_list[a].parent_id == data.item_search_list[b].id){
-									data.item_list[a].parent_item = data.item_search_list[b];
+								if(data.item_list[a].item_id == data.item_search_list[b].id){
+									data.item_list[a].item = data.item_search_list[b];
 								}
 							}
 						}
@@ -2392,36 +2326,36 @@ class Faq_Data{
 }
 class Stat_Data {
 	//9_stat_post
-	static post = (database,parent_data_type,user_id,stat_type_id,item_list,option) => {
+	static post = (database,item_data_type,user_id,stat_type_id,item_list,option) => {
 		return new Promise((callback) => {
 			let cloud_data = {};
 			cloud_data.stat_new = true;
-			cloud_data.stat_parent_item_list = [];
+			cloud_data.stat_item_list = [];
 			cloud_data.stat_item_list = [];
 			let error = null;
 			if(!item_list){
 				item_list = [];
 			}
 			async.series([
-				//get parent items
+				//get items
 				async function(call){
 					if(item_list.length>0){
 						let query = { $or: [] };
 						for(let a = 0;a < item_list.length;a++){
 							let query_field = {};
-							query_field['id'] = { $regex:String(item_list[a].parent_id), $options: "i" };
+							query_field['id'] = { $regex:String(item_list[a].item_id), $options: "i" };
 							query.$or.push(query_field);
 						}
-						let search = Item_Logic.get_search(parent_data_type,query,{},1,0);
+						let search = Item_Logic.get_search(item_data_type,query,{},1,0);
 						const [error,data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size);
 						if(error){
 							error=Log.append(error,error);
 						}else{
 							for(let a = 0; a < item_list.length; a++){
-								item_list[a].parent_item = DataItem.get_new(parent_data_type,0);
+								item_list[a].item = DataItem.get_new(item_data_type,0);
 								for(let b = 0; b < data.item_list.length; b++){
-									if(item_list[a].parent_id == data.item_list[b].id){
-										item_list[a].parent_item = data.item_list[b];
+									if(item_list[a].item_id == data.item_list[b].id){
+										item_list[a].item_item = data.item_list[b];
 									}
 								}
 							}
@@ -2444,11 +2378,11 @@ class Stat_Data {
 						}else{
 							for(let a = 0; a < item_list.length; a++){
 								let str = get_stat_str(stat_type_id);
-								item_list[a][str] = !Str.check_is_null(item_list[a].parent_item[str]) ? parseInt(item_list[a].parent_item[str]) + 1 : 1;
-								item_list[a].parent_item[str] = item_list[a][str];
+								item_list[a][str] = !Str.check_is_null(item_list[a].item[str]) ? parseInt(item_list[a].item[str]) + 1 : 1;
+								item_list[a].item[str] = item_list[a][str];
 								item_list[a].stat_new = true;
 								for(let b = 0; b < data.item_list.length; b++){
-									if(item_list[a].id == data.item_list[b].parent_id && item_list[a].data_type == data.item_list[b].parent_data_type && stat_type_id== data.item_list[b].type_id){
+									if(item_list[a].id == data.item_list[b].item_id && item_list[a].data_type == data.item_list[b].item_data_type && stat_type_id== data.item_list[b].type_id){
 										item_list[a].stat_new = false;
 									}
 								}
@@ -2463,8 +2397,8 @@ class Stat_Data {
 						for(let a = 0; a < item_list.length; a++){
 							if(item_list[a].stat_new){
 								let stat_item = DataItem.get_new(DataType.STAT,0,{
-									parent_data_type:item_list[a].parent_data_type,
-									parent_id:item_list[a].parent_id,
+									item_data_type:item_list[a].item_data_type,
+									item_id:item_list[a].item_id,
 									stat_type_id:stat_type_id,
 									stat_new:item_list[a].stat_new
 								});
@@ -2480,24 +2414,24 @@ class Stat_Data {
 						}
 					}
 				},
-				//save parent_item list
+				//save item list
 				async function(call){
 					if(item_list.length>0){
-						let stat_parent_item_list = [];
+						let stat_item_list = [];
 						let str = get_stat_str(stat_type_id);
 						for(let a = 0; a < item_list.length; a++){
 							if(item_list[a].stat_new && stat_type_id != FieldType.STAT_REVIEW_ADD_ID){
-								let parent_item = DataItem.get_new(item_list[a].parent_item.data_type,item_list[a].parent_item.id);
-								parent_item[str] = item_list[a][str];
-								cloud_data.stat_parent_item_list.push(parent_item);
+								let item = DataItem.get_new(item_list[a].item.data_type,item_list[a].item.id);
+								item[str] = item_list[a][str];
+								cloud_data.stat_item_list.push(item);
 							}
 						}
-						if(cloud_data.stat_parent_item_list.length>0){
-							const [error,data] = await Portal.post_list(database,cloud_data.stat_parent_item_list);
+						if(cloud_data.stat_item_list.length>0){
+							const [error,data] = await Portal.post_list(database,cloud_data.stat_item_list);
 							if(error){
 								error=Log.append(error,error);
 							}else{
-								cloud_data.stat_parent_item_list = data.item_list;
+								cloud_data.stat_item_list = data.item_list;
 							}
 						}
 					}

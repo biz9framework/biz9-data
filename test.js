@@ -230,8 +230,8 @@ describe('connect', function(){ this.timeout(25000);
 
         console.log('PAGE-START');
         //let page = Page_Logic.get_test("Page " + String(Num.get_id()),{get_value:true,get_item:true});
-        //let key = PageType.GALLERY;
-        let key = 'Gallery';
+        let key = PageType.BLOG_POST;
+        //let key = 'Gallery';
         const [error,data] = await Page_Data.get(database,key);
         Log.w('data',data);
         console.log('PAGE-END');
