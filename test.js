@@ -515,18 +515,42 @@ describe('item_post_data', function(){ this.timeout(25000);
                 let cart_sub_item = Cart_Logic.get_cart_sub_item(parent_sub_item_1_data_type,parent_sub_item_1_id,cart.cart_number,user_id,1);
                 cart_item.cart_sub_item_list.push(cart_sub_item);
 
-                //Log.w('cart',cart);
-                //Log.w('cart_item_list',cart.cart_item_list[0]);
-
                 const [error,data] = await Cart_Data.post(database,user_id,cart);
                 if(error){
                     cloud_error=Log.append(cloud_error,error);
                 }else{
-                    //item = data;
+                    cart = data.cart;
                     //console.log(item);
                     console.log('CART-POST-SUCCESS');
                 }
                 console.log('CART-POST-END');
+            },
+            async function(call){
+                console.log('CART-GET-START');
+                const [error,data] = await Cart_Data.post(database,user_id,cart);
+                if(error){
+                    cloud_error=Log.append(cloud_error,error);
+                }else{
+                    cart = data.cart;
+                    //console.log(item);
+                    console.log('CART-POST-SUCCESS');
+                }
+                console.log('CART-GET-END');
+            },
+            /*
+            async function(call){
+                console.log('ORDER-POST-START');
+
+                let order = Order_Logic.get_cart(cart);
+                let cart_item = Cart_Logic.get_cart_item(parent_data_type,parent_id,cart.cart_number,user_id,1);
+                cart.cart_item_list.push(cart_item);
+
+                let cart_sub_item = Cart_Logic.get_cart_sub_item(parent_sub_item_1_data_type,parent_sub_item_1_id,cart.cart_number,user_id,1);
+                cart_item.cart_sub_item_list.push(cart_sub_item);
+
+
+                console.log('ORDER-POST-END');
+
             },
             async function(call){
                 console.log('CLOSE-START');
@@ -540,6 +564,7 @@ describe('item_post_data', function(){ this.timeout(25000);
                 }
                 console.log('CLOSE-END');
             },
+            */
         ],
             function(error, result){
                 if(cloud_error){
