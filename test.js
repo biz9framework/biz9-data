@@ -502,37 +502,28 @@ describe('item_post_data', function(){ this.timeout(25000);
             },
             async function(call){
                 console.log('CART-POST-START');
-                console.log('aaaaaaaaaaaa');
                 let parent_data_type = DataType.PRODUCT;
-                let parent_id = "4302f956-f3e0-49d9-a1d0-6e776527dd57";
+                let parent_id = "7620c413-e542-4b89-82e6-60c5b1e06a55";
                 let user_id = "ea790ecf-2a91-4fe4-951d-5cae0d9551a4";
-                let cart_sub_item_1_data_type = DataType.ITEM;
-                let cart_sub_item_1_id = "0eb7b268-7c19-4705-a94e-e939568b85d8";
-                console.log('bbbbbbbb');
+                let parent_sub_item_1_data_type = DataType.ITEM;
+                let parent_sub_item_1_id = "0eb7b268-7c19-4705-a94e-e939568b85d8";
 
-                let cart = Cart_Logic.get_cart(user_id);
-
-                console.log('ccccccc');
+                let cart = Cart_Logic.get_cart(parent_data_type,user_id);
                 let cart_item = Cart_Logic.get_cart_item(parent_data_type,parent_id,cart.cart_number,user_id,1);
-                console.log('ddddddddddd');
                 cart.cart_item_list.push(cart_item);
-                console.log('eeeeeeeeeee');
 
-                let cart_sub_item = Cart_Logic.get_cart_sub_item(cart_sub_item_1_data_type,cart_sub_item_1_id,cart.cart_number,user_id,1);
-                console.log('ffffffffff');
-
+                let cart_sub_item = Cart_Logic.get_cart_sub_item(parent_sub_item_1_data_type,parent_sub_item_1_id,cart.cart_number,user_id,1);
                 cart_item.cart_sub_item_list.push(cart_sub_item);
 
                 //Log.w('cart',cart);
                 //Log.w('cart_item_list',cart.cart_item_list[0]);
 
-                console.log('start me');
                 const [error,data] = await Cart_Data.post(database,user_id,cart);
                 if(error){
                     cloud_error=Log.append(cloud_error,error);
                 }else{
-                    item = data;
-                    console.log(item);
+                    //item = data;
+                    //console.log(item);
                     console.log('CART-POST-SUCCESS');
                 }
                 console.log('CART-POST-END');
