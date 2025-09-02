@@ -1,8 +1,7 @@
 const async = require('async');
 const assert = require('node:assert');
 
-const {Data,Database,Category_Data,Product_Data,Page_Data,Blog_Post_Data,Content_Data,Stat_Data,List_Data,Review_Data,Favorite_Data,Search_Data,Admin_Data,Business_Data,Order_Data,Cart_Data,User_Data,Faq_Data,Portal} = require(".");
-
+const {Data,Database,Category_Data,Product_Data,Page_Data,Blog_Post_Data,Content_Data,Stat_Data,List_Data,Review_Data,Favorite_Data,Search_Data,Admin_Data,Business_Data,Order_Data,User_Data,Faq_Data,Portal,Cart_Data} = require(".");
 
 const {Log,Num,Str} = require("biz9-utility");
 const {DataType,DataItem,Item_Logic,Page_Logic,Template_Logic,Blog_Post_Logic,Content_Logic,Product_Logic,Field_Logic,Admin_Logic,Business_Logic,Category_Logic,User_Logic,Order_Logic,FieldType,Cart_Logic,Stat_Logic,Review_Logic,PageType} = require("/home/think2/www/doqbox/biz9-framework/biz9-logic/code");
@@ -482,9 +481,9 @@ describe('connect', function(){ this.timeout(25000);
     });
 });
 });
-//item_cart_get
-describe('item_get_data', function(){ this.timeout(25000);
-    it("_item_get_data", function(done){
+//item_cart_post
+describe('item_post_data', function(){ this.timeout(25000);
+    it("_item_post_data", function(done){
         let cloud_error=null;
         let database = {};
         var item = DataItem.get_new(DATA_TYPE,0);
@@ -502,41 +501,41 @@ describe('item_get_data', function(){ this.timeout(25000);
                 console.log('DATABASE-END');
             },
             async function(call){
-                console.log('CART-GET-START');
+                console.log('CART-POST-START');
+                console.log('aaaaaaaaaaaa');
                 let parent_data_type = DataType.PRODUCT;
                 let parent_id = "4302f956-f3e0-49d9-a1d0-6e776527dd57";
-                let user_id = "a83c80ed-a2bc-424f-9fba-71904c4253a2";
-                let cart_number = Order_Logic.get_cart_number();
+                let user_id = "ea790ecf-2a91-4fe4-951d-5cae0d9551a4";
+                let cart_sub_item_1_data_type = DataType.ITEM;
+                let cart_sub_item_1_id = "0eb7b268-7c19-4705-a94e-e939568b85d8";
+                console.log('bbbbbbbb');
 
-                let cart = DataItem.get_new(DataType.CART,0, {cart_number:cart_number,user_id:user_id,cart_item_list:[]});
+                let cart = Cart_Logic.get_cart(user_id);
 
-                let cart_item = DataItem.get_new(DataType.CART_ITEM,0,{cart_number:cart_number,parent_data_type:parent_data_type,parent_id:parent_id,cart_sub_item_list:[]});
-
-                let cart_sub_item_1 = DataItem.get_new(DataType.CART_SUB_ITEM,0,{cart_number:cart_number,user_id:user_id,parent_data_type:DataType.ITEM,parent_id:"b5e2f647-5253-492a-b956-0fc8d7fa61b3"});
-                let cart_sub_item_2 = DataItem.get_new(DataType.CART_SUB_ITEM,0,{cart_number:cart_number,user_id:user_id,parent_data_type:DataType.ITEM,parent_id:"b52432a5-6a3d-41c4-a4ad-3193709bedf5"});
-
-                cart_item.cart_sub_item_list.push(cart_sub_item_1);
-                cart_item.cart_sub_item_list.push(cart_sub_item_2);
-
+                console.log('ccccccc');
+                let cart_item = Cart_Logic.get_cart_item(parent_data_type,parent_id,cart.cart_number,user_id,1);
+                console.log('ddddddddddd');
                 cart.cart_item_list.push(cart_item);
+                console.log('eeeeeeeeeee');
+
+                let cart_sub_item = Cart_Logic.get_cart_sub_item(cart_sub_item_1_data_type,cart_sub_item_1_id,cart.cart_number,user_id,1);
+                console.log('ffffffffff');
+
+                cart_item.cart_sub_item_list.push(cart_sub_item);
 
                 //Log.w('cart',cart);
-                //Log.w('cart_sub',cart.cart_item_list);
-                //Log.w('cart_sub_sub',cart.cart_item_list);
-                //Log.w('cart_sub_sub',cart.cart_item_list[0]);
+                //Log.w('cart_item_list',cart.cart_item_list[0]);
 
-
-                /*
-                    //const [error,data] = await Portal.get(database,item.data_type,KEY,{});
+                console.log('start me');
+                const [error,data] = await Cart_Data.post(database,user_id,cart);
                 if(error){
                     cloud_error=Log.append(cloud_error,error);
                 }else{
                     item = data;
                     console.log(item);
-                    console.log('CART-GET-SUCCESS');
+                    console.log('CART-POST-SUCCESS');
                 }
-                */
-                console.log('CART-GET-END');
+                console.log('CART-POST-END');
             },
             async function(call){
                 console.log('CLOSE-START');
@@ -555,7 +554,7 @@ describe('item_get_data', function(){ this.timeout(25000);
                 if(cloud_error){
                     Log.error("GET-ERROR-DONE",cloud_error);
                 }else{
-                    console.log('GET-DONE');
+                    console.log('CART-POST-DONE');
                 }
                 done();
             });
