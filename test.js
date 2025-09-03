@@ -484,9 +484,9 @@ describe('connect', function(){ this.timeout(25000);
 //item_cart_post
 describe('item_post_data', function(){ this.timeout(25000);
     it("_item_post_data", function(done){
+        let cloud_data = {cart:DataItem.get_new(DataType.CART,0)};
         let cloud_error=null;
         let database = {};
-        var item = DataItem.get_new(DATA_TYPE,0);
         //var item = DataItem.get_new(DATA_TYPE,KEY);
         async.series([
             async function(call){
@@ -508,32 +508,40 @@ describe('item_post_data', function(){ this.timeout(25000);
                 let parent_sub_item_1_data_type = DataType.ITEM;
                 let parent_sub_item_1_id = "0eb7b268-7c19-4705-a94e-e939568b85d8";
 
+                let parent_sub_item_2_data_type = DataType.ITEM;
+                let parent_sub_item_2_id = "1e95bd1b-f902-4fc0-8424-da0c93b81b48";
+
                 let cart = Cart_Logic.get_cart(parent_data_type,user_id);
                 let cart_item = Cart_Logic.get_cart_item(parent_data_type,parent_id,cart.cart_number,user_id,1);
                 cart.cart_item_list.push(cart_item);
 
-                let cart_sub_item = Cart_Logic.get_cart_sub_item(parent_sub_item_1_data_type,parent_sub_item_1_id,cart.cart_number,user_id,1);
-                cart_item.cart_sub_item_list.push(cart_sub_item);
+                let cart_sub_item_1 = Cart_Logic.get_cart_sub_item(parent_sub_item_1_data_type,parent_sub_item_1_id,cart.cart_number,user_id,1);
+                cart_item.cart_sub_item_list.push(cart_sub_item_1);
+
+                let cart_sub_item_2 = Cart_Logic.get_cart_sub_item(parent_sub_item_2_data_type,parent_sub_item_2_id,cart.cart_number,user_id,1);
+                cart_item.cart_sub_item_list.push(cart_sub_item_2);
 
                 const [error,data] = await Cart_Data.post(database,user_id,cart);
                 if(error){
                     cloud_error=Log.append(cloud_error,error);
                 }else{
-                    cart = data.cart;
-                    //console.log(item);
+                    cloud_data.cart = data.cart;
+                    Log.w('cart_post_cart_data',cloud_data.cart);
                     console.log('CART-POST-SUCCESS');
                 }
                 console.log('CART-POST-END');
             },
             async function(call){
                 console.log('CART-GET-START');
-                const [error,data] = await Cart_Data.post(database,user_id,cart);
+                const [error,data] = await Cart_Data.get(database,cloud_data.cart.cart_number);
                 if(error){
                     cloud_error=Log.append(cloud_error,error);
                 }else{
-                    cart = data.cart;
-                    //console.log(item);
-                    console.log('CART-POST-SUCCESS');
+                    cloud_data.cart = data.cart;
+                    Log.w('cart_get_cart_data',cloud_data.cart);
+                    Log.w('cart_get_cart_data_cart_item_list',cloud_data.cart.cart_item_list);
+                    Log.w('cart_get_cart_data_cart_item_list_sub_item_list',cloud_data.cart.cart_item_list[0].sub_item_list);
+                    console.log('CART-GET-DONE');
                 }
                 console.log('CART-GET-END');
             },

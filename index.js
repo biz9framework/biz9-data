@@ -711,42 +711,35 @@ class Order_Data {
 		});
 	};
 }
-
 class Cart_Data {
 	//9_cart_post
-	static post = async (database,user_id,cart,option) => {
+	static post = async (database,user_id,post_cart,option) => {
 		return new Promise((callback) => {
 			let cloud_data = {};
 			let error = null;
-			cloud_data.publish_cart = DataItem.get_new(DataType.CART,0);
-			cloud_data.publish_cart_item_list = [];
-			cloud_data.publish_cart_sub_item_list = [];
+			cloud_data.cart = DataItem.get_new(DataType.CART,post_cart.id,{cart_number:post_cart.cart_number,parent_data_type:post_cart.parent_data_type,user_id:user_id});
+			cloud_data.cart_item_list = [];
+			cloud_data.cart_sub_item_list = [];
 			async.series([
 				//post - cart
 				async function(call){
-					let publish_cart = DataItem.get_new(DataType.CART,cart.id,
-						{
-							cart_number:cart.cart_number,
-							parent_data_type:cart.parent_data_type,
-							user_id:user_id
-						});
-					const [error,data] = await Portal.post(database,DataType.CART,publish_cart);
+					const [error,data] = await Portal.post(database,DataType.CART,cloud_data.cart);
 					if(error){
 						error=Log.append(error,error);
 					}else{
-						cloud_data.publish_cart = data.item;
+						cloud_data.cart = data.item;
 					}
 				},
 				//post - cart items
 				async function(call){
-					if(cart.cart_item_list.length>0){
-						cart.cart_item_list.forEach(item => {
+					if(post_cart.cart_item_list.length>0){
+						post_cart.cart_item_list.forEach(item => {
 							item.temp_row_id = Num.get_id();
-							cloud_data.publish_cart_item_list.push(
+							cloud_data.cart_item_list.push(
 							DataItem.get_new(DataType.CART_ITEM,0,
 								{
-									cart_id:cloud_data.publish_cart.id,
-									cart_number:cloud_data.publish_cart.cart_number,
+									cart_id:cloud_data.cart.id,
+									cart_number:cloud_data.cart.cart_number,
 									user_id:user_id,
 
 									quanity:item.quanity,
@@ -756,40 +749,40 @@ class Cart_Data {
 									temp_row_id :item.temp_row_id
 								}));
         				});
-						if(cloud_data.publish_cart_item_list.length>0){
-							const [error,data] = await Portal.post_list(database,cloud_data.publish_cart_item_list);
+						if(cloud_data.cart_item_list.length>0){
+							const [error,data] = await Portal.post_list(database,cloud_data.cart_item_list);
 							if(error){
 								error=Log.append(error,error);
 							}else{
-								cloud_data.publish_cart_item_list = data.item_list;
+								cloud_data.cart_item_list = data.item_list;
 							}
 						}
 					}
 				},
 				//post - cart_sub_item_list
 				async function(call){
-					if(cart.cart_item_list.length>0){
-						cart.cart_item_list.forEach(cart_item => {
+					if(post_cart.cart_item_list.length>0){
+						post_cart.cart_item_list.forEach(cart_item => {
 							cart_item.cart_sub_item_list.forEach(cart_sub_item => {
-								cloud_data.publish_cart_sub_item_list.push(
+								cloud_data.cart_sub_item_list.push(
 								DataItem.get_new(DataType.CART_SUB_ITEM,0,
 									{
-										cart_id:cloud_data.publish_cart.id,
-										cart_number:cloud_data.publish_cart.cart_number,
+										cart_id:cloud_data.cart.id,
+										cart_number:cloud_data.cart.cart_number,
 										user_id:user_id,
-										cart_item_id:cloud_data.publish_cart_item_list.find(item_find => item_find.temp_row_id === cart_item.temp_row_id).id,
+										cart_item_id:cloud_data.cart_item_list.find(item_find => item_find.temp_row_id === cart_item.temp_row_id).id,
 										quanity:cart_sub_item.quanity,
 										parent_data_type:cart_sub_item.parent_data_type,
 										parent_id:cart_sub_item.parent_id
 									}));
         					});
         				});
-						if(cloud_data.publish_cart_sub_item_list.length>0){
-							const [error,data] = await Portal.post_list(database,cloud_data.publish_cart_sub_item_list);
+						if(cloud_data.cart_sub_item_list.length>0){
+							const [error,data] = await Portal.post_list(database,cloud_data.cart_sub_item_list);
 							if(error){
 								error=Log.append(error,error);
 							}else{
-								cloud_data.publish_cart_sub_item_list = data.item_list;
+								cloud_data.cart_sub_item_list = data.item_list;
 							}
 						}
 					}
@@ -803,24 +796,24 @@ class Cart_Data {
 		});
 	};
 	//9_cart_get
-	static get = (database,cart_number,option) => {
+	static get = (database,cart_number) => {
 		return new Promise((callback) => {
 			let cloud_data = {cart:DataItem.get_new(DataType.CART,0,{cart_number:cart_number,cart_item_list:[]})};
 			let cart_parent_item_list_query = { $or: [] };
 			let cart_sub_item_list_query = { $or: [] };
 			let error = null;
 			let cart_sub_item_list = [];
-			option = !Obj.check_is_empty(option) ? option : {get_cart_item:true};
 			async.series([
 				//get_cart
 				async function(call){
-					option.filter = { cart_number: { $regex:String(cart_number), $options: "i" } };
-					const [error,data] = await Portal.get(database,DataType.CART,cart_number,option);
+					let filter = { cart_number: { $regex:String(cart_number), $options: "i" } };
+					const [error,data] = await Portal.get(database,DataType.CART,cart_number,{filter:filter});
 					if(error){
 						error=Log.append(error,error);
 					}else{
 						cloud_data.cart = data.item;
 					}
+					Log.w('cloud_data',cloud_data);
 				},
 				//get_cart_item_list
 				async function(call){
