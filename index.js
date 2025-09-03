@@ -414,7 +414,7 @@ class Order_Data {
 		return new Promise((callback) => {
 			let cloud_data = {};
 			let error = null;
-			cloud_data.publish_order = DataItem.get_new(DataType.ORDER,0);
+			cloud_data.order = DataItem.get_new(DataType.ORDER,0);
 			cloud_data.publish_order_item_list = [];
 			cloud_data.publish_order_sub_item_list = [];
 			async.series([
@@ -1340,15 +1340,15 @@ class User_Data {
 }
 class Favorite_Data {
 	//9_favorite_post
-	static post = async (database,item_data_type,item_id,user_id) => {
+	static post = async (database,parent_data_type,parent_id,user_id) => {
 		return new Promise((callback) => {
 			let error = null;
 			let cloud_data = {};
 			cloud_data.is_unique = false;
-			cloud_data.item = DataItem.get_new(DataType.FAVORITE,0,{item_data_type:item_data_type,item_id:item_id,user_id:user_id});
+			cloud_data.favorite = DataItem.get_new(DataType.FAVORITE,0,{parent_data_type:parent_data_type,parent_id:parent_id,user_id:user_id});
 			async.series([
 				async function(call){
-					let favorite_filter = Favorite_Logic.get_search_filter(item_data_type,item_id,user_id);
+					let favorite_filter = Favorite_Logic.get_search_filter(parent_data_type,parent_id,user_id);
 					let search = Item_Logic.get_search(DataType.FAVORITE,favorite_filter,{},1,0);
 					const [error,data] = await Portal.count(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size);
 					if(error){
@@ -1361,7 +1361,7 @@ class Favorite_Data {
 				},
 				async function(call){
 					if(cloud_data.is_unique){
-						const [error,data] = await Portal.post(database,cloud_data.item.data_type,cloud_data.item);
+						const [error,data] = await Portal.post(DataType.FAVORITE,cloud_data.favorite);
 						if(error){
 							cloud_error=Log.append(cloud_error,error);
 						}else{
@@ -1378,7 +1378,7 @@ class Favorite_Data {
 		});
 	};
 	//9_favorite_get
-	static get = async (database,item_data_type,user_id,sort_by,page_current,page_size,option) => {
+	static get = async (database,parent_data_type,user_id,sort_by,page_current,page_size,option) => {
 		return new Promise((callback) => {
 			let error = null;
 			let cloud_data = {};
@@ -1386,15 +1386,15 @@ class Favorite_Data {
 			async.series([
 				//favorite_list
 				async function(call){
-					let query = {user_id:user_id,item_data_type:item_data_type};
+					let query = {user_id:user_id,parent_data_type:parent_data_type};
 					let search = Item_Logic.get_search(DataType.FAVORITE,query,{date_create:-1},page_current,page_size);
-					let option = {get_item_search:true,item_search_data_type:item_data_type,item_search_field:'id',item_search_value:'item_id'};
+					let option = {get_item_search:true,item_search_data_type:parent_data_type,item_search_field:'id',item_search_value:'item_id'};
 					const [error,data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option);
 					if(error){
 						cloud_error=Log.append(cloud_error,error);
 					}else{
 						for(let a=0;a<data.item_list.length;a++){
-							data.item_list[a].item = DataItem.get_new(item_data_type,data.item_list[a].item,{title:'Not Found'});
+							data.item_list[a].item = DataItem.get_new(parent_data_type,data.item_list[a].item,{title:'Not Found'});
 							for(let b=0;b<data.item_search_list.length;b++){
 								if(data.item_list[a].item_id == data.item_search_list[b].id){
 									data.item_list[a].item = data.item_search_list[b];
@@ -1413,7 +1413,6 @@ class Favorite_Data {
 		});
 	};
 }
-
 class Business_Data {
 	//9_business_get
 	static get = (database,option) => {
