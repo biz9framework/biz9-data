@@ -543,21 +543,21 @@ describe('item_post_data', function(){ this.timeout(25000);
                 }
                 console.log('CART-GET-END');
             },
-            /*
             async function(call){
                 console.log('ORDER-POST-START');
-
-                let order = Order_Logic.get_cart(cart);
-                let cart_item = Cart_Logic.get_cart_item(parent_data_type,parent_id,cart.cart_number,user_id,1);
-                cart.cart_item_list.push(cart_item);
-
-                let cart_sub_item = Cart_Logic.get_cart_sub_item(parent_sub_item_1_data_type,parent_sub_item_1_id,cart.cart_number,user_id,1);
-                cart_item.cart_sub_item_list.push(cart_sub_item);
-
-
-                console.log('ORDER-POST-END');
-
+                let order = Order_Logic.get_order(cloud_data.cart);
+                Log.w('new_order',order);
+                const [error,data] = await Order_Data.post(database,order);
+                if(error){
+                    cloud_error=Log.append(cloud_error,error);
+                }else{
+                    cloud_data.order = data.order;
+                    Log.w('order_get_order_data',cloud_data.order);
+                    console.log('ORDER-GET-DONE');
+                }
+                console.log('ORDRE-GET-END');
             },
+            /*
             async function(call){
                 console.log('CLOSE-START');
                 const [error,data] = await Database.close(database,{});

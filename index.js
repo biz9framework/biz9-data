@@ -435,7 +435,6 @@ class Order_Data {
 						cloud_data.order = data.item;
 					}
 				},
-				/*
 				//post - order items
 				async function(call){
 					if(order.order_item_list.length>0){
@@ -465,6 +464,7 @@ class Order_Data {
 						}
 					}
 				},
+				/*
 				//post - order_sub_item_list
 				async function(call){
 					if(order.order_item_list.length>0){
@@ -882,9 +882,9 @@ class Cart_Data {
 				// cart_item_list - cart_sub_item_list - bind
 				async function(call){
 					cloud_data.cart.cart_item_list.forEach(cart_item => {
-						cart_item.sub_item_list = [];
+						cart_item.cart_sub_item_list = [];
 						let item_filter_list = cart_sub_item_list.filter(item_find=>item_find.cart_item_id===cart_item.id);
-						cart_item.sub_item_list = [...item_filter_list, ...cart_item.sub_item_list];
+						cart_item.cart_sub_item_list = [...item_filter_list, ...cart_item.cart_sub_item_list];
 					});
 				},
 				async function(call){
@@ -896,7 +896,7 @@ class Cart_Data {
 								cart_item.sub_total = (cart_item.sub_total + cart_item.parent_item.cost) * cart_item.quanity;
 								grand_total = grand_total + cart_item.sub_total;
 							}
-							cart_item.sub_item_list.forEach(cart_sub_item => {
+							cart_item.cart_sub_item_list.forEach(cart_sub_item => {
 								cart_sub_item.sub_total = 0;
 								if(!isNaN(cart_sub_item.parent_item.cost)){
 									cart_sub_item.sub_total = (cart_sub_item.sub_total + cart_sub_item.parent_item.cost) * cart_sub_item.quanity;
