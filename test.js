@@ -481,7 +481,7 @@ describe('connect', function(){ this.timeout(25000);
     });
 });
 });
-//item_cart_post
+//9_item_post_data
 describe('item_post_data', function(){ this.timeout(25000);
     it("_item_post_data", function(done){
         let cloud_data = {cart:DataItem.get_new(DataType.CART,0)};
@@ -552,25 +552,23 @@ describe('item_post_data', function(){ this.timeout(25000);
                     cloud_error=Log.append(cloud_error,error);
                 }else{
                     cloud_data.order = data.order;
-                    Log.w('order_get_order_data',cloud_data.order);
+                    Log.w('order_post_order_data_22',data);
                     console.log('ORDER-GET-DONE');
                 }
                 console.log('ORDRE-GET-END');
             },
-            /*
             async function(call){
-                console.log('CLOSE-START');
-                const [error,data] = await Database.close(database,{});
+                console.log('ORDER-GET-START');
+                const [error,data] = await Order_Data.get(database,cloud_data.order.order_number);
                 if(error){
                     cloud_error=Log.append(cloud_error,error);
                 }else{
-                    database = data;
-                    assert.Equal(data,null);
-                    console.log('CLOSE-SUCCESS');
+                    cloud_data.order = data.order;
+                    Log.w('cart_get_order_data',cloud_data.order);
+                    console.log('ORDER-GET-DONE');
                 }
-                console.log('CLOSE-END');
+                console.log('ORDER-GET-END');
             },
-            */
         ],
             function(error, result){
                 if(cloud_error){
@@ -582,7 +580,48 @@ describe('item_post_data', function(){ this.timeout(25000);
             });
     });
 });
+//9_item_delete_data
+describe('item_delete_data', function(){ this.timeout(25000);
+    it("_item_delete_data", function(done){
+        let cloud_data = {cart:DataItem.get_new(DataType.CART,0)};
+        let cloud_error=null;
+        let database = {};
+        async.series([
+            async function(call){
+                console.log('DATABASE-START');
+                const [error,data] = await Database.get(DATA_CONFIG);
+                if(error){
+                    cloud_error=Log.append(cloud_error,error);
+                }else{
+                    database = data;
+                    console.log('DATABASE-SUCCESS');
+                }
+                console.log('DATABASE-END');
+            },
+            async function(call){
+                console.log('CART-DELETE-START');
+                let id = "49d591f1-5c19-4520-8b46-1528bde5115d";
 
+                const [error,data] = await Cart_Data.delete(database,id);
+                if(error){
+                    cloud_error=Log.append(cloud_error,error);
+                }else{
+                    Log.w('cart_delete_cart_data',data);
+                    console.log('CART-DELETE-SUCCESS');
+                }
+                console.log('CART-DELETE-END');
+            },
+        ],
+            function(error, result){
+                if(cloud_error){
+                    Log.error("GET-ERROR-DONE",cloud_error);
+                }else{
+                    console.log('CART-DELETE-DONE');
+                }
+                done();
+            });
+    });
+});
 /*
 describe('item_get', function(){ this.timeout(25000);
     it("_item_get", function(done){
@@ -846,6 +885,7 @@ describe('old_update_old', function(){ this.timeout(25000);
 });
 */
 
+/*
 describe('item_delete', function(){ this.timeout(25000);
     it("_item_delete", function(done){
         let cloud_error=null;
@@ -900,7 +940,7 @@ describe('item_delete', function(){ this.timeout(25000);
             });
     });
 });
-
+*/
 
 
 
