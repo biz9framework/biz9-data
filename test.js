@@ -539,8 +539,6 @@ describe('item_post_data', function(){ this.timeout(25000);
                 }else{
                     cloud_data.cart = data.cart;
                     Log.w('cart_get_cart_data',cloud_data.cart);
-                    Log.w('cart_get_cart_data_cart_item_list',cloud_data.cart.cart_item_list);
-                    Log.w('cart_get_cart_data_cart_item_list_sub_item_list',cloud_data.cart.cart_item_list[0].sub_item_list);
                     console.log('CART-GET-DONE');
                 }
                 console.log('CART-GET-END');
