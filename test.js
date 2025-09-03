@@ -511,7 +511,7 @@ describe('item_post_data', function(){ this.timeout(25000);
                 let parent_sub_item_2_data_type = DataType.ITEM;
                 let parent_sub_item_2_id = "1e95bd1b-f902-4fc0-8424-da0c93b81b48";
 
-                let cart = Cart_Logic.get_new_cart(parent_data_type,user_id);
+                let cart = Cart_Logic.get_new(parent_data_type,user_id);
                 let cart_item = Cart_Logic.get_new_cart_item(parent_data_type,parent_id,cart.cart_number,user_id,1);
                 cart.cart_item_list.push(cart_item);
 
@@ -545,7 +545,7 @@ describe('item_post_data', function(){ this.timeout(25000);
             },
             async function(call){
                 console.log('ORDER-POST-START');
-                let order = Order_Logic.get_new_order(cloud_data.cart);
+                let order = Order_Logic.get_new(cloud_data.cart);
                 Log.w('new_order',order);
                 const [error,data] = await Order_Data.post(database,order);
                 if(error){
