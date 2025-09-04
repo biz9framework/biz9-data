@@ -698,11 +698,11 @@ class Order_Data {
 }
 class Cart_Data {
 	//9_cart_post
-	static post = async (database,user_id,post_cart,option) => {
+	static post = async (database,user_id,cart,option) => {
 		return new Promise((callback) => {
 			let cloud_data = {};
 			let error = null;
-			cloud_data.cart = DataItem.get_new(DataType.CART,post_cart.id,{cart_number:post_cart.cart_number,parent_data_type:post_cart.parent_data_type,user_id:user_id});
+			cloud_data.cart = DataItem.get_new(DataType.CART,cart.id,{cart_number:cart.cart_number,parent_data_type:cart.parent_data_type,user_id:user_id});
 			cloud_data.cart_item_list = [];
 			cloud_data.cart_sub_item_list = [];
 			async.series([
@@ -717,8 +717,8 @@ class Cart_Data {
 				},
 				//post - cart items
 				async function(call){
-					if(post_cart.cart_item_list.length>0){
-						post_cart.cart_item_list.forEach(item => {
+					if(cart.cart_item_list.length>0){
+						cart.cart_item_list.forEach(item => {
 							item.temp_row_id = Num.get_id();
 							cloud_data.cart_item_list.push(
 							DataItem.get_new(DataType.CART_ITEM,0,
@@ -746,8 +746,8 @@ class Cart_Data {
 				},
 				//post - cart_sub_item_list
 				async function(call){
-					if(post_cart.cart_item_list.length>0){
-						post_cart.cart_item_list.forEach(cart_item => {
+					if(cart.cart_item_list.length>0){
+						cart.cart_item_list.forEach(cart_item => {
 							cart_item.cart_sub_item_list.forEach(cart_sub_item => {
 								cloud_data.cart_sub_item_list.push(
 								DataItem.get_new(DataType.CART_SUB_ITEM,0,
