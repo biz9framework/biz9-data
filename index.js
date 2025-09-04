@@ -415,8 +415,8 @@ class Order_Data {
 			let cloud_data = {};
 			let error = null;
 			cloud_data.order = DataItem.get_new(DataType.ORDER,0);
-			cloud_data.publish_order_item_list = [];
-			cloud_data.publish_order_sub_item_list = [];
+			cloud_data.order_item_list = [];
+			cloud_data.order_sub_item_list = [];
 			async.series([
 				async function(call){
 					cloud_data.order = DataItem.get_new(DataType.ORDER,0,
@@ -428,7 +428,16 @@ class Order_Data {
 							grand_total:order.grand_total,
 
 						});
-					const [error,data] = await Portal.post(database,DataType.ORDER,cloud_data.order);
+				},
+				async function(call){
+					for(const key in order) {
+						if(Str.check_is_null(cloud_data.order[key]) && key != 'order_item_list' &&  key != 'order_item_list' && key != 'order_sub_item_list'){
+							cloud_data.order[key] = order[key];
+						}
+    				}
+				},
+				async function(call){
+				const [error,data] = await Portal.post(database,DataType.ORDER,cloud_data.order);
 					if(error){
 						error=Log.append(error,error);
 					}else{
@@ -440,7 +449,7 @@ class Order_Data {
 					if(order.order_item_list.length>0){
 						order.order_item_list.forEach(item => {
 							item.temp_row_id = Num.get_id();
-							cloud_data.publish_order_item_list.push(
+							cloud_data.order_item_list.push(
 							DataItem.get_new(DataType.ORDER_ITEM,0,
 								{
 									order_id:cloud_data.order.id,
@@ -454,12 +463,12 @@ class Order_Data {
 									temp_row_id :item.temp_row_id
 								}));
         				});
-						if(cloud_data.publish_order_item_list.length>0){
-							const [error,data] = await Portal.post_list(database,cloud_data.publish_order_item_list);
+						if(cloud_data.order_item_list.length>0){
+							const [error,data] = await Portal.post_list(database,cloud_data.order_item_list);
 							if(error){
 								error=Log.append(error,error);
 							}else{
-								cloud_data.publish_order_item_list = data.item_list;
+								cloud_data.order_item_list = data.item_list;
 							}
 						}
 					}
@@ -469,26 +478,26 @@ class Order_Data {
 					if(order.order_item_list.length>0){
 						order.order_item_list.forEach(order_item => {
 							order_item.order_sub_item_list.forEach(order_sub_item => {
-								cloud_data.publish_order_sub_item_list.push(
+								cloud_data.order_sub_item_list.push(
 								DataItem.get_new(DataType.ORDER_SUB_ITEM,0,
 									{
 										order_id:cloud_data.order.id,
 										order_number:cloud_data.order.order_number,
 										user_id:cloud_data.order.user_id,
 
-										order_item_id:cloud_data.publish_order_item_list.find(item_find => item_find.temp_row_id === order_item.temp_row_id).id,
+										order_item_id:cloud_data.order_item_list.find(item_find => item_find.temp_row_id === order_item.temp_row_id).id,
 										quanity:order_sub_item.quanity,
 										parent_data_type:order_sub_item.parent_data_type,
 										parent_id:order_sub_item.parent_id
 									}));
         					});
         				});
-						if(cloud_data.publish_order_sub_item_list.length>0){
-							const [error,data] = await Portal.post_list(database,cloud_data.publish_order_sub_item_list);
+						if(cloud_data.order_sub_item_list.length>0){
+							const [error,data] = await Portal.post_list(database,cloud_data.order_sub_item_list);
 							if(error){
 								error=Log.append(error,error);
 							}else{
-								cloud_data.publish_order_sub_item_list = data.item_list;
+								cloud_data.order_sub_item_list = data.item_list;
 							}
 						}
 
@@ -611,7 +620,7 @@ class Order_Data {
 								}
 							});
 						});
-						cloud_data.order.grand_total = Num.get_money(grand_total);
+						cloud_data.order.grand_total = grand_total;
 					}
 				},
 			]).then(result => {
@@ -889,7 +898,7 @@ class Cart_Data {
 								}
 							});
 						});
-						cloud_data.cart.grand_total = Num.get_money(grand_total);
+						cloud_data.cart.grand_total = grand_total;
 					}
 				},
 			]).then(result => {
