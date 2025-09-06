@@ -944,32 +944,28 @@ describe('item_delete', function(){ this.timeout(25000);
 
 
 
-/*
 describe('get_data', function(){ this.timeout(25000);
-    it("_get_data", function(done){
+    it("__get_data", function(done){
         let cloud_error = null;
         let database = {};
         let item = get_new_item(DATA_TYPE,KEY);
         async.series([
             async function(call){
                 console.log('TEST-CONNECT-START');
-        //const [error,data] = await Database.get(DATA_CONFIG,{biz9_config_file:"/home/think2/www/doqbox/biz9-framework/biz9-service/code/biz9_config"});
-        //const [error,data] = await Database.get(DATA_CONFIG,{biz9_config_file:"/home/think2/www/doqbox/biz9-framework/biz9-service/code/biz9_config",app_id:"cool_apple"});
-        //const [error,data] = await Database.get(DATA_CONFIG,{biz9_config_file:"/home/think2/www/doqbox/biz9-framework/biz9-service/code/biz9_config"});
-        //const [error,data] = await Database.get(DATA_CONFIG,{app_id:'cool_work'});
-        //const [error,data] = await Database.get(DATA_CONFIG,{app_id:'cool_work',biz9_config_file:"/home/think2/www/doqbox/biz9-framework/biz9-service/code/biz9_config"});
-        //const [error,data] = await Database.get({},{app_id:"cool_work",biz9_config_file:"/home/think2/www/doqbox/biz9-framework/biz9-service/code/biz9_config"});
                 const [error,data] = await Database.get(DATA_CONFIG);
                 database = data;
-                Log.w('database',database);
                 console.log('TEST-CONNECT-SUCCESS');
                 console.log('TEST-CONNECT-END');
             },
             async function(call){
                 console.log('TEST-GET-START');
-                Log.w('item',item);
-                const [error,data] = await Portal.get(database,item.data_type,item.id,OPTION);
-                Log.w('database',data);
+                let data_type = DataType.PRODUCT;
+                let key = "OR-32353";
+                let search  = Item_Logic.get_search(DataType.ORDER,{},{},1,0);
+                Log.w('search',search);
+                //const [error,data] = await Order_Data.get(database,key);
+                const [error,data] = await Order_Data.search(database,data_type,search.filter,search.sort_by,search.parent_current,search.page_size);
+                Log.w('data',data);
                 console.log('TEST-GET-SUCCESS');
                 console.log('TEST-GET-END');
             },
@@ -978,14 +974,15 @@ describe('get_data', function(){ this.timeout(25000);
                 if(cloud_error){
                     Log.error("TEST-GET-DONE",cloud_error);
                 }else{
-                    console.log('TEST-GET-DATA-CONNECT-DONE');
+                    console.log('TEST-GET-DATA-DONE');
                 }
                 done();
             });
     });
 });
-*/
-        describe('item_list_update', function(){ this.timeout(25000);
+
+
+describe('item_list_update', function(){ this.timeout(25000);
             it("_item_list_update", function(done){
                 let cloud_error=null;
                 let db_connect = {};
