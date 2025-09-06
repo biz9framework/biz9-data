@@ -514,7 +514,7 @@ class Order_Data {
 	//9_order_get
 	static get = (database,order_number,option) => {
 		return new Promise((callback) => {
-			let cloud_data = {order:DataItem.get_new(DataType.ORDER,0,{order_number:order_number,order_item_list:[],user:DataItem.get_new(DataType.USER,0)})};
+			let cloud_data = {order:DataItem.get_new(DataType.ORDER,0,{order_number:order_number,order_item_list:[],parent_user:DataItem.get_new(DataType.USER,0)})};
 			let order_parent_item_list_query = { $or: [] };
 			let order_sub_item_list_query = { $or: [] };
 			let error = null;
@@ -533,7 +533,7 @@ class Order_Data {
 				},
 				async function(call){
 					const [error,data] = await Portal.get(database,DataType.USER,cloud_data.order.user_id);
-					cloud_data.user=data.item;
+					cloud_data.parent_user=data.item;
 				},
 				//get_order_item_list
 				async function(call){
@@ -826,12 +826,11 @@ class Order_Data {
 						let item_filter_list = order_item_list.filter(item_find=>item_find.order_number===order.order_number);
 						order.order_item_list = [...item_filter_list, ...order.order_item_list];
 					});
-					Log.w('order_item_list',cloud_data.order_list);
 				},
 
 
 			]).then(result => {
-				//callback([error,cloud_data]);
+				callback([error,cloud_data]);
 			}).catch(error => {
 				Log.error("Order-Search",error);
 				callback([error,[]]);
@@ -849,6 +848,13 @@ class Cart_Data {
 			cloud_data.cart_item_list = [];
 			cloud_data.cart_sub_item_list = [];
 			async.series([
+				async function(call){
+					for(const key in cart) {
+						if(Str.check_is_null(cloud_data.cart[key]) && key != 'cart_item_list' &&  key != 'cart_item_list' && key != 'cart_sub_item_list'){
+							cloud_data.cart[key] = cart[key];
+						}
+    				}
+				},
 				//post - cart
 				async function(call){
 					const [error,data] = await Portal.post(database,DataType.CART,cloud_data.cart);
