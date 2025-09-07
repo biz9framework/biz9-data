@@ -732,6 +732,7 @@ class Order_Data {
 					}
 				},
 				async function(call){
+					if(cloud_data.item_list.length>0){
 					let option = {get_item_search:true,item_search_data_type:DataType.USER,item_search_field:'id',item_search_value:'user_id'};
 					const [error,data] = await Portal.search(database,DataType.ORDER,filter,sort_by,page_current,page_size,option);
      				data.item_list.forEach(item => {
@@ -751,9 +752,11 @@ class Order_Data {
 						cloud_data.data_type = data.data_type;
 						cloud_data.order_list = data.item_list;
 					}
+					}
 				},
 				//get_order_item_list
 				async function(call){
+				if(cloud_data.item_list.length>0){
 					cloud_data.order_list.forEach(order => {
 						let query_field = {};
 						query_field['order_number'] = { $regex:String(order.order_number), $options: "i" };
@@ -766,9 +769,11 @@ class Order_Data {
 					}else{
 						order_item_list = data.item_list;
 					}
+				}
 				},
 				//get_order_item_list - parent_item_list
 				async function(call){
+		if(cloud_data.item_list.length>0){
 						order_item_list.forEach(order_item => {
 							let query_field = {};
 							query_field['id'] = { $regex:String(order_item.parent_id), $options: "i" };
@@ -783,9 +788,11 @@ class Order_Data {
 								order_item.parent_item = data.item_list.find(item_find => item_find.id === order_item.parent_id) ? data.item_list.find(item_find => item_find.id === order_item.parent_id):Item_Logic.get_not_found(order_item.parent_data_type,order_item.parent_id,{app_id:database.app_id});
 							});
 						}
+		}
 				},
 				//get_order_sub_item_list
 				async function(call){
+		if(cloud_data.item_list.length>0){
 					let search = Item_Logic.get_search(DataType.ORDER_SUB_ITEM,order_number_list_query,{},1,0);
 					const [error,data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,{});
 					if(error){
@@ -793,9 +800,11 @@ class Order_Data {
 					}else{
 						order_sub_item_list = data.item_list;
 					}
+		}
 				},
 				//get_order_sub_item_list - parent_item_list
 				async function(call){
+		if(cloud_data.item_list.length>0){
 						order_sub_item_list.forEach(order_sub_item => {
 							let query_field = {};
 							query_field['id'] = { $regex:String(order_sub_item.parent_id), $options: "i" };
@@ -810,22 +819,27 @@ class Order_Data {
 								order_sub_item.parent_item = data.item_list.find(item_find => item_find.id === order_sub_item.parent_id) ? data.item_list.find(item_find => item_find.id === order_sub_item.parent_id):Item_Logic.get_not_found(order_sub_item.parent_data_type,order_sub_item.parent_id,{app_id:database.app_id});
 							});
 						}
+		}
 				},
 				// order_item_list - order_sub_item_list - bind
 				async function(call){
+							if(cloud_data.item_list.length>0){
 					order_item_list.forEach(order_item => {
 						order_item.order_sub_item_list = [];
 						let item_filter_list = order_sub_item_list.filter(item_find=>item_find.order_item_id===order_item.id);
 						order_item.order_sub_item_list = [...item_filter_list, ...order_item.order_sub_item_list];
 					});
+							}
 				},
 				// order_list - order_item_list - bind
 				async function(call){
+				if(cloud_data.item_list.length>0){
 					cloud_data.order_list.forEach(order => {
 						order.order_item_list = [];
 						let item_filter_list = order_item_list.filter(item_find=>item_find.order_number===order.order_number);
 						order.order_item_list = [...item_filter_list, ...order.order_item_list];
 					});
+				}
 				},
 			]).then(result => {
 				callback([error,cloud_data]);
