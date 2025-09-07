@@ -1,7 +1,7 @@
 const async = require('async');
 const assert = require('node:assert');
 
-const {Data,Database,Category_Data,Product_Data,Page_Data,Blog_Post_Data,Content_Data,Stat_Data,List_Data,Review_Data,Favorite_Data,Search_Data,Admin_Data,Business_Data,Order_Data,User_Data,Faq_Data,Portal,Cart_Data} = require(".");
+const {Data,Database,Category_Data,Product_Data,Page_Data,Blog_Post_Data,Content_Data,Stat_Data,List_Data,Review_Data,Favorite_Data,Search_Data,Admin_Data,Business_Data,Order_Data,User_Data,Faq_Data,Portal,Cart_Data,Activity_Data} = require(".");
 
 const {Log,Num,Str} = require("biz9-utility");
 const {DataType,DataItem,Item_Logic,Page_Logic,Template_Logic,Blog_Post_Logic,Content_Logic,Product_Logic,Field_Logic,Admin_Logic,Business_Logic,Category_Logic,User_Logic,Order_Logic,FieldType,Cart_Logic,Stat_Logic,Review_Logic,PageType} = require("/home/think2/www/doqbox/biz9-framework/biz9-logic/code");
@@ -481,9 +481,9 @@ describe('connect', function(){ this.timeout(25000);
     });
 });
 });
-//9_item_post_data
-describe('item_post_data', function(){ this.timeout(25000);
-    it("_item_post_data", function(done){
+//9_post_data
+describe('post_data', function(){ this.timeout(25000);
+    it("_post_data", function(done){
         let cloud_data = {cart:DataItem.get_new(DataType.CART,0)};
         let cloud_error=null;
         let database = {};
@@ -500,6 +500,21 @@ describe('item_post_data', function(){ this.timeout(25000);
                 }
                 console.log('DATABASE-END');
             },
+            async function(call){
+                console.log('SUPER-ADMIN-ADD-START');
+                let user = DataItem.get_new(DataType.USER,0,{title:'ceo',title_url:'ceo',email:"ceo@bossappz.com",password:"1234567",role:FieldType.USER_ROLE_SUPER_ADMIN});
+                Log.w('super_user',user);
+                const [error,data] = await Portal.post(database,DataType.USER,user);
+                if(error){
+                    cloud_error=Log.append(cloud_error,error);
+                }else{
+                    console.log(data);
+                    console.log('SUPER-ADMIN-ADD-SUCCESS');
+                }
+                console.log('SUPER-ADMIN-ADD-END');
+            },
+
+            /*
             async function(call){
                 console.log('CART-POST-START');
                 let parent_data_type = DataType.PRODUCT;
@@ -569,12 +584,13 @@ describe('item_post_data', function(){ this.timeout(25000);
                 }
                 console.log('ORDER-GET-END');
             },
+            */
         ],
             function(error, result){
                 if(cloud_error){
                     Log.error("GET-ERROR-DONE",cloud_error);
                 }else{
-                    console.log('CART-POST-DONE');
+                    console.log('POST-DONE');
                 }
                 done();
             });
@@ -961,10 +977,10 @@ describe('get_data', function(){ this.timeout(25000);
                 console.log('TEST-GET-START');
                 let data_type = DataType.PRODUCT;
                 let key = "OR-32353";
-                let search  = Item_Logic.get_search(DataType.ORDER,{},{},1,0);
+                let search  = Item_Logic.get_search(DataType.ACTIVITY,{user_id:"659b9787-c824-4e9c-9b56-808fae733dcf"},{},1,0);
                 Log.w('search',search);
                 //const [error,data] = await Order_Data.get(database,key);
-                const [error,data] = await Order_Data.search(database,data_type,search.filter,search.sort_by,search.parent_current,search.page_size);
+                const [error,data] = await Activity_Data.search(database,search.filter,search.sort_by,search.parent_current,search.page_size);
                 Log.w('data',data);
                 console.log('TEST-GET-SUCCESS');
                 console.log('TEST-GET-END');

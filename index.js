@@ -827,8 +827,6 @@ class Order_Data {
 						order.order_item_list = [...item_filter_list, ...order.order_item_list];
 					});
 				},
-
-
 			]).then(result => {
 				callback([error,cloud_data]);
 			}).catch(error => {
@@ -1277,6 +1275,46 @@ class Review_Data {
 		});
 	};
 }
+class Activity_Data {
+	static search = (database,filter,sort_by,page_current,page_size,option) => {
+		//9_activity_search
+		return new Promise((callback) => {
+			let cloud_data = {};
+			let error = null;
+			option = !Obj.check_is_empty(option) ? option : {};
+			let activity_id_list_query = { $or: [] };
+			let activity_list = [];
+			async.series([
+				async function(call){
+					let option = {get_item_search:true,item_search_data_type:DataType.USER,item_search_field:'id',item_search_value:'user_id'};
+					const [error,data] = await Portal.search(database,DataType.ACTIVITY,filter,sort_by,page_current,page_size,option);
+     				data.item_list.forEach(item => {
+            			const item_match = data.item_search_list.find(item_find => item_find.id === item.user_id);
+            			if(item_match){
+                			item.parent_user = item_match;
+            			}else{
+							item.parent_user = User_Logic.get_not_found(item.user_id);
+						}
+        			});
+					if(error){
+						error=Log.append(error,error);
+					}else{
+						cloud_data.item_count = data.item_count;
+						cloud_data.page_count = data.page_count;
+						cloud_data.filter = data.filter;
+						cloud_data.data_type = data.data_type;
+						cloud_data.activity_list = data.item_list;
+					}
+				},
+			]).then(result => {
+				callback([error,cloud_data]);
+			}).catch(error => {
+				Log.error("User-Search",error);
+				callback([error,[]]);
+			});
+		});
+	};
+}
 class User_Data {
 	static get_device_info = async (activity,device) => {
 		return new Promise((callback) => {
@@ -1312,12 +1350,13 @@ class User_Data {
 									{
 										country_name:geo_data.country_name,
 										region_name:geo_data.region_name,
-										district:geo_data.district,
+										is_proxy:geo_data.is_proxy,
+										district:geo_data.district?geo_data.district:"N/A",
 										city_name:geo_data.city_name,
 										latitude:geo_data.latitude,
 										longitude:geo_data.longitude,
 										zip_code:geo_data.zip_code,
-										isp:geo_data.isp,
+										isp:geo_data.as,
 										ip_address:geo_data.ip
 									};
 									callback([error,ip_info]);
@@ -2519,6 +2558,7 @@ class Data {
 	};
 }
 module.exports = {
+	Activity_Data,
 	Admin_Data,
 	Business_Data,
 	Blog_Post_Data,
