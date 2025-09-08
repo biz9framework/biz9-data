@@ -70,61 +70,11 @@ class Database {
 		});
 	}
 }
-class Data_Logic {
-	static get_child_list = (database,item_list,data_type,filter,sort_by,page_current,page_size,option) => {
-		return new Promise((callback) => {
-			/*
-			 * - option
-			 *    - get_group / bool / ex. true,false / def. false /n/a
-			 *    - group_search / search obj / ex. {} /n/a
-			 *
-			 *    - group_child_data_type / data_type /
-			 *    - group_parent_field / field_title /
-			 *    - group_child_field / field_title /
-			 *    */
-			let error=null;
-			let cloud_data = {};
-			let child_item_list = [];
-			async.series([
-				function(call){
-					let search = Item_Logic.get_search(data_type,filter,sort_by,page_current,page_size);
-					Data.get_list(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size).then(([error,data,item_count,page_count])=>{
-						if(error){
-							error=Log.append(error,error);
-						}else{
-							child_item_list=data;
-							call();
-						}
-					}).catch(error => {
-						error=Log.append(error,error);
-					});
-				},
-				function(call){
-					for(let a = 0; a<item_list.length;a++){
-						item_list[a].items = [];
-						for(let b = 0; b<child_item_list.length;b++){
-							if(item_list[a][option.group_parent_field] == child_item_list[b][option.group_child_field]){
-								item_list[a].items.push(child_item_list[b]);
-							}
-						}
-					}
-					cloud_data.item_list = item_list;
-					call();
-				}
-			]).then(result => {
-				callback([error,cloud_data]);
-			}).catch(error => {
-				Log.error("Get-Child-List",error);
-				callback([error,[]]);
-			});
-		});
-	};
-}
 class Blog_Post_Data {
 	//9_blog_post_get
 	static get = async (database,key,option) => {
 		return new Promise((callback) => {
-			let cloud_data = {};
+			let cloud_data = {blog_post:DataItem.get_new(DataType.BLOG_POST,0)};
 			let error = null;
 			option = !Obj.check_is_empty(option) ? option : {get_item:false,get_photo:false};
 			async.series([
@@ -133,11 +83,11 @@ class Blog_Post_Data {
 					if(error){
 						error=Log.append(error,error);
 					}else{
-						cloud_data = data;
+						cloud_data.blog_post = data.item;
 					}
 				},
 			]).then(result => {
-				callback([error,cloud_data]);
+				callback([error,cloud_data.blog_post]);
 			}).catch(error => {
 				Log.error("Blog_Post-Get",error);
 				callback([error,[]]);
@@ -147,7 +97,7 @@ class Blog_Post_Data {
 	//9_blog_post_search
 	static search = (database,filter,sort_by,page_current,page_size,option) => {
 		return new Promise((callback) => {
-			let cloud_data = {};
+			let cloud_data = {item_count:0,page_count:1,filter:{},data_type:DataType.BLOG_POST,item_list:[]};
 			let error = null;
 			option = !Obj.check_is_empty(option) ? option : {get_item:false,get_photo:false};
 			async.series([
@@ -156,7 +106,11 @@ class Blog_Post_Data {
 					if(error){
 						error=Log.append(error,error);
 					}else{
-						cloud_data = data;
+						cloud_data.item_count = data.item_count;
+						cloud_data.page_count = data.page_count;
+						cloud_data.filter = data.filter;
+						cloud_data.data_type = data.data_type;
+						cloud_data.blog_post_list = data.item_list;
 					}
 				},
 			]).then(result => {
@@ -168,11 +122,10 @@ class Blog_Post_Data {
 		});
 	};
 }
-class Category_Data {
-	//9_category_get
+class Category_Data { //9_category_get
 	static get = async (database,key,option) => {
 		return new Promise((callback) => {
-			let cloud_data = {};
+			let cloud_data = {category:DataItem.get_new(DataType.CATEGORY,0)};
 			let error = null;
 			option = !Obj.check_is_empty(option) ? option : {get_item:false,get_photo:false};
 			async.series([
@@ -181,11 +134,11 @@ class Category_Data {
 					if(error){
 						error=Log.append(error,error);
 					}else{
-						cloud_data = data;
+						cloud_data.category = data.item;
 					}
 				},
 			]).then(result => {
-				callback([error,cloud_data]);
+				callback([error,cloud_data.category]);
 			}).catch(error => {
 				Log.error("Category-Get",error);
 				callback([error,[]]);
@@ -195,7 +148,7 @@ class Category_Data {
 	//9_category_search
 	static search = (database,filter,sort_by,page_current,page_size,option) => {
 		return new Promise((callback) => {
-			let cloud_data = {};
+			let cloud_data = {item_count:0,page_count:1,filter:{},data_type:DataType.CATEGORY,item_list:[]};
 			let error = null;
 			option = !Obj.check_is_empty(option) ? option : {get_item:false,get_photo:false};
 			async.series([
@@ -204,7 +157,11 @@ class Category_Data {
 					if(error){
 						error=Log.append(error,error);
 					}else{
-						cloud_data = data;
+						cloud_data.item_count = data.item_count;
+						cloud_data.page_count = data.page_count;
+						cloud_data.filter = data.filter;
+						cloud_data.data_type = data.data_type;
+						cloud_data.category_list = data.item_list;
 					}
 				},
 			]).then(result => {
@@ -220,7 +177,7 @@ class Content_Data {
 	//9_content_get
 	static get = async (database,key,option) => {
 		return new Promise((callback) => {
-			let cloud_data = {};
+			let cloud_data = {content:DataItem.get_new(DataType.CONTENT,0)};
 			let error = null;
 			option = !Obj.check_is_empty(option) ? option : {get_item:false,get_photo:false};
 			async.series([
@@ -229,11 +186,11 @@ class Content_Data {
 					if(error){
 						error=Log.append(error,error);
 					}else{
-						cloud_data = data;
+					cloud_data.content = data.item;
 					}
 				},
 			]).then(result => {
-				callback([error,cloud_data]);
+				callback([error,cloud_data.content]);
 			}).catch(error => {
 				Log.error("Content-Get",error);
 				callback([error,[]]);
@@ -243,7 +200,7 @@ class Content_Data {
 	//9_content_search
 	static search = (database,filter,sort_by,page_current,page_size,option) => {
 		return new Promise((callback) => {
-			let cloud_data = {};
+			let cloud_data = {item_count:0,page_count:1,filter:{},data_type:DataType.CONTENT,item_list:[]};
 			let error = null;
 			option = !Obj.check_is_empty(option) ? option : {get_item:false,get_photo:false};
 			async.series([
@@ -252,7 +209,11 @@ class Content_Data {
 					if(error){
 						error=Log.append(error,error);
 					}else{
-						cloud_data = data;
+						cloud_data.item_count = data.item_count;
+						cloud_data.page_count = data.page_count;
+						cloud_data.filter = data.filter;
+						cloud_data.data_type = data.data_type;
+						cloud_data.content_list = data.item_list;
 					}
 				},
 			]).then(result => {
@@ -268,7 +229,7 @@ class Page_Data {
 	//9_page_data_get
 	static get = async (database,key,option) => {
 		return new Promise((callback) => {
-			let cloud_data = {};
+			let cloud_data = {page:DataItem.get_new(DataType.PAGE,0)};
 			let error = null;
 			option = !Obj.check_is_empty(option) ? option : {get_item:false,get_photo:false};
 			async.series([
@@ -291,7 +252,7 @@ class Page_Data {
 	//9_page_data_search
 	static search = (database,filter,sort_by,page_current,page_size,option) => {
 		return new Promise((callback) => {
-			let cloud_data = {};
+			let cloud_data = {item_count:0,page_count:1,filter:{},data_type:DataType.PAGE,item_list:[]};
 			let error = null;
 			option = !Obj.check_is_empty(option) ? option : {get_item:false,get_photo:false};
 			async.series([
@@ -300,7 +261,11 @@ class Page_Data {
 					if(error){
 						error=Log.append(error,error);
 					}else{
-						cloud_data = data;
+						cloud_data.item_count = data.item_count;
+						cloud_data.page_count = data.page_count;
+						cloud_data.filter = data.filter;
+						cloud_data.data_type = data.data_type;
+						cloud_data.item_list = data.item_list;
 					}
 				},
 			]).then(result => {
@@ -316,7 +281,7 @@ class Template_Data {
 	//9_template_data_get
 	static get = async (database,key,option) => {
 		return new Promise((callback) => {
-			let cloud_data = {};
+			let cloud_data = {template:DataItem.get_new(DataType.TEMPLATE,0)};
 			let error = null;
 			option = !Obj.check_is_empty(option) ? option : {get_item:false,get_photo:false};
 			async.series([
@@ -325,11 +290,11 @@ class Template_Data {
 					if(error){
 						error=Log.append(error,error);
 					}else{
-						cloud_data = data;
+						cloud_data.template = data;
 					}
 				},
 			]).then(result => {
-				callback([error,cloud_data]);
+				callback([error,cloud_data.template]);
 			}).catch(error => {
 				Log.error("Template-Get",error);
 				callback([error,[]]);
@@ -339,7 +304,7 @@ class Template_Data {
 	//9_template_data_search
 	static search = (database,filter,sort_by,page_current,page_size,option) => {
 		return new Promise((callback) => {
-			let cloud_data = {};
+			let cloud_data = {item_count:0,page_count:1,filter:{},data_type:DataType.TEMPLATE,item_list:[]};
 			let error = null;
 			option = !Obj.check_is_empty(option) ? option : {get_item:false,get_photo:false};
 			async.series([
@@ -348,7 +313,11 @@ class Template_Data {
 					if(error){
 						error=Log.append(error,error);
 					}else{
-						cloud_data = data;
+						cloud_data.item_count = data.item_count;
+						cloud_data.page_count = data.page_count;
+						cloud_data.filter = data.filter;
+						cloud_data.data_type = data.data_type;
+						cloud_data.template_list = data.item_list;
 					}
 				},
 			]).then(result => {
@@ -364,7 +333,7 @@ class Event_Data {
 	//9_event_data_get
 	static get = async (database,key,option) => {
 		return new Promise((callback) => {
-			let cloud_data = {};
+			let cloud_data = {event:DataItem.get_new(DataType.EVENT,0)};
 			let error = null;
 			option = !Obj.check_is_empty(option) ? option : {get_item:false,get_photo:false};
 			async.series([
@@ -373,11 +342,11 @@ class Event_Data {
 					if(error){
 						error=Log.append(error,error);
 					}else{
-						cloud_data = data;
+						cloud_data.event = data.item;
 					}
 				},
 			]).then(result => {
-				callback([error,cloud_data]);
+				callback([error,cloud_data.event]);
 			}).catch(error => {
 				Log.error("Event-Get",error);
 				callback([error,[]]);
@@ -387,7 +356,7 @@ class Event_Data {
 	//9_event_data_search
 	static search = (database,filter,sort_by,page_current,page_size,option) => {
 		return new Promise((callback) => {
-			let cloud_data = {};
+			let cloud_data = {item_count:0,page_count:1,filter:{},data_type:DataType.EVENT,item_list:[]};
 			let error = null;
 			option = !Obj.check_is_empty(option) ? option : {get_item:false,get_photo:false};
 			async.series([
@@ -396,7 +365,11 @@ class Event_Data {
 					if(error){
 						error=Log.append(error,error);
 					}else{
-						cloud_data = data;
+						cloud_data.item_count = data.item_count;
+						cloud_data.page_count = data.page_count;
+						cloud_data.filter = data.filter;
+						cloud_data.data_type = data.data_type;
+						cloud_data.event_list = data.item_list;
 					}
 				},
 			]).then(result => {
@@ -959,7 +932,10 @@ class Cart_Data {
 					}else{
 						cloud_data.cart = data.item;
 					}
-					Log.w('cloud_data',cloud_data);
+				},
+				async function(call){
+					const [error,data] = await Portal.get(database,DataType.USER,cloud_data.cart.user_id);
+					cloud_data.cart.parent_user=data.item;
 				},
 				//get_cart_item_list
 				async function(call){
@@ -1034,24 +1010,7 @@ class Cart_Data {
 					});
 				},
 				async function(call){
-					if(!Str.check_is_null(cloud_data.cart.id)){
-						let grand_total = 0;
-						cloud_data.cart.cart_item_list.forEach(cart_item => {
-							cart_item.sub_total = 0;
-							if(!isNaN(cart_item.parent_item.cost)){
-								cart_item.sub_total = (cart_item.sub_total + cart_item.parent_item.cost) * cart_item.quanity;
-								grand_total = grand_total + cart_item.sub_total;
-							}
-							cart_item.cart_sub_item_list.forEach(cart_sub_item => {
-								cart_sub_item.sub_total = 0;
-								if(!isNaN(cart_sub_item.parent_item.cost)){
-									cart_sub_item.sub_total = (cart_sub_item.sub_total + cart_sub_item.parent_item.cost) * cart_sub_item.quanity;
-									grand_total = grand_total + cart_sub_item.sub_total;
-								}
-							});
-						});
-						cloud_data.cart.grand_total = grand_total;
-					}
+					cloud_data.cart = Cart_Data.caculate_cart(cloud_data.cart);
 				},
 			]).then(result => {
 				callback([error,cloud_data]);
@@ -1112,33 +1071,167 @@ class Cart_Data {
 		});
 	};
 	//9_cart_search
-	static search = (database,filter,sort_by,page_current,page_size) => {
+	static search = (database,parent_data_type,filter,sort_by,page_current,page_size,option) => {
+		//9_cart_search
 		return new Promise((callback) => {
 			let cloud_data = {};
 			let error = null;
+			option = !Obj.check_is_empty(option) ? option : {};
+			let cart_number_list_query = { $or: [] };
+			let cart_parent_item_list_query = { $or: [] };
+			let cart_item_list = [];
+			let cart_sub_item_list = [];
 			async.series([
 				async function(call){
-					const [error,data] = await Portal.search(database,DataType.ORDER,filter,sort_by,page_current,page_size);
+					let option = {get_item_search:true,item_search_data_type:DataType.USER,item_search_field:'id',item_search_value:'user_id'};
+					const [error,data] = await Portal.search(database,DataType.CART,filter,sort_by,page_current,page_size,option);
+     				data.item_list.forEach(item => {
+            			const item_match = data.item_search_list.find(item_find => item_find.id === item.user_id);
+            			if(item_match){
+                			item.parent_user = item_match;
+            			}else{
+							item.parent_user = User_Logic.get_not_found(item.user_id);
+						}
+        			});
 					if(error){
 						error=Log.append(error,error);
 					}else{
-						cloud_data = data;
+						cloud_data.item_count = data.item_count;
+						cloud_data.page_count = data.page_count;
+						cloud_data.filter = data.filter;
+						cloud_data.data_type = data.data_type;
+						cloud_data.item_list = data.item_list;
+					}
+				},
+				//get_cart_item_list
+				async function(call){
+				if(cloud_data.item_list.length>0){
+					cloud_data.item_list.forEach(cart => {
+						let query_field = {};
+						query_field['cart_number'] = { $regex:String(cart.cart_number), $options: "i" };
+						cart_number_list_query.$or.push(query_field);
+        			});
+					let search = Item_Logic.get_search(DataType.CART_ITEM,cart_number_list_query,{},1,0);
+					const [error,data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,{});
+					if(error){
+						error=Log.append(error,error);
+					}else{
+						cart_item_list = data.item_list;
+					}
+				}
+				},
+				//get_cart_item_list - parent_item_list
+				async function(call){
+					if(cloud_data.item_list.length>0){
+						cart_item_list.forEach(cart_item => {
+							let query_field = {};
+							query_field['id'] = { $regex:String(cart_item.parent_id), $options: "i" };
+							cart_parent_item_list_query.$or.push(query_field);
+        				});
+						let search = Item_Logic.get_search(parent_data_type,cart_parent_item_list_query,{},1,0);
+						const [error,data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size);
+						if(error){
+							error=Log.append(error,error);
+						}else{
+							cart_item_list.forEach(cart_item => {
+								cart_item.parent_item = data.item_list.find(item_find => item_find.id === cart_item.parent_id) ? data.item_list.find(item_find => item_find.id === cart_item.parent_id):Item_Logic.get_not_found(cart_item.parent_data_type,cart_item.parent_id,{app_id:database.app_id});
+							});
+						}
+					}
+				},
+				//get_cart_sub_item_list
+				async function(call){
+					if(cloud_data.item_list.length>0){
+					let search = Item_Logic.get_search(DataType.CART_SUB_ITEM,cart_number_list_query,{},1,0);
+					const [error,data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,{});
+					if(error){
+						error=Log.append(error,error);
+					}else{
+						cart_sub_item_list = data.item_list;
+					}
+					}
+				},
+				//get_cart_sub_item_list - parent_item_list
+				async function(call){
+					if(cloud_data.item_list.length>0){
+						cart_sub_item_list.forEach(cart_sub_item => {
+							let query_field = {};
+							query_field['id'] = { $regex:String(cart_sub_item.parent_id), $options: "i" };
+							cart_parent_item_list_query.$or.push(query_field);
+        				});
+						let search = Item_Logic.get_search(DataType.ITEM,cart_parent_item_list_query,{},1,0);
+						const [error,data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size);
+						if(error){
+							error=Log.append(error,error);
+						}else{
+							cart_sub_item_list.forEach(cart_sub_item => {
+								cart_sub_item.parent_item = data.item_list.find(item_find => item_find.id === cart_sub_item.parent_id) ? data.item_list.find(item_find => item_find.id === cart_sub_item.parent_id):Item_Logic.get_not_found(cart_sub_item.parent_data_type,cart_sub_item.parent_id,{app_id:database.app_id});
+							});
+						}
+					}
+				},
+				// cart_item_list - cart_sub_item_list - bind
+				async function(call){
+					if(cloud_data.item_list.length>0){
+						cart_item_list.forEach(cart_item => {
+							cart_item.cart_sub_item_list = [];
+							let item_filter_list = cart_sub_item_list.filter(item_find=>item_find.cart_item_id===cart_item.id);
+							cart_item.cart_sub_item_list = [...item_filter_list, ...cart_item.cart_sub_item_list];
+						});
+					}
+				},
+				// cart_list - cart_item_list - bind
+				async function(call){
+					if(cloud_data.item_list.length>0){
+						cloud_data.item_list.forEach(cart => {
+							cart.cart_item_list = [];
+							let item_filter_list = cart_item_list.filter(item_find=>item_find.cart_id===cart.id);
+							cart.cart_item_list = [...item_filter_list, ...cart.cart_item_list];
+						});
+					}
+				},
+				// cart_list - caculate
+				async function(call){
+					if(cloud_data.item_list.length>0){
+							cloud_data.item_list.forEach(cart => {
+							cart = Cart_Data.caculate_cart(cart);
+						});
 					}
 				},
 			]).then(result => {
 				callback([error,cloud_data]);
 			}).catch(error => {
-				Log.error("Product-Search",error);
+				Log.error("Cart-Search",error);
 				callback([error,[]]);
 			});
 		});
+	};
+	//9_caculate_cart
+	static caculate_cart = (cart) => {
+			let grand_total = 0;
+			cart.cart_item_list.forEach(cart_item => {
+			cart_item.sub_total = 0;
+			if(!isNaN(cart_item.parent_item.cost)){
+				cart_item.sub_total = (cart_item.sub_total + cart_item.parent_item.cost) * cart_item.quanity;
+					grand_total = grand_total + cart_item.sub_total;
+			}
+				cart_item.cart_sub_item_list.forEach(cart_sub_item => {
+				cart_sub_item.sub_total = 0;
+			if(!isNaN(cart_sub_item.parent_item.cost)){
+				cart_sub_item.sub_total = (cart_sub_item.sub_total + cart_sub_item.parent_item.cost) * cart_sub_item.quanity;
+				grand_total = grand_total + cart_sub_item.sub_total;
+			}
+		});
+		});
+		cart.grand_total = grand_total;
+		return cart;
 	};
 }
 class Product_Data {
 	//9_product_get
 	static get = async (database,key,option) => {
 		return new Promise((callback) => {
-			let cloud_data = {};
+			let cloud_data = {product:DataItem.get_new(DataType.BLOG_POST,0)};
 			let error = null;
 			option = !Obj.check_is_empty(option) ? option : {get_item:false,get_photo:false};
 			async.series([
@@ -1147,11 +1240,11 @@ class Product_Data {
 					if(error){
 						error=Log.append(error,error);
 					}else{
-						cloud_data = data;
+						cloud_data.product = data.item;
 					}
 				},
 			]).then(result => {
-				callback([error,cloud_data]);
+				callback([error,cloud_data.product]);
 			}).catch(error => {
 				Log.error("Product-Get",error);
 				callback([error,[]]);
@@ -1161,7 +1254,7 @@ class Product_Data {
 	//9_product_search
 	static search = (database,filter,sort_by,page_current,page_size,option) => {
 		return new Promise((callback) => {
-			let cloud_data = {};
+			let cloud_data = {item_count:0,page_count:1,filter:{},data_type:DataType.BLOG_POST,item_list:[]};
 			let error = null;
 			option = !Obj.check_is_empty(option) ? option : {get_item:false,get_photo:false};
 			async.series([
@@ -1170,8 +1263,12 @@ class Product_Data {
 					if(error){
 						error=Log.append(error,error);
 					}else{
-						cloud_data = data;
-					}
+						cloud_data.item_count = data.item_count;
+						cloud_data.page_count = data.page_count;
+						cloud_data.filter = data.filter;
+						cloud_data.data_type = data.data_type;
+						cloud_data.product_list = data.item_list;
+				}
 				},
 			]).then(result => {
 				callback([error,cloud_data]);
@@ -1293,7 +1390,7 @@ class Activity_Data {
 	static search = (database,filter,sort_by,page_current,page_size,option) => {
 		//9_activity_search
 		return new Promise((callback) => {
-			let cloud_data = {};
+			let cloud_data = {item_count:0,page_count:1,filter:{},data_type:DataType.ACTIVITY,item_list:[]};
 			let error = null;
 			option = !Obj.check_is_empty(option) ? option : {};
 			let activity_id_list_query = { $or: [] };
@@ -1323,8 +1420,8 @@ class Activity_Data {
 			]).then(result => {
 				callback([error,cloud_data]);
 			}).catch(error => {
+				Log.error("Activity-Search",error);
 				Log.error("User-Search",error);
-				callback([error,[]]);
 			});
 		});
 	};
@@ -1610,84 +1707,6 @@ class Favorite_Data {
 				callback([error,cloud_data]);
 			}).catch(error => {
 				Log.error("Favorite-Data-List",error);
-				callback([error,[]]);
-			});
-		});
-	};
-}
-class Business_Data {
-	//9_business_get
-	static get = (database,option) => {
-		return new Promise((callback) => {
-			let cloud_data = {};
-			let error = null;
-			option = !Obj.check_is_empty(option) ? option : {get_item:false,get_photo:false};
-			async.series([
-				async function(call){
-					let search = Item_Logic.get_search(DataType.BUSINESS,{},{},0,1);
-					const [error,data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option);
-					if(error){
-						error=Log.append(error,error);
-					}else{
-						if(data.item_list.length>0){
-							cloud_data.item = data.item_list[0];
-						}else{
-							cloud_data.item = Item_Logic.get_not_found(DataType.BUSINESS,0,{app_id:data.app_id});
-						}
-					}
-				},
-			]).then(result => {
-				callback([error,cloud_data]);
-			}).catch(error => {
-				Log.error("Business-Search",error);
-				callback([error,[]]);
-			});
-		});
-	};
-}
-class Admin_Data {
-	//9_admin_get
-	static get = async (database,key,option) => {
-		return new Promise((callback) => {
-			let cloud_data = {};
-			let error = null;
-			option = !Obj.check_is_empty(option) ? option : {get_item:false,get_photo:false};
-			async.series([
-				async function(call){
-					const [error,data] = await Portal.get(database,DataType.ADMIN,key,option);
-					if(error){
-						error=Log.append(error,error);
-					}else{
-						cloud_data = data;
-					}
-				},
-			]).then(result => {
-				callback([error,cloud_data]);
-			}).catch(error => {
-				Log.error("Admin-Get",error);
-				callback([error,[]]);
-			});
-		});
-	};
-	//9_admin_search
-	static search = (database,filter,sort_by,page_current,page_size,option) => {
-		return new Promise((callback) => {
-			let cloud_data = {};
-			let error = null;
-			option = !Obj.check_is_empty(option) ? option : {get_item:false,get_photo:false};
-			async.series([
-				async function(call){
-					const [error,data] = await Portal.search(database,DataType.ADMIN,filter,sort_by,page_current,page_size,option);
-					if(error){
-						error=Log.append(error,error);
-					}else{
-						cloud_data = data;
-					}
-				},
-			]).then(result => {
-				callback([error,cloud_data]);
-			}).catch(error => {
-				Log.error("Admin-Search",error);
 				callback([error,[]]);
 			});
 		});
@@ -2570,17 +2589,30 @@ class Data {
 	static count_list = async (db_connect,data_type,filter) => {
 		return [error,data] = await get_count_item_list_adapter(db_connect,data_type,filter);
 	};
+	//9_blank
+	static blank = (database) => {
+		return new Promise((callback) => {
+			let cloud_data = {item:DataItem.get_new(DataType.BLANK,0)};
+			let error = null;
+			async.series([
+				async function(call){
+				},
+			]).then(result => {
+				callback([error,cloud_data]);
+			}).catch(error => {
+				Log.error("Blank-Get",error);
+				callback([error,[]]);
+			});
+		});
+	};
 }
 module.exports = {
 	Activity_Data,
-	Admin_Data,
-	Business_Data,
 	Blog_Post_Data,
 	Category_Data,
 	Cart_Data,
 	Content_Data,
 	Database,
-	Data_Logic,
 	Event_Data,
 	Favorite_Data,
 	Faq_Data,

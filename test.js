@@ -1,7 +1,7 @@
 const async = require('async');
 const assert = require('node:assert');
 
-const {Data,Database,Category_Data,Product_Data,Page_Data,Blog_Post_Data,Content_Data,Stat_Data,List_Data,Review_Data,Favorite_Data,Search_Data,Admin_Data,Business_Data,Order_Data,User_Data,Faq_Data,Portal,Cart_Data,Activity_Data} = require(".");
+const {Data,Database,Category_Data,Product_Data,Page_Data,Blog_Post_Data,Content_Data,Stat_Data,List_Data,Review_Data,Favorite_Data,Search_Data,Admin_Data,Business_Data,Order_Data,User_Data,Faq_Data,Portal,Cart_Data,Activity_Data,Blog_Post} = require(".");
 
 const {Log,Num,Str} = require("biz9-utility");
 const {DataType,DataItem,Item_Logic,Page_Logic,Template_Logic,Blog_Post_Logic,Content_Logic,Product_Logic,Field_Logic,Admin_Logic,Business_Logic,Category_Logic,User_Logic,Order_Logic,FieldType,Cart_Logic,Stat_Logic,Review_Logic,PageType} = require("/home/think2/www/doqbox/biz9-framework/biz9-logic/code");
@@ -976,11 +976,14 @@ describe('get_data', function(){ this.timeout(25000);
             async function(call){
                 console.log('TEST-GET-START');
                 let data_type = DataType.PRODUCT;
-                let key = "OR-32353";
-                let search  = Item_Logic.get_search(DataType.ACTIVITY,{user_id:"659b9787-c824-4e9c-9b56-808fae733dcf"},{},1,0);
-                Log.w('search',search);
+                //let key = "CA-51129";
+                let key = "blog_post_19";
+                let search  = Item_Logic.get_search(DataType.BLOG_POST,{},{},1,3);
+                //Log.w('search',search);
+                //const [error,data] = await Blog_Post_Data.get(database,key);
                 //const [error,data] = await Order_Data.get(database,key);
-                const [error,data] = await Activity_Data.search(database,search.filter,search.sort_by,search.parent_current,search.page_size);
+                //const [error,data] = await Cart_Data.get(database,key);
+                const [error,data] = await Blog_Post_Data.search(database,search.filter,search.sort_by,search.parent_current,search.page_size);
                 Log.w('data',data);
                 console.log('TEST-GET-SUCCESS');
                 console.log('TEST-GET-END');
