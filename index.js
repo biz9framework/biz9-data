@@ -74,7 +74,7 @@ class Blog_Post_Data {
 	//9_blog_post_get
 	static get = async (database,key,option) => {
 		return new Promise((callback) => {
-			let cloud_data = {blog_post:DataItem.get_new(DataType.BLOG_POST,0)};
+			let blog_post = DataItem.get_new(DataType.BLOG_POST,0);
 			let error = null;
 			option = !Obj.check_is_empty(option) ? option : {get_item:false,get_photo:false};
 			async.series([
@@ -82,22 +82,23 @@ class Blog_Post_Data {
 					const [error,data] = await Portal.get(database,DataType.BLOG_POST,key,option);
 					if(error){
 						error=Log.append(error,error);
-					}else{
-						cloud_data.blog_post = data;
+					}
+					else{
+						blog_post = data;
 					}
 				},
 			]).then(result => {
-				callback([error,cloud_data.blog_post]);
+				callback([error,blog_post]);
 			}).catch(error => {
 				Log.error("Blog_Post-Get",error);
-				callback([error,[]]);
+				callback([error,{}]);
 			});
 		});
 	};
 	//9_blog_post_search
 	static search = (database,filter,sort_by,page_current,page_size,option) => {
 		return new Promise((callback) => {
-			let cloud_data = {item_count:0,page_count:1,filter:{},data_type:DataType.BLOG_POST,item_list:[]};
+			let data = {data_count:0,page_count:1,filter:{},data_type:DataType.BLOG_POST,blog_post_list:[]};
 			let error = null;
 			option = !Obj.check_is_empty(option) ? option : {get_item:false,get_photo:false};
 			async.series([
@@ -106,11 +107,10 @@ class Blog_Post_Data {
 					if(error){
 						error=Log.append(error,error);
 					}else{
-						cloud_data.item_count = data.item_count;
-						cloud_data.page_count = data.page_count;
-						cloud_data.filter = data.filter;
-						cloud_data.data_type = data.data_type;
-						cloud_data.blog_post_list = data.item_list;
+						data.data_count = data.data_count;
+						data.page_count = data.page_count;
+						data.filter = data.filter;
+						data.blog_post_list = data.data_list;
 					}
 				},
 			]).then(result => {
@@ -125,7 +125,7 @@ class Blog_Post_Data {
 class Category_Data { //9_category_get
 	static get = async (database,key,option) => {
 		return new Promise((callback) => {
-			let cloud_data = {category:DataItem.get_new(DataType.CATEGORY,0)};
+			let category = DataItem.get_new(DataType.CATEGORY,0);
 			let error = null;
 			option = !Obj.check_is_empty(option) ? option : {get_item:false,get_photo:false};
 			async.series([
@@ -134,11 +134,11 @@ class Category_Data { //9_category_get
 					if(error){
 						error=Log.append(error,error);
 					}else{
-						cloud_data.category = data;
+						category = data;
 					}
 				},
 			]).then(result => {
-				callback([error,cloud_data.category]);
+				callback([error,category]);
 			}).catch(error => {
 				Log.error("Category-Get",error);
 				callback([error,[]]);
@@ -148,7 +148,7 @@ class Category_Data { //9_category_get
 	//9_category_search
 	static search = (database,filter,sort_by,page_current,page_size,option) => {
 		return new Promise((callback) => {
-			let cloud_data = {item_count:0,page_count:1,filter:{},data_type:DataType.CATEGORY,item_list:[]};
+			let data = {data_count:0,page_count:1,filter:{},data_type:DataType.CATEGORY,category_list:[]};
 			let error = null;
 			option = !Obj.check_is_empty(option) ? option : {get_item:false,get_photo:false};
 			async.series([
@@ -157,15 +157,14 @@ class Category_Data { //9_category_get
 					if(error){
 						error=Log.append(error,error);
 					}else{
-						cloud_data.item_count = data.item_count;
-						cloud_data.page_count = data.page_count;
-						cloud_data.filter = data.filter;
-						cloud_data.data_type = data.data_type;
-						cloud_data.category_list = data.item_list;
+						data.data_count = data.data_count;
+						data.page_count = data.page_count;
+						data.filter = data.filter;
+						data.category_list = data.data_list;
 					}
 				},
 			]).then(result => {
-				callback([error,cloud_data]);
+				callback([error,data]);
 			}).catch(error => {
 				Log.error("Category-Search",error);
 				callback([error,[]]);
@@ -177,7 +176,7 @@ class Content_Data {
 	//9_content_get
 	static get = async (database,key,option) => {
 		return new Promise((callback) => {
-			let cloud_data = {content:DataItem.get_new(DataType.CONTENT,0)};
+			let content = DataItem.get_new(DataType.CONTENT,0);
 			let error = null;
 			option = !Obj.check_is_empty(option) ? option : {get_item:false,get_photo:false};
 			async.series([
@@ -186,11 +185,11 @@ class Content_Data {
 					if(error){
 						error=Log.append(error,error);
 					}else{
-						cloud_data.content = data;
+						content = data;
 					}
 				},
 			]).then(result => {
-				callback([error,cloud_data.content]);
+				callback([error,content]);
 			}).catch(error => {
 				Log.error("Content-Get",error);
 				callback([error,[]]);
@@ -200,7 +199,7 @@ class Content_Data {
 	//9_content_search
 	static search = (database,filter,sort_by,page_current,page_size,option) => {
 		return new Promise((callback) => {
-			let cloud_data = {item_count:0,page_count:1,filter:{},data_type:DataType.CONTENT,item_list:[]};
+			let data = {data_count:0,page_count:1,filter:{},data_type:DataType.CONTENT,content_list:[]};
 			let error = null;
 			option = !Obj.check_is_empty(option) ? option : {get_item:false,get_photo:false};
 			async.series([
@@ -209,15 +208,14 @@ class Content_Data {
 					if(error){
 						error=Log.append(error,error);
 					}else{
-						cloud_data.item_count = data.item_count;
-						cloud_data.page_count = data.page_count;
-						cloud_data.filter = data.filter;
-						cloud_data.data_type = data.data_type;
-						cloud_data.content_list = data.item_list;
+						data.data_count = data.data_count;
+						data.page_count = data.page_count;
+						data.filter = data.filter;
+						data.content_list = data.data_list;
 					}
 				},
 			]).then(result => {
-				callback([error,cloud_data]);
+				callback([error,data]);
 			}).catch(error => {
 				Log.error("Content-Search",error);
 				callback([error,[]]);
@@ -229,7 +227,7 @@ class Page_Data {
 	//9_page_data_get
 	static get = async (database,key,option) => {
 		return new Promise((callback) => {
-			let cloud_data = {page:DataItem.get_new(DataType.PAGE,0)};
+			let page = DataItem.get_new(DataType.PAGE,0);
 			let error = null;
 			option = !Obj.check_is_empty(option) ? option : {get_item:false,get_photo:false};
 			async.series([
@@ -238,11 +236,11 @@ class Page_Data {
 					if(error){
 						error=Log.append(error,error);
 					}else{
-						cloud_data.page = data;
+						page = data;
 					}
 				},
 			]).then(result => {
-				callback([error,cloud_data.page]);
+				callback([error,page]);
 			}).catch(error => {
 				Log.error("Page-Get",error);
 				callback([error,[]]);
@@ -252,7 +250,7 @@ class Page_Data {
 	//9_page_data_search
 	static search = (database,filter,sort_by,page_current,page_size,option) => {
 		return new Promise((callback) => {
-			let cloud_data = {item_count:0,page_count:1,filter:{},data_type:DataType.PAGE,item_list:[]};
+			let data = {data_count:0,page_count:1,filter:{},data_type:DataType.PAGE,page_list:[]};
 			let error = null;
 			option = !Obj.check_is_empty(option) ? option : {get_item:false,get_photo:false};
 			async.series([
@@ -261,15 +259,14 @@ class Page_Data {
 					if(error){
 						error=Log.append(error,error);
 					}else{
-						cloud_data.item_count = data.item_count;
-						cloud_data.page_count = data.page_count;
-						cloud_data.filter = data.filter;
-						cloud_data.data_type = data.data_type;
-						cloud_data.page_list = data.item_list;
+						data.data_count = data.data_count;
+						data.page_count = data.page_count;
+						data.filter = data.filter;
+						data.page_list = data.data_list;
 					}
 				},
 			]).then(result => {
-				callback([error,cloud_data]);
+				callback([error,data]);
 			}).catch(error => {
 				Log.error("Page-Search",error);
 				callback([error,[]]);
@@ -281,7 +278,7 @@ class Template_Data {
 	//9_template_data_get
 	static get = async (database,key,option) => {
 		return new Promise((callback) => {
-			let cloud_data = {template:DataItem.get_new(DataType.TEMPLATE,0)};
+			let template = DataItem.get_new(DataType.TEMPLATE,0);
 			let error = null;
 			option = !Obj.check_is_empty(option) ? option : {get_item:false,get_photo:false};
 			async.series([
@@ -290,11 +287,11 @@ class Template_Data {
 					if(error){
 						error=Log.append(error,error);
 					}else{
-						cloud_data.template = data;
+						template = data;
 					}
 				},
 			]).then(result => {
-				callback([error,cloud_data.template]);
+				callback([error,template]);
 			}).catch(error => {
 				Log.error("Template-Get",error);
 				callback([error,[]]);
@@ -304,7 +301,7 @@ class Template_Data {
 	//9_template_data_search
 	static search = (database,filter,sort_by,page_current,page_size,option) => {
 		return new Promise((callback) => {
-			let cloud_data = {item_count:0,page_count:1,filter:{},data_type:DataType.TEMPLATE,item_list:[]};
+			let data = {data_count:0,page_count:1,filter:{},data_type:DataType.TEMPLATE,template_list:[]};
 			let error = null;
 			option = !Obj.check_is_empty(option) ? option : {get_item:false,get_photo:false};
 			async.series([
@@ -313,15 +310,14 @@ class Template_Data {
 					if(error){
 						error=Log.append(error,error);
 					}else{
-						cloud_data.item_count = data.item_count;
-						cloud_data.page_count = data.page_count;
-						cloud_data.filter = data.filter;
-						cloud_data.data_type = data.data_type;
-						cloud_data.template_list = data.item_list;
+						data.data_count = data.data_count;
+						data.page_count = data.page_count;
+						data.filter = data.filter;
+						data.template_list = data.data_list;
 					}
 				},
 			]).then(result => {
-				callback([error,cloud_data]);
+				callback([error,data]);
 			}).catch(error => {
 				Log.error("Template-Search",error);
 				callback([error,[]]);
@@ -333,7 +329,7 @@ class Event_Data {
 	//9_event_data_get
 	static get = async (database,key,option) => {
 		return new Promise((callback) => {
-			let cloud_data = {event:DataItem.get_new(DataType.EVENT,0)};
+			let event = DataItem.get_new(DataType.EVENT,0);
 			let error = null;
 			option = !Obj.check_is_empty(option) ? option : {get_item:false,get_photo:false};
 			async.series([
@@ -342,11 +338,11 @@ class Event_Data {
 					if(error){
 						error=Log.append(error,error);
 					}else{
-						cloud_data.event = data;
+						event = data;
 					}
 				},
 			]).then(result => {
-				callback([error,cloud_data.event]);
+				callback([error,event]);
 			}).catch(error => {
 				Log.error("Event-Get",error);
 				callback([error,[]]);
@@ -356,7 +352,7 @@ class Event_Data {
 	//9_event_data_search
 	static search = (database,filter,sort_by,page_current,page_size,option) => {
 		return new Promise((callback) => {
-			let cloud_data = {item_count:0,page_count:1,filter:{},data_type:DataType.EVENT,item_list:[]};
+			let data = {event_count:0,page_count:1,filter:{},data_type:DataType.EVENT,event_list:[]};
 			let error = null;
 			option = !Obj.check_is_empty(option) ? option : {get_item:false,get_photo:false};
 			async.series([
@@ -365,15 +361,15 @@ class Event_Data {
 					if(error){
 						error=Log.append(error,error);
 					}else{
-						cloud_data.item_count = data.item_count;
-						cloud_data.page_count = data.page_count;
-						cloud_data.filter = data.filter;
-						cloud_data.data_type = data.data_type;
-						cloud_data.event_list = data.item_list;
+						data.data_count = data.data_count;
+						data.page_count = data.page_count;
+						data.filter = data.filter;
+						data.data_type = data.data_type;
+						data.event_list = data.data_list;
 					}
 				},
 			]).then(result => {
-				callback([error,cloud_data]);
+				callback([error,data]);
 			}).catch(error => {
 				Log.error("Event-Search",error);
 				callback([error,[]]);
@@ -385,27 +381,23 @@ class Order_Data {
 	//9_order_post
 	static post = async (database,order) => {
 		return new Promise((callback) => {
-			let cloud_data = {};
+			let data = {order:DataItem.get_new(DataType.ORDER,0),order_item_list:[],order_sub_item_list:[]};
 			let error = null;
-			cloud_data.order = DataItem.get_new(DataType.ORDER,0);
-			cloud_data.order_item_list = [];
-			cloud_data.order_sub_item_list = [];
 			async.series([
 				async function(call){
-					cloud_data.order = DataItem.get_new(DataType.ORDER,0,
+					data.order = DataItem.get_new(DataType.ORDER,0,
 						{
 							order_number:order.order_number,
 							parent_data_type:order.parent_data_type,
 							user_id:order.user_id,
 							cart_number:order.cart_number,
 							grand_total:order.grand_total,
-
 						});
 				},
 				async function(call){
 					for(const key in order) {
 						if(Str.check_is_null(cloud_data.order[key]) && key != 'order_item_list' &&  key != 'order_item_list' && key != 'order_sub_item_list'){
-							cloud_data.order[key] = order[key];
+							data.order[key] = order[key];
 						}
 					}
 				},
@@ -414,7 +406,7 @@ class Order_Data {
 					if(error){
 						error=Log.append(error,error);
 					}else{
-						cloud_data.order = data;
+						data.order = data;
 					}
 				},
 				//post - order items
@@ -422,26 +414,24 @@ class Order_Data {
 					if(order.order_item_list.length>0){
 						order.order_item_list.forEach(item => {
 							item.temp_row_id = Num.get_id();
-							cloud_data.order_item_list.push(
+							data.order_item_list.push(
 								DataItem.get_new(DataType.ORDER_ITEM,0,
 									{
 										order_id:cloud_data.order.id,
 										order_number:cloud_data.order.order_number,
 										user_id:cloud_data.order.user_id,
-
 										quanity:item.quanity,
 										parent_data_type:item.parent_data_type,
 										parent_id:item.parent_id,
-
 										temp_row_id :item.temp_row_id
 									}));
 						});
-						if(cloud_data.order_item_list.length>0){
-							const [error,data] = await Portal.post_list(database,cloud_data.order_item_list);
+						if(data.order_item_list.length>0){
+							const [error,data] = await Portal.post_list(database,data.order_item_list);
 							if(error){
 								error=Log.append(error,error);
 							}else{
-								cloud_data.order_item_list = data;
+								data.order_item_list = data;
 							}
 						}
 					}
@@ -451,7 +441,7 @@ class Order_Data {
 					if(order.order_item_list.length>0){
 						order.order_item_list.forEach(order_item => {
 							order_item.order_sub_item_list.forEach(order_sub_item => {
-								cloud_data.order_sub_item_list.push(
+								data.order_sub_item_list.push(
 									DataItem.get_new(DataType.ORDER_SUB_ITEM,0,
 										{
 											order_id:cloud_data.order.id,
@@ -465,19 +455,19 @@ class Order_Data {
 										}));
 							});
 						});
-						if(cloud_data.order_sub_item_list.length>0){
-							const [error,data] = await Portal.post_list(database,cloud_data.order_sub_item_list);
+						if(data.order_sub_item_list.length>0){
+							const [error,data] = await Portal.post_list(database,data.order_sub_item_list);
 							if(error){
 								error=Log.append(error,error);
 							}else{
-								cloud_data.order_sub_item_list = data;
+								data.order_sub_item_list = data;
 							}
 						}
 
 					}
 				},
 			]).then(result => {
-				callback([error,cloud_data.order]);
+				callback([error,data.order]);
 			}).catch(error => {
 				Log.error("OrderData-Order-Item-Update",error);
 				callback([error,[]]);
@@ -487,7 +477,7 @@ class Order_Data {
 	//9_order_get
 	static get = (database,order_number,option) => {
 		return new Promise((callback) => {
-			let cloud_data = {order:DataItem.get_new(DataType.ORDER,0,{order_number:order_number,order_item_list:[],parent_user:DataItem.get_new(DataType.USER,0)})};
+			let data = {order:DataItem.get_new(DataType.ORDER,0,{order_number:order_number,order_item_list:[],parent_user:DataItem.get_new(DataType.USER,0)})};
 			let order_parent_item_list_query = { $or: [] };
 			let order_sub_item_list_query = { $or: [] };
 			let error = null;
@@ -501,12 +491,12 @@ class Order_Data {
 					if(error){
 						error=Log.append(error,error);
 					}else{
-						cloud_data.order = data;
+						data.order = data;
 					}
 				},
 				async function(call){
 					const [error,data] = await Portal.get(database,DataType.USER,cloud_data.order.user_id);
-					cloud_data.parent_user=data;
+					data.parent_user=data;
 				},
 				//get_order_item_list
 				async function(call){
@@ -517,7 +507,7 @@ class Order_Data {
 						if(error){
 							error=Log.append(error,error);
 						}else{
-							cloud_data.order.order_item_list = data.item_list;
+							data.order.order_item_list = data.item_list;
 						}
 					}
 				},
