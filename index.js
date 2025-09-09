@@ -238,11 +238,11 @@ class Page_Data {
 					if(error){
 						error=Log.append(error,error);
 					}else{
-						cloud_data = data;
+						cloud_data.page = data.item;
 					}
 				},
 			]).then(result => {
-				callback([error,cloud_data]);
+				callback([error,cloud_data.page]);
 			}).catch(error => {
 				Log.error("Page-Get",error);
 				callback([error,[]]);
@@ -265,7 +265,7 @@ class Page_Data {
 						cloud_data.page_count = data.page_count;
 						cloud_data.filter = data.filter;
 						cloud_data.data_type = data.data_type;
-						cloud_data.item_list = data.item_list;
+						cloud_data.page_list = data.item_list;
 					}
 				},
 			]).then(result => {
@@ -290,7 +290,7 @@ class Template_Data {
 					if(error){
 						error=Log.append(error,error);
 					}else{
-						cloud_data.template = data;
+						cloud_data.template = data.item;
 					}
 				},
 			]).then(result => {
@@ -1013,7 +1013,7 @@ class Cart_Data {
 					cloud_data.cart = Cart_Data.caculate_cart(cloud_data.cart);
 				},
 			]).then(result => {
-				callback([error,cloud_data]);
+				callback([error,cloud_data.cart]);
 			}).catch(error => {
 				Log.error("Cart-Get",error);
 				callback([error,[]]);
@@ -1074,7 +1074,7 @@ class Cart_Data {
 	static search = (database,parent_data_type,filter,sort_by,page_current,page_size,option) => {
 		//9_cart_search
 		return new Promise((callback) => {
-			let cloud_data = {};
+			let cloud_data = {cart_list:[]};
 			let error = null;
 			option = !Obj.check_is_empty(option) ? option : {};
 			let cart_number_list_query = { $or: [] };
@@ -1100,13 +1100,13 @@ class Cart_Data {
 						cloud_data.page_count = data.page_count;
 						cloud_data.filter = data.filter;
 						cloud_data.data_type = data.data_type;
-						cloud_data.item_list = data.item_list;
+						cloud_data.cart_list = data.item_list;
 					}
 				},
 				//get_cart_item_list
 				async function(call){
-				if(cloud_data.item_list.length>0){
-					cloud_data.item_list.forEach(cart => {
+				if(cloud_data.cart_list.length>0){
+					cloud_data.cart_list.forEach(cart => {
 						let query_field = {};
 						query_field['cart_number'] = { $regex:String(cart.cart_number), $options: "i" };
 						cart_number_list_query.$or.push(query_field);
@@ -1122,7 +1122,7 @@ class Cart_Data {
 				},
 				//get_cart_item_list - parent_item_list
 				async function(call){
-					if(cloud_data.item_list.length>0){
+					if(cloud_data.cart_list.length>0){
 						cart_item_list.forEach(cart_item => {
 							let query_field = {};
 							query_field['id'] = { $regex:String(cart_item.parent_id), $options: "i" };
@@ -1141,7 +1141,7 @@ class Cart_Data {
 				},
 				//get_cart_sub_item_list
 				async function(call){
-					if(cloud_data.item_list.length>0){
+					if(cloud_data.cart_list.length>0){
 					let search = Item_Logic.get_search(DataType.CART_SUB_ITEM,cart_number_list_query,{},1,0);
 					const [error,data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,{});
 					if(error){
@@ -1153,7 +1153,7 @@ class Cart_Data {
 				},
 				//get_cart_sub_item_list - parent_item_list
 				async function(call){
-					if(cloud_data.item_list.length>0){
+					if(cloud_data.cart_list.length>0){
 						cart_sub_item_list.forEach(cart_sub_item => {
 							let query_field = {};
 							query_field['id'] = { $regex:String(cart_sub_item.parent_id), $options: "i" };
@@ -1172,7 +1172,7 @@ class Cart_Data {
 				},
 				// cart_item_list - cart_sub_item_list - bind
 				async function(call){
-					if(cloud_data.item_list.length>0){
+					if(cloud_data.cart_list.length>0){
 						cart_item_list.forEach(cart_item => {
 							cart_item.cart_sub_item_list = [];
 							let item_filter_list = cart_sub_item_list.filter(item_find=>item_find.cart_item_id===cart_item.id);
@@ -1182,8 +1182,8 @@ class Cart_Data {
 				},
 				// cart_list - cart_item_list - bind
 				async function(call){
-					if(cloud_data.item_list.length>0){
-						cloud_data.item_list.forEach(cart => {
+					if(cloud_data.cart_list.length>0){
+						cloud_data.cart_list.forEach(cart => {
 							cart.cart_item_list = [];
 							let item_filter_list = cart_item_list.filter(item_find=>item_find.cart_id===cart.id);
 							cart.cart_item_list = [...item_filter_list, ...cart.cart_item_list];
@@ -1192,8 +1192,8 @@ class Cart_Data {
 				},
 				// cart_list - caculate
 				async function(call){
-					if(cloud_data.item_list.length>0){
-							cloud_data.item_list.forEach(cart => {
+					if(cloud_data.cart_list.length>0){
+							cloud_data.cart_list.forEach(cart => {
 							cart = Cart_Data.caculate_cart(cart);
 						});
 					}
@@ -2371,11 +2371,10 @@ class Faq_Data{
 	//9_faq_get
 	static get = (database,key,option) => {
 		return new Promise((callback) => {
-			let cloud_data = {item:DataItem.get_new(DataType.FAQ,0,{questions:[]})};
-			let faq = {};
+			let cloud_data = {faq:DataItem.get_new(DataType.FAQ,0,{questions:[]})};
 			let error = null;
 			option = !Obj.check_is_empty(option) ? option : {question_count:19};
-			let items = [];
+			let faq = DataItem.get_new(DataType.FAQ,0);
 			async.series([
 				async function(call){
 					const [error,data] = await Portal.get(database,DataType.FAQ,key,option);
@@ -2383,23 +2382,16 @@ class Faq_Data{
 				},
 				async function(call){
 					if(!Str.check_is_null(faq.id)){
-						cloud_data.item.id = faq.id;
-						cloud_data.item.title = faq.title;
-						cloud_data.item.title_url = faq.title_url;
-						cloud_data.item.date_create = faq.date_create;
 						for(let a=0;a<option.question_count+1;a++){
 							if(faq["field_"+a]){
-								cloud_data.item.questions.push({id:a,question:faq["field_"+a],answer:faq["faq_question_"+a]});
+								cloud_data.faq.questions.push({id:a,question:faq["field_"+a],answer:faq["faq_question_"+a]});
 							}
 						}
-					}else{
-						cloud_data.item = faq;
-						cloud_data.item.questions = [];
 					}
 				},
 			],
 				function(error, result){
-					callback([error,cloud_data]);
+					callback([error,cloud_data.faq.questions]);
 				});
 		});
 	}
