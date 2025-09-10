@@ -21,7 +21,8 @@ class Database {
 		 * - app_id
 		 *   - database id. / string / ex. project_500
 		 */
-		let cloud_error=null;
+		let error=null;
+		let data={};
 		return new Promise((callback) => {
 			option = !Obj.check_is_empty(option) ? option : {biz9_config_file:null,app_id:null};
 			if(option.biz9_config_file==null){
@@ -33,15 +34,15 @@ class Database {
 				data_config.app_id = option.app_id;
 			}
 			if(data_config.app_id==null){
-				cloud_error=Log.append(cloud_error,"Database Error: Missing app_id.");
+				error=Log.append(error,"Database Error: Missing app_id.");
 			}
-			Data.open_db(data_config).then(([error,data])=>{
-				cloud_error=Log.append(cloud_error,error);
-				data.data_config=data_config;
-				data.app_id=data_config.APP_ID;
-				callback([error,data]);
+			Data.open_db(data_config).then(([biz_error,biz_data])=>{
+				error=Log.append(error,biz_error);
+				biz_data.data_config=data_config;
+				biz_data.app_id=data_config.APP_ID;
+				callback([error,biz_data]);
 			}).catch(error => {
-				cloud_error=Log.append(cloud_error,error);
+				error=Log.append(error,biz_error);
 				Log.error("BiZItem-Get-Connect",error);
 				callback([error,null]);
 			});
@@ -57,14 +58,14 @@ class Database {
 		 *  - app_id
 		 *      - database id. / string / ex. project_500
 		 */
-		let cloud_error=null;
+		let error=null;
 		return new Promise((callback) => {
-			Data.delete_db(database).then(([error,data])=>{
-				cloud_error=Log.append(cloud_error,error);
+			Data.delete_db(database).then(([biz_error,data])=>{
+				error=Log.append(error,biz_error);
 				callback([error,data]);
 			}).catch(error => {
-				cloud_error=Log.append(cloud_error,error);
-				Log.error("DB-Close",error);
+				error=Log.append(error,biz_error);
+				Log.error("DB-Close",biz_error);
 				callback([error,null]);
 			});
 		});
@@ -79,12 +80,12 @@ class Blog_Post_Data {
 			option = !Obj.check_is_empty(option) ? option : {get_item:false,get_photo:false};
 			async.series([
 				async function(call){
-					const [error,item_data] = await Portal.get(database,DataType.BLOG_POST,key,option);
+					const [biz_error,biz_data] = await Portal.get(database,DataType.BLOG_POST,key,option);
 					if(error){
-						error=Log.append(error,error);
+						error=Log.append(error,biz_error);
 					}
 					else{
-						blog_post = item_data;
+						blog_post = biz_data;
 					}
 				},
 			]).then(result => {
@@ -103,15 +104,15 @@ class Blog_Post_Data {
 			option = !Obj.check_is_empty(option) ? option : {get_item:false,get_photo:false};
 			async.series([
 				async function(call){
-					const [error,item_data] = await Portal.search(database,DataType.BLOG_POST,filter,sort_by,page_current,page_size,option);
+					const [biz_error,biz_data] = await Portal.search(database,DataType.BLOG_POST,filter,sort_by,page_current,page_size,option);
 					if(error){
-						error=Log.append(error,error);
+						error=Log.append(error,biz_error);
 					}else{
-						data.data_count = item_data.data_count;
+						data.data_count = biz_data.data_count;
 						data.data_type = DataType.BLOG_POST;
-						data.page_count = item_data.page_count;
-						data.filter = item_data.filter;
-						data.blog_post_list = item_data.data_list;
+						data.page_count = biz_data.page_count;
+						data.filter = biz_data.filter;
+						data.blog_post_list = biz_data.data_list;
 					}
 				},
 			]).then(result => {
@@ -131,11 +132,11 @@ class Category_Data { //9_category_get
 			option = !Obj.check_is_empty(option) ? option : {get_item:false,get_photo:false};
 			async.series([
 				async function(call){
-					const [error,item_data] = await Portal.get(database,DataType.CATEGORY,key,option);
+					const [biz_error,biz_data] = await Portal.get(database,DataType.CATEGORY,key,option);
 					if(error){
-						error=Log.append(error,error);
+						error=Log.append(error,biz_error);
 					}else{
-						category = item_data;
+						category = biz_data;
 					}
 				},
 			]).then(result => {
@@ -154,15 +155,15 @@ class Category_Data { //9_category_get
 			option = !Obj.check_is_empty(option) ? option : {get_item:false,get_photo:false};
 			async.series([
 				async function(call){
-					const [error,item_data] = await Portal.search(database,DataType.CATEGORY,filter,sort_by,page_current,page_size,option);
+					const [biz_error,biz_data] = await Portal.search(database,DataType.CATEGORY,filter,sort_by,page_current,page_size,option);
 					if(error){
-						error=Log.append(error,error);
+						error=Log.append(error,biz_error);
 					}else{
-						data.data_count = item_data.data_count;
+						data.data_count = biz_data.data_count;
 						data.data_type = DataType.CATEGORY;
-						data.page_count = item_data.page_count;
-						data.filter = item_data.filter;
-						data.category_list = item_data.data_list;
+						data.page_count = biz_data.page_count;
+						data.filter = biz_data.filter;
+						data.category_list = biz_data.data_list;
 					}
 				},
 			]).then(result => {
@@ -183,11 +184,11 @@ class Content_Data {
 			option = !Obj.check_is_empty(option) ? option : {get_item:false,get_photo:false};
 			async.series([
 				async function(call){
-					const [error,item_data] = await Portal.get(database,DataType.CONTENT,key,option);
+					const [biz_error,biz_data] = await Portal.get(database,DataType.CONTENT,key,option);
 					if(error){
-						error=Log.append(error,error);
+						error=Log.append(error,biz_error);
 					}else{
-						content = item_data;
+						content = biz_data;
 					}
 				},
 			]).then(result => {
@@ -206,15 +207,15 @@ class Content_Data {
 			option = !Obj.check_is_empty(option) ? option : {get_item:false,get_photo:false};
 			async.series([
 				async function(call){
-					const [error,item_data] = await Portal.search(database,DataType.CONTENT,filter,sort_by,page_current,page_size,option);
+					const [biz_error,biz_data] = await Portal.search(database,DataType.CONTENT,filter,sort_by,page_current,page_size,option);
 					if(error){
-						error=Log.append(error,error);
+						error=Log.append(error,biz_error);
 					}else{
-						data.data_count = item_data.data_count;
+						data.data_count = biz_data.data_count;
 						data.data_type = DataType.CONTENT;
-						data.page_count = item_data.page_count;
-						data.filter = item_data.filter;
-						data.content_list = item_data.data_list;
+						data.page_count = biz_data.page_count;
+						data.filter = biz_data.filter;
+						data.content_list = biz_data.data_list;
 					}
 				},
 			]).then(result => {
@@ -237,7 +238,7 @@ class Page_Data {
 				async function(call){
 					const [error,data] = await Portal.get(database,DataType.PAGE,key,option);
 					if(error){
-						error=Log.append(error,error);
+						error=Log.append(error,biz_error);
 					}else{
 						page = data;
 					}
@@ -260,7 +261,7 @@ class Page_Data {
 				async function(call){
 					const [error,data] = await Portal.search(database,DataType.PAGE,filter,sort_by,page_current,page_size,option);
 					if(error){
-						error=Log.append(error,error);
+						error=Log.append(error,biz_error);
 					}else{
 						data.data_count = data.data_count;
 						data.data_type =DataType.PAGE;
@@ -289,7 +290,7 @@ class Template_Data {
 				async function(call){
 					const [error,data] = await Portal.get(database,DataType.TEMPLATE,key,option);
 					if(error){
-						error=Log.append(error,error);
+						error=Log.append(error,biz_error);
 					}else{
 						template = data;
 					}
@@ -312,7 +313,7 @@ class Template_Data {
 				async function(call){
 					const [error,data] = await Portal.search(database,DataType.TEMPLATE,filter,sort_by,page_current,page_size,option);
 					if(error){
-						error=Log.append(error,error);
+						error=Log.append(error,biz_error);
 					}else{
 						data.data_count = data.data_count;
 						data.data_type = DataType.TEMPLATE;
@@ -341,7 +342,7 @@ class Event_Data {
 				async function(call){
 					const [error,data] = await Portal.get(database,DataType.EVENT,key,option);
 					if(error){
-						error=Log.append(error,error);
+						error=Log.append(error,biz_error);
 					}else{
 						event = data;
 					}
@@ -364,7 +365,7 @@ class Event_Data {
 				async function(call){
 					const [error,data] = await Portal.search(database,DataType.EVENT,filter,sort_by,page_current,page_size,option);
 					if(error){
-						error=Log.append(error,error);
+						error=Log.append(error,biz_error);
 					}else{
 						data.data_count = data.data_count;
 						data.data_type = DataType.EVENT;
@@ -411,7 +412,7 @@ class Order_Data {
 				async function(call){
 					const [error,data] = await Portal.post(database,DataType.ORDER,cloud_data.order);
 					if(error){
-						error=Log.append(error,error);
+						error=Log.append(error,biz_error);
 					}else{
 						data.order = data;
 					}
@@ -436,7 +437,7 @@ class Order_Data {
 						if(data.order_item_list.length>0){
 							const [error,data] = await Portal.post_list(database,data.order_item_list);
 							if(error){
-								error=Log.append(error,error);
+								error=Log.append(error,biz_error);
 							}else{
 								data.order_item_list = data;
 							}
@@ -465,7 +466,7 @@ class Order_Data {
 						if(data.order_sub_item_list.length>0){
 							const [error,data] = await Portal.post_list(database,data.order_sub_item_list);
 							if(error){
-								error=Log.append(error,error);
+								error=Log.append(error,biz_error);
 							}else{
 								data.order_sub_item_list = data;
 							}
@@ -496,7 +497,7 @@ class Order_Data {
 					let filter = { order_number: { $regex:String(order_number), $options: "i" } };
 					const [error,data] = await Portal.get(database,DataType.ORDER,order_number,{filter:filter});
 					if(error){
-						error=Log.append(error,error);
+						error=Log.append(error,biz_error);
 					}else{
 						data.order = data;
 					}
@@ -512,7 +513,7 @@ class Order_Data {
 						let search = Item_Logic.get_search(DataType.ORDER_ITEM,filter,{},1,0);
 						const [error,data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,{});
 						if(error){
-							error=Log.append(error,error);
+							error=Log.append(error,biz_error);
 						}else{
 							data.order.order_item_list = data.item_list;
 						}
@@ -529,7 +530,7 @@ class Order_Data {
 						let search = Item_Logic.get_search(cloud_data.order.parent_data_type,order_parent_item_list_query,{},1,0);
 						const [error,data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size);
 						if(error){
-							error=Log.append(error,error);
+							error=Log.append(error,biz_error);
 						}else{
 							cloud_data.order.order_item_list.forEach(order_item => {
 								order_item.parent_item = data.item_list.find(item_find => item_find.id === order_item.parent_id) ? data.item_list.find(item_find => item_find.id === order_item.parent_id):Item_Logic.get_not_found(order_item.parent_data_type,order_item.parent_id,{app_id:database.app_id});
@@ -544,7 +545,7 @@ class Order_Data {
 						let search = Item_Logic.get_search(DataType.ORDER_SUB_ITEM,filter,{},1,0);
 						const [error,data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,{});
 						if(error){
-							error=Log.append(error,error);
+							error=Log.append(error,biz_error);
 						}else{
 							order_sub_item_list = data.item_list;
 						}
@@ -561,7 +562,7 @@ class Order_Data {
 						let search = Item_Logic.get_search(DataType.ITEM,order_sub_item_list_query,{},1,0);
 						const [error,data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size);
 						if(error){
-							error=Log.append(error,error);
+							error=Log.append(error,biz_error);
 						}else{
 							order_sub_item_list.forEach(order_sub_item => {
 								order_sub_item.parent_item = data.item_list.find(item_find => item_find.id === order_sub_item.parent_id) ? data.item_list.find(item_find => item_find.id === order_sub_item.parent_id):Item_Logic.get_not_found(order_sub_item.parent_data_type,order_sub_item.parent_id,{app_id:database.app_id});
@@ -586,7 +587,7 @@ class Order_Data {
 						let search = Item_Logic.get_search(DataType.ORDER_PAYMENT,filter,{date_create:-1},0,1);
 						const [error,data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size);
 						if(error){
-							error=Log.append(error,error);
+							error=Log.append(error,biz_error);
 						}else{
 							cloud_data.order_payment_search_filter = search;
 							cloud_data.order_payment_list = data.item_list;
@@ -612,7 +613,7 @@ class Order_Data {
 				async function(call){
 					const [error,data] = await Portal.get(database,DataType.ORDER,id);
 					if(error){
-						error=Log.append(error,error);
+						error=Log.append(error,biz_error);
 					}else{
 						cloud_data.order = data;
 					}
@@ -620,7 +621,7 @@ class Order_Data {
 				async function(call){
 					const [error,data] = await Portal.delete(database,DataType.ORDER,id);
 					if(error){
-						error=Log.append(error,error);
+						error=Log.append(error,biz_error);
 					}else{
 						cloud_data.order_delete = data.item;
 					}
@@ -629,7 +630,7 @@ class Order_Data {
 					let search = Item_Logic.get_search(DataType.ORDER_ITEM,{order_number:cloud_data.order.order_number},{},1,0);
 					const [error,data] = await Portal.delete_search(database,search.data_type,search.filter);
 					if(error){
-						error=Log.append(error,error);
+						error=Log.append(error,biz_error);
 					}else{
 						cloud_data.delete_order_item_search = data;
 					}
@@ -638,7 +639,7 @@ class Order_Data {
 					let search = Item_Logic.get_search(DataType.ORDER_SUB_ITEM,{order_number:cloud_data.order.order_number},{},1,0);
 					const [error,data] = await Portal.delete_search(database,search.data_type,search.filter);
 					if(error){
-						error=Log.append(error,error);
+						error=Log.append(error,biz_error);
 					}else{
 						cloud_data.delete_order_sub_item_search = data;
 					}
@@ -647,7 +648,7 @@ class Order_Data {
 					let search = Item_Logic.get_search(DataType.ORDER_PAYMENT,{order_number:cloud_data.order.order_number},{},1,0);
 					const [error,data] = await Portal.delete_search(database,search.data_type,search.filter);
 					if(error){
-						error=Log.append(error,error);
+						error=Log.append(error,biz_error);
 					}else{
 						cloud_data.delete_order_payment_search = data;
 					}
@@ -684,7 +685,7 @@ class Order_Data {
 						}
 					});
 					if(error){
-						error=Log.append(error,error);
+						error=Log.append(error,biz_error);
 					}else{
 						cloud_data.item_count = data.item_count;
 						cloud_data.page_count = data.page_count;
@@ -704,7 +705,7 @@ class Order_Data {
 						let search = Item_Logic.get_search(DataType.ORDER_ITEM,order_number_list_query,{},1,0);
 						const [error,data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,{});
 						if(error){
-							error=Log.append(error,error);
+							error=Log.append(error,biz_error);
 						}else{
 							order_item_list = data.item_list;
 						}
@@ -721,7 +722,7 @@ class Order_Data {
 						let search = Item_Logic.get_search(parent_data_type,order_parent_item_list_query,{},1,0);
 						const [error,data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size);
 						if(error){
-							error=Log.append(error,error);
+							error=Log.append(error,biz_error);
 						}else{
 							order_item_list.forEach(order_item => {
 								order_item.parent_item = data.item_list.find(item_find => item_find.id === order_item.parent_id) ? data.item_list.find(item_find => item_find.id === order_item.parent_id):Item_Logic.get_not_found(order_item.parent_data_type,order_item.parent_id,{app_id:database.app_id});
@@ -735,7 +736,7 @@ class Order_Data {
 						let search = Item_Logic.get_search(DataType.ORDER_SUB_ITEM,order_number_list_query,{},1,0);
 						const [error,data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,{});
 						if(error){
-							error=Log.append(error,error);
+							error=Log.append(error,biz_error);
 						}else{
 							order_sub_item_list = data.item_list;
 						}
@@ -752,7 +753,7 @@ class Order_Data {
 						let search = Item_Logic.get_search(DataType.ITEM,order_parent_item_list_query,{},1,0);
 						const [error,data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size);
 						if(error){
-							error=Log.append(error,error);
+							error=Log.append(error,biz_error);
 						}else{
 							order_sub_item_list.forEach(order_sub_item => {
 								order_sub_item.parent_item = data.item_list.find(item_find => item_find.id === order_sub_item.parent_id) ? data.item_list.find(item_find => item_find.id === order_sub_item.parent_id):Item_Logic.get_not_found(order_sub_item.parent_data_type,order_sub_item.parent_id,{app_id:database.app_id});
@@ -841,7 +842,7 @@ class Cart_Data {
 				async function(call){
 					const [error,data] = await Portal.post(database,DataType.CART,cloud_data.cart);
 					if(error){
-						error=Log.append(error,error);
+						error=Log.append(error,biz_error);
 					}else{
 						cloud_data.cart = data;
 					}
@@ -868,7 +869,7 @@ class Cart_Data {
 						if(cloud_data.cart_item_list.length>0){
 							const [error,data] = await Portal.post_list(database,cloud_data.cart_item_list);
 							if(error){
-								error=Log.append(error,error);
+								error=Log.append(error,biz_error);
 							}else{
 								cloud_data.cart_item_list = data;
 							}
@@ -896,7 +897,7 @@ class Cart_Data {
 						if(cloud_data.cart_sub_item_list.length>0){
 							const [error,data] = await Portal.post_list(database,cloud_data.cart_sub_item_list);
 							if(error){
-								error=Log.append(error,error);
+								error=Log.append(error,biz_error);
 							}else{
 								cloud_data.cart_sub_item_list = data;
 							}
@@ -925,7 +926,7 @@ class Cart_Data {
 					let filter = { cart_number: { $regex:String(cart_number), $options: "i" } };
 					const [error,data] = await Portal.get(database,DataType.CART,cart_number,{filter:filter});
 					if(error){
-						error=Log.append(error,error);
+						error=Log.append(error,biz_error);
 					}else{
 						cloud_data.cart = data;
 					}
@@ -941,7 +942,7 @@ class Cart_Data {
 						let search = Item_Logic.get_search(DataType.CART_ITEM,filter,{},1,0);
 						const [error,data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,{});
 						if(error){
-							error=Log.append(error,error);
+							error=Log.append(error,biz_error);
 						}else{
 							cloud_data.cart.cart_item_list = data.item_list;
 						}
@@ -958,7 +959,7 @@ class Cart_Data {
 						let search = Item_Logic.get_search(cloud_data.cart.parent_data_type,cart_parent_item_list_query,{},1,0);
 						const [error,data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size);
 						if(error){
-							error=Log.append(error,error);
+							error=Log.append(error,biz_error);
 						}else{
 							cloud_data.cart.cart_item_list.forEach(cart_item => {
 								cart_item.parent_item = data.item_list.find(item_find => item_find.id === cart_item.parent_id) ? data.item_list.find(item_find => item_find.id === cart_item.parent_id):Item_Logic.get_not_found(cart_item.parent_data_type,cart_item.parent_id,{app_id:database.app_id});
@@ -973,7 +974,7 @@ class Cart_Data {
 						let search = Item_Logic.get_search(DataType.CART_SUB_ITEM,filter,{},1,0);
 						const [error,data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,{});
 						if(error){
-							error=Log.append(error,error);
+							error=Log.append(error,biz_error);
 						}else{
 							cart_sub_item_list = data.item_list;
 						}
@@ -990,7 +991,7 @@ class Cart_Data {
 						let search = Item_Logic.get_search(DataType.ITEM,cart_sub_item_list_query,{},1,0);
 						const [error,data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size);
 						if(error){
-							error=Log.append(error,error);
+							error=Log.append(error,biz_error);
 						}else{
 							cart_sub_item_list.forEach(cart_sub_item => {
 								cart_sub_item.parent_item = data.item_list.find(item_find => item_find.id === cart_sub_item.parent_id) ? data.item_list.find(item_find => item_find.id === cart_sub_item.parent_id):Item_Logic.get_not_found(cart_sub_item.parent_data_type,cart_sub_item.parent_id,{app_id:database.app_id});
@@ -1028,7 +1029,7 @@ class Cart_Data {
 				async function(call){
 					const [error,data] = await Portal.get(database,DataType.CART,id);
 					if(error){
-						error=Log.append(error,error);
+						error=Log.append(error,biz_error);
 					}else{
 						cloud_data.cart = data;
 					}
@@ -1036,7 +1037,7 @@ class Cart_Data {
 				async function(call){
 					const [error,data] = await Portal.delete(database,DataType.CART,id);
 					if(error){
-						error=Log.append(error,error);
+						error=Log.append(error,biz_error);
 					}else{
 						cloud_data.cart_delete = data.item;
 					}
@@ -1045,7 +1046,7 @@ class Cart_Data {
 					let search = Item_Logic.get_search(DataType.CART_ITEM,{cart_number:cloud_data.cart.cart_number},{},1,0);
 					const [error,data] = await Portal.delete_search(database,search.data_type,search.filter);
 					if(error){
-						error=Log.append(error,error);
+						error=Log.append(error,biz_error);
 					}else{
 						cloud_data.delete_cart_item_search = data;
 					}
@@ -1054,7 +1055,7 @@ class Cart_Data {
 					let search = Item_Logic.get_search(DataType.CART_SUB_ITEM,{cart_number:cloud_data.cart.cart_number},{},1,0);
 					const [error,data] = await Portal.delete_search(database,search.data_type,search.filter);
 					if(error){
-						error=Log.append(error,error);
+						error=Log.append(error,biz_error);
 					}else{
 						cloud_data.delete_cart_sub_item_search = data;
 					}
@@ -1091,7 +1092,7 @@ class Cart_Data {
 						}
 					});
 					if(error){
-						error=Log.append(error,error);
+						error=Log.append(error,biz_error);
 					}else{
 						cloud_data.item_count = data.item_count;
 						cloud_data.page_count = data.page_count;
@@ -1111,7 +1112,7 @@ class Cart_Data {
 						let search = Item_Logic.get_search(DataType.CART_ITEM,cart_number_list_query,{},1,0);
 						const [error,data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,{});
 						if(error){
-							error=Log.append(error,error);
+							error=Log.append(error,biz_error);
 						}else{
 							cart_item_list = data.item_list;
 						}
@@ -1128,7 +1129,7 @@ class Cart_Data {
 						let search = Item_Logic.get_search(parent_data_type,cart_parent_item_list_query,{},1,0);
 						const [error,data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size);
 						if(error){
-							error=Log.append(error,error);
+							error=Log.append(error,biz_error);
 						}else{
 							cart_item_list.forEach(cart_item => {
 								cart_item.parent_item = data.item_list.find(item_find => item_find.id === cart_item.parent_id) ? data.item_list.find(item_find => item_find.id === cart_item.parent_id):Item_Logic.get_not_found(cart_item.parent_data_type,cart_item.parent_id,{app_id:database.app_id});
@@ -1142,7 +1143,7 @@ class Cart_Data {
 						let search = Item_Logic.get_search(DataType.CART_SUB_ITEM,cart_number_list_query,{},1,0);
 						const [error,data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,{});
 						if(error){
-							error=Log.append(error,error);
+							error=Log.append(error,biz_error);
 						}else{
 							cart_sub_item_list = data.item_list;
 						}
@@ -1159,7 +1160,7 @@ class Cart_Data {
 						let search = Item_Logic.get_search(DataType.ITEM,cart_parent_item_list_query,{},1,0);
 						const [error,data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size);
 						if(error){
-							error=Log.append(error,error);
+							error=Log.append(error,biz_error);
 						}else{
 							cart_sub_item_list.forEach(cart_sub_item => {
 								cart_sub_item.parent_item = data.item_list.find(item_find => item_find.id === cart_sub_item.parent_id) ? data.item_list.find(item_find => item_find.id === cart_sub_item.parent_id):Item_Logic.get_not_found(cart_sub_item.parent_data_type,cart_sub_item.parent_id,{app_id:database.app_id});
@@ -1234,11 +1235,11 @@ class Product_Data {
 			option = !Obj.check_is_empty(option) ? option : {get_item:false,get_photo:false};
 			async.series([
 				async function(call){
-					const [error,item_data] = await Portal.get(database,DataType.PRODUCT,key,option);
+					const [biz_error,biz_data] = await Portal.get(database,DataType.PRODUCT,key,option);
 					if(error){
-						error=Log.append(error,error);
+						error=Log.append(error,biz_error);
 					}else{
-						product = item_data;
+						product = biz_data;
 					}
 				},
 			]).then(result => {
@@ -1257,15 +1258,15 @@ class Product_Data {
 			option = !Obj.check_is_empty(option) ? option : {get_item:false,get_photo:false};
 			async.series([
 				async function(call){
-					const [error,item_data] = await Portal.search(database,DataType.PRODUCT,filter,sort_by,page_current,page_size,option);
+					const [biz_error,biz_data] = await Portal.search(database,DataType.PRODUCT,filter,sort_by,page_current,page_size,option);
 					if(error){
-						error=Log.append(error,error);
+						error=Log.append(error,biz_error);
 					}else{
-						data.data_count = item_data.data_count;
+						data.data_count = biz_data.data_count;
 						data.data_type = DataType.PRODUCT;
-						data.page_count = item_data.page_count;
-						data.filter = item_data.filter;
-						data.blog_post_list = item_data.data_list;
+						data.page_count = biz_data.page_count;
+						data.filter = biz_data.filter;
+						data.product_list = biz_data.data_list;
 	}
 				},
 			]).then(result => {
@@ -1280,12 +1281,12 @@ class Product_Data {
 class Review_Data {
 	/*
 	//9_review_post
-	static post = async(database,item_data_type,item_id,user_id,review) => {
+	static post = async(database,biz_data_type,item_id,user_id,review) => {
 		return new Promise((callback) => {
 			let error = null;
 			let cloud_data = {};
-			cloud_data.item = DataItem.get_new(item_data_type,item_id);
-			cloud_data.item_item = DataItem.get_new(item_data_type,item_id);
+			cloud_data.item = DataItem.get_new(biz_data_type,item_id);
+			cloud_data.item_item = DataItem.get_new(biz_data_type,item_id);
 			cloud_data.review = review;
 			cloud_data.review.user = DataItem.get_new(DataType.USER,0);
 			let review_list = [];
@@ -1296,7 +1297,7 @@ class Review_Data {
 				async function(call){
 					const [error,data] = await Portal.post(database,DataType.REVIEW,cloud_data.review);
 					if(error){
-						cloud_error=Log.append(cloud_error,error);
+						cloud_error=Log.append(cloud_error,biz_error);
 					}else{
 						cloud_data.item = data;
 					}
@@ -1305,7 +1306,7 @@ class Review_Data {
 				async function(call){
 					const [error,data] = await Portal.get(database,cloud_data.item.data_type,cloud_data.item.id);
 					if(error){
-						cloud_error=Log.append(cloud_error,error);
+						cloud_error=Log.append(cloud_error,biz_error);
 					}else{
 						cloud_data.item = data;
 					}
@@ -1322,7 +1323,7 @@ class Review_Data {
 
 						const [error,data] = await Portal.post(database,cloud_data.item.data_type,cloud_data.item);
 						if(error){
-							cloud_error=Log.append(cloud_error,error);
+							cloud_error=Log.append(cloud_error,biz_error);
 						}else{
 							cloud_data.item = data;
 						}
@@ -1333,7 +1334,7 @@ class Review_Data {
 					if(!Str.check_is_null(cloud_data.item.id)){
 						const [error,data] = await Portal.get(database,DataType.USER,user_id);
 						if(error){
-							cloud_error=Log.append(cloud_error,error);
+							cloud_error=Log.append(cloud_error,biz_error);
 						}else{
 							cloud_data.review.user = data;
 						}
@@ -1348,7 +1349,7 @@ class Review_Data {
 		});
 	};
 	//9_review_get
-	static get = async (database,item_data_type,user_id,sort_by,page_current,page_size,option) => {
+	static get = async (database,biz_data_type,user_id,sort_by,page_current,page_size,option) => {
 		return new Promise((callback) => {
 			let error = null;
 			let cloud_data = {};
@@ -1358,15 +1359,15 @@ class Review_Data {
 			async.series([
 				//review_list
 				async function(call){
-					let query = {user_id:user_id,item_data_type:item_data_type};
+					let query = {user_id:user_id,biz_data_type:biz_data_type};
 					let search = Item_Logic.get_search(DataType.REVIEW,query,{},page_current,page_size);
-					let option = {get_item_search:true,item_search_data_type:item_data_type,item_search_field:'id',item_search_value:'item_id'};
+					let option = {get_item_search:true,item_search_data_type:biz_data_type,item_search_field:'id',item_search_value:'item_id'};
 					const [error,data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option);
 					if(error){
-						cloud_error=Log.append(cloud_error,error);
+						cloud_error=Log.append(cloud_error,biz_error);
 					}else{
 						for(let a=0;a<data.item_list.length;a++){
-							data.item_list[a].item = DataItem.get_new(item_data_type,data.item_list[a].item,{title:'Not Found'});
+							data.item_list[a].item = DataItem.get_new(biz_data_type,data.item_list[a].item,{title:'Not Found'});
 							for(let b=0;b<data.item_search_list.length;b++){
 								if(data.item_list[a].item_id == data.item_search_list[b].id){
 									data.item_list[a].item_item = data.item_search_list[b];
@@ -1409,7 +1410,7 @@ class Activity_Data {
 						}
 					});
 					if(error){
-						error=Log.append(error,error);
+						error=Log.append(error,biz_error);
 					}else{
 						cloud_data.item_count = data.item_count;
 						cloud_data.page_count = data.page_count;
@@ -1500,7 +1501,7 @@ class User_Data {
 					let search = Item_Logic.get_search(DataType.USER,{email:cloud_data.user.email},{},1,0);
 					const [error,data] = await Portal.count(database,search.data_type,search.filter);
 					if(error){
-						cloud_error=Log.append(cloud_error,error);
+						cloud_error=Log.append(cloud_error,biz_error);
 					}else{
 						if(data.count>0){
 							cloud_data.email_found = true;
@@ -1512,7 +1513,7 @@ class User_Data {
 					let search = Item_Logic.get_search(DataType.USER,{title:cloud_data.user.title},{},1,0);
 					const [error,data] = await Portal.count(database,search.data_type,search.filter);
 					if(error){
-						cloud_error=Log.append(cloud_error,error);
+						cloud_error=Log.append(cloud_error,biz_error);
 					}else{
 						if(data.count>0){
 							cloud_data.title_found = true;
@@ -1525,7 +1526,7 @@ class User_Data {
 						cloud_data.user.last_login = dayjs().toISOString();
 						const [error,data] = await Portal.post(database,DataType.USER,cloud_data.user);
 						if(error){
-							cloud_error=Log.append(cloud_error,error);
+							cloud_error=Log.append(cloud_error,biz_error);
 						}else{
 							cloud_data.user = data;
 						}
@@ -1577,7 +1578,7 @@ class User_Data {
 					let search = Item_Logic.get_search(DataType.USER,{email:cloud_data.user.email,password:cloud_data.user.password},{},1,0);
 					const [error,data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size);
 					if(error){
-						cloud_error=Log.append(cloud_error,error);
+						cloud_error=Log.append(cloud_error,biz_error);
 					}else{
 						if(data.item_list.length>0){
 							cloud_data.user = data.item_list[0];
@@ -1591,7 +1592,7 @@ class User_Data {
 						cloud_data.user.last_login = dayjs().toISOString();
 						const [error,data] = await Portal.post(database,DataType.USER,cloud_data.user);
 						if(error){
-							cloud_error=Log.append(cloud_error,error);
+							cloud_error=Log.append(cloud_error,biz_error);
 						}else{
 							cloud_data.user = data;
 						}
@@ -1602,7 +1603,7 @@ class User_Data {
 					if(cloud_data.user_found){
 						const [error,data] = await Portal.get(database,DataType.USER,cloud_data.user.id);
 						if(error){
-							cloud_error=Log.append(cloud_error,error);
+							cloud_error=Log.append(cloud_error,biz_error);
 						}else{
 							cloud_data.user = data;
 						}
@@ -1656,7 +1657,7 @@ class Favorite_Data {
 					let search = Item_Logic.get_search(DataType.FAVORITE,favorite_filter,{},1,0);
 					const [error,data] = await Portal.count(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size);
 					if(error){
-						cloud_error=Log.append(cloud_error,error);
+						cloud_error=Log.append(cloud_error,biz_error);
 					}else{
 						if(data.count<=0){
 							cloud_data.is_unique = true;
@@ -1667,7 +1668,7 @@ class Favorite_Data {
 					if(cloud_data.is_unique){
 						const [error,data] = await Portal.post(DataType.FAVORITE,cloud_data.favorite);
 						if(error){
-							cloud_error=Log.append(cloud_error,error);
+							cloud_error=Log.append(cloud_error,biz_error);
 						}else{
 							cloud_data.item = data;
 						}
@@ -1695,7 +1696,7 @@ class Favorite_Data {
 					let option = {get_item_search:true,item_search_data_type:parent_data_type,item_search_field:'id',item_search_value:'item_id'};
 					const [error,data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option);
 					if(error){
-						cloud_error=Log.append(cloud_error,error);
+						cloud_error=Log.append(cloud_error,biz_error);
 					}else{
 						for(let a=0;a<data.item_list.length;a++){
 							data.item_list[a].item = DataItem.get_new(parent_data_type,data.item_list[a].item,{title:'Not Found'});
@@ -1743,12 +1744,12 @@ class Portal {
 					call();
 				},
 				function(call){
-					Data.get(database,data_type,key,option).then(([error,item_data])=> {
+					Data.get(database,data_type,key,option).then(([biz_error,biz_data])=> {
 						if(error){
-							error=Log.append(error,error);
+							error=Log.append(error,biz_error);
 						}else{
-							if(!Str.check_is_null(item.id)){
-								data = item_data;
+							if(!Str.check_is_null(biz_data.id)){
+								data = biz_data;
 							}else{
 								data = data_type != DataType.USER ? Item_Logic.get_not_found(data_type,key,{app_id:database.app_id}) : User_Logic.get_not_found(key,{app_id:database.app_id});
 								data.photos = [];
@@ -1756,9 +1757,9 @@ class Portal {
 							}
 						}
 						call();
-					}).catch(error => {
-						Log.error("Portal-Get-Key-A",error);
-						error = Log.append(error,error);
+					}).catch(err => {
+						Log.error("Portal-Get-Key-A",err);
+						error = Log.append(error,err);
 						call();
 					});
 				},
@@ -1792,13 +1793,13 @@ class Portal {
 						let search = Item_Logic.get_search(DataType.ITEM,filter,get_sort(data),1,0);
 						Data.get_list(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size).then(([error,item_list,item_count,page_count])=> {
 							if(error){
-								error=Log.append(error,error);
+								error=Log.append(error,biz_error);
 							}else{
 								full_data_list = item_list;
 							}
 							call();
 						}).catch(error => {
-							error = Log.append(error,error);
+							error = Log.append(error,biz_error);
 							call();
 						});
 					}else{
@@ -1835,9 +1836,9 @@ class Portal {
 						let sort_by = option.photo_sort_by;
 						let page_current = 1;
 						let page_size = option.photo_count;
-						const [error,item_data] = await Portal.search(database,DataType.PHOTO,filter,sort_by,page_current,page_size,option);
-						if(item_data.item_list.length > 0){
-							data.photos = item_data.data_list;
+						const [biz_error,biz_data] = await Portal.search(database,DataType.PHOTO,filter,sort_by,page_current,page_size,option);
+						if(biz_data.item_list.length > 0){
+							data.photos = biz_data.data_list;
 						}
 					}
 				},
@@ -1880,7 +1881,7 @@ class Portal {
 					let search = Item_Logic.get_search(data_type,filter,sort_by,page_current,page_size);
 					Data.get_list(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size).then(([error,item_list,item_count,page_count])=>{
 						if(error){
-							error=Log.append(error,error);
+							error=Log.append(error,biz_error);
 						}else{
 							data.data_type=data_type;
 							data.data_count=item_count;
@@ -1891,7 +1892,7 @@ class Portal {
 							call();
 						}
 					}).catch(error => {
-						error=Log.append(error,error);
+						error=Log.append(error,biz_error);
 					});
 				},
 				function(call){
@@ -1905,13 +1906,13 @@ class Portal {
 						let search = Item_Logic.get_search(option.item_count_data_type,query,{},1,0);
 						Data.get_list(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size).then(([error,item_list,item_count,page_count])=> {
 							if(error){
-								error=Log.append(error,error);
+								error=Log.append(error,biz_error);
 							}else{
 								data_list_count = item_list;
 							}
 							call();
 						}).catch(error => {
-							error = Log.append(error,error);
+							error = Log.append(error,biz_error);
 							call();
 						});
 					}else{
@@ -1945,7 +1946,7 @@ class Portal {
 						data.item_search_search = search;
 						Data.get_list(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size).then(([error,item_list,item_count,page_count])=> {
 							if(error){
-								error=Log.append(error,error);
+								error=Log.append(error,biz_error);
 							}else{
 								data.data_search_list = item_list;
 								data.data_search_count = item_count;
@@ -1955,7 +1956,7 @@ class Portal {
 							}
 							call();
 						}).catch(error => {
-							error = Log.append(error,error);
+							error = Log.append(error,biz_error);
 							call();
 						});
 					}else{
@@ -1996,15 +1997,15 @@ class Portal {
 			option = !Obj.check_is_empty(option) ? option : {get_item:false,get_photo:false};
 			async.series([
 				function(call){
-					Data.post(database,data_type,item,option).then(([error,item_data])=> {
+					Data.post(database,data_type,item,option).then(([biz_error,biz_data])=> {
 						if(error){
-							error=Log.append(error,error);
+							error=Log.append(error,biz_error);
 						}else{
-							data = item_data;
+							data = biz_data;
 						}
 						call();
 					}).catch(error => {
-						error = Log.append(error,error);
+						error = Log.append(error,biz_error);
 						call();
 					});
 				},
@@ -2036,15 +2037,15 @@ class Portal {
 			option = !Obj.check_is_empty(option) ? option : {get_item:false,get_photo:false};
 			async.series([
 				function(call){
-					Data.delete_cache(database,data_type,id).then(([error,item_data])=> {
+					Data.delete_cache(database,data_type,id).then(([biz_error,biz_data])=> {
 						if(error){
-							error=Log.append(error,error);
+							error=Log.append(error,biz_error);
 						}else{
-							data = item_data;
+							data = biz_data;
 						}
 						call();
 					}).catch(error => {
-						error = Log.append(error,error);
+						error = Log.append(error,biz_error);
 						call();
 					});
 				},
@@ -2077,15 +2078,15 @@ class Portal {
 			option = !Obj.check_is_empty(option) ? option : {get_item:false,get_photo:false,delete_items:true,delete_photos:true};
 			async.series([
 				function(call){
-					Data.delete(database,data_type,id).then(([error,item_data])=> {
+					Data.delete(database,data_type,id).then(([biz_error,biz_data])=> {
 						if(error){
-							error=Log.append(error,error);
+							error=Log.append(error,biz_error);
 						}else{
-							data.data = item_data;
+							data.data = biz_data;
 						}
 						call();
 					}).catch(error => {
-						error = Log.append(error,error);
+						error = Log.append(error,biz_error);
 						call();
 					});
 				},
@@ -2094,15 +2095,15 @@ class Portal {
 						let data_type = DataType.ITEM;
 						let filter = {parent_id:id};
 						data.delete_data_list = false;
-						Data.delete_list(database,data_type,filter).then(([error,item_data])=> {
+						Data.delete_list(database,data_type,filter).then(([biz_error,biz_data])=> {
 							if(error){
-								error=Log.append(error,error);
+								error=Log.append(error,biz_error);
 							}else{
 								data.delete_data_list = true;
 							}
 							call();
 						}).catch(error => {
-							error = Log.append(error,error);
+							error = Log.append(error,biz_error);
 							call();
 						});
 					}else{
@@ -2114,15 +2115,15 @@ class Portal {
 						let data_type = DataType.PHOTO;
 						let filter = {parent_id:id};
 						cloud_data.delete_photos = false;
-						Data.delete_list(database,data_type,filter).then(([error,item_data])=> {
+						Data.delete_list(database,data_type,filter).then(([biz_error,biz_data])=> {
 							if(error){
-								error=Log.append(error,error);
+								error=Log.append(error,biz_error);
 							}else{
 								data.delete_photos = true;
 							}
 							call();
 						}).catch(error => {
-							error = Log.append(error,error);
+							error = Log.append(error,biz_error);
 							call();
 						});
 					}else{
@@ -2148,15 +2149,15 @@ class Portal {
 			option = !Obj.check_is_empty(option) ? option : {get_item:false,get_photo:false};
 			async.series([
 				function(call){
-					Data.post_list(database,data_list).then(([error,item_data])=> {
+					Data.post_list(database,data_list).then(([biz_error,biz_data])=> {
 						if(error){
-							error=Log.append(error,error);
+							error=Log.append(error,biz_error);
 						}else{
-							data_list = item_data;
+							data_list = biz_data;
 						}
 						call();
 					}).catch(error => {
-						error = Log.append(error,error);
+						error = Log.append(error,biz_error);
 						call();
 					});
 				},
@@ -2179,15 +2180,15 @@ class Portal {
 			option = !Obj.check_is_empty(option) ? option : {get_item:false,get_photo:false};
 			async.series([
 				function(call){
-					Data.delete_list(database,data_type,filter).then(([error,item_data])=> {
+					Data.delete_list(database,data_type,filter).then(([biz_error,biz_data])=> {
 						if(error){
-							error=Log.append(error,error);
+							error=Log.append(error,biz_error);
 						}else{
-							data = item_data;
+							data = biz_data;
 						}
 						call();
 					}).catch(error => {
-						error = Log.append(error,error);
+						error = Log.append(error,biz_error);
 						call();
 					});
 				},
@@ -2210,15 +2211,15 @@ class Portal {
 			let data = {};
 			async.series([
 				function(call){
-					Data.count_list(database,data_type,filter).then(([error,item_data])=> {
+					Data.count_list(database,data_type,filter).then(([biz_error,biz_data])=> {
 						if(error){
-							error=Log.append(error,error);
+							error=Log.append(error,biz_error);
 						}else{
-							data = item_data;
+							data = biz_data;
 						}
 						call();
 					}).catch(error => {
-						error = Log.append(error,error);
+						error = Log.append(error,biz_error);
 						call();
 					});
 				},
@@ -2253,26 +2254,26 @@ class Portal {
 			let copy_data_list = [];
 			async.series([
 				function(call){
-					Data.get(database,data_type,id).then(([error,item_data])=> {
+					Data.get(database,data_type,id).then(([biz_error,biz_data])=> {
 						if(error){
-							error=Log.append(error,error);
+							error=Log.append(error,biz_error);
 						}
-						top_data=item_data;
+						top_data=biz_data;
 						call();
 					})
 				},
 				function(call){
 					let filter = {top_id:top_data.id};
 					let search = Item_Logic.get_search(DataType.ITEM,filter,{},1,0);
-					Data.get_list(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size).then(([error,item_data,item_count,page_count])=> {
+					Data.get_list(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size).then(([biz_error,biz_data,item_count,page_count])=> {
 						if(error){
-							error=Log.append(error,error);
+							error=Log.append(error,biz_error);
 						}else{
-							data_list = item_data;
+							data_list = biz_data;
 						}
 						call();
 					}).catch(error => {
-						error = Log.append(error,error);
+						error = Log.append(error,biz_error);
 						call();
 					});
 				},
@@ -2289,15 +2290,15 @@ class Portal {
 					call();
 				},
 				function(call){
-					Data.post(database,copy_data.data_type,copy_data).then(([error,item_data])=> {
+					Data.post(database,copy_data.data_type,copy_data).then(([biz_error,biz_data])=> {
 						if(error){
-							error=Log.append(error,error);
+							error=Log.append(error,biz_error);
 						}else{
-							copy_data=item_data;
+							copy_data=biz_data;
 						}
 						call();
 					}).catch(error => {
-						error=Log.append(error,error);
+						error=Log.append(error,biz_error);
 						call();
 					});
 				},
@@ -2323,11 +2324,11 @@ class Portal {
 					call();
 				},
 				function(call){
-					Data.post_list(database,copy_data_list).then(([error,item_data])=> {
+					Data.post_list(database,copy_data_list).then(([biz_error,biz_data])=> {
 						if(error){
-							error=Log.append(error,error);
+							error=Log.append(error,biz_error);
 						}
-						copy_data_list=item_data;
+						copy_data_list=biz_data;
 						call();
 					})
 				},
@@ -2348,11 +2349,11 @@ class Portal {
 					call();
 				},
 				function(call){
-					Data.post_list(database,copy_data_list).then(([error,item_data])=> {
+					Data.post_list(database,copy_data_list).then(([biz_error,biz_data])=> {
 						if(error){
-							error=Log.append(error,error);
+							error=Log.append(error,biz_error);
 						}
-						copy_data_list=item_data;
+						copy_data_list=biz_data;
 						call();
 					})
 				},
@@ -2380,8 +2381,8 @@ class Faq_Data{
 			let faq = DataItem.get_new(DataType.FAQ,0);
 			async.series([
 				async function(call){
-					const [error,item_data] = await Portal.get(database,DataType.FAQ,key,option);
-					faq=item_data;
+					const [biz_error,biz_data] = await Portal.get(database,DataType.FAQ,key,option);
+					faq=biz_data;
 				},
 				async function(call){
 					if(!Str.check_is_null(faq.id)){
@@ -2425,7 +2426,7 @@ class Stat_Data {
 						let search = Item_Logic.get_search(parent_data_type,query,{},1,0);
 						const [error,data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size);
 						if(error){
-							error=Log.append(error,error);
+							error=Log.append(error,biz_error);
 						}else{
 							for(let a = 0; a < parent_item_list.length; a++){
 								parent_item_list[a].item = DataItem.get_new(parent_data_type,0);
@@ -2450,7 +2451,7 @@ class Stat_Data {
 						let search = Item_Logic.get_search(DataType.STAT,query,{},1,0);
 						const [error,data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size);
 						if(error){
-							error=Log.append(error,error);
+							error=Log.append(error,biz_error);
 						}else{
 							for(let a = 0; a < parent_item_list.length; a++){
 								let str = get_stat_str(stat_type_id);
@@ -2484,7 +2485,7 @@ class Stat_Data {
 						}
 						const [error,data] = await Portal.post_list(database,cloud_data.stat_item_list);
 						if(error){
-							error=Log.append(error,error);
+							error=Log.append(error,biz_error);
 						}else{
 							cloud_data.stat_item_list = data;
 						}
@@ -2505,7 +2506,7 @@ class Stat_Data {
 						if(cloud_data.stat_item_list.length>0){
 							const [error,data] = await Portal.post_list(database,cloud_data.stat_item_list);
 							if(error){
-								error=Log.append(error,error);
+								error=Log.append(error,biz_error);
 							}else{
 								cloud_data.stat_item_list = data;
 							}
