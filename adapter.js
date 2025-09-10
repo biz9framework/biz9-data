@@ -8,7 +8,7 @@ const async = require('async');
 const {get_db_connect_main,check_db_connect_main,delete_db_connect_main,post_item_main,get_item_main,delete_item_main,get_id_list_main,delete_item_list_main,get_count_item_list_main} = require('./mongo/index.js');
 const {get_cache_connect_main,delete_cache_connect_main,get_cache_string_main,delete_cache_string_main,post_cache_string_main} = require('./redis/index.js');
 const {DataItem}=require("biz9-logic");
-const {Log,Str,Num}=require("biz9-utility");
+const {Log,Str,Num,Obj}=require("biz9-utility");
 const DB_TITLE='DB';
 const CACHE_TITLE='CACHE';
 const NOT_FOUND_TITLE='NOT-FOUND';
@@ -171,7 +171,7 @@ const post_item_adapter=(db_connect,data_type,item_data,option) => {
         });
     });
 }
-const get_item_list_adapter = (db_connect,data_type,filter,sort_by,page_current,page_size) => {
+const get_item_list_adapter = (db_connect,data_type,filter,sort_by,page_current,page_size,option) => {
     return new Promise((callback) => {
         let cache_connect = {};
         let item_id_list = [];
@@ -207,7 +207,7 @@ const get_item_list_adapter = (db_connect,data_type,filter,sort_by,page_current,
             async function(call) {
                 if(item_id_list.length>0){
                     for(const item of item_id_list) {
-                        [error,data] = await get_item_cache_db(cache_connect,db_connect,data_type,item.id);
+                        [error,data] = await get_item_cache_db(cache_connect,db_connect,data_type,item.id,option);
                         if(data){
                             item_data_list.push(data);
                         }
@@ -371,13 +371,14 @@ const delete_item_adapter = (db_connect,data_type,id) => {
         });
     });
 }
-const get_item_cache_db = (cache_connect,db_connect,data_type,id) => {
+const get_item_cache_db = (cache_connect,db_connect,data_type,id,option) => {
     return new Promise((callback) => {
         let cache_found = false;
         let cache_key_list = null;
         let item_data = DataItem.get_new(data_type,id,{app_id:db_connect.app_id});
         let cache_string_list = [];
-        async.series([
+		option = option ? option : {get_field:false};
+	    async.series([
             function(call) {
                 get_cache_string_main(cache_connect,get_cache_item_attr_list_key(data_type,id)).then(([error,data]) => {
                     cache_key_list=data;
@@ -388,17 +389,34 @@ const get_item_cache_db = (cache_connect,db_connect,data_type,id) => {
                 });
             },
             async function(call) {
-                if(cache_key_list!=null){
-                    cache_found = true;
-                    cache_string_list =cache_key_list.split(',');
-                }
-                for(const item of cache_string_list) {
-                    if(item){
-                        const [error,val] = await get_cache_string_main(cache_connect,get_cache_item_attr_key(data_type,id,item));
-                        if(val){
-                            item_data[item] = val;
-                        }else{
-                            item_data[item] = null;
+                if(!option.get_field){
+                    if(cache_key_list!=null){
+                        cache_found = true;
+                        cache_string_list =cache_key_list.split(',');
+                    }
+                    for(const item of cache_string_list) {
+                        if(item){
+                            const [error,val] = await get_cache_string_main(cache_connect,get_cache_item_attr_key(data_type,id,item));
+                            if(val){
+                                item_data[item] = val;
+                            }else{
+                                item_data[item] = null;
+                            }
+                        }
+                    }
+                }else{
+                    if(cache_key_list!=null){
+                        cache_found = true;
+                        cache_string_list =option.fields.split(',');
+                    }
+                    for(const item of cache_string_list) {
+                        if(item){
+                            const [error,val] = await get_cache_string_main(cache_connect,get_cache_item_attr_key(data_type,id,item));
+                            if(val){
+                                item_data[item] = val;
+                            }else{
+                                item_data[item] = null;
+                            }
                         }
                     }
                 }

@@ -24,7 +24,7 @@ class Database {
 		let error=null;
 		let data={};
 		return new Promise((callback) => {
-			option = !Obj.check_is_empty(option) ? option : {biz9_config_file:null,app_id:null};
+			option = option ? option : {biz9_config_file:null,app_id:null};
 			if(option.biz9_config_file==null){
 				option.biz9_config_file=null;
 			}else{
@@ -77,7 +77,7 @@ class Blog_Post_Data {
 		return new Promise((callback) => {
 			let blog_post = DataItem.get_new(DataType.BLOG_POST,0);
 			let error = null;
-			option = !Obj.check_is_empty(option) ? option : {get_item:false,get_photo:false};
+			option = option ? option : {get_item:false,get_photo:false};
 			async.series([
 				async function(call){
 					const [biz_error,biz_data] = await Portal.get(database,DataType.BLOG_POST,key,option);
@@ -99,16 +99,16 @@ class Blog_Post_Data {
 	//9_blog_post_search
 	static search = (database,filter,sort_by,page_current,page_size,option) => {
 		return new Promise((callback) => {
-			let data = {data_count:0,page_count:1,filter:{},data_type:DataType.BLOG_POST,blog_post_list:[]};
+			let data = {item_count:0,page_count:1,filter:{},data_type:DataType.BLOG_POST,blog_post_list:[]};
 			let error = null;
-			option = !Obj.check_is_empty(option) ? option : {get_item:false,get_photo:false};
+			option = option ? option : {get_item:false,get_photo:false};
 			async.series([
 				async function(call){
 					const [biz_error,biz_data] = await Portal.search(database,DataType.BLOG_POST,filter,sort_by,page_current,page_size,option);
 					if(error){
 						error=Log.append(error,biz_error);
 					}else{
-						data.data_count = biz_data.data_count;
+						data.item_count = biz_data.item_count;
 						data.data_type = DataType.BLOG_POST;
 						data.page_count = biz_data.page_count;
 						data.filter = biz_data.filter;
@@ -129,7 +129,7 @@ class Category_Data { //9_category_get
 		return new Promise((callback) => {
 			let category = DataItem.get_new(DataType.CATEGORY,0);
 			let error = null;
-			option = !Obj.check_is_empty(option) ? option : {get_item:false,get_photo:false};
+			option = option ? option : {get_item:false,get_photo:false};
 			async.series([
 				async function(call){
 					const [biz_error,biz_data] = await Portal.get(database,DataType.CATEGORY,key,option);
@@ -150,16 +150,16 @@ class Category_Data { //9_category_get
 	//9_category_search
 	static search = (database,filter,sort_by,page_current,page_size,option) => {
 		return new Promise((callback) => {
-			let data = {data_count:0,page_count:1,filter:{},data_type:DataType.CATEGORY,category_list:[]};
+			let data = {item_count:0,page_count:1,filter:{},data_type:DataType.CATEGORY,category_list:[]};
 			let error = null;
-			option = !Obj.check_is_empty(option) ? option : {get_item:false,get_photo:false};
+			option = option ? option : {get_item:false,get_photo:false};
 			async.series([
 				async function(call){
 					const [biz_error,biz_data] = await Portal.search(database,DataType.CATEGORY,filter,sort_by,page_current,page_size,option);
 					if(error){
 						error=Log.append(error,biz_error);
 					}else{
-						data.data_count = biz_data.data_count;
+						data.item_count = biz_data.item_count;
 						data.data_type = DataType.CATEGORY;
 						data.page_count = biz_data.page_count;
 						data.filter = biz_data.filter;
@@ -181,7 +181,7 @@ class Content_Data {
 		return new Promise((callback) => {
 			let content = DataItem.get_new(DataType.CONTENT,0);
 			let error = null;
-			option = !Obj.check_is_empty(option) ? option : {get_item:false,get_photo:false};
+			option = option ? option : {get_item:false,get_photo:false};
 			async.series([
 				async function(call){
 					const [biz_error,biz_data] = await Portal.get(database,DataType.CONTENT,key,option);
@@ -202,16 +202,16 @@ class Content_Data {
 	//9_content_search
 	static search = (database,filter,sort_by,page_current,page_size,option) => {
 		return new Promise((callback) => {
-			let data = {data_count:0,page_count:1,filter:{},data_type:DataType.CONTENT,content_list:[]};
+			let data = {item_count:0,page_count:1,filter:{},data_type:DataType.CONTENT,content_list:[]};
 			let error = null;
-			option = !Obj.check_is_empty(option) ? option : {get_item:false,get_photo:false};
+			option = option ? option : {get_item:false,get_photo:false};
 			async.series([
 				async function(call){
 					const [biz_error,biz_data] = await Portal.search(database,DataType.CONTENT,filter,sort_by,page_current,page_size,option);
 					if(error){
 						error=Log.append(error,biz_error);
 					}else{
-						data.data_count = biz_data.data_count;
+						data.item_count = biz_data.item_count;
 						data.data_type = DataType.CONTENT;
 						data.page_count = biz_data.page_count;
 						data.filter = biz_data.filter;
@@ -233,7 +233,7 @@ class Page_Data {
 		return new Promise((callback) => {
 			let page = DataItem.get_new(DataType.PAGE,0);
 			let error = null;
-			option = !Obj.check_is_empty(option) ? option : {get_item:false,get_photo:false};
+			option = option ? option : {get_item:false,get_photo:false};
 			async.series([
 				async function(call){
 					const [error,data] = await Portal.get(database,DataType.PAGE,key,option);
@@ -254,16 +254,16 @@ class Page_Data {
 	//9_page_data_search
 	static search = (database,filter,sort_by,page_current,page_size,option) => {
 		return new Promise((callback) => {
-			let data = {data_count:0,page_count:1,filter:{},data_type:DataType.PAGE,page_list:[]};
+			let data = {item_count:0,page_count:1,filter:{},data_type:DataType.PAGE,page_list:[]};
 			let error = null;
-			option = !Obj.check_is_empty(option) ? option : {get_item:false,get_photo:false};
+			option = option ? option : {get_item:false,get_photo:false};
 			async.series([
 				async function(call){
 					const [error,data] = await Portal.search(database,DataType.PAGE,filter,sort_by,page_current,page_size,option);
 					if(error){
 						error=Log.append(error,biz_error);
 					}else{
-						data.data_count = data.data_count;
+						data.item_count = data.item_count;
 						data.data_type =DataType.PAGE;
 						data.page_count = data.page_count;
 						data.filter = data.filter;
@@ -285,7 +285,7 @@ class Template_Data {
 		return new Promise((callback) => {
 			let template = DataItem.get_new(DataType.TEMPLATE,0);
 			let error = null;
-			option = !Obj.check_is_empty(option) ? option : {get_item:false,get_photo:false};
+			option = option ? option : {get_item:false,get_photo:false};
 			async.series([
 				async function(call){
 					const [error,data] = await Portal.get(database,DataType.TEMPLATE,key,option);
@@ -306,16 +306,16 @@ class Template_Data {
 	//9_template_data_search
 	static search = (database,filter,sort_by,page_current,page_size,option) => {
 		return new Promise((callback) => {
-			let data = {data_count:0,page_count:1,filter:{},data_type:DataType.TEMPLATE,template_list:[]};
+			let data = {item_count:0,page_count:1,filter:{},data_type:DataType.TEMPLATE,template_list:[]};
 			let error = null;
-			option = !Obj.check_is_empty(option) ? option : {get_item:false,get_photo:false};
+			option = option ? option : {get_item:false,get_photo:false};
 			async.series([
 				async function(call){
 					const [error,data] = await Portal.search(database,DataType.TEMPLATE,filter,sort_by,page_current,page_size,option);
 					if(error){
 						error=Log.append(error,biz_error);
 					}else{
-						data.data_count = data.data_count;
+						data.item_count = data.item_count;
 						data.data_type = DataType.TEMPLATE;
 						data.page_count = data.page_count;
 						data.filter = data.filter;
@@ -337,7 +337,7 @@ class Event_Data {
 		return new Promise((callback) => {
 			let event = DataItem.get_new(DataType.EVENT,0);
 			let error = null;
-			option = !Obj.check_is_empty(option) ? option : {get_item:false,get_photo:false};
+			option = option ? option : {get_item:false,get_photo:false};
 			async.series([
 				async function(call){
 					const [error,data] = await Portal.get(database,DataType.EVENT,key,option);
@@ -360,14 +360,14 @@ class Event_Data {
 		return new Promise((callback) => {
 			let data = {event_count:0,page_count:1,filter:{},data_type:DataType.EVENT,event_list:[]};
 			let error = null;
-			option = !Obj.check_is_empty(option) ? option : {get_item:false,get_photo:false};
+			option = option ? option : {get_item:false,get_photo:false};
 			async.series([
 				async function(call){
 					const [error,data] = await Portal.search(database,DataType.EVENT,filter,sort_by,page_current,page_size,option);
 					if(error){
 						error=Log.append(error,biz_error);
 					}else{
-						data.data_count = data.data_count;
+						data.item_count = data.item_count;
 						data.data_type = DataType.EVENT;
 						data.page_count = data.page_count;
 						data.filter = data.filter;
@@ -490,7 +490,7 @@ class Order_Data {
 			let order_sub_item_list_query = { $or: [] };
 			let error = null;
 			let order_sub_item_list = [];
-			option = !Obj.check_is_empty(option) ? option : {get_payment:true};
+			option = option ? option : {get_payment:true};
 			async.series([
 				//get_order
 				async function(call){
@@ -667,7 +667,7 @@ class Order_Data {
 		return new Promise((callback) => {
 			let cloud_data = {order_list:[]};
 			let error = null;
-			option = !Obj.check_is_empty(option) ? option : {};
+			option = option ? option : {};
 			let order_number_list_query = { $or: [] };
 			let order_parent_item_list_query = { $or: [] };
 			let order_item_list = [];
@@ -1074,7 +1074,7 @@ class Cart_Data {
 		return new Promise((callback) => {
 			let cloud_data = {cart_list:[]};
 			let error = null;
-			option = !Obj.check_is_empty(option) ? option : {};
+			option = option ? option : {};
 			let cart_number_list_query = { $or: [] };
 			let cart_parent_item_list_query = { $or: [] };
 			let cart_item_list = [];
@@ -1232,7 +1232,7 @@ class Product_Data {
 		return new Promise((callback) => {
 			let product = DataItem.get_new(DataType.PRODUCT,0);
 			let error = null;
-			option = !Obj.check_is_empty(option) ? option : {get_item:false,get_photo:false};
+			option = option ? option : {get_item:false,get_photo:false};
 			async.series([
 				async function(call){
 					const [biz_error,biz_data] = await Portal.get(database,DataType.PRODUCT,key,option);
@@ -1253,16 +1253,16 @@ class Product_Data {
 	//9_product_search
 	static search = (database,filter,sort_by,page_current,page_size,option) => {
 		return new Promise((callback) => {
-			let data = {data_count:0,page_count:1,filter:{},data_type:DataType.PRODUCT,data_list:[]};
+			let data = {item_count:0,page_count:1,filter:{},data_type:DataType.PRODUCT,data_list:[]};
 			let error = null;
-			option = !Obj.check_is_empty(option) ? option : {get_item:false,get_photo:false};
+			option = option ? option : {get_item:false,get_photo:false};
 			async.series([
 				async function(call){
 					const [biz_error,biz_data] = await Portal.search(database,DataType.PRODUCT,filter,sort_by,page_current,page_size,option);
 					if(error){
 						error=Log.append(error,biz_error);
 					}else{
-						data.data_count = biz_data.data_count;
+						data.item_count = biz_data.item_count;
 						data.data_type = DataType.PRODUCT;
 						data.page_count = biz_data.page_count;
 						data.filter = biz_data.filter;
@@ -1353,7 +1353,7 @@ class Review_Data {
 		return new Promise((callback) => {
 			let error = null;
 			let cloud_data = {};
-			option = !Obj.check_is_empty(option) ? option : {get_item:false,get_photo:false};
+			option = option ? option : {get_item:false,get_photo:false};
 			let item_item_list = [];
 			let user_list = [];
 			async.series([
@@ -1394,7 +1394,7 @@ class Activity_Data {
 		return new Promise((callback) => {
 			let cloud_data = {item_count:0,page_count:1,filter:{},data_type:DataType.ACTIVITY,item_list:[]};
 			let error = null;
-			option = !Obj.check_is_empty(option) ? option : {};
+			option = option ? option : {};
 			let activity_id_list_query = { $or: [] };
 			let activity_list = [];
 			async.series([
@@ -1687,7 +1687,7 @@ class Favorite_Data {
 		return new Promise((callback) => {
 			let error = null;
 			let cloud_data = {};
-			option = !Obj.check_is_empty(option) ? option : {get_item:false,get_photo:false};
+			option = option ? option : {get_item:false,get_photo:false};
 			async.series([
 				//favorite_list
 				async function(call){
@@ -1735,7 +1735,7 @@ class Portal {
 			let data = DataItem.get_new(data_type,0,{key:key});
 			let full_data_list = [];
 			let new_data_list = [];
-			option = !Obj.check_is_empty(option) ? option : {get_item:false,get_photo:false,title_url:null,get_group:false,filter:false};
+			option = option ? option : {get_item:false,get_photo:false,title_url:null,get_group:false,filter:false};
 			async.series([
 				function(call){
 					if(!Num.check_is_guid(key)){
@@ -1871,20 +1871,20 @@ class Portal {
 			  - item_search_value / 'beauty'
 			  */
 		return new Promise((callback) => {
-			let data = {data_type:data_type,data_count:0,page_count:1,filter:{},data_list:[],app_id:database.app_id};
+			let data = {data_type:data_type,item_count:0,page_count:1,filter:{},data_list:[],app_id:database.app_id};
 			let error=null;
 			let data_list_count =[];
 			let data_search_list =[];
-			option = !Obj.check_is_empty(option) ? option : {get_item:false,get_photo:false};
+			option = option ? option : {get_item:false,get_photo:false};
 			async.series([
 				function(call){
 					let search = Item_Logic.get_search(data_type,filter,sort_by,page_current,page_size);
-					Data.get_list(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size).then(([error,item_list,item_count,page_count])=>{
+					Data.get_list(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option).then(([error,item_list,item_count,page_count])=>{
 						if(error){
 							error=Log.append(error,biz_error);
 						}else{
 							data.data_type=data_type;
-							data.data_count=item_count;
+							data.item_count=item_count;
 							data.page_count=page_count;
 							data.filter=filter;
 							data.data_list=item_list;
@@ -1922,10 +1922,10 @@ class Portal {
 				function(call){
 					if(option.get_item_count && data.data_list.length>0){
 						for(let a = 0; a < data.data_list.length; a++){
-							data.data_list[a].data_count = 0;
+							data.data_list[a].item_count = 0;
 							for(let b = 0; b < data_list_count.length; b++){
 								if(data.data_list[a][option.item_count_value] == data_list_count[b][option.item_count_field]){
-									data.data_list[a].data_count = data.data_list[a].data_count + 1;
+									data.data_list[a].item_count = data.data_list[a].item_count + 1;
 								}
 							}
 						}
@@ -1994,7 +1994,7 @@ class Portal {
 		return new Promise((callback) => {
 			let error = null;
 			let data = DataItem.get_new(data_type,0);
-			option = !Obj.check_is_empty(option) ? option : {get_item:false,get_photo:false};
+			option = option ? option : {get_item:false,get_photo:false};
 			async.series([
 				function(call){
 					Data.post(database,data_type,item,option).then(([biz_error,biz_data])=> {
@@ -2034,7 +2034,7 @@ class Portal {
 		return new Promise((callback) => {
 			let error = null;
 			let data = {};
-			option = !Obj.check_is_empty(option) ? option : {get_item:false,get_photo:false};
+			option = option ? option : {get_item:false,get_photo:false};
 			async.series([
 				function(call){
 					Data.delete_cache(database,data_type,id).then(([biz_error,biz_data])=> {
@@ -2075,7 +2075,7 @@ class Portal {
 		return new Promise((callback) => {
 			let error = null;
 			let data = {};
-			option = !Obj.check_is_empty(option) ? option : {get_item:false,get_photo:false,delete_items:true,delete_photos:true};
+			option = option ? option : {get_item:false,get_photo:false,delete_items:true,delete_photos:true};
 			async.series([
 				function(call){
 					Data.delete(database,data_type,id).then(([biz_error,biz_data])=> {
@@ -2146,7 +2146,7 @@ class Portal {
 		return new Promise((callback) => {
 			let error = null;
 			let data_list = [];
-			option = !Obj.check_is_empty(option) ? option : {get_item:false,get_photo:false};
+			option = option ? option : {get_item:false,get_photo:false};
 			async.series([
 				function(call){
 					Data.post_list(database,data_list).then(([biz_error,biz_data])=> {
@@ -2177,7 +2177,7 @@ class Portal {
 		return new Promise((callback) => {
 			let error = null;
 			let data = {};
-			option = !Obj.check_is_empty(option) ? option : {get_item:false,get_photo:false};
+			option = option ? option : {get_item:false,get_photo:false};
 			async.series([
 				function(call){
 					Data.delete_list(database,data_type,filter).then(([biz_error,biz_data])=> {
@@ -2377,7 +2377,7 @@ class Faq_Data{
 		return new Promise((callback) => {
 			let data = {faq:DataItem.get_new(DataType.FAQ,0,{questions:[]})};
 			let error = null;
-			option = !Obj.check_is_empty(option) ? option : {question_count:19};
+			option = option ? option : {question_count:19};
 			let faq = DataItem.get_new(DataType.FAQ,0);
 			async.series([
 				async function(call){
@@ -2577,9 +2577,9 @@ class Data {
 	static post_list = async (db_connect,data_list) => {
 		return [error,data] = await post_item_list_adapter(db_connect,data_list);
 	};
-	static get_list = async (db_connect,data_type,filter,sort_by,page_current,page_size) => {
-		const [error,data,data_count,page_count] = await get_item_list_adapter(db_connect,data_type,filter,sort_by,page_current,page_size);
-		return [error,data,data_count,page_count];
+	static get_list = async (db_connect,data_type,filter,sort_by,page_current,page_size,option) => {
+		const [error,data,item_count,page_count] = await get_item_list_adapter(db_connect,data_type,filter,sort_by,page_current,page_size,option);
+		return [error,data,item_count,page_count];
 	};
 	static delete_list = async (db_connect,data_type,filter) => {
 		return [error,data_list] = await delete_item_list_adapter(db_connect,data_type,filter);
