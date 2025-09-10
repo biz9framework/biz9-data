@@ -501,17 +501,37 @@ describe('post_data', function(){ this.timeout(25000);
                 console.log('DATABASE-END');
             },
             async function(call){
-                console.log('SUPER-ADMIN-ADD-START');
-                let user = DataItem.get_new(DataType.USER,0,{title:'ceo',title_url:'ceo',email:"ceo@bossappz.com",password:"1234567",role:FieldType.USER_ROLE_SUPER_ADMIN});
-                Log.w('super_user',user);
-                const [error,data] = await Portal.post(database,DataType.USER,user);
+                console.log('BLOG-POST-ADD-START');
+                //let user = DataItem.get_new(DataType.USER,0,{title:'ceo',title_url:'ceo',email:"ceo@bossappz.com",password:"1234567",role:FieldType.USER_ROLE_SUPER_ADMIN});
+                //Log.w('super_user',user);
+
+                console.log('111111');
+                let title = Num.get_id()+"_title";
+                let title_2 = Num.get_id()+"_title_2";
+                let blog_post = DataItem.get_new(DataType.BLOG_POST,'d86ec25e-4b15-4c4a-8ef9-ce82c9067571',{title:title,title_url:Str.get_title_url(title),author:Num.get_id()+"_cool"});
+                //let blog_post = DataItem.get_new(DataType.BLOG_POST,key);
+                let item = DataItem.get_new(DataType.ITEM,0,{title:title_2,title_url:Str.get_title_url(title_2)});
+                let full_item = DataItem.get_new_full_item(item,blog_post,blog_post,{title:title,title_url:Str.get_title_url(title)});
+                console.log('aaaa');
+                console.log(blog_post);
+                console.log(item);
+                console.log(full_item);
+                //let sub_item = DataItem.get_new_full_item());
+                console.log('bbbbb');
+                //Log.w('sub_item',sub_item);
+                console.log('ccccc');
+                //const [error,data] = await Portal.post(database,DataType.BLOG_POST,blog_post);
+                const [error,data] = await Portal.post(database,DataType.ITEM,full_item);
+                Log.w('cool',data);
+                /*
                 if(error){
                     cloud_error=Log.append(cloud_error,error);
                 }else{
                     console.log(data);
-                    console.log('SUPER-ADMIN-ADD-SUCCESS');
+                    console.log('BLOG-POST-ADD-SUCCESS');
                 }
-                console.log('SUPER-ADMIN-ADD-END');
+                */
+                console.log('BLOG-POST-ADD-END');
             },
 
             /*
@@ -978,15 +998,17 @@ describe('get_data', function(){ this.timeout(25000);
                 let data_type = DataType.PRODUCT;
                 //let key = "CA-51129";
                 //let key = "blog_post_19";
-                let key = "partners";
-                let search  = Item_Logic.get_search(DataType.BLOG_POST,{},{},1,3);
+                //let key = "d86ec25e-4b15-4c4a-8ef9-ce82c9067571";
+                let search  = Item_Logic.get_search(DataType.CATEGORY,{category:'Application'},{},1,13);
+                let option = {get_item_count:true,item_count_data_type:DataType.PRODUCT,item_count_field:'category',item_count_value:'title'};
                 //Log.w('search',search);
+                //const [error,data] = await Portal.get(database,data_type,key);
                 //const [error,data] = await Content_Data.get(database,key,{get_item:true});
                 //const [error,data] = await Blog_Post_Data.get(database,key);
                 //const [error,data] = await Order_Data.get(database,key);
                 //const [error,data] = await Cart_Data.get(database,key);
-                const [error,data] = await Cart_Data.search(database,DataType.PRODUCT,search.filter,search.sort_by,search.parent_current,search.page_size);
-                //const [error,data] = await Blog_Post_Data.search(database,search.filter,search.sort_by,search.parent_current,search.page_size);
+                //const [error,data] = await Cart_Data.search(database,DataType.PRODUCT,search.filter,search.sort_by,search.parent_current,search.page_size);
+                const [error,data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.parent_current,search.page_size,option);
                 Log.w('data',data);
                 console.log('TEST-GET-SUCCESS');
                 console.log('TEST-GET-END');
