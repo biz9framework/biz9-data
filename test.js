@@ -995,20 +995,22 @@ describe('get_data', function(){ this.timeout(25000);
             },
             async function(call){
                 console.log('TEST-GET-START');
-                let data_type = DataType.PRODUCT;
+                let data_type = DataType.BLOG_POST;
                 //let key = "CA-51129";
-                //let key = "blog_post_19";
+                let key = "blog_post_19";
                 //let key = "d86ec25e-4b15-4c4a-8ef9-ce82c9067571";
-                let search  = Item_Logic.get_search(DataType.CATEGORY,{category:'Application'},{},1,13);
-                let option = {get_item_count:true,item_count_data_type:DataType.PRODUCT,item_count_field:'category',item_count_value:'title'};
+                let search  = Item_Logic.get_search(DataType.BLOG_POST,{},{},1,0);
+                //let option = {get_item_count:true,item_count_data_type:DataType.PRODUCT,item_count_field:'category',item_count_value:'title'};
+                //let option = {get_item_search:true,item_search_data_type:DataType.CATEGORY,item_search_field:'category',item_search_value:'title'};
                 //Log.w('search',search);
                 //const [error,data] = await Portal.get(database,data_type,key);
                 //const [error,data] = await Content_Data.get(database,key,{get_item:true});
                 //const [error,data] = await Blog_Post_Data.get(database,key);
+                const [error,data] = await Blog_Post_Data.search(database,search.filter,search.sort_by,search.page_current,search.page_size);
                 //const [error,data] = await Order_Data.get(database,key);
                 //const [error,data] = await Cart_Data.get(database,key);
                 //const [error,data] = await Cart_Data.search(database,DataType.PRODUCT,search.filter,search.sort_by,search.parent_current,search.page_size);
-                const [error,data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.parent_current,search.page_size,option);
+                //const [error,data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.parent_current,search.page_size,option);
                 Log.w('data',data);
                 console.log('TEST-GET-SUCCESS');
                 console.log('TEST-GET-END');
