@@ -1288,7 +1288,7 @@ class Review_Data {
 			async.series([
 				//review_post
 				async function(call){
-					const [biz_error,biz_data] = await Portal.post(database,DataType.REVIEW,data.review);
+					const [biz_error,biz_data] = await Portal.post(database,DataType.REVIEW,review);
 					if(biz_error){
 						error=Log.append(error,biz_error);
 					}else{
@@ -1304,7 +1304,6 @@ class Review_Data {
 					}else{
 						data.parent_item = biz_data;
 					}
-					Log.w('cool_bean_44',data);
 				},
 				//post_item
 				async function(call){
@@ -1332,23 +1331,26 @@ class Review_Data {
 		});
 	};
 	//9_review_get
-	static get = async (database,biz_data_type,user_id,sort_by,page_current,page_size,option) => {
+	static get = async (database,parent_data_type,parent_id,sort_by,page_current,page_size,option) => {
 		return new Promise((callback) => {
 			let error = null;
-			let cloud_data = {};
+			let data = {};
 			option = option ? option : {get_item:false,get_photo:false};
-			let item_item_list = [];
-			let user_list = [];
 			async.series([
 				//review_list
 				async function(call){
-					let query = {user_id:user_id,biz_data_type:biz_data_type};
+					let query = {parent_id:parent_id,parent_data_type:parent_data_type};
 					let search = Item_Logic.get_search(DataType.REVIEW,query,{},page_current,page_size);
-					let option = {get_item_search:true,item_search_data_type:biz_data_type,item_search_field:'id',item_search_value:'item_id'};
-					const [error,data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option);
-					if(error){
-						cloud_error=Log.append(cloud_error,biz_error);
+					let option = {get_item_search:true,item_search_data_type:parent_data_type,item_search_field:'id',item_search_value:'parent_id'};
+					const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option);
+					if(biz_error){
+						error=Log.append(error,biz_error);
 					}else{
+						//biz_data.data_list.forEach(item => {
+							//item.parent_item = biz_data.item_search_list.find(item_find => item_find.id === item.parent_id) ? biz_data.data_list.find(item_find => item_find.id === item.parent_id) : Item_Logic.get_not_found(item_find.data_type,item_find.id,{app_id:database.app_id});
+						//});
+
+						/*
 						for(let a=0;a<data.item_list.length;a++){
 							data.item_list[a].item = DataItem.get_new(biz_data_type,data.item_list[a].item,{title:'Not Found'});
 							for(let b=0;b<data.item_search_list.length;b++){
@@ -1358,10 +1360,12 @@ class Review_Data {
 							}
 						}
 						cloud_data.item_list = data.item_list;
+						*/
+						Log.w('rrr',biz_data);
 					}
 				},
 			]).then(result => {
-				callback([error,cloud_data]);
+				//callback([error,data]);
 			}).catch(error => {
 				Log.error("Review-Data-List",error);
 				callback([error,[]]);
@@ -1890,14 +1894,12 @@ class Portal {
 							data.filter=filter;
 							data.data_list=item_list;
 							data.app_id = database.app_id;
-							Log.w('my_data',data);
 							call();
 						}
 					}).catch(error => {
 						error=Log.append(error,biz_error);
 					});
 				},
-				/*
 				function(call){
 					if(option.get_item_count && data.data_list.length>0){
 						let query = { $or: [] };
@@ -1981,7 +1983,6 @@ class Portal {
 						call();
 					}
 				}
-				*/
 			]).then(result => {
 				callback([error,data]);
 			}).catch(error => {

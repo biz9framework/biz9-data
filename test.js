@@ -499,6 +499,25 @@ describe('post_data', function(){ this.timeout(25000);
             async function(call){
                 console.log('POST-DATA-START');
 
+                //- search - start
+                let query = {category:'Application'};
+                let search = Item_Logic.get_search(DataType.CATEGORY,query,{title:1},1,13);
+                /* - item_count
+                let option = {
+                    get_item_count:true,
+                    item_count_data_type:DataType.PRODUCT,
+                    item_count_field:'category',
+                    item_count_value:'title',
+                    get_field:true,
+                    fields:'id,title,title_url,photo_data,cost'
+                };
+                */
+                let option = {get_item_search:true,item_search_data_type:DataType.PRODUCT,item_search_field:'id',item_search_value:'parent_id'};
+                const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option);
+                Log.w('data',biz_data);
+
+                //- search - end
+                //
                 //- user - start
                 //let user = DataItem.get_new(DataType.USER,0,{title:'ceo',title_url:'ceo',email:"ceo@bossappz.com",password:"1234567",role:FieldType.USER_ROLE_SUPER_ADMIN});
                 //let title = Num.get_id() + "user";
@@ -511,14 +530,14 @@ describe('post_data', function(){ this.timeout(25000);
                 //- user - end
 
                 //- review - start
-                let parent_data_type = DataType.PRODUCT;
-                let parent_id = "604f0e31-816e-47f4-a411-0c507b859460";
-                let user_id = "80009d4a-1df4-421a-9105-d9450ebc5e01";
-                let review = Review_Logic.get_new(parent_data_type,parent_id,user_id,Num.get_id()+"_My_Title",Num.get_id()+"_Comment_",5);
-                Log.w('review',review);
-                const [biz_error,biz_data] = await Review_Data.post(database,parent_data_type,parent_id,user_id,review);
+                //let parent_data_type = DataType.PRODUCT;
+                //let parent_id = "604f0e31-816e-47f4-a411-0c507b859460";
+                //let user_id = "80009d4a-1df4-421a-9105-d9450ebc5e01";
+                //let review = Review_Logic.get_new(parent_data_type,parent_id,user_id,Num.get_id()+"_My_Title",Num.get_id()+"_Comment_",Num.get_id(5));
+                //Log.w('review',review);
+                //const [biz_error,biz_data] = await Review_Data.post(database,parent_data_type,parent_id,user_id,review);
+                //const [biz_error,biz_data] = await Review_Data.get(database,parent_data_type,parent_id,{},1,0,{});
                 //Log.w('portal_review',biz_data);
-
                 //- review - end
 
                 //console.log('111111');
