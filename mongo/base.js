@@ -46,11 +46,9 @@ const delete_db_connect_base = (db_connect) => {
 }
 const get_item_base = (db_connect,data_type,id) => {
     return new Promise((callback) => {
-        let collection = null;
         let data = null;
         if(check_db_connect_base(db_connect)){
-            collection = db_connect.collection(data_type);
-            collection.findOne({id:id}).then((data) => {
+            db_connect.collection(data_type).findOne({id:id}).then((data) => {
                 if(data){
                     data = data;
                     delete data['_id'];
@@ -79,14 +77,13 @@ const check_db_client_connected = (db_connect) => {
 }
 const post_item_base = (db_connect,data_type,item,option) => {
     return new Promise((callback) => {
-        let collection = db_connect.collection(data_type);
 		option = !Obj.check_is_empty(option) ? option : {overwrite_obj:false};
         if (Str.check_is_null(item.id)){//insert
             item.id = Num.get_guid();
             item.date_create = dayjs().toISOString();
             item.date_save = dayjs().toISOString();
             if(check_db_connect_base(db_connect)){
-                collection.insertOne(item).then((data) => {
+                db_connect.collection(data_type).insertOne(item).then((data) => {
                     if(data){
                         delete item['_id'];
                     }
@@ -99,7 +96,7 @@ const post_item_base = (db_connect,data_type,item,option) => {
         }else{
             item.date_save = dayjs().toISOString();
             if(!option.overwrite_obj){
-                collection.updateOne({id:item.id},{$set: item}).then((data) => {
+                db_connect.collection(data_type).updateOne({id:item.id},{$set: item}).then((data) => {
                     if(data){
                         delete item['_id'];
                     }
@@ -109,7 +106,7 @@ const post_item_base = (db_connect,data_type,item,option) => {
                     callback([error,null]);
                 });
             }else{
-                collection.replaceOne({id:item.id},item).then((data) => {
+               db_connect.collection(data_type).replaceOne({id:item.id},item).then((data) => {
                     if(data){
                         delete item['_id'];
                     }
@@ -118,17 +115,15 @@ const post_item_base = (db_connect,data_type,item,option) => {
                     Log.error("DATA-MONGO-BASE-UPDATE-ITEM-BASE-ERROR",error);
                     callback([error,null]);
                 });
-
             }
         }
     });
 }
 const delete_item_base = (db_connect,data_type,id) => {
     return new Promise((callback) => {
-        let collection = db_connect.collection(data_type);
         let data = null;
         if(check_db_connect_base(db_connect)){
-            collection.deleteMany({id:id}).then((data) => {
+            db_connect.collection(data_type).deleteMany({id:id}).then((data) => {
                 if(data){
                     data = data;
                 };
@@ -142,10 +137,9 @@ const delete_item_base = (db_connect,data_type,id) => {
 }
 const delete_item_list_base = (db_connect,data_type,filter) => {
     return new Promise((callback) => {
-        let collection = db_connect.collection(data_type);
         let data = null;
         if(check_db_connect_base(db_connect)){
-            collection.deleteMany(filter).then((data) => {
+            db_connect.collection(data_type).deleteMany(filter).then((data) => {
                 if(data){
                     data = data;
                 }
@@ -213,7 +207,6 @@ const get_count_item_list_base = async (db_connect,data_type,filter) => {
                 data = data;
             }
             callback([error,data]);
-
         }).catch(error => {
             Log.error("DATA-MONGO-BASE-COUNT-ITEM-LIST-BASE-ERROR",error);
             callback([error,null]);

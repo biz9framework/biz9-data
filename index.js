@@ -1430,7 +1430,6 @@ class Activity_Data {
 	*/
 }
 class User_Data {
-	/*
 	static get_device_info = async (activity,device) => {
 		return new Promise((callback) => {
 			activity.platform_name = !Str.check_is_null(device.name) ? device.name : 'N/A';
@@ -1444,7 +1443,12 @@ class User_Data {
 	static get_ip_info = async (ip_address,geo_key) => {
 		return new Promise((callback) => {
 			let error = null;
-			let ip_info ={country_name:"",region_name:"",district:"",city_name:"",latitude:"",longitude:"",zip_code:"",isp:"",ip_address:""};
+			if(!geo_key){
+				error = 'Geo Key Not Found';
+				callback([error,null]);
+			}
+			else{
+			let ip_info ={country_name:"N/A",region_name:"N/A",district:"N/A",city_name:"N/A",latitude:"N/A",longitude:"N/A",zip_code:"N/A",isp:"N/A",ip_address:"N/A"};
 			var https = require('https');
 			let url = 'https://api.ip2location.io/?key=' + geo_key + '&ip=' + ip_address + '&format=json';
 			let response = '';
@@ -1452,7 +1456,7 @@ class User_Data {
 				res.on('error', (e) => console.log('GEO_LOCATION ERROR: ' + e));
 				var https = require('https');
 				var key = geo_key;
-				var ip = ip_address;
+				var ip = Str.check_is_null(ip_address) ? ip_address : "0.0.0.0" ;
 				let url = 'https://api.ip2location.io/?key=' + key + '&ip=' + ip + '&format=json';
 				let response = '';
 				let req = https.get(url, function (res) {
@@ -1463,16 +1467,16 @@ class User_Data {
 							let geo_data = JSON.parse(response);
 							ip_info =
 								{
-									country_name:geo_data.country_name,
-									region_name:geo_data.region_name,
-									is_proxy:geo_data.is_proxy,
-									district:geo_data.district?geo_data.district:"N/A",
-									city_name:geo_data.city_name,
-									latitude:geo_data.latitude,
-									longitude:geo_data.longitude,
-									zip_code:geo_data.zip_code,
-									isp:geo_data.as,
-									ip_address:geo_data.ip
+									country_name:!Str.check_is_null(geo_data.country_name) ? geo_data.country_name : "N/A",
+									region_name:!Str.check_is_null(geo_data.region_name) ?geo_data.region_name : "N/A",
+									is_proxy:!Str.check_is_null(geo_data.is_proxy) ?geo_data.is_proxy : "N/A",
+									district:!Str.check_is_null(geo_data.district) ?geo_data.district : "N/A",
+									city_name:!Str.check_is_null(geo_data.city_name) ?geo_data.city_name : "N/A",
+									latitude:!Str.check_is_null(geo_data.latitude) ?geo_data.latitude : "N/A",
+									longitude:!Str.check_is_null(geo_data.longitude) ?geo_data.longitude : "N/A",
+									zip_code:!Str.check_is_null(geo_data.zip_code) ?geo_data.zip_code : "N/A",
+									isp:!Str.check_is_null(geo_data.as) ?geo_data.as : "N/A",
+									ip_address:!Str.check_is_null(geo_data.ip) ?geo_data.ip : "N/A"
 								};
 							callback([error,ip_info]);
 						}
@@ -1483,80 +1487,91 @@ class User_Data {
 					});
 				});
 			});
+			}
 		});
 	};
 	//9_user_register
 	static register = async (database,user,ip_address,geo_key,device) => {
 		return new Promise((callback) => {
 			let error = null;
-			let data = {};
-			cloud_data.email_found = false;
-			cloud_data.title_found = false;
-			cloud_data.user = user;
-			cloud_data.activity = DataItem.get_new(DataType.ACTIVITY,0);
-			cloud_data.device = DataItem.get_new(DataType.BLANK,0,device);
+			let data = {
+					email_found:false,
+					title_found:false,
+				    user:user,
+					activity:DataItem.get_new(DataType.ACTIVITY,0),
+					device:DataItem.get_new(DataType.BLANK,0,device)
+			};
 			async.series([
 				//check email
 				async function(call){
-					let search = Item_Logic.get_search(DataType.USER,{email:cloud_data.user.email},{},1,0);
-					const [error,data] = await Portal.count(database,search.data_type,search.filter);
-					if(error){
-						cloud_error=Log.append(cloud_error,biz_error);
+					let search = Item_Logic.get_search(DataType.USER,{email:data.user.email},{},1,0);
+					const [biz_error,biz_data] = await Portal.count(database,search.data_type,search.filter);
+					if(biz_error){
+						biz_error=Log.append(error,biz_error);
 					}else{
-						if(data.count>0){
-							cloud_data.email_found = true;
+						if(biz_data.count>0){
+							data.email_found = true;
 						}
 					}
 				},
 				//check title
 				async function(call){
-					let search = Item_Logic.get_search(DataType.USER,{title:cloud_data.user.title},{},1,0);
-					const [error,data] = await Portal.count(database,search.data_type,search.filter);
-					if(error){
-						cloud_error=Log.append(cloud_error,biz_error);
+					let search = Item_Logic.get_search(DataType.USER,{title:data.user.title},{},1,0);
+					const [biz_error,biz_data] = await Portal.count(database,search.data_type,search.filter);
+					if(biz_error){
+						biz_error=Log.append(error,biz_error);
 					}else{
-						if(data.count>0){
-							cloud_data.title_found = true;
+						if(biz_data.count>0){
+							data.title_found = true;
 						}
 					}
 				},
 				//post user
 				async function(call){
-					if(!cloud_data.email_found && !cloud_data.title_found){
-						cloud_data.user.last_login = dayjs().toISOString();
-						const [error,data] = await Portal.post(database,DataType.USER,cloud_data.user);
-						if(error){
-							cloud_error=Log.append(cloud_error,biz_error);
+					if(!data.email_found && !data.title_found){
+						data.user.last_login = dayjs().toISOString();
+						const [biz_error,biz_data] = await Portal.post(database,DataType.USER,data.user);
+						if(biz_error){
+							biz_error=Log.append(error,biz_error);
 						}else{
-							cloud_data.user = data;
+							data.user = biz_data;
 						}
 					}
 				},
 				//get activity - ip
 				async function(call){
-					if(!cloud_data.email_found && !cloud_data.title_found){
-						const [error,data] = await User_Data.get_ip_info(ip_address,geo_key);
-						cloud_data.activity = DataItem.get_new(DataType.ACTIVITY,0,data);
-						cloud_data.activity.user_id = cloud_data.user.id;
-						cloud_data.activity.type = FieldType.ACTIVITY_TYPE_REGISTER;
+					if(!data.email_found && !data.title_found){
+						const [biz_error,biz_data] = await User_Data.get_ip_info(ip_address,geo_key);
+						if(biz_error){
+							error=Log.append(error,biz_error);
+						}
+						data.activity = DataItem.get_new(DataType.ACTIVITY,0,biz_data);
+						data.activity.user_id = data.user.id;
+						data.activity.type = FieldType.ACTIVITY_TYPE_REGISTER;
 					}
 				},
 				//get activity - device
 				async function(call){
-					if(!cloud_data.email_found && !cloud_data.title_found){
-						const [error,data] = await User_Data.get_device_info(cloud_data.activity,cloud_data.device);
-						cloud_data.activity = data;
+					if(!data.email_found && !data.title_found){
+						const [biz_error,biz_data] = await User_Data.get_device_info(data.activity,data.device);
+						if(biz_error){
+							error=Log.append(error,biz_error);
+						}
+						data.activity = biz_data;
 					}
 				},
 				//post activity
 				async function(call){
-					if(!cloud_data.email_found && !cloud_data.title_found){
-						const [error,data] = await Portal.post(database,DataType.ACTIVITY,cloud_data.activity);
-						cloud_data.activity = data;
+					if(!data.email_found && !data.title_found){
+						const [biz_error,biz_data] = await Portal.post(database,DataType.ACTIVITY,data.activity);
+						if(biz_error){
+							error=Log.append(error,biz_error);
+						}
+						data.activity =biz_data;
 					}
 				},
 			]).then(result => {
-				callback([error,cloud_data]);
+				callback([error,data]);
 			}).catch(error => {
 				Log.error("User-Data-Register",error);
 				callback([error,[]]);
@@ -1567,115 +1582,119 @@ class User_Data {
 	static login = async (database,user,ip_address,geo_key,device) => {
 		return new Promise((callback) => {
 			let error = null;
-			let cloud_data = {};
-			cloud_data.user_found = false;
-			cloud_data.user = user;
-			cloud_data.activity = DataItem.get_new(DataType.ACTIVITY,0);
-			cloud_data.device = DataItem.get_new(DataType.BLANK,0,device);
+			let data = {user_found:false,user:user,activity:DataItem.get_new(DataType.ACTIVITY,0),device:DataItem.get_new(DataType.BLANK,0,device)};
 			async.series([
 				//check email,password
 				async function(call){
-					let search = Item_Logic.get_search(DataType.USER,{email:cloud_data.user.email,password:cloud_data.user.password},{},1,0);
-					const [error,data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size);
+					let search = Item_Logic.get_search(DataType.USER,{email:data.user.email,password:data.user.password},{},1,0);
+					const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size);
 					if(error){
-						cloud_error=Log.append(cloud_error,biz_error);
+						error=Log.append(error,biz_error);
 					}else{
-						if(data.item_list.length>0){
-							cloud_data.user = data.item_list[0];
-							cloud_data.user_found = true;
+						if(biz_data.data_list.length>0){
+							data.user = biz_data.data_list[0];
+							data.user_found = true;
 						}
 					}
 				},
 				//post user
 				async function(call){
-					if(cloud_data.user_found){
-						cloud_data.user.last_login = dayjs().toISOString();
-						const [error,data] = await Portal.post(database,DataType.USER,cloud_data.user);
-						if(error){
-							cloud_error=Log.append(cloud_error,biz_error);
+					if(data.user_found){
+						data.user.last_login = dayjs().toISOString();
+						const [biz_error,biz_data] = await Portal.post(database,DataType.USER,data.user);
+						if(biz_error){
+							error=Log.append(error,biz_error);
 						}else{
-							cloud_data.user = data;
+							data.user = biz_data;
 						}
 					}
 				},
 				//get user
 				async function(call){
-					if(cloud_data.user_found){
-						const [error,data] = await Portal.get(database,DataType.USER,cloud_data.user.id);
+					if(data.user_found){
+						const [biz_error,biz_data] = await Portal.get(database,DataType.USER,data.user.id);
 						if(error){
-							cloud_error=Log.append(cloud_error,biz_error);
+							error=Log.append(error,biz_error);
 						}else{
-							cloud_data.user = data;
+							data.user = biz_data;
 						}
 					}
 				},
 				//get activity - ip
 				async function(call){
-					if(!cloud_data.email_found && !cloud_data.title_found){
-						const [error,data] = await User_Data.get_ip_info(ip_address,geo_key);
-						cloud_data.activity = DataItem.get_new(DataType.ACTIVITY,0,data);
-						cloud_data.activity.user_id = cloud_data.user.id;
-						cloud_data.activity.type = FieldType.ACTIVITY_TYPE_LOGIN;
+					if(!data.email_found && !data.title_found){
+						const [biz_error,biz_data] = await User_Data.get_ip_info(ip_address,geo_key);
+						if(biz_error){
+							error=Log.append(error,biz_error);
+						}
+						data.activity = DataItem.get_new(DataType.ACTIVITY,0,data);
+						data.activity.user_id = data.user.id;
+						data.activity.type = FieldType.ACTIVITY_TYPE_LOGIN;
 					}
 				},
 				//get activity - device
 				async function(call){
-					if(cloud_data.user_found){
-						const [error,data] = await User_Data.get_device_info(cloud_data.activity,cloud_data.device);
-						cloud_data.activity = data;
+					if(data.user_found){
+						const [biz_error,biz_data] = await User_Data.get_device_info(data.activity,data.device);
+						if(biz_error){
+							error=Log.append(error,biz_error);
+						}
+						data.activity = biz_data;
 					}
 				},
 				//post activity
 				async function(call){
-					if(cloud_data.user_found){
-						const [error,data] = await Portal.post(database,DataType.ACTIVITY,cloud_data.activity);
-						cloud_data.activity = data;
+					if(data.user_found){
+						const [biz_error,biz_data] = await Portal.post(database,DataType.ACTIVITY,data.activity);
+						if(biz_error){
+							error=Log.append(error,biz_error);
+						}else{
+							data.activity = biz_data;
+						}
 					}
 				},
 			]).then(result => {
-				callback([error,cloud_data]);
+				callback([error,data]);
 			}).catch(error => {
 				Log.error("User-Data-Login",error);
 				callback([error,[]]);
 			});
 		});
 	};
-	*/
 }
 class Favorite_Data {
-	/*
 	//9_favorite_post
 	static post = async (database,parent_data_type,parent_id,user_id) => {
 		return new Promise((callback) => {
 			let error = null;
-			let cloud_data = {};
-			cloud_data.is_unique = false;
-			cloud_data.favorite = DataItem.get_new(DataType.FAVORITE,0,{parent_data_type:parent_data_type,parent_id:parent_id,user_id:user_id});
+			let data = {};
+			data.is_unique = false;
+			data.favorite = DataItem.get_new(DataType.FAVORITE,0,{parent_data_type:parent_data_type,parent_id:parent_id,user_id:user_id});
 			async.series([
 				async function(call){
 					let favorite_filter = Favorite_Logic.get_search_filter(parent_data_type,parent_id,user_id);
 					let search = Item_Logic.get_search(DataType.FAVORITE,favorite_filter,{},1,0);
-					const [error,data] = await Portal.count(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size);
-					if(error){
-						cloud_error=Log.append(cloud_error,biz_error);
+					const [biz_error,biz_data] = await Portal.count(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size);
+					if(biz_error){
+						error=Log.append(biz_error,error);
 					}else{
-						if(data.count<=0){
-							cloud_data.is_unique = true;
+						if(biz_data.count<=0){
+							data.is_unique = true;
 						}
 					}
 				},
 				async function(call){
-					if(cloud_data.is_unique){
-						const [error,data] = await Portal.post(DataType.FAVORITE,cloud_data.favorite);
-						if(error){
-							cloud_error=Log.append(cloud_error,biz_error);
+					if(data.is_unique){
+						const [biz_error,biz_data] = await Portal.post(DataType.FAVORITE,data.favorite);
+						if(biz_error){
+							error=Log.append(error,biz_error);
 						}else{
-							cloud_data.item = data;
+							data.item = biz_data;
 						}
 					}
 				},
 			]).then(result => {
-				callback([error,cloud_data]);
+				callback([error,data]);
 			}).catch(error => {
 				Log.error("Favorite-Data-Update",error);
 				callback([error,[]]);
@@ -1686,7 +1705,7 @@ class Favorite_Data {
 	static get = async (database,parent_data_type,user_id,sort_by,page_current,page_size,option) => {
 		return new Promise((callback) => {
 			let error = null;
-			let cloud_data = {};
+			let data = {};
 			option = option ? option : {get_item:false,get_photo:false};
 			async.series([
 				//favorite_list
@@ -1694,19 +1713,19 @@ class Favorite_Data {
 					let query = {user_id:user_id,parent_data_type:parent_data_type};
 					let search = Item_Logic.get_search(DataType.FAVORITE,query,{date_create:-1},page_current,page_size);
 					let option = {get_item_search:true,item_search_data_type:parent_data_type,item_search_field:'id',item_search_value:'item_id'};
-					const [error,data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option);
+					const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option);
 					if(error){
-						cloud_error=Log.append(cloud_error,biz_error);
+						error=Log.append(error,biz_error);
 					}else{
-						for(let a=0;a<data.item_list.length;a++){
-							data.item_list[a].item = DataItem.get_new(parent_data_type,data.item_list[a].item,{title:'Not Found'});
-							for(let b=0;b<data.item_search_list.length;b++){
-								if(data.item_list[a].item_id == data.item_search_list[b].id){
-									data.item_list[a].item = data.item_search_list[b];
-								}
-							}
-						}
-						cloud_data.item_list = data.item_list;
+						biz_data.item_list.forEach(item => {
+							item.parent_item = data.item_search_list.find(item_find => item_find.id === item.parent_id) ? data.item_search_list.find(item_find => item_find.id === item.parent_id): Item_Logic.get_not_found(item_find.data_type,item_find.id,{app_id:database.app_id});
+						});
+						data.data_type = parent_data_type;
+						data.item_count = biz_data.item_count;
+						data.page_count = biz_data.page_count;
+						data.filter = biz_data.filter;
+						data.data_list = biz_data.data_list;
+						data.app_id = database.app_id;
 					}
 				},
 			]).then(result => {
@@ -1717,7 +1736,6 @@ class Favorite_Data {
 			});
 		});
 	};
-	*/
 }
 class Portal {
 	//9_portal_get
@@ -1809,14 +1827,15 @@ class Portal {
 				function(call){
 					if(!Str.check_is_null(data.id) && option.get_item || option.get_section){
 						data.items = [];
-						for(let a=0; a<full_data_list.length; a++){
-							if(full_data_list[a].parent_id == data.id){
-								let data_title_url = Str.get_title_url(full_data_list[a].title);
+						full_data_list.forEach(item => {
+							if(item.parent_id == data.id){
+								let data_title_url = Str.get_title_url(item.title);
 								data[item_title_url] = new Object();
-								data[item_title_url] = full_data_list[a];
-								data.items.push(full_data_list[a]);
+								data[item_title_url] = item;
+								data.items.push(item);
 							}
-						}
+
+						});
 						call();
 					}
 					else{
@@ -1852,6 +1871,7 @@ class Portal {
 	};
 	//9_portal_search
 	static search = (database,data_type,filter,sort_by,page_current,page_size,option) => {
+		console.log('1111111111111');
 		/* Options
 		 * Items
 		 *  - get_item / bool / ex. true,false / def. true
@@ -1874,11 +1894,11 @@ class Portal {
 			let data = {data_type:data_type,item_count:0,page_count:1,filter:{},data_list:[],app_id:database.app_id};
 			let error=null;
 			let data_list_count =[];
-			let data_search_list =[];
+			let item_search_list =[];
 			option = option ? option : {get_item:false,get_photo:false};
 			async.series([
 				function(call){
-					let search = Item_Logic.get_search(data_type,filter,sort_by,page_current,page_size);
+					let search = Item_Logic.get_search(data_type,!Obj.check_is_empty(filter)?filter:{},!Obj.check_is_empty(sort_by)?sort_by:{},!Str.check_is_null(page_current)?page_current:0,!Str.check_is_null(page_size)?page_size:0);
 					Data.get_list(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option).then(([error,item_list,item_count,page_count])=>{
 						if(error){
 							error=Log.append(error,biz_error);
@@ -1889,20 +1909,22 @@ class Portal {
 							data.filter=filter;
 							data.data_list=item_list;
 							data.app_id = database.app_id;
+							Log.w('my_data',data);
 							call();
 						}
 					}).catch(error => {
 						error=Log.append(error,biz_error);
 					});
 				},
+				/*
 				function(call){
 					if(option.get_item_count && data.data_list.length>0){
 						let query = { $or: [] };
-						for(let a = 0;a < data.data_list.length;a++){
+						data.data_list.forEach(item => {
 							let query_field = {};
-							query_field[option.item_count_field] = { $regex:String(data.data_list[a][option.item_count_value]), $options: "i" };
+							query_field[option.item_count_field] = { $regex:String(item[option.item_count_value]), $options: "i" };
 							query.$or.push(query_field);
-						}
+						});
 						let search = Item_Logic.get_search(option.item_count_data_type,query,{},1,0);
 						Data.get_list(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size).then(([error,item_list,item_count,page_count])=> {
 							if(error){
@@ -1921,14 +1943,14 @@ class Portal {
 				},
 				function(call){
 					if(option.get_item_count && data.data_list.length>0){
-						for(let a = 0; a < data.data_list.length; a++){
-							data.data_list[a].item_count = 0;
-							for(let b = 0; b < data_list_count.length; b++){
-								if(data.data_list[a][option.item_count_value] == data_list_count[b][option.item_count_field]){
-									data.data_list[a].item_count = data.data_list[a].item_count + 1;
+						data.data_list.forEach(item => {
+							item.item_count = 0;
+							data_list_count.forEach(item_count => {
+								if(item[option.item_count_value] == item_count[option.item_count_field]){
+									item.item_count = item.item_count + 1;
 								}
-							}
-						}
+							});
+						});
 						call();
 					}else{
 						call();
@@ -1937,18 +1959,18 @@ class Portal {
 				function(call){
 					if(option.get_item_search && data.data_list.length>0){
 						let query = { $or: [] };
-						for(let a = 0;a < data.data_list.length;a++){
+						data.data_list.forEach(item => {
 							let query_field = {};
-							query_field[option.item_search_field] = { $regex:String(data.data_list[a][option.item_search_value]), $options: "i" };
+							query_field[option.item_search_field] = { $regex:String(item[option.item_search_value]), $options: "i" };
 							query.$or.push(query_field);
-						}
+						});
 						let search = Item_Logic.get_search(option.item_search_data_type,query,{},1,0);
 						data.item_search_search = search;
 						Data.get_list(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size).then(([error,item_list,item_count,page_count])=> {
 							if(error){
 								error=Log.append(error,biz_error);
 							}else{
-								data.data_search_list = item_list;
+								data.item_search_list = item_list;
 								data.data_search_count = item_count;
 								data.data_search_page_count = page_count;
 								data.data_search_data_type = search.data_type;
@@ -1965,19 +1987,20 @@ class Portal {
 				},
 				function(call){
 					if(option.get_item_search && data.data_list.length>0){
-						for(let a = 0; a < data.data_list.length; a++){
-							data.data_list[a].data_search_list = [];
-							for(let b = 0; b < data_search_list.length; b++){
-								if(data.data_list[a][option.item_search_value] == data_search_list[b][option.item_search_field]){
-									data.data_list[a].data_search_list.push(data_search_list[b]);
+						data.data_list.forEach(item => {
+							item.data_search_list = [];
+							data_search_list.forEach(item_search => {
+								if(item[option.item_search_value] == item_search[option.item_search_field]){
+									item.data_search_list.push(item_search);
 								}
-							}
-						}
+							});
+						});
 						call();
 					}else{
 						call();
 					}
 				}
+				*/
 			]).then(result => {
 				callback([error,data]);
 			}).catch(error => {
@@ -2282,12 +2305,13 @@ class Portal {
 					copy_data[FieldType.TITLE_URL] = 'copy_'+top_data[FieldType.TITLE_URL];
 					copy_data[FieldType.SOURCE_ID] = top_data.id;
 					copy_data[FieldType.SOURCE_DATA_TYPE] = top_data.data_type;
-					for(const key in top_data) {
+					top_data.forEach(key => {
 						if(key!=FieldType.ID&&key!=FieldType.SOURCE&&key!=FieldType.TITLE&&key!=FieldType.TITLE_URL){
 							copy_data[key]=top_data[key];
 						}
-					}
-					call();
+					});
+
+					all();
 				},
 				function(call){
 					Data.post(database,copy_data.data_type,copy_data).then(([biz_error,biz_data])=> {
@@ -2303,24 +2327,24 @@ class Portal {
 					});
 				},
 				function(call){
-					for(let a=0;a<data_list.length;a++){
+					data_list.forEach(item => {
 						let copy_sub_data=DataItem.get_new(copy_data.data_type,0,{top_id:copy_data.id,top_data_type:copy_data.data_type});
-						copy_sub_data[FieldType.SOURCE_ID] = data_list[a][FieldType.ID];
-						copy_sub_data[FieldType.SOURCE_DATA_TYPE] = data_list[a][FieldType.DATA_TYPE];
+						copy_sub_data[FieldType.SOURCE_ID] = item[FieldType.ID];
+						copy_sub_data[FieldType.SOURCE_DATA_TYPE] = item[FieldType.DATA_TYPE];
 
-						copy_sub_data[FieldType.SOURCE_PARENT_ID] = data_list[a][FieldType.PARENT_ID];
-						copy_sub_data[FieldType.SOURCE_PARENT_DATA_TYPE] = data_list[a][FieldType.PARENT_DATA_TYPE][FieldType.PARENT_DATA_TYPE];
+						copy_sub_data[FieldType.SOURCE_PARENT_ID] = item[FieldType.PARENT_ID];
+						copy_sub_data[FieldType.SOURCE_PARENT_DATA_TYPE] = item[FieldType.PARENT_DATA_TYPE][FieldType.PARENT_DATA_TYPE];
 
-						copy_sub_data[FieldType.SOURCE_TOP_ID] = data_list[a][FieldType.TOP_ID];
-						copy_sub_data[FieldType.SOURCE_TOP_DATA_TYPE] = data_list[a][FieldType.TOP_DATA_TYPE];
+						copy_sub_data[FieldType.SOURCE_TOP_ID] = item[FieldType.TOP_ID];
+						copy_sub_data[FieldType.SOURCE_TOP_DATA_TYPE] = item[FieldType.TOP_DATA_TYPE];
 
-						for(const key in data_list[a]) {
+						item.forEach(key => {
 							if( key != FieldType.ID && key != FieldType.SOURCE && key != FieldType.PARENT_ID && key != FieldType.PARENT_DATA_TYPE  && key != FieldType.TOP_ID && key != FieldType.TOP_DATA_TYPE ){
-								copy_sub_data[key] = data_list[a][key];
+								copy_sub_data[key] = item[key];
 							}
-						}
+						});
 						copy_data_list.push(copy_sub_data);
-					}
+					});
 					call();
 				},
 				function(call){
@@ -2333,19 +2357,20 @@ class Portal {
 					})
 				},
 				function(call){
-					for(let a=0;a<copy_data_list.length;a++){
-						if(copy_data_list[a][FieldType.SOURCE_PARENT_ID] == top_data[FieldType.ID]){
-							copy_data_list[a][FieldType.PARENT_ID] = copy_data[FieldType.ID];
-							copy_data_list[a][FieldType.PARENT_DATA_TYPE]  = copy_data[FieldType.DATA_TYPE];
+					copy_data_list.forEach(item => {
+						if(item[FieldType.SOURCE_PARENT_ID] == top_data[FieldType.ID]){
+							item[FieldType.PARENT_ID] = copy_data[FieldType.ID];
+							item[FieldType.PARENT_DATA_TYPE]  = copy_data[FieldType.DATA_TYPE];
 						}else{
-							for(let b=0;b<copy_data_list.length;b++){
-								if(copy_data_list[a][FieldType.SOURCE_PARENT_ID] == copy_data_list[b][FieldType.SOURCE_ID]){
-									copy_data_list[a][FieldType.PARENT_ID] = copy_data_list[b][FieldType.ID];
-									copy_data_list[a][FieldType.PARENT_DATA_TYPE] = copy_data_list[b][FieldType.DATA_TYPE];
+							copy_data_list.forEach(item_sub => {
+								if(item[FieldType.SOURCE_PARENT_ID] == item_sub[FieldType.SOURCE_ID]){
+									item[FieldType.PARENT_ID] = item_sub[FieldType.ID];
+									item[FieldType.PARENT_DATA_TYPE] = item_sub[FieldType.DATA_TYPE];
 								}
-							}
+
+							});
 						}
-					}
+					});
 					call();
 				},
 				function(call){
@@ -2594,6 +2619,8 @@ class Data {
 			let error = null;
 			async.series([
 				async function(call){
+					item_list.forEach(item => {
+					});
 				},
 			]).then(result => {
 				callback([error,data]);

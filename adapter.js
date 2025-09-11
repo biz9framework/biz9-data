@@ -52,13 +52,13 @@ const post_item_list_adapter=(db_connect,item_data_list)=>{
             },
             function(call){
                 async.forEachOf(item_data_list,(item,key,go)=>{
-                    for(property in item[key]){
-                        if(property!='id'&&property!='data_type'){
-                            if(!item[key][property]){
-                                delete item[key][property];
+                    item[key].forEach(row => {
+                        if(row!='id'&&row!='data_type'){
+                            if(!item[key][row]){
+                                delete item[key][row];
                             }
                         }
-                    }
+                    });
                     go();
                 }, error => {
                     if(error){
@@ -97,11 +97,11 @@ const post_item_list_adapter=(db_connect,item_data_list)=>{
                 });
             },
             async function(call){
-                for(const item of item_data_list){
+                item_data_list.forEach(item => {
                     item.source=DB_TITLE;
                     item.app_id = db_connect.data_config.APP_ID;
                     item_data_new_list.push(item);
-                }
+                });
             },
             function(call){
                 delete_cache_connect_main(cache_connect).then(([error,data])=>{
@@ -162,7 +162,7 @@ const post_item_adapter=(db_connect,data_type,item_data,option) => {
                     Log.error("Data-Adapter-Update-Item-Adapter-4",error);
                     callback([error,[]]);
                 });
-           },
+            },
         ]).then(result => {
             callback([error,item_data]);
         }).catch(error => {
@@ -220,7 +220,7 @@ const get_item_list_adapter = (db_connect,data_type,filter,sort_by,page_current,
                 item_count = Str.check_is_null(item_count) ? "0" : item_count;
                 page_size = Str.check_is_null(page_size) ? "0" : page_size;
                 call();
-        }
+            }
         ]).then(result => {
             callback([error,item_data_list,item_count,page_count]);
         }).catch(error => {
@@ -247,7 +247,7 @@ const get_item_adapter = (db_connect,data_type,key,option) => {
                 });
             },
             function(call) {
-               if(option.filter){
+                if(option.filter){
                     let sort_by={};
                     let page_current=1;
                     let page_size=0;
@@ -291,7 +291,7 @@ const get_item_adapter = (db_connect,data_type,key,option) => {
                         }else{
                             item_data.source = NOT_FOUND_TITLE;
                         }
-                         item_data.app_id = db_connect.app_id;
+                        item_data.app_id = db_connect.app_id;
                         call();
                     }).catch(error => {
                         Log.error("Adapter-Get-Item-Adapter-3",error);
@@ -321,18 +321,18 @@ const post_cache_item = (cache_connect,data_type,id,item_data) => {
         let prop_list = [];
         async.series([
             function(call) {
-                for (prop in item_data) {
+                item_data.forEach(prop => {
                     if(prop != '_id' && prop != 'source'){
                         prop_list.push({title:prop,value:item_data[prop]});
                     }
-                }
+                });
                 call();
             },
             async function(call) {
-                for(const item of prop_list) {
+                prop_list.forEach(async item => {
                     cache_string_str=cache_string_str+item.title+',';
-                    await post_cache_string_main(cache_connect,get_cache_item_attr_key(data_type,id,item.title), item.value);
-                }
+                    await post_cache_string_main(cache_connect,get_cache_item_attr_key(data_type,id,item.title),item.value);
+                });
             },
             function(call) {
                 post_cache_string_main(cache_connect,get_cache_item_attr_list_key(data_type,id),cache_string_str).then(([error,data]) => {
@@ -377,8 +377,8 @@ const get_item_cache_db = (cache_connect,db_connect,data_type,id,option) => {
         let cache_key_list = null;
         let item_data = DataItem.get_new(data_type,id,{app_id:db_connect.app_id});
         let cache_string_list = [];
-		option = option ? option : {get_field:false};
-	    async.series([
+        option = option ? option : {get_field:false};
+        async.series([
             function(call) {
                 get_cache_string_main(cache_connect,get_cache_item_attr_list_key(data_type,id)).then(([error,data]) => {
                     cache_key_list=data;
@@ -485,10 +485,10 @@ const delete_item_list_adapter = (db_connect,data_type,filter) => {
             },
             async function(call) {
                 var list = [];
-                for(const item of item_id_list) {
+                item_id_list.forEach(async item => {
                     [error,data] = await delete_item_cache_db(db_connect,data_type,item.id);
                     item_data_new_list.push(data);
-                }
+                });
             },
         ]).then(result => {
             callback([error,item_data_new_list]);
@@ -527,11 +527,11 @@ const delete_item_cache=(db_connect,data_type,id)=>{
                 if(cache_key_list!=null){
                     cache_string_list =cache_key_list.split(',');
                 }
-                for(const item of cache_string_list) {
+                cache_string_list.forEach(async item => {
                     if(item){
                         const [error,val] = await delete_cache_string_main(cache_connect,get_cache_item_attr_key(data_type,id,item));
                     }
-                }
+                });
             },
             function(call){
                 delete_cache_string_main(cache_connect,get_cache_item_attr_list_key(data_type,id)).then(([error,data]) => {
@@ -590,11 +590,11 @@ const delete_item_cache_db = (db_connect,data_type,id) => {
                 if(cache_key_list!=null){
                     cache_string_list =cache_key_list.split(',');
                 }
-                for(const item of cache_string_list) {
+                cache_string_list.forEach(async item => {
                     if(item){
                         const [error,val] = await delete_cache_string_main(cache_connect,get_cache_item_attr_key(data_type,id,item));
                     }
-                }
+                });
             },
             function(call){
                 delete_cache_string_main(cache_connect,get_cache_item_attr_list_key(data_type,id)).then(([error,data]) => {
