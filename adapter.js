@@ -251,7 +251,7 @@ const get_item_adapter = (db_connect,data_type,key,option) => {
                     let sort_by={};
                     let page_current=1;
                     let page_size=0;
-                    get_item_list_adapter(db_connect,data_type,option.filter,sort_by,page_current,page_size).then(([error,data]) => {
+                    get_item_list_adapter(db_connect,data_type,option.filter,sort_by,page_current,page_size,option).then(([error,data]) => {
                         if(data.length>0){
                             item_data = data[0];
                         }else{
@@ -272,7 +272,7 @@ const get_item_adapter = (db_connect,data_type,key,option) => {
                     let sort_by={};
                     let page_current=1;
                     let page_size=0;
-                    get_item_list_adapter(db_connect,data_type,filter,sort_by,page_current,page_size).then(([error,data]) => {
+                    get_item_list_adapter(db_connect,data_type,filter,sort_by,page_current,page_size,option).then(([error,data]) => {
                         if(data.length>0){
                             item_data = data[0];
                         }else{
@@ -285,7 +285,7 @@ const get_item_adapter = (db_connect,data_type,key,option) => {
                         callback([error,null]);
                     });
                 }else{
-                    get_item_cache_db(cache_connect,db_connect,item_data.data_type,item_data.key).then(([error,data]) => {
+                    get_item_cache_db(cache_connect,db_connect,item_data.data_type,item_data.key,option).then(([error,data]) => {
                         if(data){
                             item_data = data;
                         }else{
@@ -321,18 +321,18 @@ const post_cache_item = (cache_connect,data_type,id,item_data) => {
         let prop_list = [];
         async.series([
             function(call) {
-                item_data.forEach(prop => {
+                for (prop in item_data) {
                     if(prop != '_id' && prop != 'source'){
                         prop_list.push({title:prop,value:item_data[prop]});
                     }
-                });
+                }
                 call();
             },
             async function(call) {
-                prop_list.forEach(async item => {
+                for(const item of prop_list) {
                     cache_string_str=cache_string_str+item.title+',';
                     await post_cache_string_main(cache_connect,get_cache_item_attr_key(data_type,id,item.title),item.value);
-                });
+                }
             },
             function(call) {
                 post_cache_string_main(cache_connect,get_cache_item_attr_list_key(data_type,id),cache_string_str).then(([error,data]) => {
@@ -429,14 +429,32 @@ const get_item_cache_db = (cache_connect,db_connect,data_type,id,option) => {
                 else{
                     get_item_main(db_connect,data_type,id).then(([error,data]) => {
                         if(data){
-                            item_data = data;
-                            item_data.source = DB_TITLE;
-                            post_cache_item(cache_connect,data_type,id,data).then(([error,data2]) => {
-                                call();
-                            }).catch(error => {
-                                Log.error("Data-Adapter-Get-Item-Cache-DB-2",error);
-                                callback([error,null]);
-                            });
+                            if(!option.get_field){
+                                item_data = data;
+                                item_data.source = DB_TITLE;
+                                post_cache_item(cache_connect,data_type,id,data).then(([error,data2]) => {
+                                    call();
+                                }).catch(error => {
+                                    Log.error("Data-Adapter-Get-Item-Cache-DB-2",error);
+                                    callback([error,null]);
+                                });
+                            }else{
+                                for(const item of option.fields.split(',')) {
+                                    if(item){
+                                        item_data[item] = data[item];
+                                    }else{
+                                        item_data[item] = null;
+                                    }
+                                }
+                                post_cache_item(cache_connect,data_type,id,data).then(([error,data2]) => {
+                                    call();
+                                }).catch(error => {
+                                    Log.error("Data-Adapter-Get-Item-Cache-DB-2",error);
+                                    callback([error,null]);
+                                });
+
+                            }
+
                         }else{
                             item_data.source = NOT_FOUND_TITLE;
                             call();
@@ -485,10 +503,10 @@ const delete_item_list_adapter = (db_connect,data_type,filter) => {
             },
             async function(call) {
                 var list = [];
-                item_id_list.forEach(async item => {
+                for(const item of item_id_list) {
                     [error,data] = await delete_item_cache_db(db_connect,data_type,item.id);
                     item_data_new_list.push(data);
-                });
+                };
             },
         ]).then(result => {
             callback([error,item_data_new_list]);
@@ -527,11 +545,11 @@ const delete_item_cache=(db_connect,data_type,id)=>{
                 if(cache_key_list!=null){
                     cache_string_list =cache_key_list.split(',');
                 }
-                cache_string_list.forEach(async item => {
+                for(const item of cache_string_list) {
                     if(item){
                         const [error,val] = await delete_cache_string_main(cache_connect,get_cache_item_attr_key(data_type,id,item));
                     }
-                });
+                }
             },
             function(call){
                 delete_cache_string_main(cache_connect,get_cache_item_attr_list_key(data_type,id)).then(([error,data]) => {
@@ -590,11 +608,11 @@ const delete_item_cache_db = (db_connect,data_type,id) => {
                 if(cache_key_list!=null){
                     cache_string_list =cache_key_list.split(',');
                 }
-                cache_string_list.forEach(async item => {
+                for(const item of cache_string_list) {
                     if(item){
                         const [error,val] = await delete_cache_string_main(cache_connect,get_cache_item_attr_key(data_type,id,item));
                     }
-                });
+                }
             },
             function(call){
                 delete_cache_string_main(cache_connect,get_cache_item_attr_list_key(data_type,id)).then(([error,data]) => {

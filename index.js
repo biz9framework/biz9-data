@@ -9,7 +9,7 @@ const dayjs = require('dayjs');
 const {get_db_connect_main,check_db_connect_main,delete_db_connect_main,post_item_main,get_item_main,delete_item_main,get_id_list_main,delete_item_list_main,get_count_item_list_main} = require('./mongo/index.js');
 const {Scriptz}=require("biz9-scriptz");
 const {Log,Str,Num,Obj}=require("/home/think2/www/doqbox/biz9-framework/biz9-utility/code");
-const {DataItem,DataType,FieldType,Item_Logic,User_Logic,Favorite_Logic,Stat_Logic,Order_Logic}=require("/home/think2/www/doqbox/biz9-framework/biz9-logic/code");
+const {DataItem,DataType,FieldType,Item_Logic,User_Logic,Favorite_Logic,Stat_Logic,Order_Logic,Review_Logic}=require("/home/think2/www/doqbox/biz9-framework/biz9-logic/code");
 const { get_db_connect_adapter,check_db_connect_adapter,delete_db_connect_adapter,post_item_adapter,post_item_list_adapter,get_item_adapter,delete_item_adapter,get_item_list_adapter,delete_item_list_adapter,get_count_item_list_adapter,delete_item_cache }  = require('./adapter.js');
 class Database {
 	static get = async (data_config,option) => {
@@ -1279,71 +1279,54 @@ class Product_Data {
 	};
 }
 class Review_Data {
-	/*
 	//9_review_post
-	static post = async(database,biz_data_type,item_id,user_id,review) => {
+	static post = async(database,parent_data_type,parent_id,user_id,post_review) => {
 		return new Promise((callback) => {
 			let error = null;
-			let cloud_data = {};
-			cloud_data.item = DataItem.get_new(biz_data_type,item_id);
-			cloud_data.item_item = DataItem.get_new(biz_data_type,item_id);
-			cloud_data.review = review;
-			cloud_data.review.user = DataItem.get_new(DataType.USER,0);
-			let review_list = [];
-			let review_count = 0;
-			let review_avg = 0;
+			let data = {parent_item:DataItem.get_new(parent_data_type,parent_id),review:DataItem.get_new(DataType.REVIEW,0)};
+			let review = Review_Logic.get_new(parent_data_type,parent_id,user_id,post_review.title,post_review.comment,post_review.rating);
 			async.series([
 				//review_post
 				async function(call){
-					const [error,data] = await Portal.post(database,DataType.REVIEW,cloud_data.review);
-					if(error){
-						cloud_error=Log.append(cloud_error,biz_error);
+					const [biz_error,biz_data] = await Portal.post(database,DataType.REVIEW,data.review);
+					if(biz_error){
+						error=Log.append(error,biz_error);
 					}else{
-						cloud_data.item = data;
+						data.review = biz_data;
 					}
 				},
-				//get_item
+				//get_parent_item
 				async function(call){
-					const [error,data] = await Portal.get(database,cloud_data.item.data_type,cloud_data.item.id);
-					if(error){
-						cloud_error=Log.append(cloud_error,biz_error);
+					let option = {get_field:true,fields:'id,rating_count,review_count,rating_avg,title,title_url'};
+					const [biz_error,biz_data] = await Portal.get(database,parent_data_type,parent_id,option);
+					if(biz_error){
+						error=Log.append(error,biz_error);
 					}else{
-						cloud_data.item = data;
+						data.parent_item = biz_data;
 					}
+					Log.w('cool_bean_44',data);
 				},
 				//post_item
 				async function(call){
-					if(!Str.check_is_null(cloud_data.item.id)){
+					if(!Str.check_is_null(data.parent_item.id)){
 						//rating_count
-						cloud_data.item.rating_count = !Str.check_is_null(cloud_data.item.rating_count) ? parseInt(cloud_data.item.rating_count) + parseInt(review.rating) :parseInt(review.rating);
+						data.parent_item.rating_count = !Str.check_is_null(data.parent_item.rating_count) ? parseInt(data.parent_item.rating_count) + parseInt(review.rating) :parseInt(review.rating);
 						//review_count
-						cloud_data.item.review_count = !Str.check_is_null(cloud_data.item.review_count) ? parseInt(cloud_data.item.review_count) + 1 : 1;
+						data.parent_item.review_count = !Str.check_is_null(data.parent_item.review_count) ? parseInt(data.parent_item.review_count) + 1 : 1;
 						//rating_avg
-						cloud_data.item.rating_avg = !Str.check_is_null(cloud_data.item.rating_avg) ? parseInt(cloud_data.item.rating_count)  /  parseInt(cloud_data.item.review_count) :parseInt(review.rating);
-
-						const [error,data] = await Portal.post(database,cloud_data.item.data_type,cloud_data.item);
-						if(error){
-							cloud_error=Log.append(cloud_error,biz_error);
+						data.parent_item.rating_avg = !Str.check_is_null(data.parent_item.rating_avg) ? parseInt(data.parent_item.rating_count)  /  parseInt(data.parent_item.review_count) :parseInt(review.rating);
+						const [biz_error,biz_data] = await Portal.post(database,parent_data_type,data.parent_item);
+						if(biz_error){
+							error=Log.append(error,biz_error);
 						}else{
-							cloud_data.item = data;
-						}
-					}
-				},
-				//get_user
-				async function(call){
-					if(!Str.check_is_null(cloud_data.item.id)){
-						const [error,data] = await Portal.get(database,DataType.USER,user_id);
-						if(error){
-							cloud_error=Log.append(cloud_error,biz_error);
-						}else{
-							cloud_data.review.user = data;
+							data.parent_item = biz_data;
 						}
 					}
 				},
 			]).then(result => {
-				callback([error,cloud_data]);
+				callback([error,data]);
 			}).catch(error => {
-				Log.error("Review-Data-Update",error);
+				Log.error("Review-Data-Portal",error);
 				callback([error,[]]);
 			});
 		});
@@ -1385,7 +1368,6 @@ class Review_Data {
 			});
 		});
 	};
-	*/
 }
 class Activity_Data {
 	/*
@@ -1729,9 +1711,9 @@ class Favorite_Data {
 					}
 				},
 			]).then(result => {
-				callback([error,cloud_data]);
+				callback([error,data]);
 			}).catch(error => {
-				Log.error("Favorite-Data-List",error);
+				Log.error("Favorite-Data-Get",error);
 				callback([error,[]]);
 			});
 		});
@@ -1762,7 +1744,7 @@ class Portal {
 					call();
 				},
 				function(call){
-					Data.get(database,data_type,key,option).then(([biz_error,biz_data])=> {
+					Data.get(database,data_type,key,option).then(([biz_error,biz_data,option])=> {
 						if(error){
 							error=Log.append(error,biz_error);
 						}else{
@@ -1871,7 +1853,6 @@ class Portal {
 	};
 	//9_portal_search
 	static search = (database,data_type,filter,sort_by,page_current,page_size,option) => {
-		console.log('1111111111111');
 		/* Options
 		 * Items
 		 *  - get_item / bool / ex. true,false / def. true
