@@ -542,13 +542,24 @@ describe('post_data', function(){ this.timeout(25000);
                 //- REVIEW - START
                 let parent_data_type = DataType.PRODUCT;
                 let parent_id = "604f0e31-816e-47f4-a411-0c507b859460";
-                //let user_id = "80009d4a-1df4-421a-9105-d9450ebc5e01";
-                //let review = Review_Logic.get_new(parent_data_type,parent_id,user_id,Num.get_id()+"_My_Title",Num.get_id()+"_Comment_",Num.get_id(5));
+                let user_id = "80009d4a-1df4-421a-9105-d9450ebc5e01";
+                let review = Review_Logic.get_new(parent_data_type,parent_id,user_id,Num.get_id()+"_My_Title",Num.get_id()+"_Comment_",Num.get_id(5));
                 //Log.w('review',review);
-                //const [biz_error,biz_data] = await Review_Data.post(database,parent_data_type,parent_id,user_id,review);
-                const [biz_error,biz_data] = await Review_Data.get(database,parent_data_type,parent_id,{},1,0,{});
+                const [biz_error,biz_data] = await Review_Data.post(database,parent_data_type,parent_id,user_id,review);
+                //const [biz_error,biz_data] = await Review_Data.get(database,parent_data_type,parent_id,{},1,0,{});
                 Log.w('portal_review',biz_data);
                 //- REVIEW - END
+
+                //- FAVORITE - START
+                /*
+                let parent_data_type = DataType.PRODUCT;
+                let parent_id = "604f0e31-816e-47f4-a411-0c507b859460";
+                let user_id = "80009d4a-1df4-421a-9105-d9450ebc5e01";
+                const [biz_error,biz_data] = await Favorite_Data.post(database,parent_data_type,parent_id,user_id);
+                //const [biz_error,biz_data] = await Favorite_Data.get(database,parent_data_type,parent_id,{},1,0,{});
+                Log.w('portal_favorite',biz_data);
+                */
+                //- FAVORITE - END
 
                 //console.log('111111');
                 //let title = Num.get_id()+"_title";

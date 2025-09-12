@@ -1339,17 +1339,14 @@ class Review_Data {
 			async.series([
 				//review_list
 				async function(call){
-					console.log('aaaaa');
 					let query = {parent_id:parent_id,parent_data_type:parent_data_type};
 					let search = Item_Logic.get_search(DataType.REVIEW,query,{},page_current,page_size);
-					let option = {get_parent:true,parent_field_data_type:DataType.PRODUCT,parent_fields:'id,title,title_url,photo_data',get_user:true,user_fields:'id,title,title_url,photo_data'};
-					console.log('bbbb');
+					let option = {get_parent:true,parent_field_data_type:parent_data_type,parent_fields:'id,title,title_url,photo_data',get_user:true,user_fields:'id,title,title_url,photo_data'};
 					const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option);
-					console.log('cccccc');
-					console.log(biz_data);
 					if(biz_error){
 						error=Log.append(error,biz_error);
 					}else{
+							data.option = option;
 							data.data_type=biz_data.data_type;
 							data.item_count=biz_data.item_count;
 							data.page_count=biz_data.page_count;
@@ -1649,12 +1646,14 @@ class Favorite_Data {
 			let error = null;
 			let data = {};
 			data.is_unique = false;
-			data.favorite = DataItem.get_new(DataType.FAVORITE,0,{parent_data_type:parent_data_type,parent_id:parent_id,user_id:user_id});
+			let favorite = Favorite_Logic.get_new(parent_data_type,parent_id,user_id);
 			async.series([
 				async function(call){
 					let favorite_filter = Favorite_Logic.get_search_filter(parent_data_type,parent_id,user_id);
 					let search = Item_Logic.get_search(DataType.FAVORITE,favorite_filter,{},1,0);
-					const [biz_error,biz_data] = await Portal.count(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size);
+					Log.w('favorite_filter',favorite_filter);
+					Log.w('search',search);
+					const [biz_error,biz_data] = await Portal.count(database,search.data_type,search.filter);
 					if(biz_error){
 						error=Log.append(biz_error,error);
 					}else{
@@ -1665,11 +1664,11 @@ class Favorite_Data {
 				},
 				async function(call){
 					if(data.is_unique){
-						const [biz_error,biz_data] = await Portal.post(DataType.FAVORITE,data.favorite);
+						const [biz_error,biz_data] = await Portal.post(DataType.FAVORITE,favorite);
 						if(biz_error){
 							error=Log.append(error,biz_error);
 						}else{
-							data.item = biz_data;
+							data.favorite = biz_data;
 						}
 					}
 				},
@@ -1692,7 +1691,7 @@ class Favorite_Data {
 				async function(call){
 					let query = {user_id:user_id,parent_data_type:parent_data_type};
 					let search = Item_Logic.get_search(DataType.FAVORITE,query,{date_create:-1},page_current,page_size);
-					let option = {get_search:true,search_data_type:parent_data_type,search_field:'id',search_parent_field:'item_id'};
+					let option = {get_parent:true,parent_field_data_type:parent_data_type,parent_fields:'id,title,title_url,photo_data',get_user:true,user_fields:'id,title,title_url,photo_data'};
 					const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option);
 					if(error){
 						error=Log.append(error,biz_error);
@@ -1700,6 +1699,7 @@ class Favorite_Data {
 						biz_data.item_list.forEach(item => {
 							item.parent_item = data.item_search_list.find(item_find => item_find.id === item.parent_id) ? data.item_search_list.find(item_find => item_find.id === item.parent_id): Item_Logic.get_not_found(item_find.data_type,item_find.id,{app_id:database.app_id});
 						});
+						data.option = option;
 						data.data_type = parent_data_type;
 						data.item_count = biz_data.item_count;
 						data.page_count = biz_data.page_count;
