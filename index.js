@@ -674,7 +674,7 @@ class Order_Data {
 			let order_sub_item_list = [];
 			async.series([
 				async function(call){
-					let option = {get_item_search:true,item_search_data_type:DataType.USER,item_search_field:'id',item_search_value:'user_id'};
+					let option = {get_search:true,search_data_type:DataType.USER,search_field:'id',search_parent_field:'user_id'};
 					const [error,data] = await Portal.search(database,DataType.ORDER,filter,sort_by,page_current,page_size,option);
 					data.item_list.forEach(item => {
 						const item_match = data.item_search_list.find(item_find => item_find.id === item.user_id);
@@ -1081,7 +1081,7 @@ class Cart_Data {
 			let cart_sub_item_list = [];
 			async.series([
 				async function(call){
-					let option = {get_item_search:true,item_search_data_type:DataType.USER,item_search_field:'id',item_search_value:'user_id'};
+					let option = {get_search:true,search_data_type:DataType.USER,search_field:'id',search_parent_field:'user_id'};
 					const [error,data] = await Portal.search(database,DataType.CART,filter,sort_by,page_current,page_size,option);
 					data.item_list.forEach(item => {
 						const item_match = data.item_search_list.find(item_find => item_find.id === item.user_id);
@@ -1341,26 +1341,11 @@ class Review_Data {
 				async function(call){
 					let query = {parent_id:parent_id,parent_data_type:parent_data_type};
 					let search = Item_Logic.get_search(DataType.REVIEW,query,{},page_current,page_size);
-					let option = {get_item_search:true,item_search_data_type:parent_data_type,item_search_field:'id',item_search_value:'parent_id'};
+					let option = {get_parent:true,parent_field_data_type:DataType.PRODUCT,parent_fields:'id,title,title_url,photo_data'};
 					const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option);
 					if(biz_error){
 						error=Log.append(error,biz_error);
 					}else{
-						//biz_data.data_list.forEach(item => {
-							//item.parent_item = biz_data.item_search_list.find(item_find => item_find.id === item.parent_id) ? biz_data.data_list.find(item_find => item_find.id === item.parent_id) : Item_Logic.get_not_found(item_find.data_type,item_find.id,{app_id:database.app_id});
-						//});
-
-						/*
-						for(let a=0;a<data.item_list.length;a++){
-							data.item_list[a].item = DataItem.get_new(biz_data_type,data.item_list[a].item,{title:'Not Found'});
-							for(let b=0;b<data.item_search_list.length;b++){
-								if(data.item_list[a].item_id == data.item_search_list[b].id){
-									data.item_list[a].item_item = data.item_search_list[b];
-								}
-							}
-						}
-						cloud_data.item_list = data.item_list;
-						*/
 						Log.w('rrr',biz_data);
 					}
 				},
@@ -1385,7 +1370,7 @@ class Activity_Data {
 			let activity_list = [];
 			async.series([
 				async function(call){
-					let option = {get_item_search:true,item_search_data_type:DataType.USER,item_search_field:'id',item_search_value:'user_id'};
+					let option = {get_search:true,search_data_type:DataType.USER,search_field:'id',search_parent_field:'user_id'};
 					const [error,data] = await Portal.search(database,DataType.ACTIVITY,filter,sort_by,page_current,page_size,option);
 					data.item_list.forEach(item => {
 						const item_match = data.item_search_list.find(item_find => item_find.id === item.user_id);
@@ -1698,7 +1683,7 @@ class Favorite_Data {
 				async function(call){
 					let query = {user_id:user_id,parent_data_type:parent_data_type};
 					let search = Item_Logic.get_search(DataType.FAVORITE,query,{date_create:-1},page_current,page_size);
-					let option = {get_item_search:true,item_search_data_type:parent_data_type,item_search_field:'id',item_search_value:'item_id'};
+					let option = {get_search:true,search_data_type:parent_data_type,search_field:'id',search_parent_field:'item_id'};
 					const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option);
 					if(error){
 						error=Log.append(error,biz_error);
@@ -1858,23 +1843,32 @@ class Portal {
 	//9_portal_search
 	static search = (database,data_type,filter,sort_by,page_current,page_size,option) => {
 		/* Options
+		 * Fields
+		   - get_field / type. bool / ex. true,false / default. false
+		   - fields / type. string / ex. field1,field2 / default. throw error
 		 * Items
-		 *  - get_item / bool / ex. true,false / def. true
+		    - get_item / type. bool / ex. true,false / default. false
 		 * Photos
-		 *  - get_photo / bool / ex. true,false / def. true
-		 *    - photo_count / int / ex. 1-999 / def. 19
-		 *    - photo_sort_by / query obj / ex. {date_create:1}
+		    - get_photo / type. bool / ex. true,false / default. false
+		    - photo_count / type. int / ex. 1-999 / default. 19
+		    - photo_sort_by / type. {} / ex. {date_create:1} / default. {}
 		 *  Count
-		    - get_item_count / true - false
-			  - item_count_data_type / Product
-			  - item_count_field / ex. category
-			  - item_count_value /  ex. title
+		    - get_count / type. bool / ex. true,false / default. false
+			  - count_data_type / type. string / ex. PRODUCT / default. throw error
+			  - count_field / type. number / ex. category /  default. throw error
+			  - count_value / type. string / ex. title / default. throw error
 		 *  Search
-		 *  - get_item_search / true - false
-			  - item_search_data_type / Product
-			  - item_search_field / category_title
-			  - item_search_value / 'beauty'
-			  */
+		    - get_search / type. bool / ex. true,false / default. false
+			  - search_data_type / type. string / ex. PRODUCT / default. throw error
+			  - search_field / type. string / ex. category_title / default. throw error
+			  - search_parent_field / type. string / ex. title / default. throw error
+ 			- get_parent / type. bool / ex. true,false / default. false
+			  - parent_field_data_type / type. string / ex. PRODUCT / ex. throw error
+			- get_parent / type. bool / ex. true,false / default. false
+	  		  - parent_data_type / type. string / ex. PRODUCT / default. throw error
+	  		  - parent_fields / type. string / ex. field1,field2 / default. blank
+
+	     */
 		return new Promise((callback) => {
 			let data = {data_type:data_type,item_count:0,page_count:1,filter:{},data_list:[],app_id:database.app_id};
 			let error=null;
@@ -1901,14 +1895,14 @@ class Portal {
 					});
 				},
 				function(call){
-					if(option.get_item_count && data.data_list.length>0){
+					if(option.get_count && data.data_list.length>0){
 						let query = { $or: [] };
 						data.data_list.forEach(item => {
 							let query_field = {};
-							query_field[option.item_count_field] = { $regex:String(item[option.item_count_value]), $options: "i" };
+							query_field[option.count_field] = { $regex:String(item[option.count_value]), $options: "i" };
 							query.$or.push(query_field);
 						});
-						let search = Item_Logic.get_search(option.item_count_data_type,query,{},1,0);
+						let search = Item_Logic.get_search(option.count_data_type,query,{},1,0);
 						Data.get_list(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size).then(([error,item_list,item_count,page_count])=> {
 							if(error){
 								error=Log.append(error,biz_error);
@@ -1925,11 +1919,11 @@ class Portal {
 					}
 				},
 				function(call){
-					if(option.get_item_count && data.data_list.length>0){
+					if(option.get_count && data.data_list.length>0){
 						data.data_list.forEach(item => {
 							item.item_count = 0;
 							data_list_count.forEach(item_count => {
-								if(item[option.item_count_value] == item_count[option.item_count_field]){
+								if(item[option.count_value] == item_count[option.count_field]){
 									item.item_count = item.item_count + 1;
 								}
 							});
@@ -1940,24 +1934,26 @@ class Portal {
 					}
 				},
 				function(call){
-					if(option.get_item_search && data.data_list.length>0){
+					if(option.get_search && data.data_list.length>0){
 						let query = { $or: [] };
 						data.data_list.forEach(item => {
 							let query_field = {};
-							query_field[option.item_search_field] = { $regex:String(item[option.item_search_value]), $options: "i" };
+							query_field[option.search_field] = { $regex:String(item[option.search_parent_field]), $options: "i" };
 							query.$or.push(query_field);
 						});
-						let search = Item_Logic.get_search(option.item_search_data_type,query,{},1,0);
-						data.item_search_search = search;
+						let search = Item_Logic.get_search(option.search_data_type,query,{},1,0);
 						Data.get_list(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size).then(([error,item_list,item_count,page_count])=> {
 							if(error){
 								error=Log.append(error,biz_error);
 							}else{
-								data.item_search_list = item_list;
-								data.data_search_count = item_count;
-								data.data_search_page_count = page_count;
-								data.data_search_data_type = search.data_type;
-								data.data_search_search = search;
+								data.data_list.forEach(item => {
+									item.data_search_list = [];
+									item_list.forEach(item_search => {
+										if(item[option.search_parent_field] == item_search[option.search_field]){
+											item.data_search_list.push(item_search);
+										}
+									});
+								});
 							}
 							call();
 						}).catch(error => {
@@ -1968,12 +1964,46 @@ class Portal {
 						call();
 					}
 				},
+
 				function(call){
-					if(option.get_item_search && data.data_list.length>0){
+					if(option.get_parent && data.data_list.length>0){
+						let query = { $or: [] };
+						data.data_list.forEach(item => {
+							let query_field = {};
+							query_field['id'] = { $regex:String(item['parent_id']), $options: "i" };
+							query.$or.push(query_field);
+						});
+						let search = Item_Logic.get_search(option.parent_field_data_type,query,{},1,0);
+						let parent_option = option.parent_fields ? {get_field:true,fields:option.parent_fields} : {};
+						Data.get_list(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,parent_option).then(([error,item_list,item_count,page_count])=> {
+							if(error){
+								error=Log.append(error,biz_error);
+							}else{
+								data.data_list.forEach(item => {
+									item.parent_item = item_list.find(item_find => item_find.id === item.parent_id) ? item_list.find(item_find => item_find.id === item.parent_id):Item_Logic.get_not_found(item.parent_data_type,item.parent_id,{app_id:database.app_id});
+								});
+							}
+							console.log(data.data_list);
+							console.log(data.data_list.length);
+							console.log('done');
+
+							//call();
+						}).catch(error => {
+							error = Log.append(error,biz_error);
+							call();
+						});
+					}else{
+						call();
+					}
+					//Log.w('aaa',data.data_list);
+				},
+				/*
+				function(call){
+					if(option.get_search && data.data_list.length>0){
 						data.data_list.forEach(item => {
 							item.data_search_list = [];
-							data_search_list.forEach(item_search => {
-								if(item[option.item_search_value] == item_search[option.item_search_field]){
+							item_search_list.forEach(item_search => {
+								if(item[option.search_parent_field] == item_search[option.search_field]){
 									item.data_search_list.push(item_search);
 								}
 							});
@@ -1982,9 +2012,12 @@ class Portal {
 					}else{
 						call();
 					}
-				}
+				},
+				*/
+
+
 			]).then(result => {
-				callback([error,data]);
+				//callback([error,data]);
 			}).catch(error => {
 				Log.error("Portal-Search",error);
 				callback([error,[]]);

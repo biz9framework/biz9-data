@@ -188,13 +188,13 @@ describe('connect', function(){ this.timeout(25000);
         let search = Item_Logic.get_search(data_type,{},{},1,0);
         let option = {
             //count--start
-            get_item_count:true,
-            item_count_data_type:DataType.PRODUCT,
-            item_count_field:'category',
-            item_count_value:'title',
+            get_count:true,
+            item_data_type:DataType.PRODUCT,
+            item_field:'category',
+            item_value:'title',
             //count--end
-            //get_item_search:true,
-            //item_search_data_type:DataType.PRODUCT,
+            //get_search:true,
+            //search_data_type:DataType.PRODUCT,
             //item_search_filter:{category:'Cool'},
         };
                 //Log.w('option',option);
@@ -498,27 +498,35 @@ describe('post_data', function(){ this.timeout(25000);
             },
             async function(call){
                 console.log('POST-DATA-START');
-
-                //- search - start
-                //let query = {category:'Application'};
-                let query = {};
-                let search = Item_Logic.get_search(DataType.PRODUCT,query,{title:1},1,13);
-                /* - item_count
+                //- GET_ITEM_SEARCH - START
+                /*
+                let query = {category:'Application'};
+                let search = Item_Logic.get_search(DataType.CATEGORY,query,{title:1},1,13);
+                let option = {get_search:true,search_data_type:DataType.PRODUCT,search_data_type:DataType.PRODUCT,search_field:'category',item_search_parent_field:'title'};
+                */
+                //- GET_ITEM_SEARCH - END
+                // - GET_ITEM_COUNT - START
+                /*
+                let query = {category:'Application'};
+                let search = Item_Logic.get_search(DataType.CATEGORY,query,{title:1},1,13);
                 let option = {
-                    get_item_count:true,
-                    item_count_data_type:DataType.PRODUCT,
-                    item_count_field:'category',
-                    item_count_value:'title',
-                    get_field:true,
+                    get_count:true,
+                    item_data_type:DataType.PRODUCT,
+                    item_field:'category',
+                    item_value:'title',
+                    get_field:false,
                     fields:'id,title,title_url,photo_data,cost'
                 };
                 */
-                let option = {get_field:true,fields:'id,title,title_url,photo_data,cost'};
-                //let option = {get_item_search:true,item_search_data_type:DataType.PRODUCT,item_search_field:'id',item_search_value:'parent_id'};
+                // - GET_ITEM_COUNT - END
+
+                // - PORTAL-SEARCH - START
+                /*
                 const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option);
                 Log.w('data',biz_data);
+                */
+                // - PORTAL-SEARCH - END
 
-                //- search - end
                 //
                 //- user - start
                 //let user = DataItem.get_new(DataType.USER,0,{title:'ceo',title_url:'ceo',email:"ceo@bossappz.com",password:"1234567",role:FieldType.USER_ROLE_SUPER_ADMIN});
@@ -531,16 +539,16 @@ describe('post_data', function(){ this.timeout(25000);
                 //Log.w('data',data);
                 //- user - end
 
-                //- review - start
-                //let parent_data_type = DataType.PRODUCT;
-                //let parent_id = "604f0e31-816e-47f4-a411-0c507b859460";
+                //- REVIEW - START
+                let parent_data_type = DataType.PRODUCT;
+                let parent_id = "604f0e31-816e-47f4-a411-0c507b859460";
                 //let user_id = "80009d4a-1df4-421a-9105-d9450ebc5e01";
                 //let review = Review_Logic.get_new(parent_data_type,parent_id,user_id,Num.get_id()+"_My_Title",Num.get_id()+"_Comment_",Num.get_id(5));
                 //Log.w('review',review);
                 //const [biz_error,biz_data] = await Review_Data.post(database,parent_data_type,parent_id,user_id,review);
-                //const [biz_error,biz_data] = await Review_Data.get(database,parent_data_type,parent_id,{},1,0,{});
+                const [biz_error,biz_data] = await Review_Data.get(database,parent_data_type,parent_id,{},1,0,{});
                 //Log.w('portal_review',biz_data);
-                //- review - end
+                //- REVIEW - END
 
                 //console.log('111111');
                 //let title = Num.get_id()+"_title";
@@ -1038,8 +1046,8 @@ describe('get_data', function(){ this.timeout(25000);
                 //let key = "d86ec25e-4b15-4c4a-8ef9-ce82c9067571";
                 let search  = Item_Logic.get_search(DataType.BLOG_POST,{},{},1,0);
                 let option = {};
-                //let option = {get_item_count:true,item_count_data_type:DataType.PRODUCT,item_count_field:'category',item_count_value:'title'};
-                //let option = {get_item_search:true,item_search_data_type:DataType.CATEGORY,item_search_field:'category',item_search_value:'title'};
+                //let option = {get_count:true,item_data_type:DataType.PRODUCT,item_field:'category',item_value:'title'};
+                //let option = {get_search:true,search_data_type:DataType.CATEGORY,search_field:'category',item_search_value:'title'};
                 //Log.w('search',search);
                 //const [error,data] = await Portal.get(database,data_type,key);
                 //const [error,data] = await Content_Data.get(database,key,{get_item:true});
