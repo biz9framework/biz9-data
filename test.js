@@ -500,8 +500,9 @@ describe('post_data', function(){ this.timeout(25000);
                 console.log('POST-DATA-START');
 
                 //- search - start
-                let query = {category:'Application'};
-                let search = Item_Logic.get_search(DataType.CATEGORY,query,{title:1},1,13);
+                //let query = {category:'Application'};
+                let query = {};
+                let search = Item_Logic.get_search(DataType.PRODUCT,query,{title:1},1,13);
                 /* - item_count
                 let option = {
                     get_item_count:true,
@@ -512,7 +513,8 @@ describe('post_data', function(){ this.timeout(25000);
                     fields:'id,title,title_url,photo_data,cost'
                 };
                 */
-                let option = {get_item_search:true,item_search_data_type:DataType.PRODUCT,item_search_field:'id',item_search_value:'parent_id'};
+                let option = {get_field:true,fields:'id,title,title_url,photo_data,cost'};
+                //let option = {get_item_search:true,item_search_data_type:DataType.PRODUCT,item_search_field:'id',item_search_value:'parent_id'};
                 const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option);
                 Log.w('data',biz_data);
 
