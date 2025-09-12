@@ -532,11 +532,11 @@ describe('post_data', function(){ this.timeout(25000);
                 //let user = DataItem.get_new(DataType.USER,0,{title:'ceo',title_url:'ceo',email:"ceo@bossappz.com",password:"1234567",role:FieldType.USER_ROLE_SUPER_ADMIN});
                 //let title = Num.get_id() + "user";
                 //let user = DataItem.get_new(DataType.USER,0,{title:title,title_url:title,email:title+"@bossappz.com",password:"1234567",role:FieldType.USER_ROLE_USER});
-                //let user = DataItem.get_new(DataType.USER,0,{email:'70725user@bossappz.com',password:"1234567"});
-                //Log.w('user',user);
+                let user = DataItem.get_new(DataType.USER,0,{email:'ceo@bossappz.com',password:"1234567"});
+                Log.w('user',user);
                 //const [error,data] = await User_Data.register(database,user,null,null,null);
-                //const [error,data] = await User_Data.login(database,user,null,null,null);
-                //Log.w('data',data);
+                const [error,data] = await User_Data.login(database,user,null,null,null);
+                Log.w('data',data);
                 //- user - end
 
                 //- REVIEW - START

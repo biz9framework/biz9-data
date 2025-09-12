@@ -1640,8 +1640,6 @@ class Favorite_Data {
 				async function(call){
 					let favorite_filter = Favorite_Logic.get_search_filter(parent_data_type,parent_id,user_id);
 					let search = Item_Logic.get_search(DataType.FAVORITE,favorite_filter,{},1,0);
-					Log.w('favorite_filter',favorite_filter);
-					Log.w('search',search);
 					const [biz_error,biz_data] = await Portal.count(database,search.data_type,search.filter);
 					if(biz_error){
 						error=Log.append(biz_error,error);
