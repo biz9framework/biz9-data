@@ -546,13 +546,15 @@ describe('post_data', function(){ this.timeout(25000);
                 let user_id = "80009d4a-1df4-421a-9105-d9450ebc5e01";
                 let review = Review_Logic.get_new(parent_data_type,parent_id,user_id,Num.get_id()+"_My_Title",Num.get_id()+"_Comment_",Num.get_id(5));
                 //Log.w('review',review);
-                const [biz_error,biz_data] = await Review_Data.post(database,parent_data_type,parent_id,user_id,review);
-                //const [biz_error,biz_data] = await Review_Data.get(database,parent_data_type,parent_id,{},1,0,{});
+                //const [biz_error,biz_data] = await Review_Data.post(database,parent_data_type,parent_id,user_id,review);
+                const [biz_error,biz_data] = await Review_Data.get(database,parent_data_type,parent_id,{},1,0,{});
                 Log.w('portal_review',biz_data);
                 */
                 //- REVIEW - END
 
+
                 //- FAVORITE - START
+                /*
                 let parent_data_type = DataType.PRODUCT;
                 let parent_id = "604f0e31-816e-47f4-a411-0c507b859460";
                 let user_id = "80009d4a-1df4-421a-9105-d9450ebc5e01";
@@ -560,6 +562,7 @@ describe('post_data', function(){ this.timeout(25000);
                 //const [biz_error,biz_data] = await Favorite_Data.post(database,parent_data_type,parent_id,user_id);
                 const [biz_error,biz_data] = await Favorite_Data.get(database,parent_data_type,filter,{},1,0);
                 Log.w('portal_favorite',biz_data);
+                */
                 //- FAVORITE - END
 
                 //console.log('111111');
@@ -1061,16 +1064,15 @@ describe('get_data', function(){ this.timeout(25000);
                 //let option = {get_count:true,item_data_type:DataType.PRODUCT,item_field:'category',item_value:'title'};
                 //let option = {get_search:true,search_data_type:DataType.CATEGORY,search_field:'category',item_search_value:'title'};
                 //Log.w('search',search);
-                //const [error,data] = await Portal.get(database,data_type,key);
-                //const [error,data] = await Content_Data.get(database,key,{get_item:true});
-                //const [error,data] = await Blog_Post_Data.get(database,key);
-                //const [error,data] = await Blog_Post_Data.search(database,search.filter,search.sort_by,search.page_current,search.page_size);
-                //const [error,data] = await Order_Data.get(database,key);
-                //const [error,data] = await Cart_Data.get(database,key);
-                //const [error,data] = await Cart_Data.search(database,DataType.PRODUCT,search.filter,search.sort_by,search.parent_current,search.page_size);
-                console.log('dddddddddddddddd');
-                const [error,data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.parent_current,search.page_size,option);
-                Log.w('data',data);
+                //const [biz_error,biz_data] = await Portal.get(database,data_type,key);
+                //const [biz_error,biz_data] = await Content_Data.get(database,key,{get_item:true});
+                //const [biz_error,biz_data] = await Blog_Post_Data.get(database,key);
+                //const [biz_error,biz_data] = await Blog_Post_Data.search(database,search.filter,search.sort_by,search.page_current,search.page_size);
+                //const [biz_error,biz_data] = await Order_Data.get(database,key);
+                //const [biz_error,biz_data] = await Cart_Data.get(database,key);
+                //const [biz_error,biz_data] = await Cart_Data.search(database,DataType.PRODUCT,search.filter,search.sort_by,search.parent_current,search.page_size);
+                const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.parent_current,search.page_size,option);
+                Log.w('data',biz_data);
                 console.log('TEST-GET-SUCCESS');
                 console.log('TEST-GET-END');
             },

@@ -113,6 +113,7 @@ class Blog_Post_Data {
 						data.page_count = biz_data.page_count;
 						data.filter = biz_data.filter;
 						data.blog_post_list = biz_data.data_list;
+						data.app_id = database.app_id;
 					}
 				},
 			]).then(result => {
@@ -1364,46 +1365,35 @@ class Review_Data {
 	};
 }
 class Activity_Data {
-	/*
 	static search = (database,filter,sort_by,page_current,page_size,option) => {
 		//9_activity_search
 		return new Promise((callback) => {
-			let cloud_data = {item_count:0,page_count:1,filter:{},data_type:DataType.ACTIVITY,item_list:[]};
+			let data = {item_count:0,page_count:1,filter:{},data_type:DataType.ACTIVITY,activity_list:[]};
 			let error = null;
 			option = option ? option : {};
 			let activity_id_list_query = { $or: [] };
 			let activity_list = [];
 			async.series([
 				async function(call){
-					let option = {get_search:true,search_data_type:DataType.USER,search_field:'id',search_parent_field:'user_id'};
+					let option = {get_user:true};
 					const [error,data] = await Portal.search(database,DataType.ACTIVITY,filter,sort_by,page_current,page_size,option);
-					data.item_list.forEach(item => {
-						const item_match = data.item_search_list.find(item_find => item_find.id === item.user_id);
-						if(item_match){
-							item.parent_user = item_match;
-						}else{
-							item.parent_user = User_Logic.get_not_found(item.user_id);
-						}
-					});
 					if(error){
 						error=Log.append(error,biz_error);
 					}else{
-						cloud_data.item_count = data.item_count;
-						cloud_data.page_count = data.page_count;
-						cloud_data.filter = data.filter;
-						cloud_data.data_type = data.data_type;
-						cloud_data.activity_list = data.item_list;
+						data.item_count = data.item_count;
+						data.page_count = data.page_count;
+						data.filter = data.filter;
+						data.data_type = data.data_type;
+						data.activity_list = data.item_list;
 					}
 				},
 			]).then(result => {
-				callback([error,cloud_data]);
+				callback([error,data]);
 			}).catch(error => {
 				Log.error("Activity-Search",error);
-				Log.error("User-Search",error);
 			});
 		});
 	};
-	*/
 }
 class User_Data {
 	static get_device_info = async (activity,device) => {
@@ -1882,12 +1872,12 @@ class Portal {
 						if(error){
 							error=Log.append(error,biz_error);
 						}else{
-							data.data_type=data_type;
-							data.item_count=item_count;
-							data.page_count=page_count;
-							data.filter=filter;
-							data.data_list=item_list;
-							data.app_id = database.app_id;
+							 data.data_type=data_type;
+                             data.item_count=item_count;
+                             data.page_count=page_count;
+                             data.filter=filter;
+                             data.data_list=item_list;
+                             data.app_id = database.app_id;
 							call();
 						}
 					}).catch(error => {
