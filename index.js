@@ -1331,11 +1331,10 @@ class Review_Data {
 		});
 	};
 	//9_review_get
-	static get = async (database,parent_data_type,parent_id,sort_by,page_current,page_size,option) => {
+	static get = async (database,parent_data_type,parent_id,sort_by,page_current,page_size) => {
 		return new Promise((callback) => {
 			let error = null;
 			let data = {};
-			option = option ? option : {get_item:false,get_photo:false};
 			async.series([
 				//review_list
 				async function(call){
@@ -1664,7 +1663,7 @@ class Favorite_Data {
 				},
 				async function(call){
 					if(data.is_unique){
-						const [biz_error,biz_data] = await Portal.post(DataType.FAVORITE,favorite);
+						const [biz_error,biz_data] = await Portal.post(database,DataType.FAVORITE,favorite);
 						if(biz_error){
 							error=Log.append(error,biz_error);
 						}else{
@@ -1681,24 +1680,19 @@ class Favorite_Data {
 		});
 	};
 	//9_favorite_get
-	static get = async (database,parent_data_type,user_id,sort_by,page_current,page_size,option) => {
+	static get = async (database,parent_data_type,filter,sort_by,page_current,page_size) => {
 		return new Promise((callback) => {
 			let error = null;
 			let data = {};
-			option = option ? option : {get_item:false,get_photo:false};
 			async.series([
 				//favorite_list
 				async function(call){
-					let query = {user_id:user_id,parent_data_type:parent_data_type};
-					let search = Item_Logic.get_search(DataType.FAVORITE,query,{date_create:-1},page_current,page_size);
+					let search = Item_Logic.get_search(DataType.FAVORITE,filter,{date_create:-1},page_current,page_size);
 					let option = {get_parent:true,parent_field_data_type:parent_data_type,parent_fields:'id,title,title_url,photo_data',get_user:true,user_fields:'id,title,title_url,photo_data'};
 					const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option);
 					if(error){
 						error=Log.append(error,biz_error);
 					}else{
-						biz_data.item_list.forEach(item => {
-							item.parent_item = data.item_search_list.find(item_find => item_find.id === item.parent_id) ? data.item_search_list.find(item_find => item_find.id === item.parent_id): Item_Logic.get_not_found(item_find.data_type,item_find.id,{app_id:database.app_id});
-						});
 						data.option = option;
 						data.data_type = parent_data_type;
 						data.item_count = biz_data.item_count;
@@ -1913,6 +1907,7 @@ class Portal {
 							if(error){
 								error=Log.append(error,biz_error);
 							}else{
+								if(data.data_list.length> 0 && item_list.length>0){
 								data.data_list.forEach(item => {
 									item.item_count = 0;
 									item_list.forEach(item_count => {
@@ -1921,6 +1916,7 @@ class Portal {
 										}
 									});
 								});
+								}
 							}
 							call();
 						}).catch(error => {
@@ -1944,6 +1940,7 @@ class Portal {
 							if(error){
 								error=Log.append(error,biz_error);
 							}else{
+								if(data.data_list.length> 0 && item_list.length>0){
 								data.data_list.forEach(item => {
 									item.data_search_list = [];
 									item_list.forEach(item_search => {
@@ -1952,6 +1949,7 @@ class Portal {
 										}
 									});
 								});
+								}
 							}
 							call();
 						}).catch(error => {
@@ -1976,9 +1974,11 @@ class Portal {
 								if(error){
 									error=Log.append(error,biz_error);
                                 }else{
+									if(data.data_list.length> 0 && item_list.length>0){
                                   	data.data_list.forEach(item => {
                                     	item.parent_item = item_list.find(item_find => item_find.id === item.parent_id) ? item_list.find(item_find => item_find.id === item.parent_id):Item_Logic.get_not_found(item.parent_data_type,item.parent_id,{app_id:database.app_id});
 									});
+									}
 								}
 								call();
 								}).catch(error => {
@@ -2003,9 +2003,11 @@ class Portal {
 							if(error){
 								error=Log.append(error,biz_error);
 							}else{
+								if(data.data_list.length> 0 && item_list.length>0){
 								data.data_list.forEach(item => {
 									item.user = item_list.find(item_find => item_find.id === item.user_id) ? item_list.find(item_find => item_find.id === item.user_id):User_Logic.get_not_found(item.user_id,{app_id:database.app_id});
 								});
+								}
 							}
 							call();
 						}).catch(error => {
