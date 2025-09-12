@@ -1339,18 +1339,27 @@ class Review_Data {
 			async.series([
 				//review_list
 				async function(call){
+					console.log('aaaaa');
 					let query = {parent_id:parent_id,parent_data_type:parent_data_type};
 					let search = Item_Logic.get_search(DataType.REVIEW,query,{},page_current,page_size);
-					let option = {get_parent:true,parent_field_data_type:DataType.PRODUCT,parent_fields:'id,title,title_url,photo_data'};
+					let option = {get_parent:true,parent_field_data_type:DataType.PRODUCT,parent_fields:'id,title,title_url,photo_data',get_user:true,user_fields:'id,title,title_url,photo_data'};
+					console.log('bbbb');
 					const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option);
+					console.log('cccccc');
+					console.log(biz_data);
 					if(biz_error){
 						error=Log.append(error,biz_error);
 					}else{
-						Log.w('rrr',biz_data);
+							data.data_type=biz_data.data_type;
+							data.item_count=biz_data.item_count;
+							data.page_count=biz_data.page_count;
+							data.filter=biz_data.filter;
+							data.data_list=biz_data.data_list;
+							data.app_id = database.app_id;
 					}
 				},
 			]).then(result => {
-				//callback([error,data]);
+				callback([error,data]);
 			}).catch(error => {
 				Log.error("Review-Data-List",error);
 				callback([error,[]]);
@@ -1864,16 +1873,13 @@ class Portal {
 			  - search_parent_field / type. string / ex. title / default. throw error
  			- get_parent / type. bool / ex. true,false / default. false
 			  - parent_field_data_type / type. string / ex. PRODUCT / ex. throw error
-			- get_parent / type. bool / ex. true,false / default. false
-	  		  - parent_data_type / type. string / ex. PRODUCT / default. throw error
-	  		  - parent_fields / type. string / ex. field1,field2 / default. blank
-
+   			  - parent_fields / type. string / ex. field1,field2 / default. empty
+			- get_user / type. bool / ex. true,false / default. false
+			  - user_fields / type. string / ex. field1,field2 / default. empty
 	     */
 		return new Promise((callback) => {
 			let data = {data_type:data_type,item_count:0,page_count:1,filter:{},data_list:[],app_id:database.app_id};
 			let error=null;
-			let data_list_count =[];
-			let item_search_list =[];
 			option = option ? option : {get_item:false,get_photo:false};
 			async.series([
 				function(call){
@@ -1907,7 +1913,14 @@ class Portal {
 							if(error){
 								error=Log.append(error,biz_error);
 							}else{
-								data_list_count = item_list;
+								data.data_list.forEach(item => {
+									item.item_count = 0;
+									item_list.forEach(item_count => {
+										if(item[option.count_value] == item_count[option.count_field]){
+											item.item_count = item.item_count + 1;
+										}
+									});
+								});
 							}
 							call();
 						}).catch(error => {
@@ -1918,22 +1931,7 @@ class Portal {
 						call();
 					}
 				},
-				function(call){
-					if(option.get_count && data.data_list.length>0){
-						data.data_list.forEach(item => {
-							item.item_count = 0;
-							data_list_count.forEach(item_count => {
-								if(item[option.count_value] == item_count[option.count_field]){
-									item.item_count = item.item_count + 1;
-								}
-							});
-						});
-						call();
-					}else{
-						call();
-					}
-				},
-				function(call){
+			function(call){
 					if(option.get_search && data.data_list.length>0){
 						let query = { $or: [] };
 						data.data_list.forEach(item => {
@@ -1964,30 +1962,52 @@ class Portal {
 						call();
 					}
 				},
-
 				function(call){
 					if(option.get_parent && data.data_list.length>0){
 						let query = { $or: [] };
-						data.data_list.forEach(item => {
-							let query_field = {};
-							query_field['id'] = { $regex:String(item['parent_id']), $options: "i" };
+                        data.data_list.forEach(item => {
+                          	let query_field = {};
+                            query_field['id'] = { $regex:String(item['parent_id']), $options: "i" };
 							query.$or.push(query_field);
 						});
-						let search = Item_Logic.get_search(option.parent_field_data_type,query,{},1,0);
-						let parent_option = option.parent_fields ? {get_field:true,fields:option.parent_fields} : {};
-						Data.get_list(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,parent_option).then(([error,item_list,item_count,page_count])=> {
+							let search = Item_Logic.get_search(option.parent_field_data_type,query,{},1,0);
+                      	    let parent_option = option.parent_fields ? {get_field:true,fields:option.parent_fields} : {};
+                            Data.get_list(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,parent_option).then(([error,item_list,item_count,page_count])=> {
+								if(error){
+									error=Log.append(error,biz_error);
+                                }else{
+                                  	data.data_list.forEach(item => {
+                                    	item.parent_item = item_list.find(item_find => item_find.id === item.parent_id) ? item_list.find(item_find => item_find.id === item.parent_id):Item_Logic.get_not_found(item.parent_data_type,item.parent_id,{app_id:database.app_id});
+									});
+								}
+								call();
+								}).catch(error => {
+							error = Log.append(error,biz_error);
+							call();
+						});
+					}else{
+						call();
+					}
+				},
+				function(call){
+					if(option.get_user && data.data_list.length>0){
+						let query = { $or: [] };
+						data.data_list.forEach(item => {
+							let query_field = {};
+							query_field['id'] = { $regex:String(item['user_id']), $options: "i" };
+							query.$or.push(query_field);
+						});
+						let search = Item_Logic.get_search(DataType.USER,query,{},1,0);
+						let user_option = option.user_fields ? {get_field:true,fields:option.user_fields} : {};
+						Data.get_list(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,user_option).then(([error,item_list,item_count,page_count])=> {
 							if(error){
 								error=Log.append(error,biz_error);
 							}else{
 								data.data_list.forEach(item => {
-									item.parent_item = item_list.find(item_find => item_find.id === item.parent_id) ? item_list.find(item_find => item_find.id === item.parent_id):Item_Logic.get_not_found(item.parent_data_type,item.parent_id,{app_id:database.app_id});
+									item.user = item_list.find(item_find => item_find.id === item.user_id) ? item_list.find(item_find => item_find.id === item.user_id):User_Logic.get_not_found(item.user_id,{app_id:database.app_id});
 								});
 							}
-							console.log(data.data_list);
-							console.log(data.data_list.length);
-							console.log('done');
-
-							//call();
+							call();
 						}).catch(error => {
 							error = Log.append(error,biz_error);
 							call();
@@ -1995,29 +2015,9 @@ class Portal {
 					}else{
 						call();
 					}
-					//Log.w('aaa',data.data_list);
 				},
-				/*
-				function(call){
-					if(option.get_search && data.data_list.length>0){
-						data.data_list.forEach(item => {
-							item.data_search_list = [];
-							item_search_list.forEach(item_search => {
-								if(item[option.search_parent_field] == item_search[option.search_field]){
-									item.data_search_list.push(item_search);
-								}
-							});
-						});
-						call();
-					}else{
-						call();
-					}
-				},
-				*/
-
-
 			]).then(result => {
-				//callback([error,data]);
+				callback([error,data]);
 			}).catch(error => {
 				Log.error("Portal-Search",error);
 				callback([error,[]]);

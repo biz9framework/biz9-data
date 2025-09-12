@@ -547,7 +547,7 @@ describe('post_data', function(){ this.timeout(25000);
                 //Log.w('review',review);
                 //const [biz_error,biz_data] = await Review_Data.post(database,parent_data_type,parent_id,user_id,review);
                 const [biz_error,biz_data] = await Review_Data.get(database,parent_data_type,parent_id,{},1,0,{});
-                //Log.w('portal_review',biz_data);
+                Log.w('portal_review',biz_data);
                 //- REVIEW - END
 
                 //console.log('111111');
