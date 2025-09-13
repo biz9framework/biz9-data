@@ -1038,8 +1038,6 @@ describe('item_delete', function(){ this.timeout(25000);
 });
 */
 
-
-
 describe('get_data', function(){ this.timeout(25000);
     it("__get_data", function(done){
         let cloud_error = null;
@@ -1067,11 +1065,13 @@ describe('get_data', function(){ this.timeout(25000);
                 //const [biz_error,biz_data] = await Portal.get(database,data_type,key);
                 //const [biz_error,biz_data] = await Content_Data.get(database,key,{get_item:true});
                 //const [biz_error,biz_data] = await Blog_Post_Data.get(database,key);
-                //const [biz_error,biz_data] = await Blog_Post_Data.search(database,search.filter,search.sort_by,search.page_current,search.page_size);
+                console.log('aaaaaaa');
+                Log.w('search',search);
+                const [biz_error,biz_data] = await Activity_Data.search(database,search.filter,search.sort_by,search.page_current,search.page_size);
                 //const [biz_error,biz_data] = await Order_Data.get(database,key);
                 //const [biz_error,biz_data] = await Cart_Data.get(database,key);
                 //const [biz_error,biz_data] = await Cart_Data.search(database,DataType.PRODUCT,search.filter,search.sort_by,search.parent_current,search.page_size);
-                const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.parent_current,search.page_size,option);
+                //const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.parent_current,search.page_size,option);
                 Log.w('data',biz_data);
                 console.log('TEST-GET-SUCCESS');
                 console.log('TEST-GET-END');

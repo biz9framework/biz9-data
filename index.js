@@ -1365,26 +1365,50 @@ class Review_Data {
 	};
 }
 class Activity_Data {
+	//9_activity_post
+	static post = (database,activity_type,user_id,post_activity) => {
+		return new Promise((callback) => {
+			let data = {}
+			let error = null;
+			async.series([
+				async function(call){
+					post_activity.type = activity_type;
+					post_activity.user_id = user_id;
+					const [biz_error,biz_data] = await Portal.post(database,DataType.ACTIVITY,post_activity);
+						if(biz_error){
+							biz_error=Log.append(error,biz_error);
+						}else{
+							data.activity = biz_data;
+						}
+				},
+			]).then(result => {
+				callback([error,data.activity]);
+			}).catch(error => {
+				Log.error("Activity-Post",error);
+				callback([error,[]]);
+			});
+		});
+	};
 	static search = (database,filter,sort_by,page_current,page_size,option) => {
 		//9_activity_search
 		return new Promise((callback) => {
-			let data = {item_count:0,page_count:1,filter:{},data_type:DataType.ACTIVITY,activity_list:[]};
+			let data = {data_type:DataType.ACTIVITY,item_count:0,page_count:1,filter:{},activity_list:[],app_id:database.app_id};
 			let error = null;
 			option = option ? option : {};
-			let activity_id_list_query = { $or: [] };
-			let activity_list = [];
 			async.series([
 				async function(call){
-					let option = {get_user:true};
-					const [error,data] = await Portal.search(database,DataType.ACTIVITY,filter,sort_by,page_current,page_size,option);
-					if(error){
+					let option = {get_user:true,user_fields:'title,title_url'};
+					const [biz_error,biz_data] = await Portal.search(database,DataType.ACTIVITY,filter,sort_by,page_current,page_size,option);
+					if(biz_error){
 						error=Log.append(error,biz_error);
 					}else{
-						data.item_count = data.item_count;
-						data.page_count = data.page_count;
-						data.filter = data.filter;
-						data.data_type = data.data_type;
-						data.activity_list = data.item_list;
+						data.data_type = biz_data.data_type;
+						data.item_count = biz_data.item_count;
+						data.page_count = biz_data.page_count;
+						data.filter = biz_data.filter;
+						data.activity_list = biz_data.data_list;
+						data.app_id = biz_data.app_id;
+						Log.w('rrrrr',data);
 					}
 				},
 			]).then(result => {
@@ -1396,17 +1420,18 @@ class Activity_Data {
 	};
 }
 class User_Data {
-	static get_device_info = async (activity,device) => {
+	static get_device = async (device) => {
 		return new Promise((callback) => {
-			activity.platform_name = !Str.check_is_null(device.name) ? device.name : 'N/A';
-			activity.platform_version = !Str.check_is_null(device.version) ? device.version : 'N/A';
-			activity.platform_layout = !Str.check_is_null(device.layout) ? device.layout : 'N/A';
-			activity.platform_os = !Str.check_is_null(device.os) ? device.os : 'N/A';
-			activity.platform_description = !Str.check_is_null(device.description) ? device.description : 'N/A';
-			callback([null,activity]);
+			let dev = {};
+			dev.platform_name = !Str.check_is_null(device.name) ? device.name : 'N/A';
+			dev.platform_version = !Str.check_is_null(device.version) ? device.version : 'N/A';
+			dev.platform_layout = !Str.check_is_null(device.layout) ? device.layout : 'N/A';
+			dev.platform_os = !Str.check_is_null(device.os) ? device.os : 'N/A';
+			dev.platform_description = !Str.check_is_null(device.description) ? device.description : 'N/A';
+			callback(dev);
 		});
 	}
-	static get_ip_info = async (ip_address,geo_key) => {
+	static get_ip = async (ip_address,geo_key) => {
 		return new Promise((callback) => {
 			let error = null;
 			if(!geo_key){
@@ -1422,7 +1447,7 @@ class User_Data {
 				res.on('error', (e) => console.log('GEO_LOCATION ERROR: ' + e));
 				var https = require('https');
 				var key = geo_key;
-				var ip = Str.check_is_null(ip_address) ? ip_address : "0.0.0.0" ;
+				var ip = !Str.check_is_null(ip_address) ? ip_address : "0.0.0.0" ;
 				let url = 'https://api.ip2location.io/?key=' + key + '&ip=' + ip + '&format=json';
 				let response = '';
 				let req = https.get(url, function (res) {
@@ -1457,15 +1482,13 @@ class User_Data {
 		});
 	};
 	//9_user_register
-	static register = async (database,user,ip_address,geo_key,device) => {
+	static register = async (database,user) => {
 		return new Promise((callback) => {
 			let error = null;
 			let data = {
 					email_found:false,
 					title_found:false,
 				    user:user,
-					activity:DataItem.get_new(DataType.ACTIVITY,0),
-					device:DataItem.get_new(DataType.BLANK,0,device)
 			};
 			async.series([
 				//check email
@@ -1503,39 +1526,7 @@ class User_Data {
 							data.user = biz_data;
 						}
 					}
-				},
-				//get activity - ip
-				async function(call){
-					if(!data.email_found && !data.title_found){
-						const [biz_error,biz_data] = await User_Data.get_ip_info(ip_address,geo_key);
-						if(biz_error){
-							error=Log.append(error,biz_error);
-						}
-						data.activity = DataItem.get_new(DataType.ACTIVITY,0,biz_data);
-						data.activity.user_id = data.user.id;
-						data.activity.type = FieldType.ACTIVITY_TYPE_REGISTER;
-					}
-				},
-				//get activity - device
-				async function(call){
-					if(!data.email_found && !data.title_found){
-						const [biz_error,biz_data] = await User_Data.get_device_info(data.activity,data.device);
-						if(biz_error){
-							error=Log.append(error,biz_error);
-						}
-						data.activity = biz_data;
-					}
-				},
-				//post activity
-				async function(call){
-					if(!data.email_found && !data.title_found){
-						const [biz_error,biz_data] = await Portal.post(database,DataType.ACTIVITY,data.activity);
-						if(biz_error){
-							error=Log.append(error,biz_error);
-						}
-						data.activity =biz_data;
-					}
-				},
+				}
 			]).then(result => {
 				callback([error,data]);
 			}).catch(error => {
@@ -1545,15 +1536,16 @@ class User_Data {
 		});
 	};
 	//9_user_login
-	static login = async (database,user,ip_address,geo_key,device) => {
+	static login = async (database,user) => {
 		return new Promise((callback) => {
 			let error = null;
-			let data = {user_found:false,user:user,activity:DataItem.get_new(DataType.ACTIVITY,0),device:DataItem.get_new(DataType.BLANK,0,device)};
+			let data = {user_found:false,user:user};
 			async.series([
 				//check email,password
 				async function(call){
 					let search = Item_Logic.get_search(DataType.USER,{email:data.user.email,password:data.user.password},{},1,0);
-					const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size);
+					let option = {get_field:true,fields:'email,last_login,photo_data,title,title_url,first_name,last_name,role,city,country,gender,state'};
+					const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option);
 					if(error){
 						error=Log.append(error,biz_error);
 					}else{
@@ -1570,56 +1562,10 @@ class User_Data {
 						const [biz_error,biz_data] = await Portal.post(database,DataType.USER,data.user);
 						if(biz_error){
 							error=Log.append(error,biz_error);
-						}else{
-							data.user = biz_data;
 						}
 					}
 				},
-				//get user
-				async function(call){
-					if(data.user_found){
-						const [biz_error,biz_data] = await Portal.get(database,DataType.USER,data.user.id);
-						if(error){
-							error=Log.append(error,biz_error);
-						}else{
-							data.user = biz_data;
-						}
-					}
-				},
-				//get activity - ip
-				async function(call){
-					if(!data.email_found && !data.title_found){
-						const [biz_error,biz_data] = await User_Data.get_ip_info(ip_address,geo_key);
-						if(biz_error){
-							error=Log.append(error,biz_error);
-						}
-						data.activity = DataItem.get_new(DataType.ACTIVITY,0,data);
-						data.activity.user_id = data.user.id;
-						data.activity.type = FieldType.ACTIVITY_TYPE_LOGIN;
-					}
-				},
-				//get activity - device
-				async function(call){
-					if(data.user_found){
-						const [biz_error,biz_data] = await User_Data.get_device_info(data.activity,data.device);
-						if(biz_error){
-							error=Log.append(error,biz_error);
-						}
-						data.activity = biz_data;
-					}
-				},
-				//post activity
-				async function(call){
-					if(data.user_found){
-						const [biz_error,biz_data] = await Portal.post(database,DataType.ACTIVITY,data.activity);
-						if(biz_error){
-							error=Log.append(error,biz_error);
-						}else{
-							data.activity = biz_data;
-						}
-					}
-				},
-			]).then(result => {
+		]).then(result => {
 				callback([error,data]);
 			}).catch(error => {
 				Log.error("User-Data-Login",error);
@@ -2617,6 +2563,8 @@ class Data {
 	static count_list = async (db_connect,data_type,filter) => {
 		return [error,data] = await get_count_item_list_adapter(db_connect,data_type,filter);
 	};
+}
+class Blank_Data {
 	//9_blank
 	static blank = (database) => {
 		return new Promise((callback) => {
