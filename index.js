@@ -1408,7 +1408,6 @@ class Activity_Data {
 						data.filter = biz_data.filter;
 						data.activity_list = biz_data.data_list;
 						data.app_id = biz_data.app_id;
-						Log.w('rrrrr',data);
 					}
 				},
 			]).then(result => {
@@ -1544,8 +1543,7 @@ class User_Data {
 				//check email,password
 				async function(call){
 					let search = Item_Logic.get_search(DataType.USER,{email:data.user.email,password:data.user.password},{},1,0);
-					let option = {get_field:true,fields:'email,last_login,photo_data,title,title_url,first_name,last_name,role,city,country,gender,state'};
-					const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option);
+					const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size);
 					if(error){
 						error=Log.append(error,biz_error);
 					}else{
@@ -1661,7 +1659,7 @@ class Portal {
 			let data = DataItem.get_new(data_type,0,{key:key});
 			let full_data_list = [];
 			let new_data_list = [];
-			option = option ? option : {get_item:false,get_photo:false,title_url:null,get_group:false,filter:false};
+			option = option ? option : {get_item:false,get_photo:false};
 			async.series([
 				function(call){
 					if(!Num.check_is_guid(key)){
@@ -1691,6 +1689,7 @@ class Portal {
 				},
 				function(call){
 					function get_sort(data){
+						console.log('111111111111');
 						let sort_order = {};
 						switch(data.setting_sort_type)
 						{
@@ -1710,29 +1709,36 @@ class Portal {
 						return sort_order;
 					}
 					let filter = {};
+					console.log('22222222');
 					if(!Str.check_is_null(data.id) && option.get_item || option.get_section){
+						console.log('33333');
 						if(Str.check_is_null(data.top_id)){
 							filter={top_id:data.id};
 						}else{
 							filter={top_id:data.top_id};
 						}
+						console.log('4444444444');
 						let search = Item_Logic.get_search(DataType.ITEM,filter,get_sort(data),1,0);
-						Data.get_list(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size).then(([error,item_list,item_count,page_count])=> {
-							if(error){
+						console.log('55555555');
+						Data.get_list(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size).then(([biz_error,item_list,item_count,page_count])=> {
+							console.log('6666666');
+							if(biz_error){
 								error=Log.append(error,biz_error);
 							}else{
 								full_data_list = item_list;
 							}
 							call();
-						}).catch(error => {
-							error = Log.append(error,biz_error);
+						}).catch(err => {
+							error = Log.append(error,err);
 							call();
 						});
 					}else{
 						call();
 					}
 				},
+				/*
 				function(call){
+					console.log('7777777');
 					if(!Str.check_is_null(data.id) && option.get_item || option.get_section){
 						data.items = [];
 						full_data_list.forEach(item => {
@@ -1769,8 +1775,9 @@ class Portal {
 						}
 					}
 				},
+				*/
 			]).then(result => {
-				callback([error,data]);
+				//callback([error,data]);
 			}).catch(error => {
 				Log.error("Portal-Get",error);
 				callback([error,[]]);
@@ -2113,18 +2120,17 @@ class Portal {
 		});
 	};
 	//9_portal_post_list - 9_post_list
-	static post_list = async (database,data_list,option) => {
+	static post_list = async (database,post_list) => {
 		/* option params
 		 * n/a
 		 */
 		return new Promise((callback) => {
 			let error = null;
 			let data_list = [];
-			option = option ? option : {get_item:false,get_photo:false};
 			async.series([
 				function(call){
-					Data.post_list(database,data_list).then(([biz_error,biz_data])=> {
-						if(error){
+					Data.post_list(database,post_list).then(([biz_error,biz_data])=> {
+						if(biz_error){
 							error=Log.append(error,biz_error);
 						}else{
 							data_list = biz_data;

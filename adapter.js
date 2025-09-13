@@ -52,13 +52,13 @@ const post_item_list_adapter=(db_connect,item_data_list)=>{
             },
             function(call){
                 async.forEachOf(item_data_list,(item,key,go)=>{
-                    item[key].forEach(row => {
+                    for(property in item[key]){
                         if(row!='id'&&row!='data_type'){
                             if(!item[key][row]){
                                 delete item[key][row];
                             }
                         }
-                    });
+                    }
                     go();
                 }, error => {
                     if(error){
