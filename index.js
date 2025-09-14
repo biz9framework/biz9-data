@@ -1647,12 +1647,15 @@ class Portal {
 	//9_portal_get
 	static get = async (database,data_type,key,option) => {
 		/* Options
+		 * Fields
+		   - get_field / type. bool / ex. true,false / default. false
+		   - fields / type. string / ex. field1,field2 / default. throw error
 		 * Items
-		 *  - get_item / bool / ex. true,false / def. true
+		   - get_item / bool / ex. true,false / def. true
 		 * Photos
-		 *  - get_photo / bool / ex. true,false / def. true
-		 *    - photo_count / int / ex. 1-999 / def. 19
-		 *    - photo_sort_by / query obj / ex. {date_create:1}
+		   - get_photo / bool / ex. true,false / def. true
+		   - photo_count / int / ex. 1-999 / def. 19
+		   - photo_sort_by / query obj / ex. {date_create:1}
 		 */
 		return new Promise((callback) => {
 			let error = null;
@@ -1676,9 +1679,7 @@ class Portal {
 								data = biz_data;
 							}else{
 								data = data_type != DataType.USER ? Item_Logic.get_not_found(data_type,key,{app_id:database.app_id}) : User_Logic.get_not_found(key,{app_id:database.app_id});
-								data.photos = [];
-								data.items = [];
-							}
+						}
 						}
 						call();
 					}).catch(err => {
@@ -1689,7 +1690,6 @@ class Portal {
 				},
 				function(call){
 					function get_sort(data){
-						console.log('111111111111');
 						let sort_order = {};
 						switch(data.setting_sort_type)
 						{
@@ -1709,23 +1709,27 @@ class Portal {
 						return sort_order;
 					}
 					let filter = {};
-					console.log('22222222');
 					if(!Str.check_is_null(data.id) && option.get_item || option.get_section){
-						console.log('33333');
+						data.photos = [];
+						data.items = [];
 						if(Str.check_is_null(data.top_id)){
 							filter={top_id:data.id};
 						}else{
 							filter={top_id:data.top_id};
 						}
-						console.log('4444444444');
 						let search = Item_Logic.get_search(DataType.ITEM,filter,get_sort(data),1,0);
-						console.log('55555555');
 						Data.get_list(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size).then(([biz_error,item_list,item_count,page_count])=> {
-							console.log('6666666');
 							if(biz_error){
 								error=Log.append(error,biz_error);
 							}else{
-								full_data_list = item_list;
+								item_list.forEach(item => {
+								if(item.parent_id == data.id){
+									let item_title_url = Str.get_title_url(item.title);
+									data[item_title_url] = new Object();
+									data[item_title_url] = item;
+									data.items.push(item);
+								}
+						});
 							}
 							call();
 						}).catch(err => {
@@ -1733,26 +1737,6 @@ class Portal {
 							call();
 						});
 					}else{
-						call();
-					}
-				},
-				/*
-				function(call){
-					console.log('7777777');
-					if(!Str.check_is_null(data.id) && option.get_item || option.get_section){
-						data.items = [];
-						full_data_list.forEach(item => {
-							if(item.parent_id == data.id){
-								let data_title_url = Str.get_title_url(item.title);
-								data[item_title_url] = new Object();
-								data[item_title_url] = item;
-								data.items.push(item);
-							}
-
-						});
-						call();
-					}
-					else{
 						call();
 					}
 				},
@@ -1775,9 +1759,8 @@ class Portal {
 						}
 					}
 				},
-				*/
 			]).then(result => {
-				//callback([error,data]);
+				callback([error,data]);
 			}).catch(error => {
 				Log.error("Portal-Get",error);
 				callback([error,[]]);
