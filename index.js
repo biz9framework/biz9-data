@@ -41,10 +41,9 @@ class Database {
 				biz_data.data_config=data_config;
 				biz_data.app_id=data_config.APP_ID;
 				callback([error,biz_data]);
-			}).catch(error => {
-				error=Log.append(error,biz_error);
-				Log.error("BiZItem-Get-Connect",error);
-				callback([error,null]);
+			}).catch(err => {
+				Log.error("BiZItem-Get-Connect",err);
+				callback([err,null]);
 			});
 		});
 	}
@@ -63,10 +62,9 @@ class Database {
 			Data.delete_db(database).then(([biz_error,data])=>{
 				error=Log.append(error,biz_error);
 				callback([error,data]);
-			}).catch(error => {
-				error=Log.append(error,biz_error);
-				Log.error("DB-Close",biz_error);
-				callback([error,null]);
+			}).catch(err => {
+				Log.error("DB-Close",err);
+				callback([err,null]);
 			});
 		});
 	}
@@ -81,7 +79,7 @@ class Blog_Post_Data {
 			async.series([
 				async function(call){
 					const [biz_error,biz_data] = await Portal.get(database,DataType.BLOG_POST,key,option);
-					if(error){
+					if(biz_error){
 						error=Log.append(error,biz_error);
 					}
 					else{
@@ -90,9 +88,9 @@ class Blog_Post_Data {
 				},
 			]).then(result => {
 				callback([error,blog_post]);
-			}).catch(error => {
-				Log.error("Blog_Post-Get",error);
-				callback([error,{}]);
+			}).catch(err => {
+				Log.error("Blog_Post-Get",err);
+				callback([err,null]);
 			});
 		});
 	};
@@ -105,7 +103,7 @@ class Blog_Post_Data {
 			async.series([
 				async function(call){
 					const [biz_error,biz_data] = await Portal.search(database,DataType.BLOG_POST,filter,sort_by,page_current,page_size,option);
-					if(error){
+					if(biz_error){
 						error=Log.append(error,biz_error);
 					}else{
 						data.item_count = biz_data.item_count;
@@ -118,9 +116,9 @@ class Blog_Post_Data {
 				},
 			]).then(result => {
 				callback([error,data]);
-			}).catch(error => {
-				Log.error("Blog_Post-Search",error);
-				callback([error,[]]);
+			}).catch(err => {
+				Log.error("Blog_Post-Search",err);
+				callback([err,null]);
 			});
 		});
 	};
@@ -134,7 +132,7 @@ class Category_Data { //9_category_get
 			async.series([
 				async function(call){
 					const [biz_error,biz_data] = await Portal.get(database,DataType.CATEGORY,key,option);
-					if(error){
+					if(biz_error){
 						error=Log.append(error,biz_error);
 					}else{
 						category = biz_data;
@@ -142,9 +140,9 @@ class Category_Data { //9_category_get
 				},
 			]).then(result => {
 				callback([error,category]);
-			}).catch(error => {
-				Log.error("Category-Get",error);
-				callback([error,[]]);
+			}).catch(err => {
+				Log.error("Category-Get",err);
+				callback([err,null]);
 			});
 		});
 	};
@@ -157,7 +155,7 @@ class Category_Data { //9_category_get
 			async.series([
 				async function(call){
 					const [biz_error,biz_data] = await Portal.search(database,DataType.CATEGORY,filter,sort_by,page_current,page_size,option);
-					if(error){
+					if(biz_error){
 						error=Log.append(error,biz_error);
 					}else{
 						data.item_count = biz_data.item_count;
@@ -165,13 +163,14 @@ class Category_Data { //9_category_get
 						data.page_count = biz_data.page_count;
 						data.filter = biz_data.filter;
 						data.category_list = biz_data.data_list;
+						data.app_id = database.app_id;
 					}
 				},
 			]).then(result => {
 				callback([error,data]);
-			}).catch(error => {
-				Log.error("Category-Search",error);
-				callback([error,[]]);
+			}).catch(err => {
+				Log.error("Category-Search",err);
+				callback([err,null]);
 			});
 		});
 	};
@@ -186,7 +185,7 @@ class Content_Data {
 			async.series([
 				async function(call){
 					const [biz_error,biz_data] = await Portal.get(database,DataType.CONTENT,key,option);
-					if(error){
+					if(biz_error){
 						error=Log.append(error,biz_error);
 					}else{
 						content = biz_data;
@@ -194,9 +193,9 @@ class Content_Data {
 				},
 			]).then(result => {
 				callback([error,content]);
-			}).catch(error => {
-				Log.error("Content-Get",error);
-				callback([error,[]]);
+			}).catch(err => {
+				Log.error("Content-Get",err);
+				callback([err,null]);
 			});
 		});
 	};
@@ -209,7 +208,7 @@ class Content_Data {
 			async.series([
 				async function(call){
 					const [biz_error,biz_data] = await Portal.search(database,DataType.CONTENT,filter,sort_by,page_current,page_size,option);
-					if(error){
+					if(biz_error){
 						error=Log.append(error,biz_error);
 					}else{
 						data.item_count = biz_data.item_count;
@@ -217,13 +216,14 @@ class Content_Data {
 						data.page_count = biz_data.page_count;
 						data.filter = biz_data.filter;
 						data.content_list = biz_data.data_list;
+						data.app_id = database.app_id;
 					}
 				},
 			]).then(result => {
 				callback([error,data]);
-			}).catch(error => {
-				Log.error("Content-Search",error);
-				callback([error,[]]);
+			}).catch(err => {
+				Log.error("Content-Search",err);
+				callback([err,null]);
 			});
 		});
 	};
@@ -237,18 +237,18 @@ class Page_Data {
 			option = option ? option : {get_item:false,get_photo:false};
 			async.series([
 				async function(call){
-					const [error,data] = await Portal.get(database,DataType.PAGE,key,option);
-					if(error){
+					const [biz_error,biz_data] = await Portal.get(database,DataType.PAGE,key,option);
+					if(biz_error){
 						error=Log.append(error,biz_error);
 					}else{
-						page = data;
+						page = biz_data;
 					}
 				},
 			]).then(result => {
 				callback([error,page]);
-			}).catch(error => {
-				Log.error("Page-Get",error);
-				callback([error,[]]);
+			}).catch(err => {
+				Log.error("Page-Get",err);
+				callback([err,null]);
 			});
 		});
 	};
@@ -260,22 +260,23 @@ class Page_Data {
 			option = option ? option : {get_item:false,get_photo:false};
 			async.series([
 				async function(call){
-					const [error,data] = await Portal.search(database,DataType.PAGE,filter,sort_by,page_current,page_size,option);
-					if(error){
+					const [biz_error,biz_data] = await Portal.search(database,DataType.PAGE,filter,sort_by,page_current,page_size,option);
+					if(biz_error){
 						error=Log.append(error,biz_error);
 					}else{
-						data.item_count = data.item_count;
+						data.item_count = biz_data.item_count;
 						data.data_type =DataType.PAGE;
-						data.page_count = data.page_count;
-						data.filter = data.filter;
-						data.page_list = data.data_list;
+						data.page_count = biz_data.page_count;
+						data.filter = biz_data.filter;
+						data.page_list = biz_data.data_list;
+						data.app_id = database.app_id;
 					}
 				},
 			]).then(result => {
 				callback([error,data]);
-			}).catch(error => {
-				Log.error("Page-Search",error);
-				callback([error,[]]);
+			}).catch(err => {
+				Log.error("Page-Search",err);
+				callback([err,null]);
 			});
 		});
 	};
@@ -289,18 +290,18 @@ class Template_Data {
 			option = option ? option : {get_item:false,get_photo:false};
 			async.series([
 				async function(call){
-					const [error,data] = await Portal.get(database,DataType.TEMPLATE,key,option);
-					if(error){
+					const [biz_error,biz_data] = await Portal.get(database,DataType.TEMPLATE,key,option);
+					if(biz_error){
 						error=Log.append(error,biz_error);
 					}else{
-						template = data;
+						template = biz_data;
 					}
 				},
 			]).then(result => {
 				callback([error,template]);
-			}).catch(error => {
-				Log.error("Template-Get",error);
-				callback([error,[]]);
+			}).catch(err => {
+				Log.error("Template-Get",err);
+				callback([err,null]);
 			});
 		});
 	};
@@ -312,22 +313,23 @@ class Template_Data {
 			option = option ? option : {get_item:false,get_photo:false};
 			async.series([
 				async function(call){
-					const [error,data] = await Portal.search(database,DataType.TEMPLATE,filter,sort_by,page_current,page_size,option);
-					if(error){
+					const [biz_error,biz_data] = await Portal.search(database,DataType.TEMPLATE,filter,sort_by,page_current,page_size,option);
+					if(biz_error){
 						error=Log.append(error,biz_error);
 					}else{
-						data.item_count = data.item_count;
+						data.item_count = biz_data.item_count;
 						data.data_type = DataType.TEMPLATE;
-						data.page_count = data.page_count;
-						data.filter = data.filter;
-						data.template_list = data.data_list;
+						data.page_count = biz_data.page_count;
+						data.filter = biz_data.filter;
+						data.template_list = biz_data.data_list;
+						data.app_id = database.app_id;
 					}
 				},
 			]).then(result => {
 				callback([error,data]);
-			}).catch(error => {
-				Log.error("Template-Search",error);
-				callback([error,[]]);
+			}).catch(err => {
+				Log.error("Template-Search",err);
+				callback([err,null]);
 			});
 		});
 	};
@@ -341,18 +343,16 @@ class Event_Data {
 			option = option ? option : {get_item:false,get_photo:false};
 			async.series([
 				async function(call){
-					const [error,data] = await Portal.get(database,DataType.EVENT,key,option);
-					if(error){
+					const [biz_error,biz_data] = await Portal.get(database,DataType.EVENT,key,option);
+					if(biz_error){
 						error=Log.append(error,biz_error);
 					}else{
 						event = data;
 					}
-				},
-			]).then(result => {
-				callback([error,event]);
-			}).catch(error => {
-				Log.error("Event-Get",error);
-				callback([error,[]]);
+				}, ]).then(result => { callback([error,event]);
+			}).catch(err => {
+				Log.error("Event-Get",err);
+				callback([err,null]);
 			});
 		});
 	};
@@ -364,23 +364,24 @@ class Event_Data {
 			option = option ? option : {get_item:false,get_photo:false};
 			async.series([
 				async function(call){
-					const [error,data] = await Portal.search(database,DataType.EVENT,filter,sort_by,page_current,page_size,option);
-					if(error){
+					const [biz_error,biz_data] = await Portal.search(database,DataType.EVENT,filter,sort_by,page_current,page_size,option);
+					if(biz_error){
 						error=Log.append(error,biz_error);
 					}else{
-						data.item_count = data.item_count;
+						data.item_count = biz_data.item_count;
 						data.data_type = DataType.EVENT;
-						data.page_count = data.page_count;
-						data.filter = data.filter;
-						data.data_type = data.data_type;
-						data.event_list = data.data_list;
+						data.page_count = biz_data.page_count;
+						data.filter = biz_data.filter;
+						data.data_type = biz_data.data_type;
+						data.event_list = biz_data.data_list;
+						data.app_id = database.app_id;
 					}
 				},
 			]).then(result => {
 				callback([error,data]);
-			}).catch(error => {
-				Log.error("Event-Search",error);
-				callback([error,[]]);
+			}).catch(err => {
+				Log.error("Event-Search",err);
+				callback([err,[]]);
 			});
 		});
 	};
@@ -422,7 +423,7 @@ class Order_Data {
 				async function(call){
 					if(order.order_item_list.length>0){
 						order.order_item_list.forEach(item => {
-							item.temp_row_id = Num.get_id();
+							item.temp_row_id = Str.get_id();
 							data.order_item_list.push(
 								DataItem.get_new(DataType.ORDER_ITEM,0,
 									{
@@ -852,7 +853,7 @@ class Cart_Data {
 				async function(call){
 					if(cart.cart_item_list.length>0){
 						cart.cart_item_list.forEach(item => {
-							item.temp_row_id = Num.get_id();
+							item.temp_row_id = Str.get_id();
 							cloud_data.cart_item_list.push(
 								DataItem.get_new(DataType.CART_ITEM,0,
 									{
@@ -1237,7 +1238,7 @@ class Product_Data {
 			async.series([
 				async function(call){
 					const [biz_error,biz_data] = await Portal.get(database,DataType.PRODUCT,key,option);
-					if(error){
+					if(biz_error){
 						error=Log.append(error,biz_error);
 					}else{
 						product = biz_data;
@@ -1245,9 +1246,9 @@ class Product_Data {
 				},
 			]).then(result => {
 				callback([error,product]);
-			}).catch(error => {
-				Log.error("Product-Get",error);
-				callback([error,[]]);
+			}).catch(err => {
+				Log.error("Product-Get",err);
+				callback([err,null]);
 			});
 		});
 	};
@@ -1260,7 +1261,7 @@ class Product_Data {
 			async.series([
 				async function(call){
 					const [biz_error,biz_data] = await Portal.search(database,DataType.PRODUCT,filter,sort_by,page_current,page_size,option);
-					if(error){
+					if(biz_error){
 						error=Log.append(error,biz_error);
 					}else{
 						data.item_count = biz_data.item_count;
@@ -1268,13 +1269,14 @@ class Product_Data {
 						data.page_count = biz_data.page_count;
 						data.filter = biz_data.filter;
 						data.product_list = biz_data.data_list;
-	}
+						data.app_id = database.app_id;
+					}
 				},
 			]).then(result => {
 				callback([error,data]);
-			}).catch(error => {
-				Log.error("Product-Search",error);
-				callback([error,[]]);
+			}).catch(err => {
+				Log.error("Product-Search",err);
+				callback([err,[]]);
 			});
 		});
 	};
@@ -1325,9 +1327,9 @@ class Review_Data {
 				},
 			]).then(result => {
 				callback([error,data]);
-			}).catch(error => {
-				Log.error("Review-Data-Portal",error);
-				callback([error,[]]);
+			}).catch(err => {
+				Log.error("Review-Data-Portal",err);
+				callback([err,[]]);
 			});
 		});
 	};
@@ -1357,9 +1359,9 @@ class Review_Data {
 				},
 			]).then(result => {
 				callback([error,data]);
-			}).catch(error => {
-				Log.error("Review-Data-List",error);
-				callback([error,[]]);
+			}).catch(err => {
+				Log.error("Review-Data-List",err);
+				callback([err,[]]);
 			});
 		});
 	};
@@ -1376,7 +1378,7 @@ class Activity_Data {
 					post_activity.user_id = user_id;
 					const [biz_error,biz_data] = await Portal.post(database,DataType.ACTIVITY,post_activity);
 						if(biz_error){
-							biz_error=Log.append(error,biz_error);
+							error=Log.append(error,biz_error);
 						}else{
 							data.activity = biz_data;
 						}
@@ -1384,8 +1386,8 @@ class Activity_Data {
 			]).then(result => {
 				callback([error,data.activity]);
 			}).catch(error => {
-				Log.error("Activity-Post",error);
-				callback([error,[]]);
+				Log.error("Activity-Post",err);
+				callback([err,{}]);
 			});
 		});
 	};
@@ -1412,8 +1414,9 @@ class Activity_Data {
 				},
 			]).then(result => {
 				callback([error,data]);
-			}).catch(error => {
-				Log.error("Activity-Search",error);
+			}).catch(err => {
+				Log.error("Activity-Search",err);
+				callback([err,{}]);
 			});
 		});
 	};
@@ -1471,8 +1474,7 @@ class User_Data {
 							callback([error,ip_info]);
 						}
 						catch (e) {
-							error = e;
-							callback([error,ip_info]);
+							callback([e,ip_info]);
 						}
 					});
 				});
@@ -1528,9 +1530,9 @@ class User_Data {
 				}
 			]).then(result => {
 				callback([error,data]);
-			}).catch(error => {
-				Log.error("User-Data-Register",error);
-				callback([error,[]]);
+			}).catch(err => {
+				Log.error("User-Data-Register",err);
+				callback([error,{}]);
 			});
 		});
 	};
@@ -1544,7 +1546,7 @@ class User_Data {
 				async function(call){
 					let search = Item_Logic.get_search(DataType.USER,{email:data.user.email,password:data.user.password},{},1,0);
 					const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size);
-					if(error){
+					if(biz_error){
 						error=Log.append(error,biz_error);
 					}else{
 						if(biz_data.data_list.length>0){
@@ -1565,9 +1567,9 @@ class User_Data {
 				},
 		]).then(result => {
 				callback([error,data]);
-			}).catch(error => {
-				Log.error("User-Data-Login",error);
-				callback([error,[]]);
+			}).catch(err => {
+				Log.error("User-Data-Login",err);
+				callback([err,{}]);
 			});
 		});
 	};
@@ -1605,9 +1607,9 @@ class Favorite_Data {
 				},
 			]).then(result => {
 				callback([error,data]);
-			}).catch(error => {
-				Log.error("Favorite-Data-Update",error);
-				callback([error,[]]);
+			}).catch(err => {
+				Log.error("Favorite-Data-Update",err);
+				callback([err,{}]);
 			});
 		});
 	};
@@ -1622,7 +1624,7 @@ class Favorite_Data {
 					let search = Item_Logic.get_search(DataType.FAVORITE,filter,{date_create:-1},page_current,page_size);
 					let option = {get_parent:true,parent_field_data_type:parent_data_type,parent_fields:'id,title,title_url,photo_data',get_user:true,user_fields:'id,title,title_url,photo_data'};
 					const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option);
-					if(error){
+					if(biz_error){
 						error=Log.append(error,biz_error);
 					}else{
 						data.option = option;
@@ -1636,9 +1638,9 @@ class Favorite_Data {
 				},
 			]).then(result => {
 				callback([error,data]);
-			}).catch(error => {
-				Log.error("Favorite-Data-Get",error);
-				callback([error,[]]);
+			}).catch(err => {
+				Log.error("Favorite-Data-Get",err);
+				callback([err,[]]);
 			});
 		});
 	};
@@ -1665,14 +1667,14 @@ class Portal {
 			option = option ? option : {get_item:false,get_photo:false};
 			async.series([
 				function(call){
-					if(!Num.check_is_guid(key)){
+					if(!Str.check_is_guid(key)){
 						option.title_url = key;
 					}
 					call();
 				},
 				function(call){
 					Data.get(database,data_type,key,option).then(([biz_error,biz_data,option])=> {
-						if(error){
+						if(biz_error){
 							error=Log.append(error,biz_error);
 						}else{
 							if(!Str.check_is_null(biz_data.id)){
@@ -1761,9 +1763,9 @@ class Portal {
 				},
 			]).then(result => {
 				callback([error,data]);
-			}).catch(error => {
-				Log.error("Portal-Get",error);
-				callback([error,[]]);
+			}).catch(err => {
+				Log.error("Portal-Get",err);
+				callback([error,{}]);
 			});
 		});
 	};
@@ -1802,8 +1804,8 @@ class Portal {
 			async.series([
 				function(call){
 					let search = Item_Logic.get_search(data_type,!Obj.check_is_empty(filter)?filter:{},!Obj.check_is_empty(sort_by)?sort_by:{},!Str.check_is_null(page_current)?page_current:0,!Str.check_is_null(page_size)?page_size:0);
-					Data.get_list(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option).then(([error,item_list,item_count,page_count])=>{
-						if(error){
+					Data.get_list(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option).then(([biz_error,item_list,item_count,page_count])=>{
+						if(biz_error){
 							error=Log.append(error,biz_error);
 						}else{
 							 data.data_type=data_type;
@@ -1827,8 +1829,8 @@ class Portal {
 							query.$or.push(query_field);
 						});
 						let search = Item_Logic.get_search(option.count_data_type,query,{},1,0);
-						Data.get_list(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size).then(([error,item_list,item_count,page_count])=> {
-							if(error){
+						Data.get_list(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size).then(([biz_error,item_list,item_count,page_count])=> {
+							if(biz_error){
 								error=Log.append(error,biz_error);
 							}else{
 								if(data.data_list.length> 0 && item_list.length>0){
@@ -1843,8 +1845,8 @@ class Portal {
 								}
 							}
 							call();
-						}).catch(error => {
-							error = Log.append(error,biz_error);
+						}).catch(err => {
+							error = Log.append(err,biz_error);
 							call();
 						});
 					}else{
@@ -1860,8 +1862,8 @@ class Portal {
 							query.$or.push(query_field);
 						});
 						let search = Item_Logic.get_search(option.search_data_type,query,{},1,0);
-						Data.get_list(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size).then(([error,item_list,item_count,page_count])=> {
-							if(error){
+						Data.get_list(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size).then(([biz_error,item_list,item_count,page_count])=> {
+							if(biz_error){
 								error=Log.append(error,biz_error);
 							}else{
 								if(data.data_list.length> 0 && item_list.length>0){
@@ -1876,8 +1878,8 @@ class Portal {
 								}
 							}
 							call();
-						}).catch(error => {
-							error = Log.append(error,biz_error);
+						}).catch(err => {
+							error = Log.append(error,err);
 							call();
 						});
 					}else{
@@ -1894,8 +1896,8 @@ class Portal {
 						});
 							let search = Item_Logic.get_search(option.parent_field_data_type,query,{},1,0);
                       	    let parent_option = option.parent_fields ? {get_field:true,fields:option.parent_fields} : {};
-                            Data.get_list(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,parent_option).then(([error,item_list,item_count,page_count])=> {
-								if(error){
+                            Data.get_list(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,parent_option).then(([biz_error,item_list,item_count,page_count])=> {
+								if(biz_error){
 									error=Log.append(error,biz_error);
                                 }else{
 									if(data.data_list.length> 0 && item_list.length>0){
@@ -1905,8 +1907,8 @@ class Portal {
 									}
 								}
 								call();
-								}).catch(error => {
-							error = Log.append(error,biz_error);
+								}).catch(err => {
+							error = Log.append(error,err);
 							call();
 						});
 					}else{
@@ -1923,8 +1925,8 @@ class Portal {
 						});
 						let search = Item_Logic.get_search(DataType.USER,query,{},1,0);
 						let user_option = option.user_fields ? {get_field:true,fields:option.user_fields} : {};
-						Data.get_list(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,user_option).then(([error,item_list,item_count,page_count])=> {
-							if(error){
+						Data.get_list(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,user_option).then(([biz_error,item_list,item_count,page_count])=> {
+							if(biz_error){
 								error=Log.append(error,biz_error);
 							}else{
 								if(data.data_list.length> 0 && item_list.length>0){
@@ -1934,8 +1936,8 @@ class Portal {
 								}
 							}
 							call();
-						}).catch(error => {
-							error = Log.append(error,biz_error);
+						}).catch(err => {
+							error = Log.append(error,err);
 							call();
 						});
 					}else{
@@ -1944,9 +1946,9 @@ class Portal {
 				},
 			]).then(result => {
 				callback([error,data]);
-			}).catch(error => {
-				Log.error("Portal-Search",error);
-				callback([error,[]]);
+			}).catch(err => {
+				Log.error("Portal-Search",err);
+				callback([err,[]]);
 			});
 		});
 	};
@@ -1962,22 +1964,22 @@ class Portal {
 			async.series([
 				function(call){
 					Data.post(database,data_type,item,option).then(([biz_error,biz_data])=> {
-						if(error){
+						if(biz_error){
 							error=Log.append(error,biz_error);
 						}else{
 							data = biz_data;
 						}
 						call();
-					}).catch(error => {
-						error = Log.append(error,biz_error);
+					}).catch(err => {
+						error = Log.append(error,err);
 						call();
 					});
 				},
 			]).then(result => {
 				callback([error,data]);
-			}).catch(error => {
-				Log.error("Post-Data",error);
-				callback([error,[]]);
+			}).catch(err => {
+				Log.error("Post-Data",err);
+				callback([err,{}]);
 			});
 		});
 	};
@@ -2002,22 +2004,22 @@ class Portal {
 			async.series([
 				function(call){
 					Data.delete_cache(database,data_type,id).then(([biz_error,biz_data])=> {
-						if(error){
+						if(biz_error){
 							error=Log.append(error,biz_error);
 						}else{
 							data = biz_data;
 						}
 						call();
-					}).catch(error => {
-						error = Log.append(error,biz_error);
+					}).catch(err => {
+						error = Log.append(error,err);
 						call();
 					});
 				},
 			]).then(result => {
 				callback([error,data]);
-			}).catch(error => {
-				Log.error("Delete-Cache-Item",error);
-				callback([error,[]]);
+			}).catch(err => {
+				Log.error("Delete-Cache-Item",err);
+				callback([error,{}]);
 			});
 		});
 	};
@@ -2043,14 +2045,14 @@ class Portal {
 			async.series([
 				function(call){
 					Data.delete(database,data_type,id).then(([biz_error,biz_data])=> {
-						if(error){
+						if(biz_error){
 							error=Log.append(error,biz_error);
 						}else{
 							data.data = biz_data;
 						}
 						call();
-					}).catch(error => {
-						error = Log.append(error,biz_error);
+					}).catch(err => {
+						error = Log.append(error,err);
 						call();
 					});
 				},
@@ -2060,14 +2062,14 @@ class Portal {
 						let filter = {parent_id:id};
 						data.delete_data_list = false;
 						Data.delete_list(database,data_type,filter).then(([biz_error,biz_data])=> {
-							if(error){
+							if(biz_error){
 								error=Log.append(error,biz_error);
 							}else{
 								data.delete_data_list = true;
 							}
 							call();
-						}).catch(error => {
-							error = Log.append(error,biz_error);
+						}).catch(err => {
+							error = Log.append(error,err);
 							call();
 						});
 					}else{
@@ -2080,14 +2082,14 @@ class Portal {
 						let filter = {parent_id:id};
 						cloud_data.delete_photos = false;
 						Data.delete_list(database,data_type,filter).then(([biz_error,biz_data])=> {
-							if(error){
+							if(biz_error){
 								error=Log.append(error,biz_error);
 							}else{
 								data.delete_photos = true;
 							}
 							call();
-						}).catch(error => {
-							error = Log.append(error,biz_error);
+						}).catch(err => {
+							error = Log.append(error,err);
 							call();
 						});
 					}else{
@@ -2096,9 +2098,9 @@ class Portal {
 				},
 			]).then(result => {
 				callback([error,data]);
-			}).catch(error => {
-				Log.error("Delete-Item",error);
-				callback([error,[]]);
+			}).catch(err => {
+				Log.error("Delete-Item",err);
+				callback([err,{}]);
 			});
 		});
 	};
@@ -2119,16 +2121,16 @@ class Portal {
 							data_list = biz_data;
 						}
 						call();
-					}).catch(error => {
-						error = Log.append(error,biz_error);
+					}).catch(err => {
+						error = Log.append(error,err);
 						call();
 					});
 				},
 			]).then(result => {
 				callback([error,data_list]);
-			}).catch(error => {
-				Log.error("Post-List-Data",error);
-				callback([error,[]]);
+			}).catch(err => {
+				Log.error("Post-List-Data",err);
+				callback([err,{}]);
 			});
 		});
 	};
@@ -2144,23 +2146,23 @@ class Portal {
 			async.series([
 				function(call){
 					Data.delete_list(database,data_type,filter).then(([biz_error,biz_data])=> {
-						if(error){
+						if(biz_error){
 							error=Log.append(error,biz_error);
 						}else{
 							data = biz_data;
 						}
 						call();
-					}).catch(error => {
-						error = Log.append(error,biz_error);
+					}).catch(err => {
+						error = Log.append(error,err);
 						call();
 					});
 				},
 
 			]).then(result => {
 				callback([error,data]);
-			}).catch(error => {
-				Log.error("Delete-List-Data",error);
-				callback([error,[]]);
+			}).catch(err => {
+				Log.error("Delete-List-Data",err);
+				callback([err,[]]);
 			});
 		});
 	};
@@ -2175,22 +2177,22 @@ class Portal {
 			async.series([
 				function(call){
 					Data.count_list(database,data_type,filter).then(([biz_error,biz_data])=> {
-						if(error){
+						if(biz_error){
 							error=Log.append(error,biz_error);
 						}else{
 							data = biz_data;
 						}
 						call();
-					}).catch(error => {
-						error = Log.append(error,biz_error);
+					}).catch(err => {
+						error = Log.append(error,err);
 						call();
 					});
 				},
 			]).then(result => {
 				callback([error,data]);
-			}).catch(error => {
-				Log.error("Count-List-Data",error);
-				callback([error,[]]);
+			}).catch(err => {
+				Log.error("Count-List-Data",err);
+				callback([err,{}]);
 			});
 		});
 	};
@@ -2218,7 +2220,7 @@ class Portal {
 			async.series([
 				function(call){
 					Data.get(database,data_type,id).then(([biz_error,biz_data])=> {
-						if(error){
+						if(biz_error){
 							error=Log.append(error,biz_error);
 						}
 						top_data=biz_data;
@@ -2229,14 +2231,14 @@ class Portal {
 					let filter = {top_id:top_data.id};
 					let search = Item_Logic.get_search(DataType.ITEM,filter,{},1,0);
 					Data.get_list(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size).then(([biz_error,biz_data,item_count,page_count])=> {
-						if(error){
+						if(biz_error){
 							error=Log.append(error,biz_error);
 						}else{
 							data_list = biz_data;
 						}
 						call();
-					}).catch(error => {
-						error = Log.append(error,biz_error);
+					}).catch(err => {
+						error = Log.append(error,err);
 						call();
 					});
 				},
@@ -2255,14 +2257,14 @@ class Portal {
 				},
 				function(call){
 					Data.post(database,copy_data.data_type,copy_data).then(([biz_error,biz_data])=> {
-						if(error){
+						if(biz_error){
 							error=Log.append(error,biz_error);
 						}else{
 							copy_data=biz_data;
 						}
 						call();
-					}).catch(error => {
-						error=Log.append(error,biz_error);
+					}).catch(err => {
+						error=Log.append(error,err);
 						call();
 					});
 				},
@@ -2289,7 +2291,7 @@ class Portal {
 				},
 				function(call){
 					Data.post_list(database,copy_data_list).then(([biz_error,biz_data])=> {
-						if(error){
+						if(biz_error){
 							error=Log.append(error,biz_error);
 						}
 						copy_data_list=biz_data;
@@ -2315,7 +2317,7 @@ class Portal {
 				},
 				function(call){
 					Data.post_list(database,copy_data_list).then(([biz_error,biz_data])=> {
-						if(error){
+						if(biz_error){
 							error=Log.append(error,biz_error);
 						}
 						copy_data_list=biz_data;
@@ -2329,9 +2331,9 @@ class Portal {
 					data.copy_success = true;
 				}
 				callback([error,data]);
-			}).catch(error => {
-				Log.error("Copy",error);
-				callback([error,[]]);
+			}).catch(err => {
+				Log.error("Copy",err);
+				callback([err,{}]);
 			});
 		});
 	};
@@ -2566,8 +2568,8 @@ class Blank_Data {
 				},
 			]).then(result => {
 				callback([error,data]);
-			}).catch(error => {
-				Log.error("Blank-Get",error);
+			}).catch(err => {
+				Log.error("Blank-Get",err);
 				callback([error,[]]);
 			});
 		});
