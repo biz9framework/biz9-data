@@ -9,7 +9,7 @@ const dayjs = require('dayjs');
 const {get_db_connect_main,check_db_connect_main,delete_db_connect_main,post_item_main,get_item_main,delete_item_main,get_id_list_main,delete_item_list_main,get_count_item_list_main} = require('./mongo/index.js');
 const {Scriptz}=require("biz9-scriptz");
 const {Log,Str,Num,Obj}=require("/home/think2/www/doqbox/biz9-framework/biz9-utility/code");
-const {DataItem,DataType,FieldType,Item_Logic,User_Logic,Favorite_Logic,Stat_Logic,Order_Logic,Review_Logic}=require("/home/think2/www/doqbox/biz9-framework/biz9-logic/code");
+const {DataItem,DataType,Item_Logic,User_Logic,Favorite_Logic,Stat_Logic,Order_Logic,Review_Logic}=require("/home/think2/www/doqbox/biz9-framework/biz9-logic/code");
 const { get_db_connect_adapter,check_db_connect_adapter,delete_db_connect_adapter,post_item_adapter,post_item_list_adapter,get_item_adapter,delete_item_adapter,get_item_list_adapter,delete_item_list_adapter,get_count_item_list_adapter,delete_item_cache }  = require('./adapter.js');
 class Database {
 	static get = async (data_config,option) => {
@@ -1365,6 +1365,56 @@ class Review_Data {
 			});
 		});
 	};
+	//9_review_delete
+	static delete = async(database,parent_data_type,parent_id,review_id) => {
+		return new Promise((callback) => {
+			let error = null;
+			let data = {parent_item:DataItem.get_new(parent_data_type,parent_id),review:DataItem.get_new(DataType.REVIEW,0)};
+			let review = DataItem.get_new(DataType.REVIEW,review_id);
+			async.series([
+				//review_post
+				async function(call){
+					const [biz_error,biz_data] = await Portal.delete(database,DataType.REVIEW,review.id);
+					if(biz_error){
+						error=Log.append(error,biz_error);
+					}else{
+						data.review = biz_data;
+					}
+				},
+				//get_parent_item
+				async function(call){
+					const [biz_error,biz_data] = await Portal.get(database,parent_data_type,parent_id);
+					if(biz_error){
+						error=Log.append(error,biz_error);
+					}else{
+						data.parent_item = biz_data;
+					}
+				},
+				//post_item
+				async function(call){
+					if(!Str.check_is_null(data.parent_item.id)){
+						//rating_count
+						data.parent_item.rating_count = !Str.check_is_null(data.parent_item.rating_count) ? parseInt(data.parent_item.rating_count) - 1 :parseInt(review.rating);
+						//review_count
+						data.parent_item.review_count = !Str.check_is_null(data.parent_item.review_count) ? parseInt(data.parent_item.review_count) - 1 : 1;
+						//rating_avg
+						data.parent_item.rating_avg = !Str.check_is_null(data.parent_item.rating_avg) ? parseInt(data.parent_item.rating_count)  /  parseInt(data.parent_item.review_count) :parseInt(review.rating);
+						const [biz_error,biz_data] = await Portal.post(database,parent_data_type,data.parent_item);
+						if(biz_error){
+							error=Log.append(error,biz_error);
+						}else{
+							data.parent_item = biz_data;
+						}
+					}
+				},
+			]).then(result => {
+				callback([error,data]);
+			}).catch(err => {
+				Log.error("Review-Data-Delete-Portal",err);
+				callback([err,[]]);
+			});
+		});
+	};
 }
 class Activity_Data {
 	//9_activity_post
@@ -2242,19 +2292,20 @@ class Portal {
 					});
 				},
 				function(call){
-					copy_data[FieldType.TITLE] = 'Copy '+top_data[FieldType.TITLE];
-					copy_data[FieldType.TITLE_URL] = 'copy_'+top_data[FieldType.TITLE_URL];
-					copy_data[FieldType.SOURCE_ID] = top_data.id;
-					copy_data[FieldType.SOURCE_DATA_TYPE] = top_data.data_type;
-					top_data.forEach(key => {
-						if(key!=FieldType.ID&&key!=FieldType.SOURCE&&key!=FieldType.TITLE&&key!=FieldType.TITLE_URL){
+					copy_data['title'] = 'Copy '+top_data['title'];
+					copy_data['title_url'] = 'copy_'+top_data['title_url'];
+					copy_data['source_id'] = top_data.id;
+					copy_data['source_data_type'] = top_data.data_type;
+					const keys = Object.keys(top_data);
+					  keys.forEach(key => {
+						if(key!='id'&&key!='source'&&key!='title'&&key!='title_url'){
 							copy_data[key]=top_data[key];
 						}
 					});
-
-					all();
+					call();
 				},
 				function(call){
+					console.log('33333333');
 					Data.post(database,copy_data.data_type,copy_data).then(([biz_error,biz_data])=> {
 						if(biz_error){
 							error=Log.append(error,biz_error);
@@ -2268,19 +2319,20 @@ class Portal {
 					});
 				},
 				function(call){
+					console.log('44444444');
 					data_list.forEach(item => {
 						let copy_sub_data=DataItem.get_new(copy_data.data_type,0,{top_id:copy_data.id,top_data_type:copy_data.data_type});
-						copy_sub_data[FieldType.SOURCE_ID] = item[FieldType.ID];
-						copy_sub_data[FieldType.SOURCE_DATA_TYPE] = item[FieldType.DATA_TYPE];
+						copy_sub_data['source_id'] = item['id'];
+						copy_sub_data['source_data_type'] = item['data_type'];
 
-						copy_sub_data[FieldType.SOURCE_PARENT_ID] = item[FieldType.PARENT_ID];
-						copy_sub_data[FieldType.SOURCE_PARENT_DATA_TYPE] = item[FieldType.PARENT_DATA_TYPE][FieldType.PARENT_DATA_TYPE];
+						copy_sub_data['source_parent_id'] = item['parent_id'];
+						copy_sub_data['source_parent_data_type'] = item['parent_data_type'];
 
-						copy_sub_data[FieldType.SOURCE_TOP_ID] = item[FieldType.TOP_ID];
-						copy_sub_data[FieldType.SOURCE_TOP_DATA_TYPE] = item[FieldType.TOP_DATA_TYPE];
+						copy_sub_data['source_top_id'] = item['top_id'];
+						copy_sub_data['source_top_data_type'] = item['top_data_type'];
 
 						item.forEach(key => {
-							if( key != FieldType.ID && key != FieldType.SOURCE && key != FieldType.PARENT_ID && key != FieldType.PARENT_DATA_TYPE  && key != FieldType.TOP_ID && key != FieldType.TOP_DATA_TYPE ){
+							if( key != 'id' && key != 'source' && key != 'parent_id' && key != 'parent_data_type'  && key != 'top_id' && key != 'top_data_type' ){
 								copy_sub_data[key] = item[key];
 							}
 						});
@@ -2289,6 +2341,8 @@ class Portal {
 					call();
 				},
 				function(call){
+					console.log('55555555');
+					if(copy_data_list.length>0){
 					Data.post_list(database,copy_data_list).then(([biz_error,biz_data])=> {
 						if(biz_error){
 							error=Log.append(error,biz_error);
@@ -2296,25 +2350,34 @@ class Portal {
 						copy_data_list=biz_data;
 						call();
 					})
+					}else{
+						call();
+					}
 				},
 				function(call){
+					console.log('66666666');
+					if(copy_data_list.length>0){
 					copy_data_list.forEach(item => {
-						if(item[FieldType.SOURCE_PARENT_ID] == top_data[FieldType.ID]){
-							item[FieldType.PARENT_ID] = copy_data[FieldType.ID];
-							item[FieldType.PARENT_DATA_TYPE]  = copy_data[FieldType.DATA_TYPE];
+						if(item['source_parent_id'] == top_data['ID']){
+							item['parent_id'] = copy_data['ID'];
+							item['parent_data_type']  = copy_data['data_type'];
 						}else{
 							copy_data_list.forEach(item_sub => {
-								if(item[FieldType.SOURCE_PARENT_ID] == item_sub[FieldType.SOURCE_ID]){
-									item[FieldType.PARENT_ID] = item_sub[FieldType.ID];
-									item[FieldType.PARENT_DATA_TYPE] = item_sub[FieldType.DATA_TYPE];
+								if(item['source_parent_id'] == item_sub['source_id']){
+									item['parent_id'] = item_sub['id'];
+									item['parent_data_type'] = item_sub['data_type'];
 								}
 
 							});
 						}
 					});
 					call();
+					}else{
+						call();
+					}
 				},
 				function(call){
+					if(copy_data_list.length>0){
 					Data.post_list(database,copy_data_list).then(([biz_error,biz_data])=> {
 						if(biz_error){
 							error=Log.append(error,biz_error);
@@ -2322,6 +2385,9 @@ class Portal {
 						copy_data_list=biz_data;
 						call();
 					})
+					}else{
+						call();
+					}
 				},
 			]).then(result => {
 				if(copy_data.id){
@@ -2463,7 +2529,7 @@ class Stat_Data {
 						let stat_item_list = [];
 						let str = get_stat_str(stat_type_id);
 						for(let a = 0; a < parent_item_list.length; a++){
-							if(parent_item_list[a].stat_new && stat_type_id != FieldType.STAT_REVIEW_ADD_ID){
+							if(parent_item_list[a].stat_new && stat_type_id != Stat_Logic.TYPE_STAT_REVIEW){
 								let item = DataItem.get_new(parent_item_list[a].item.data_type,parent_item_list[a].item.id);
 								item[str] = parent_item_list[a][str];
 								cloud_data.stat_item_list.push(item);
@@ -2488,22 +2554,22 @@ class Stat_Data {
 			function get_stat_str(stat_type_id){
 				let str = "";
 				switch(stat_type_id){
-					case FieldType.STAT_VIEW_ADD_ID:
+					case Stat_Logic.TYPE_STAT_VIEW:
 						str = 'view_count';
 						break;
-					case FieldType.STAT_LIKE_ADD_ID:
+					case Stat_Logic.TYPE_STAT_LIKE:
 						str = 'like_count';
 						break;
-					case FieldType.STAT_FAVORITE_ADD_ID:
+					case Stat_Logic.TYPE_STAT_FAVORITE:
 						str = 'favorite_count';
 						break;
-					case FieldType.STAT_CART_ADD_ID:
+					case Stat_Logic.TYPE_STAT_CART:
 						str = 'cart_count';
 						break;
-					case FieldType.STAT_ORDER_ADD_ID:
+					case Stat_Logic.TYPE_STAT_ORDER:
 						str = 'order_count';
 						break;
-					case FieldType.STAT_REVIEW_ADD_ID:
+					case Stat_Logic.TYPE_STAT_REVIEW:
 						str = 'review_count';
 						break;
 					default:
@@ -2548,7 +2614,6 @@ class Data {
 		return [error,data,item_count,page_count];
 	};
 	static delete_list = async (db_connect,data_type,filter) => {
-		console.log('333333aaaaaaaaaaaaa[');
 		return [error,data_list] = await delete_item_list_adapter(db_connect,data_type,filter);
 	};
 	static count_list = async (db_connect,data_type,filter) => {
