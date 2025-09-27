@@ -8,7 +8,7 @@ const async = require('async');
 const {get_db_connect_main,check_db_connect_main,delete_db_connect_main,post_item_main,get_item_main,delete_item_main,get_id_list_main,delete_item_list_main,get_count_item_list_main} = require('./mongo/index.js');
 const {Scriptz}=require("biz9-scriptz");
 const {Log,Str,Num,Obj,DateTime}=require("/home/think2/www/doqbox/biz9-framework/biz9-utility/code");
-const {DataItem,DataType,Item_Logic,User_Logic,Favorite_Logic,Stat_Logic,Order_Logic,Review_Logic}=require("/home/think2/www/doqbox/biz9-framework/biz9-logic/code");
+const {DataItem,DataType,Item_Logic,User_Logic,Favorite_Logic,Stat_Logic,Order_Logic,Review_Logic,Type}=require("/home/think2/www/doqbox/biz9-framework/biz9-logic/code");
 const { get_db_connect_adapter,check_db_connect_adapter,delete_db_connect_adapter,post_item_adapter,post_item_list_adapter,get_item_adapter,delete_item_adapter,get_item_list_adapter,delete_item_list_adapter,get_count_item_list_adapter,delete_item_cache }  = require('./adapter.js');
 class Database {
 	static get = async (data_config,option) => {
@@ -1477,13 +1477,25 @@ class User_Data {
 		});
 	};
 	//9_user_register
-	static register = async (database,user) => {
+	static register = async (database,post_data,option) => {
+		/* Post Data
+		 *  - user / type. obj / ex. {email:myemail@gmail.com,title:my_title} / default. error
+		 *  - ip_address / type. string / ex. 123.0.0.1 / default. 0.0.0.0
+		 *  - geo_key / type. string / ex. Geo Location Key / default. blank
+		 *  - device / type. opj / ex. Geo Location Key / default. blank  / https://www.npmjs.com/package/platform
+		 *
+		/* Options
+		 * IP Address Information
+		 * - post_ip_address / type. bool / ex.true,false / default. false
+		 * - post_device / type. bool / ex.true,false / default. false
+		*/
 		return new Promise((callback) => {
 			let error = null;
 			let data = {
 					email_success:false,
 					title_success:false,
-				    user:user,
+				    user:post_data.user,
+					stat:DataItem.get_new(DataType.STAT,0)
 			};
 			async.series([
 				//check email
@@ -1512,7 +1524,7 @@ class User_Data {
 				},
 				//post user
 				async function(call){
-					if(!data.email_success && !data.title_success){
+					if(data.email_success && data.title_success){
 						data.user.last_login = DateTime.get_new();
 						const [biz_error,biz_data] = await Portal.post(database,DataType.USER,data.user);
 						if(biz_error){
@@ -1521,8 +1533,40 @@ class User_Data {
 							data.user = biz_data;
 						}
 					}
-				}
-			]).then(result => {
+				},
+ 				//get stat - ip - merge
+        		async function(call){
+            		if(data.email_success && data.title_success && option.post_ip_address){
+				    	data.ip_address = post_data.ip_address?post_data.ip_address:null;
+				    	data.geo_key = post_data.geo_key?post_data.geo_key:null;
+                		const [biz_error,biz_data] = await User_Data.get_ip(data.ip_address,data.geo_key);
+                	if(biz_error){
+                    	error=Log.append(error,biz_error);
+                	}
+                		data.stat = Obj.merge(data.stat,biz_data);
+            		}
+        		},
+ 				//get stat - device - merge
+        		async function(call){
+            		if(data.email_success && data.title_success && option.post_device){
+				    	data.device = post_data.device?post_data.device:null;
+                		const biz_data = await User_Data.get_device(data.device);
+                		data.stat = Obj.merge(data.stat,biz_data);
+            		}
+        		},
+				//post stat
+        		async function(call){
+            		if(data.email_success && data.title_success && option.post_device || option.post_ip){
+                		let post_new_stat = Stat_Logic.get_new_user(data.user.id,Type.STAT_REGISTER,data.stat);
+            			const [biz_error,biz_data] = await Stat_Data.post_user(database,post_new_stat.user_id,post_new_stat.type,post_new_stat.data);
+            		if(biz_error){
+                		error=Log.append(error,biz_error);
+            		}else{
+                		data.stat = biz_data;
+            		}
+            	}
+        		},
+		]).then(result => {
 				callback([error,data]);
 			}).catch(err => {
 				Log.error("User-Data-Register",err);
@@ -1531,10 +1575,26 @@ class User_Data {
 		});
 	};
 	//9_user_login
-	static login = async (database,user) => {
+	static login = async (database,post_data,option) => {
+		/* Post Data
+		 *  - user / type. obj / ex. {email:myemail@gmail.com,password:my_password} / default. error
+		 *  - ip_address / type. string / ex. 123.0.0.1 / default. 0.0.0.0
+		 *  - geo_key / type. string / ex. Geo Location Key / default. blank
+		 *  - device / type. opj / ex. Geo Location Key / default. blank  / https://www.npmjs.com/package/platform
+		 *
+		/* Options
+		 * IP Address Information
+		 * - post_ip_address / type. bool / ex.true,false / default. false
+		 * - post_device / type. bool / ex.true,false / default. false
+		*/
+
 		return new Promise((callback) => {
 			let error = null;
-			let data = {user_found:false,user:user};
+			let data = {
+				user_success:false,
+				user:post_data.user,
+				stat:DataItem.get_new(DataType.STAT,0)
+			};
 			async.series([
 				//check email,password
 				async function(call){
@@ -1545,13 +1605,13 @@ class User_Data {
 					}else{
 						if(biz_data.data_list.length>0){
 							data.user = biz_data.data_list[0];
-							data.user_found = true;
+							data.user_success = true;
 						}
 					}
 				},
 				//post user
 				async function(call){
-					if(data.user_found){
+					if(data.user_success){
 						data.user.last_login = DateTime.get_new();
 						const [biz_error,biz_data] = await Portal.post(database,DataType.USER,data.user);
 						if(biz_error){
@@ -1559,6 +1619,39 @@ class User_Data {
 						}
 					}
 				},
+				//get stat - ip - merge
+        		async function(call){
+            		if(data.user_success && option.post_ip_address){
+				    	data.ip_address = post_data.ip_address?post_data.ip_address:null;
+				    	data.geo_key = post_data.geo_key?post_data.geo_key:null;
+                		const [biz_error,biz_data] = await User_Data.get_ip(data.ip_address,data.geo_key);
+                	if(biz_error){
+                    	error=Log.append(error,biz_error);
+                	}
+                		data.stat = Obj.merge(data.stat,biz_data);
+            		}
+        		},
+ 				//get stat - device - merge
+        		async function(call){
+            		if(data.user_success && option.post_device){
+				    	data.device = post_data.device?post_data.device:null;
+                		const biz_data = await User_Data.get_device(data.device);
+                		data.stat = Obj.merge(data.stat,biz_data);
+            		}
+        		},
+				//post stat
+        		async function(call){
+            		if(data.user_success && option.post_device || option.post_ip){
+                		let post_new_stat = Stat_Logic.get_new_user(data.user.id,Type.STAT_LOGIN,data.stat);
+            			const [biz_error,biz_data] = await Stat_Data.post_user(database,post_new_stat.user_id,post_new_stat.type,post_new_stat.data);
+            		if(biz_error){
+                		error=Log.append(error,biz_error);
+            		}else{
+                		data.stat = biz_data;
+            		}
+            	}
+        		},
+
 		]).then(result => {
 				callback([error,data]);
 			}).catch(err => {
@@ -2387,7 +2480,8 @@ class Faq_Data{
 class Stat_Data {
 	static post_user = (database,user_id,stat_type,post_data,option) => {
 		return new Promise((callback) => {
-			let post_stat = DataItem.get_new(DataType.STAT,0,{user_id:user_id,type:stat_type,post_data:post_data});
+			let post_stat = DataItem.get_new(DataType.STAT,0,{user_id:user_id,type:stat_type});
+			post_stat = Obj.merge(post_stat,post_data);
 			let data = DataItem.get_new(DataType.STAT,0);
 			let error = null;
 			async.series([
