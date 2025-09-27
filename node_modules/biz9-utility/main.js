@@ -5,6 +5,7 @@ License GNU General Public License v3.0
 Description: BiZ9 Framework: Utility - Main
 */
 const moment = require('moment');
+const dayjs = require('dayjs');
 const prettydate = require('pretty-date');
 const get_discount_main=(old_cost,now_cost)=>{
     if(isNaN(old_cost)){
@@ -117,7 +118,7 @@ const message_append_main=(message,new_message)=>{
     return message;
 }
 const get_new_date_main=()=>{
-    return moment().toISOString();
+    return dayjs().toISOString();
 }
 const get_date_time_str_main=(datetime)=>{
     //Tuesday, February 14th 2023, at 2:39 am
@@ -448,6 +449,9 @@ const check_is_null_main=(str)=>{
     }
 }
 function get_file_type_from_base64_main(base64Data) {
+    if(!base64Data){
+        base64Data="";
+    }
       const regex = /^data:([a-zA-Z0-9]+\/[a-zA-Z0-9-.+]+)(;charset=[a-zA-Z0-9-]+)?(;base64)?,/;
       const matches = base64Data.match(regex);
 

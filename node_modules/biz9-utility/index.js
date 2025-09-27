@@ -129,7 +129,7 @@ class Str {
     };
 }
 class DateTime {
-    static get_new_date = () => {
+    static get_new = () => {
         return get_new_date_main();
     };
     static get = (datatime) => {

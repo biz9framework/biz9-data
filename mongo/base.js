@@ -5,8 +5,7 @@
  * Data - Mongo - Base
  */
 const async = require('async');
-const dayjs = require('dayjs');
-const {Num,Log,Str,Obj} = require("biz9-utility");
+const {Num,Log,Str,Obj,DateTime} = require("biz9-utility");
 const {MongoClient} = require("mongodb");
 let client_db = {};
 const get_db_connect_base = (data_config) => {
@@ -80,8 +79,8 @@ const post_item_base = (db_connect,data_type,item,option) => {
 		option = !Obj.check_is_empty(option) ? option : {overwrite_obj:false};
         if (Str.check_is_null(item.id)){//insert
             item.id = Str.get_guid();
-            item.date_create = dayjs().toISOString();
-            item.date_save = dayjs().toISOString();
+            item.date_create = DateTime.get_new();
+            item.date_save = DateTime.get_new();
             if(check_db_connect_base(db_connect)){
                 db_connect.collection(data_type).insertOne(item).then((data) => {
                     if(data){
@@ -94,7 +93,7 @@ const post_item_base = (db_connect,data_type,item,option) => {
                 });
             }
         }else{
-            item.date_save = dayjs().toISOString();
+            item.date_save = DateTime.get_new();
             if(!option.overwrite_obj){
                 db_connect.collection(data_type).updateOne({id:item.id},{$set: item}).then((data) => {
                     if(data){

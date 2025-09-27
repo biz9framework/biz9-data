@@ -5,10 +5,9 @@ License GNU General Public License v3.0
 Description: BiZ9 Framework: Data
 */
 const async = require('async');
-const dayjs = require('dayjs');
 const {get_db_connect_main,check_db_connect_main,delete_db_connect_main,post_item_main,get_item_main,delete_item_main,get_id_list_main,delete_item_list_main,get_count_item_list_main} = require('./mongo/index.js');
 const {Scriptz}=require("biz9-scriptz");
-const {Log,Str,Num,Obj}=require("/home/think2/www/doqbox/biz9-framework/biz9-utility/code");
+const {Log,Str,Num,Obj,DateTime}=require("/home/think2/www/doqbox/biz9-framework/biz9-utility/code");
 const {DataItem,DataType,Item_Logic,User_Logic,Favorite_Logic,Stat_Logic,Order_Logic,Review_Logic}=require("/home/think2/www/doqbox/biz9-framework/biz9-logic/code");
 const { get_db_connect_adapter,check_db_connect_adapter,delete_db_connect_adapter,post_item_adapter,post_item_list_adapter,get_item_adapter,delete_item_adapter,get_item_list_adapter,delete_item_list_adapter,get_count_item_list_adapter,delete_item_cache }  = require('./adapter.js');
 class Database {
@@ -1416,61 +1415,6 @@ class Review_Data {
 		});
 	};
 }
-class Activity_Data {
-	//9_activity_post
-	static post = (database,activity_type,user_id,post_activity) => {
-		return new Promise((callback) => {
-			let data = {}
-			let error = null;
-			async.series([
-				async function(call){
-					post_activity.type = activity_type;
-					post_activity.user_id = user_id;
-					const [biz_error,biz_data] = await Portal.post(database,DataType.ACTIVITY,post_activity);
-						if(biz_error){
-							error=Log.append(error,biz_error);
-						}else{
-							data.activity = biz_data;
-						}
-				},
-			]).then(result => {
-				callback([error,data.activity]);
-			}).catch(error => {
-				Log.error("Activity-Post",err);
-				callback([err,{}]);
-			});
-		});
-	};
-	static search = (database,filter,sort_by,page_current,page_size,option) => {
-		//9_activity_search
-		return new Promise((callback) => {
-			let data = {data_type:DataType.ACTIVITY,item_count:0,page_count:1,filter:{},activity_list:[],app_id:database.app_id};
-			let error = null;
-			option = option ? option : {};
-			async.series([
-				async function(call){
-					let option = {get_user:true,user_fields:'title,title_url'};
-					const [biz_error,biz_data] = await Portal.search(database,DataType.ACTIVITY,filter,sort_by,page_current,page_size,option);
-					if(biz_error){
-						error=Log.append(error,biz_error);
-					}else{
-						data.data_type = biz_data.data_type;
-						data.item_count = biz_data.item_count;
-						data.page_count = biz_data.page_count;
-						data.filter = biz_data.filter;
-						data.activity_list = biz_data.data_list;
-						data.app_id = biz_data.app_id;
-					}
-				},
-			]).then(result => {
-				callback([error,data]);
-			}).catch(err => {
-				Log.error("Activity-Search",err);
-				callback([err,{}]);
-			});
-		});
-	};
-}
 class User_Data {
 	static get_device = async (device) => {
 		return new Promise((callback) => {
@@ -1537,8 +1481,8 @@ class User_Data {
 		return new Promise((callback) => {
 			let error = null;
 			let data = {
-					email_found:false,
-					title_found:false,
+					email_success:false,
+					title_success:false,
 				    user:user,
 			};
 			async.series([
@@ -1549,8 +1493,8 @@ class User_Data {
 					if(biz_error){
 						biz_error=Log.append(error,biz_error);
 					}else{
-						if(biz_data.count>0){
-							data.email_found = true;
+						if(biz_data.count<=0){
+							data.email_success = true;
 						}
 					}
 				},
@@ -1561,15 +1505,15 @@ class User_Data {
 					if(biz_error){
 						biz_error=Log.append(error,biz_error);
 					}else{
-						if(biz_data.count>0){
-							data.title_found = true;
+						if(biz_data.count<=0){
+							data.title_success = true;
 						}
 					}
 				},
 				//post user
 				async function(call){
-					if(!data.email_found && !data.title_found){
-						data.user.last_login = dayjs().toISOString();
+					if(!data.email_success && !data.title_success){
+						data.user.last_login = DateTime.get_new();
 						const [biz_error,biz_data] = await Portal.post(database,DataType.USER,data.user);
 						if(biz_error){
 							biz_error=Log.append(error,biz_error);
@@ -1608,7 +1552,7 @@ class User_Data {
 				//post user
 				async function(call){
 					if(data.user_found){
-						data.user.last_login = dayjs().toISOString();
+						data.user.last_login = DateTime.get_new();
 						const [biz_error,biz_data] = await Portal.post(database,DataType.USER,data.user);
 						if(biz_error){
 							error=Log.append(error,biz_error);
@@ -1845,6 +1789,13 @@ class Portal {
    			  - parent_fields / type. string / ex. field1,field2 / default. empty
 			- get_user / type. bool / ex. true,false / default. false
 			  - user_fields / type. string / ex. field1,field2 / default. empty
+		* Return
+			- data_type
+			- item_count
+			- page_count
+			- filter
+			- item_list
+			- app_id
 	     */
 		return new Promise((callback) => {
 			let data = {data_type:data_type,item_count:0,page_count:1,filter:{},data_list:[],app_id:database.app_id};
@@ -2432,7 +2383,61 @@ class Faq_Data{
 		});
 	}
 }
+//9_stat_data
 class Stat_Data {
+	static post_user = (database,user_id,stat_type,post_data,option) => {
+		return new Promise((callback) => {
+			let post_stat = DataItem.get_new(DataType.STAT,0,{user_id:user_id,type:stat_type,post_data:post_data});
+			let data = DataItem.get_new(DataType.STAT,0);
+			let error = null;
+			async.series([
+				//post_stat
+				async function(call){
+					const [biz_error,biz_data] = await Portal.post(database,DataType.STAT,post_stat);
+					if(biz_error){
+						error=Log.append(error,biz_error);
+					}else{
+						data = biz_data;
+					}
+				}
+			]).then(result => {
+				callback([error,data]);
+			}).catch(err => {
+				Log.error("Stat-Data-Post-User",err);
+				callback([error,[]]);
+			});
+		});
+	};
+	//9_search
+	static search = (database,filter,sort_by,page_current,page_size,option) => {
+		return new Promise((callback) => {
+			let data = DataItem.get_new(DataType.BLANK,0);
+			let error = null;
+			async.series([
+				async function(call){
+					const [biz_error,biz_data] = await Portal.search(database,DataType.STAT,filter,sort_by,page_current,page_size,option);
+					if(biz_error){
+						error=Log.append(error,biz_error);
+					}else{
+						data.item_count = biz_data.item_count;
+						data.data_type = DataType.BLOG_POST;
+						data.page_count = biz_data.page_count;
+						data.filter = biz_data.filter;
+						data.stat_list = biz_data.data_list;
+						data.app_id = database.app_id;
+					}
+					call();
+				},
+			]).then(result => {
+				callback([error,data]);
+			}).catch(err => {
+				Log.error("Blank-Get",err);
+				callback([error,[]]);
+			});
+		});
+	};
+
+
 	/*
 	//9_stat_post
 	static post = (database,parent_data_type,user_id,stat_type_id,parent_item_list,option) => {
@@ -2628,8 +2633,8 @@ class Blank_Data {
 			let error = null;
 			async.series([
 				async function(call){
-					item_list.forEach(item => {
-					});
+					const [biz_error,biz_data] = await Portal.post(database,DataType.BLANK,post_data);
+					call();
 				},
 			]).then(result => {
 				callback([error,data]);
@@ -2641,7 +2646,6 @@ class Blank_Data {
 	};
 }
 module.exports = {
-	Activity_Data,
 	Blog_Post_Data,
 	Category_Data,
 	Cart_Data,
