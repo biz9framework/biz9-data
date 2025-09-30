@@ -100,7 +100,6 @@ const post_item_list_adapter=(db_connect,item_data_list)=>{
                 for(const item of item_data_list) {
                     item.source=DB_TITLE;
                     item.app_id = db_connect.data_config.APP_ID;
-                    console.log(item);
                     item_data_new_list.push(item);
                 }
             },

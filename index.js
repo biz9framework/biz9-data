@@ -1236,7 +1236,6 @@ class Product_Data {
 			option = option ? option : {get_item:false,get_image:false};
 			async.series([
 				async function(call){
-					console.log('33333aaaaaaaa');
 					const [biz_error,biz_data] = await Portal.get(database,DataType.PRODUCT,key,option);
 					if(biz_error){
 						error=Log.append(error,biz_error);
@@ -1245,7 +1244,6 @@ class Product_Data {
 					}
 				},
 			]).then(result => {
-				console.log('333333bbbbbbbb');
 				callback([error,product]);
 			}).catch(err => {
 				Log.error("Product-Get",err);
@@ -1757,7 +1755,6 @@ class Portal {
 				},
 
 				function(call){
-					console.log('33333333333dddddddd');
 					function get_sort(data){
 						let sort_order = {};
 						switch(data.setting_sort_type)
@@ -1779,7 +1776,6 @@ class Portal {
 					}
 					let filter = {};
 					if(!Str.check_is_null(data.id) && option.get_item || option.get_section){
-						console.log('333333333333eeeeeeeeeeeee');
 						data.images = [];
 						data.items = [];
 						if(Str.check_is_null(data.top_id)){
@@ -1812,7 +1808,6 @@ class Portal {
 				},
 				async function(call){
 					if(!Str.check_is_null(data.id) && option.get_image){
-						console.log('333333333333fffffffffffffffffff');
 						data.images = [];
 						if(option.image_count == null){
 							option.image_count = 19;
@@ -1831,7 +1826,6 @@ class Portal {
 					}
 				},
 			]).then(result => {
-				console.log('33333333gggggggggg');
 				callback([error,data]);
 			}).catch(err => {
 				Log.error("Portal-Get",err);
@@ -2192,9 +2186,6 @@ class Portal {
 			let data_list = [];
 			async.series([
 				function(call){
-					console.log('aaaaaaaaa');
-					console.log('aaaaaaaaa');
-					console.log(post_list);
 					Data.post_list(database,post_list).then(([biz_error,biz_data])=> {
 						if(biz_error){
 							error=Log.append(error,biz_error);
