@@ -4,7 +4,7 @@ const assert = require('node:assert');
 const {Data,Database,Category_Data,Product_Data,Page_Data,Blog_Post_Data,Content_Data,Stat_Data,List_Data,Review_Data,Favorite_Data,Search_Data,Admin_Data,Business_Data,Order_Data,User_Data,Faq_Data,Portal,Cart_Data,Activity_Data,Blog_Post} = require(".");
 
 const {Log,Num,Str} = require("biz9-utility");
-const {DataType,DataItem,Item_Logic,Page_Logic,Template_Logic,Blog_Post_Logic,Content_Logic,Product_Logic,Field_Logic,Admin_Logic,Business_Logic,Category_Logic,User_Logic,Order_Logic,FieldType,Cart_Logic,Stat_Logic,Review_Logic,PageType} = require("/home/think2/www/doqbox/biz9-framework/biz9-logic/code");
+const {DataType,DataItem,Item_Logic,Page_Logic,Template_Logic,Blog_Post_Logic,Content_Logic,Product_Logic,Field_Logic,Admin_Logic,Business_Logic,Category_Logic,User_Logic,Order_Logic,FieldType,Cart_Logic,Stat_Logic,Review_Logic,PageType,Sub_Item_Logic} = require("/home/think2/www/doqbox/biz9-framework/biz9-logic/code");
 /*
  * availble tests
 - connect
@@ -506,6 +506,8 @@ describe('post_data', function(){ this.timeout(25000);
         let data = {cart:DataItem.get_new(DataType.CART,0)};
         let error=null;
         let database = {};
+        let parent_item = {};
+        let content_item_list = [];
         //var item = DataItem.get_new(DATA_TYPE,KEY);
         async.series([
             async function(call){
@@ -516,7 +518,27 @@ describe('post_data', function(){ this.timeout(25000);
                 console.log('TEST-CONNECT-END');
             },
             async function(call){
-                console.log('POST-DATA-START');
+                parent_item = DataItem.get_new(DataType.BLOG_POST,0,{title:'my_parent_'+Num.get_id()});
+                const [error,data] = await Portal.post(database,parent_item.data_type,parent_item);
+                parent_item = data;
+                //Log.w('parent_item',parent_item);
+            },
+            async function(call){
+                //console.log(parent_item.data_type);
+                content_item_list.push(Sub_Item_Logic.get_test('Content Item 1',parent_item,parent_item));
+                content_item_list.push(Sub_Item_Logic.get_test('Content Item 2',parent_item,parent_item));
+                const [error,data] = await Portal.post_list(database,content_item_list);
+                content_item_list = data;
+                //Log.w('content_item_list',content_item_list);
+            },
+            async function(call){
+                const [error,data] = await Portal.get(database,parent_item.data_type,parent_item.id,{get_item:true});
+                Log.w('get_parent_item',data);
+            },
+
+
+            async function(call){
+                //console.log('POST-DATA-START');
                 //- GET_ITEM_SEARCH - START
                 /*
                 let query = {category:'Application'};
@@ -551,11 +573,11 @@ describe('post_data', function(){ this.timeout(25000);
                 //let user = DataItem.get_new(DataType.USER,0,{title:'ceo',title_url:'ceo',email:"ceo@bossappz.com",password:"1234567",role:FieldType.USER_ROLE_SUPER_ADMIN});
                 //let title = Num.get_id() + "user";
                 //let user = DataItem.get_new(DataType.USER,0,{title:title,title_url:title,email:title+"@bossappz.com",password:"1234567",role:FieldType.USER_ROLE_USER});
-                let user = DataItem.get_new(DataType.USER,0,{email:'ceo@bossappz.com',password:"1234567"});
-                Log.w('user',user);
+                //let user = DataItem.get_new(DataType.USER,0,{email:'ceo@bossappz.com',password:"1234567"});
+                //Log.w('user',user);
                 //const [error,data] = await User_Data.register(database,user,null,null,null);
-                const [error,data] = await User_Data.login(database,user,null,null,null);
-                Log.w('data',data);
+                //const [error,data] = await User_Data.login(database,user,null,null,null);
+                //Log.w('data',data);
                 //- user - end
 
                 //- REVIEW - START
