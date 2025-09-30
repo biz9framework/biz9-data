@@ -63,21 +63,28 @@ describe('connect', function(){ this.timeout(25000);
                 //APP-START
                 //APP-END
                 console.log('DATA-START');
-                let data_type = DataType.PRODUCT;
-                let id = "7980d0fa-4552-4f2f-89f8-403b77e3aee9";
-                let key = undefined;
+                //let data_type = DataType.PRODUCT;
+                //let id = "7980d0fa-4552-4f2f-89f8-403b77e3aee9";
+                //let key = undefined;
                 //let parent_data_type = DataType.PRODUCT;
                 //let search = Item_Logic.get_search(DataType.FAVORITE,{},{},1,0);
                 //Log.w('parent_data_type',parent_data_type);
                 //Log.w('search',search);
                  //let option = {get_parent:true,parent_data_type:DataType.PRODUCT,parent_fields:'id,title,category,title_url,image_filename,delivery_time,cost',get_user:true,user_fields:'id,title,title_url,image_filename'};
 
+                let data_list = [
+                DataItem.get_new(DataType.BLOG_POST,0,{title:'my_title_'+Num.get_id()}),
+                DataItem.get_new(DataType.BLOG_POST,0,{title:'my_title_'+Num.get_id()}),
+                DataItem.get_new(DataType.BLOG_POST,0,{title:'my_title_'+Num.get_id()})
+            ];
+
+
                 //const [biz_error,biz_data] = await Favorite_Data.search(database,search.filter,search.sort_by,search.page_current,search.page_size,option);
-                //const [biz_error,biz_data] = await Portal.copy(database,data_type,id);
-                const [biz_error,biz_data] = await Product_Data.get(database,data_type,key);
+                const [biz_error,biz_data] = await Portal.post_list(database,data_list);
+                //const [biz_error,biz_data] = await Product_Data.get(database,key);
                 Log.w('data_type',data_type);
                 Log.w('key',key);
-                //Log.w('data',biz_data);
+                Log.w('data',biz_data);
                 console.log('DATA-END');
 
 

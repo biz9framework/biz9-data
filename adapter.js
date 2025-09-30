@@ -97,11 +97,12 @@ const post_item_list_adapter=(db_connect,item_data_list)=>{
                 });
             },
             async function(call){
-                item_data_list.forEach(item => {
+                for(const item of item_data_list) {
                     item.source=DB_TITLE;
                     item.app_id = db_connect.data_config.APP_ID;
+                    console.log(item);
                     item_data_new_list.push(item);
-                });
+                }
             },
             function(call){
                 delete_cache_connect_main(cache_connect).then(([error,data])=>{

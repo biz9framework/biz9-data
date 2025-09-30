@@ -1726,22 +1726,18 @@ class Portal {
 		 */
 		return new Promise((callback) => {
 			let error = null;
-			let data = DataItem.get_new(data_type,0,{key:key});
-			Log.w('rrrr',data);
-
+			let data = DataItem.get_new(data_type,0,{key:key?key:'blank'});
 			let full_data_list = [];
 			let new_data_list = [];
 			option = option ? option : {get_item:false,get_image:false};
 			async.series([
 				function(call){
-					console.log('33333333333ccccccccc');
 					if(!Str.check_is_guid(key)){
 						option.title_url = key;
 					}
 					call();
 				},
 				function(call){
-					console.log('33333333333dddddddddd');
 					Data.get(database,data_type,key,option).then(([biz_error,biz_data,option])=> {
 						if(biz_error){
 							error=Log.append(error,biz_error);
@@ -1752,9 +1748,7 @@ class Portal {
 								data = data_type != DataType.USER ? Item_Logic.get_not_found(data_type,key,{app_id:database.app_id}) : User_Logic.get_not_found(key,{app_id:database.app_id});
 						}
 						}
-						if(data_type!=DataType.PRODUCT){
-							call();
-						}
+						call();
 					}).catch(err => {
 						Log.error("Portal-Get-Key-A",err);
 						error = Log.append(error,err);
@@ -2198,6 +2192,9 @@ class Portal {
 			let data_list = [];
 			async.series([
 				function(call){
+					console.log('aaaaaaaaa');
+					console.log('aaaaaaaaa');
+					console.log(post_list);
 					Data.post_list(database,post_list).then(([biz_error,biz_data])=> {
 						if(biz_error){
 							error=Log.append(error,biz_error);
