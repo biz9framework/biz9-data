@@ -1236,6 +1236,7 @@ class Product_Data {
 			option = option ? option : {get_item:false,get_image:false};
 			async.series([
 				async function(call){
+					console.log('33333aaaaaaaa');
 					const [biz_error,biz_data] = await Portal.get(database,DataType.PRODUCT,key,option);
 					if(biz_error){
 						error=Log.append(error,biz_error);
@@ -1244,6 +1245,7 @@ class Product_Data {
 					}
 				},
 			]).then(result => {
+				console.log('333333bbbbbbbb');
 				callback([error,product]);
 			}).catch(err => {
 				Log.error("Product-Get",err);
@@ -1486,6 +1488,7 @@ class User_Data {
 		 *
 		/* Options
 		 * IP Address Information
+		 * - post_stat / type. bool / ex.true,false / default. false
 		 * - post_ip_address / type. bool / ex.true,false / default. false
 		 * - post_device / type. bool / ex.true,false / default. false
 		*/
@@ -1497,6 +1500,9 @@ class User_Data {
 				    user:post_data.user,
 					stat:DataItem.get_new(DataType.STAT,0)
 			};
+			let post_ip_address = post_data.ip_address?post_data.ip_address:null;
+			let post_geo_key = post_data.geo_key?post_data.geo_key:null;
+			let post_device = post_data.device?post_data.device:null;
 			async.series([
 				//check email
 				async function(call){
@@ -1537,8 +1543,8 @@ class User_Data {
  				//get stat - ip - merge
         		async function(call){
             		if(data.email_success && data.title_success && option.post_ip_address){
-				    	data.ip_address = post_data.ip_address?post_data.ip_address:null;
-				    	data.geo_key = post_data.geo_key?post_data.geo_key:null;
+				    	data.ip_address = post_ip_address;
+				    	data.geo_key = post_geo_key;
                 		const [biz_error,biz_data] = await User_Data.get_ip(data.ip_address,data.geo_key);
                 	if(biz_error){
                     	error=Log.append(error,biz_error);
@@ -1549,14 +1555,14 @@ class User_Data {
  				//get stat - device - merge
         		async function(call){
             		if(data.email_success && data.title_success && option.post_device){
-				    	data.device = post_data.device?post_data.device:null;
+				    	data.device = post_device;
                 		const biz_data = await User_Data.get_device(data.device);
                 		data.stat = Obj.merge(data.stat,biz_data);
             		}
         		},
 				//post stat
         		async function(call){
-            		if(data.email_success && data.title_success && option.post_device || option.post_ip){
+            		if(data.email_success && data.title_success && option.post_stat && option.post_device || option.post_ip){
                 		let post_new_stat = Stat_Logic.get_new_user(data.user.id,Type.STAT_REGISTER,data.stat);
             			const [biz_error,biz_data] = await Stat_Data.post_user(database,post_new_stat.user_id,post_new_stat.type,post_new_stat.data);
             		if(biz_error){
@@ -1584,6 +1590,7 @@ class User_Data {
 		 *
 		/* Options
 		 * IP Address Information
+		 * - post_stat / type. bool / ex.true,false / default. false
 		 * - post_ip_address / type. bool / ex.true,false / default. false
 		 * - post_device / type. bool / ex.true,false / default. false
 		*/
@@ -1595,6 +1602,9 @@ class User_Data {
 				user:post_data.user,
 				stat:DataItem.get_new(DataType.STAT,0)
 			};
+			let post_ip_address = post_data.ip_address?post_data.ip_address:null;
+			let post_geo_key = post_data.geo_key?post_data.geo_key:null;
+			let post_device = post_data.device?post_data.device:null;
 			async.series([
 				//check email,password
 				async function(call){
@@ -1622,26 +1632,26 @@ class User_Data {
 				//get stat - ip - merge
         		async function(call){
             		if(data.user_success && option.post_ip_address){
-				    	data.ip_address = post_data.ip_address?post_data.ip_address:null;
-				    	data.geo_key = post_data.geo_key?post_data.geo_key:null;
-                		const [biz_error,biz_data] = await User_Data.get_ip(data.ip_address,data.geo_key);
-                	if(biz_error){
-                    	error=Log.append(error,biz_error);
-                	}
-                		data.stat = Obj.merge(data.stat,biz_data);
+				    	data.ip_address = post_ip_address;
+				    	data.geo_key = post_geo_key;
+            		const [biz_error,biz_data] = await User_Data.get_ip(data.ip_address,data.geo_key);
+                		if(biz_error){
+                    		error=Log.append(error,biz_error);
+                		}
+                			data.stat = Obj.merge(data.stat,biz_data);
             		}
         		},
  				//get stat - device - merge
         		async function(call){
             		if(data.user_success && option.post_device){
-				    	data.device = post_data.device?post_data.device:null;
-                		const biz_data = await User_Data.get_device(data.device);
+						data.device = post_device;
+            			const biz_data = await User_Data.get_device(data.device);
                 		data.stat = Obj.merge(data.stat,biz_data);
             		}
         		},
 				//post stat
         		async function(call){
-            		if(data.user_success && option.post_device || option.post_ip){
+            		if(data.user_success && option.post_stat && option.post_device || option.post_ip){
                 		let post_new_stat = Stat_Logic.get_new_user(data.user.id,Type.STAT_LOGIN,data.stat);
             			const [biz_error,biz_data] = await Stat_Data.post_user(database,post_new_stat.user_id,post_new_stat.type,post_new_stat.data);
             		if(biz_error){
@@ -1651,7 +1661,6 @@ class User_Data {
             		}
             	}
         		},
-
 		]).then(result => {
 				callback([error,data]);
 			}).catch(err => {
@@ -1700,36 +1709,6 @@ class Favorite_Data {
 			});
 		});
 	};
-	//9_favorite_search
-	static search = async (database,filter,sort_by,page_current,page_size,option) => {
-		return new Promise((callback) => {
-			let error = null;
-			let data = {};
-			option = option ? option : {get_parent:false,get_user:false};
-			async.series([
-				//favorite_list
-				async function(call){
-					let search = Item_Logic.get_search(DataType.FAVORITE,{},{date_create:-1},page_current,page_size);
-					const [biz_error,biz_data] = await Portal.search(database,DataType.FAVORITE,search.filter,search.sort_by,search.page_current,search.page_size,option);
-					if(biz_error){
-						error=Log.append(error,biz_error);
-					}else{
-						data.option = option;
-						data.item_count = biz_data.item_count;
-						data.page_count = biz_data.page_count;
-						data.filter = biz_data.filter;
-						data.favorite_list = biz_data.data_list;
-						data.app_id = database.app_id;
-					}
-				},
-			]).then(result => {
-				callback([error,data]);
-			}).catch(err => {
-				Log.error("Favorite-Data-Get",err);
-				callback([err,[]]);
-			});
-		});
-	};
 }
 class Portal {
 	//9_portal_get
@@ -1748,17 +1727,21 @@ class Portal {
 		return new Promise((callback) => {
 			let error = null;
 			let data = DataItem.get_new(data_type,0,{key:key});
+			Log.w('rrrr',data);
+
 			let full_data_list = [];
 			let new_data_list = [];
 			option = option ? option : {get_item:false,get_image:false};
 			async.series([
 				function(call){
+					console.log('33333333333ccccccccc');
 					if(!Str.check_is_guid(key)){
 						option.title_url = key;
 					}
 					call();
 				},
 				function(call){
+					console.log('33333333333dddddddddd');
 					Data.get(database,data_type,key,option).then(([biz_error,biz_data,option])=> {
 						if(biz_error){
 							error=Log.append(error,biz_error);
@@ -1769,14 +1752,18 @@ class Portal {
 								data = data_type != DataType.USER ? Item_Logic.get_not_found(data_type,key,{app_id:database.app_id}) : User_Logic.get_not_found(key,{app_id:database.app_id});
 						}
 						}
-						call();
+						if(data_type!=DataType.PRODUCT){
+							call();
+						}
 					}).catch(err => {
 						Log.error("Portal-Get-Key-A",err);
 						error = Log.append(error,err);
 						call();
 					});
 				},
+
 				function(call){
+					console.log('33333333333dddddddd');
 					function get_sort(data){
 						let sort_order = {};
 						switch(data.setting_sort_type)
@@ -1798,6 +1785,7 @@ class Portal {
 					}
 					let filter = {};
 					if(!Str.check_is_null(data.id) && option.get_item || option.get_section){
+						console.log('333333333333eeeeeeeeeeeee');
 						data.images = [];
 						data.items = [];
 						if(Str.check_is_null(data.top_id)){
@@ -1830,6 +1818,7 @@ class Portal {
 				},
 				async function(call){
 					if(!Str.check_is_null(data.id) && option.get_image){
+						console.log('333333333333fffffffffffffffffff');
 						data.images = [];
 						if(option.image_count == null){
 							option.image_count = 19;
@@ -1848,6 +1837,7 @@ class Portal {
 					}
 				},
 			]).then(result => {
+				console.log('33333333gggggggggg');
 				callback([error,data]);
 			}).catch(err => {
 				Log.error("Portal-Get",err);
@@ -1993,7 +1983,7 @@ class Portal {
 								if(biz_error){
 									error=Log.append(error,biz_error);
                                 }else{
-									if(data.data_list.length> 0 && item_list.length>0){
+									if(data.data_list.length> 0){
                                   	data.data_list.forEach(item => {
                                     	item.parent_item = item_list.find(item_find => item_find.id === item.parent_id) ? item_list.find(item_find => item_find.id === item.parent_id):Item_Logic.get_not_found(item.parent_data_type,item.parent_id,{app_id:database.app_id});
 									});
@@ -2022,9 +2012,10 @@ class Portal {
 							if(biz_error){
 								error=Log.append(error,biz_error);
 							}else{
-								if(data.data_list.length> 0 && item_list.length>0){
+								if(data.data_list.length> 0){
 								data.data_list.forEach(item => {
 									item.user = item_list.find(item_find => item_find.id === item.user_id) ? item_list.find(item_find => item_find.id === item.user_id):User_Logic.get_not_found(item.user_id,{app_id:database.app_id});
+
 								});
 								}
 							}
@@ -2349,7 +2340,6 @@ class Portal {
 					call();
 				},
 				function(call){
-					console.log('33333333');
 					Data.post(database,copy_data.data_type,copy_data).then(([biz_error,biz_data])=> {
 						if(biz_error){
 							error=Log.append(error,biz_error);
@@ -2363,7 +2353,6 @@ class Portal {
 					});
 				},
 				function(call){
-					console.log('44444444');
 					data_list.forEach(item => {
 						let copy_sub_data=DataItem.get_new(copy_data.data_type,0,{top_id:copy_data.id,top_data_type:copy_data.data_type});
 						copy_sub_data['source_id'] = item['id'];
@@ -2385,7 +2374,6 @@ class Portal {
 					call();
 				},
 				function(call){
-					console.log('55555555');
 					if(copy_data_list.length>0){
 					Data.post_list(database,copy_data_list).then(([biz_error,biz_data])=> {
 						if(biz_error){
@@ -2399,7 +2387,6 @@ class Portal {
 					}
 				},
 				function(call){
-					console.log('66666666');
 					if(copy_data_list.length>0){
 					copy_data_list.forEach(item => {
 						if(item['source_parent_id'] == top_data['ID']){

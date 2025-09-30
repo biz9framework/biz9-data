@@ -63,9 +63,9 @@ describe('connect', function(){ this.timeout(25000);
                 //APP-START
                 //APP-END
                 console.log('DATA-START');
-                //data_type: "blog_post_biz", id: "7980d0fa-4552-4f2f-89f8-403b77e3aee9"
-                let data_type = DataType.BLOG_POST;
+                let data_type = DataType.PRODUCT;
                 let id = "7980d0fa-4552-4f2f-89f8-403b77e3aee9";
+                let key = undefined;
                 //let parent_data_type = DataType.PRODUCT;
                 //let search = Item_Logic.get_search(DataType.FAVORITE,{},{},1,0);
                 //Log.w('parent_data_type',parent_data_type);
@@ -73,8 +73,11 @@ describe('connect', function(){ this.timeout(25000);
                  //let option = {get_parent:true,parent_data_type:DataType.PRODUCT,parent_fields:'id,title,category,title_url,image_filename,delivery_time,cost',get_user:true,user_fields:'id,title,title_url,image_filename'};
 
                 //const [biz_error,biz_data] = await Favorite_Data.search(database,search.filter,search.sort_by,search.page_current,search.page_size,option);
-                const [biz_error,biz_data] = await Portal.copy(database,data_type,id);
-                Log.w('data',biz_data);
+                //const [biz_error,biz_data] = await Portal.copy(database,data_type,id);
+                const [biz_error,biz_data] = await Product_Data.get(database,data_type,key);
+                Log.w('data_type',data_type);
+                Log.w('key',key);
+                //Log.w('data',biz_data);
                 console.log('DATA-END');
 
 
