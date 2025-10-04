@@ -8,7 +8,7 @@ const async = require('async');
 const {Num,Log,Str,Obj,DateTime} = require("biz9-utility");
 const {MongoClient} = require("mongodb");
 let client_db = {};
-const get_db_connect_base = (data_config) => {
+const get_db_connect_base = (data_config,option) => {
     return new Promise((callback) => {
         const mongo_full_url="mongodb://"+data_config.MONGO_USERNAME_PASSWORD+data_config.MONGO_IP+":"+data_config.MONGO_PORT_ID+"?retryWrites=true&w=majority&maxIdleTimeMS=60000&connectTimeoutMS=150000&socketTimeoutMS=90000&maxPoolSize=900000&maxConnecting=10000";
         client_db = new MongoClient(mongo_full_url);
@@ -33,7 +33,7 @@ const get_db_connect_base = (data_config) => {
         });
     });
 }
-const delete_db_connect_base = (db_connect) => {
+const delete_db_connect_base = (db_connect,option) => {
     return new Promise((callback) => {
         client_db.close().then((data)=> {
             callback([error,null]);
@@ -43,7 +43,7 @@ const delete_db_connect_base = (db_connect) => {
         });
     });
 }
-const get_item_base = (db_connect,data_type,id) => {
+const get_item_base = (db_connect,data_type,id,option) => {
     return new Promise((callback) => {
         let data = null;
         if(check_db_connect_base(db_connect)){
@@ -118,7 +118,7 @@ const post_item_base = (db_connect,data_type,item,option) => {
         }
     });
 }
-const delete_item_base = (db_connect,data_type,id) => {
+const delete_item_base = (db_connect,data_type,id,option) => {
     return new Promise((callback) => {
         let data = null;
         if(check_db_connect_base(db_connect)){
@@ -150,23 +150,48 @@ const delete_item_list_base = (db_connect,data_type,filter) => {
         }
     });
 }
-const get_id_list_base = (db_connect,data_type,filter,sort_by,page_current,page_size) => {
+const get_id_list_base = (db_connect,data_type,filter,sort_by,page_current,page_size,option) => {
     return new Promise((callback) => {
         let total_count = 0;
         let data_list = [];
         let collection = {};
+        //option = option ? option : {get_distinct:false,distinct_field:false,distinct_query:{}};
+        let distinct_filter = [option.distinct_field] = option.distinct_query;
         async.series([
             function(call) {
+                console.log('1111111111');
+                console.log(option);
+                console.log(distinct_field);
+                console.log('2222222222');
                 if(check_db_connect_base(db_connect)){
-                    db_connect.collection(data_type).countDocuments(filter).then((data) => {
-                        if(data){
-                            total_count = data;
-                        }
-                        call();
+                    if(!option.get_distinct){
+                        console.log('aaaaaaaaa');
+                        console.log('aaaaaaaaa');
+                        console.log('aaaaaaaaa');
+                        db_connect.collection(data_type).countDocuments(filter).then((data) => {
+                            if(data){
+                                total_count = data;
+                            }
+                            //call();
                     }).catch(error => {
                         Log.error("DATA-MONGO-BASE-GET-SQL-PAGING-TBLiD-BASE-ERROR-1",error);
                         callback([error,0,[]]);
                     });
+                    }else{
+                        console.log('bbbbbbbb');
+                        console.log('bbbbbbbb');
+                        db_connect.collection(data_type).countDocuments(filter).then((data) => {
+                        if(data){
+                            total_count = data;
+                        }
+                        //call();
+                    }).catch(error => {
+                        Log.error("DATA-MONGO-BASE-GET-SQL-PAGING-TBLiD-BASE-ERROR-1",error);
+                        callback([error,0,[]]);
+                    });
+
+                    }
+
                 }else{
                     Log.error("DATA-MONGO-BASE-GET-SQL-PAGING-TBLID-BASE-ERROR-2",error);
                     callback(['No connection',0,[]]);
@@ -198,7 +223,7 @@ const get_id_list_base = (db_connect,data_type,filter,sort_by,page_current,page_
         });
     });
 }
-const get_count_item_list_base = async (db_connect,data_type,filter) => {
+const get_count_item_list_base = async (db_connect,data_type,filter,option) => {
     return new Promise((callback) => {
         let data = 0;
         db_connect.collection(data_type).countDocuments(filter).then((data) => {

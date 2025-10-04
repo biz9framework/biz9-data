@@ -4,7 +4,7 @@ const assert = require('node:assert');
 const {Data,Database,Category_Data,Product_Data,Page_Data,Blog_Post_Data,Content_Data,Stat_Data,List_Data,Review_Data,Favorite_Data,Search_Data,Admin_Data,Business_Data,Order_Data,User_Data,Faq_Data,Portal,Cart_Data,Activity_Data,Blog_Post} = require(".");
 
 const {Log,Num,Str} = require("biz9-utility");
-const {DataType,DataItem,Item_Logic,Page_Logic,Template_Logic,Blog_Post_Logic,Content_Logic,Product_Logic,Field_Logic,Admin_Logic,Business_Logic,Category_Logic,User_Logic,Order_Logic,FieldType,Cart_Logic,Stat_Logic,Review_Logic,PageType,Sub_Item_Logic} = require("/home/think2/www/doqbox/biz9-framework/biz9-logic/code");
+const {DataType,DataItem,Item_Logic,App_Logic,Page_Logic,Template_Logic,Blog_Post_Logic,Content_Logic,Product_Logic,Field_Logic,Admin_Logic,Business_Logic,Service_Logic,Category_Logic,User_Logic,Order_Logic,FieldType,Cart_Logic,Stat_Logic,Review_Logic,PageType,BLog_Post_Logic,Sub_Item_Logic,Event_Logic} = require("/home/think2/www/doqbox/biz9-framework/biz9-logic/code");
 /*
  * availble tests
 - connect
@@ -63,29 +63,42 @@ describe('connect', function(){ this.timeout(25000);
                 //APP-START
                 //APP-END
                 console.log('DATA-START');
-                //let data_type = DataType.PRODUCT;
-                //let id = "7980d0fa-4552-4f2f-89f8-403b77e3aee9";
+                //{ data_type: 'type_biz', id: '878290d1-8972-46bf-9716-c01f47a55cb4' }
+                //let data_type = DataType.TYPE;
+                //let id = '878290d1-8972-46bf-9716-c01f47a55cb4';
+                ///let data_list = Event_Logic.get_test_list();
+                //Log.w('data_list',data_list);
+                //const [biz_error,biz_data] = await Portal.post_list(database,data_list);
+                //Log.w('biz_data',biz_data);
                 //let key = undefined;
                 //let parent_data_type = DataType.PRODUCT;
-                //let search = Item_Logic.get_search(DataType.FAVORITE,{},{},1,0);
+                console.log('aaaaaa');
+                let search = App_Logic.get_search(DataType.PRODUCT,{},{},1,0);
+                let option = {get_distinct:true,distinct_field:'category'};
+                console.log('bbbbbbbb');
+                const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option);
+                console.log('cccccc');
+                Log.w('biz_data',biz_data);
                 //Log.w('parent_data_type',parent_data_type);
-                //Log.w('search',search);
                  //let option = {get_parent:true,parent_data_type:DataType.PRODUCT,parent_fields:'id,title,category,title_url,image_filename,delivery_time,cost',get_user:true,user_fields:'id,title,title_url,image_filename'};
 
+                /*
                 let data_list = [
                 DataItem.get_new(DataType.BLOG_POST,0,{title:'my_title_'+Num.get_id()}),
                 DataItem.get_new(DataType.BLOG_POST,0,{title:'my_title_'+Num.get_id()}),
                 DataItem.get_new(DataType.BLOG_POST,0,{title:'my_title_'+Num.get_id()})
             ];
+                */
 
 
-                //const [biz_error,biz_data] = await Favorite_Data.search(database,search.filter,search.sort_by,search.page_current,search.page_size,option);
+                /*
                 const [biz_error,biz_data] = await Portal.post_list(database,data_list);
                 //const [biz_error,biz_data] = await Product_Data.get(database,key);
                 Log.w('data_type',data_type);
                 Log.w('key',key);
                 Log.w('data',biz_data);
                 console.log('DATA-END');
+                */
 
 
                 /*
@@ -168,7 +181,7 @@ describe('connect', function(){ this.timeout(25000);
         //query.product_type = "Application Development Template";
         //query.featured = "true";
         //let user_id = 'ccdaa4d8-9aa0-499f-9249-dd70a6d675f9';
-            let search = Item_Logic.get_search(DataType.PRODUCT,{title:'ffffffff'},{},1,0);
+            let search = App_Logic.get_search(DataType.PRODUCT,{title:'ffffffff'},{},1,0);
             Log.w('search',search);
 //const [error,data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size);
             const [error,data] = await Search_Data.get(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size);
@@ -202,7 +215,7 @@ describe('connect', function(){ this.timeout(25000);
         let data_type = DataType.CATEGORY;
         //let id =  'db4ce653-ed62-454a-b556-29dffd3940e6';
         let key = 'cool';
-        let search = Item_Logic.get_search(data_type,{},{},1,0);
+        let search = App_Logic.get_search(data_type,{},{},1,0);
         let option = {
             //count--start
             get_count:true,
@@ -225,7 +238,7 @@ describe('connect', function(){ this.timeout(25000);
     /*
         console.log('PRODUCT-START');
         let key = "copy_test_91963";
-        let search = Item_Logic.get_search(DataType.PRODUCT,{title:'Test 91963'},{},1,0);
+        let search = App_Logic.get_search(DataType.PRODUCT,{title:'Test 91963'},{},1,0);
         const [error,data] = await Product_Data.search(database,search.filter,search.sort_by,search.page_current,search.page_size);
     //const [error,data] = await Product_Data.get(database,key);
         Log.w('error',error);
@@ -279,7 +292,7 @@ describe('connect', function(){ this.timeout(25000);
                 console.log('PORTAL-SEARCH-START');
                 let id = 0;
                 let data_type = DataType.PRODUCT;
-                let search = Item_Logic.get_search(DataType.PRODUCT,{},{},1,0);
+                let search = App_Logic.get_search(DataType.PRODUCT,{},{},1,0);
                 const [error,data] = await Search_Data.get(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size);
                 Log.w('data',data);
                 console.log('PORTAL-SEARCH-END');
@@ -288,7 +301,7 @@ describe('connect', function(){ this.timeout(25000);
 /*
                 console.log('ADMIN-START');
                 let key = 'test_53555';
-        //let search = Item_Logic.get_search(DataType.ADMIN,{},{},1,0);
+        //let search = App_Logic.get_search(DataType.ADMIN,{},{},1,0);
         //const [error,data] = await Admin_Data.get(database,key);
                 const [error,data] = await Admin_Data.search(database,search.filter,search.sort_by,search.page_current,search.page_size);
                 Log.w('data',data);
@@ -298,7 +311,7 @@ describe('connect', function(){ this.timeout(25000);
         /*
                 console.log('BLOG-DATA-START');
                 let key = 'test_39058';
-        //let search = Item_Logic.get_search(DataType.BLOG_POST,{},{},1,0);
+        //let search = App_Logic.get_search(DataType.BLOG_POST,{},{},1,0);
                 const [error,data] = await Blog_Post_Data.get(database,key);
                 //const [error,data] = await Business_Data.search(database,search.filter,search.sort_by,search.page_current,search.page_size);
                 Log.w('data',data);
@@ -542,14 +555,14 @@ describe('post_data', function(){ this.timeout(25000);
                 //- GET_ITEM_SEARCH - START
                 /*
                 let query = {category:'Application'};
-                let search = Item_Logic.get_search(DataType.CATEGORY,query,{title:1},1,13);
+                let search = App_Logic.get_search(DataType.CATEGORY,query,{title:1},1,13);
                 let option = {get_search:true,search_data_type:DataType.PRODUCT,search_data_type:DataType.PRODUCT,search_field:'category',item_search_parent_field:'title'};
                 */
                 //- GET_ITEM_SEARCH - END
                 // - GET_ITEM_COUNT - START
                 /*
                 let query = {category:'Application'};
-                let search = Item_Logic.get_search(DataType.CATEGORY,query,{title:1},1,13);
+                let search = App_Logic.get_search(DataType.CATEGORY,query,{title:1},1,13);
                 let option = {
                     get_count:true,
                     item_data_type:DataType.PRODUCT,
@@ -1098,14 +1111,14 @@ describe('get_data', function(){ this.timeout(25000);
                 //let key = "CA-51129";
                 let key = "apple";
                 //let key = "d86ec25e-4b15-4c4a-8ef9-ce82c9067571";
-                //let search  = Item_Logic.get_search(DataType.BLOG_POST,{},{},1,0);
+                //let search  = App_Logic.get_search(DataType.BLOG_POST,{},{},1,0);
                 //let option = {};
                 //let option = {get_count:true,item_data_type:DataType.PRODUCT,item_field:'category',item_value:'title'};
                 //let option = {get_search:true,search_data_type:DataType.CATEGORY,search_field:'category',item_search_value:'title'};
                 //Log.w('search',search);
                 //const [biz_error,biz_data] = await Portal.get(database,data_type,key,{get_item:true,get_field:true,fields:'title,title_url'});
                 //////const [biz_error,biz_data] = await Content_Data.get(database,key,{get_item:true});
-                const [biz_error,biz_data] = await Faq_Data.get(database,'primary');
+                //const [biz_error,biz_data] = await Faq_Data.get(database,'primary');
                 //const [biz_error,biz_data] = await Blog_Post_Data.get(database,key,{get_item:true});
                 //console.log('aaaaaaa');
                 //Log.w('search',search);

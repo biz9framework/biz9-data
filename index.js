@@ -8,7 +8,7 @@ const async = require('async');
 const {get_db_connect_main,check_db_connect_main,delete_db_connect_main,post_item_main,get_item_main,delete_item_main,get_id_list_main,delete_item_list_main,get_count_item_list_main} = require('./mongo/index.js');
 const {Scriptz}=require("biz9-scriptz");
 const {Log,Str,Num,Obj,DateTime}=require("/home/think2/www/doqbox/biz9-framework/biz9-utility/code");
-const {DataItem,DataType,Item_Logic,User_Logic,Favorite_Logic,Stat_Logic,Order_Logic,Review_Logic,Type}=require("/home/think2/www/doqbox/biz9-framework/biz9-logic/code");
+const {DataItem,DataType,Favorite_Logic,Stat_Logic,Review_Logic,Type,App_Logic}=require("/home/think2/www/doqbox/biz9-framework/biz9-logic/code");
 const { get_db_connect_adapter,check_db_connect_adapter,delete_db_connect_adapter,post_item_adapter,post_item_list_adapter,get_item_adapter,delete_item_adapter,get_item_list_adapter,delete_item_list_adapter,get_count_item_list_adapter,delete_item_cache }  = require('./adapter.js');
 class Database {
 	static get = async (data_config,option) => {
@@ -511,7 +511,7 @@ class Order_Data {
 				async function(call){
 					if(!Str.check_is_null(cloud_data.order.id)){
 						let filter = { order_number: { $regex:String(order_number), $options: "i" } };
-						let search = Item_Logic.get_search(DataType.ORDER_ITEM,filter,{},1,0);
+						let search = App_Logic.get_search(DataType.ORDER_ITEM,filter,{},1,0);
 						const [error,data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,{});
 						if(error){
 							error=Log.append(error,biz_error);
@@ -528,13 +528,13 @@ class Order_Data {
 							query_field['id'] = { $regex:String(order_item.parent_id), $options: "i" };
 							order_parent_item_list_query.$or.push(query_field);
 						});
-						let search = Item_Logic.get_search(cloud_data.order.parent_data_type,order_parent_item_list_query,{},1,0);
+						let search = App_Logic.get_search(cloud_data.order.parent_data_type,order_parent_item_list_query,{},1,0);
 						const [error,data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size);
 						if(error){
 							error=Log.append(error,biz_error);
 						}else{
 							cloud_data.order.order_item_list.forEach(order_item => {
-								order_item.parent_item = data.item_list.find(item_find => item_find.id === order_item.parent_id) ? data.item_list.find(item_find => item_find.id === order_item.parent_id):Item_Logic.get_not_found(order_item.parent_data_type,order_item.parent_id,{app_id:database.app_id});
+								order_item.parent_item = data.item_list.find(item_find => item_find.id === order_item.parent_id) ? data.item_list.find(item_find => item_find.id === order_item.parent_id):App_Logic.get_not_found(order_item.parent_data_type,order_item.parent_id,{app_id:database.app_id});
 							});
 						}
 					}
@@ -543,7 +543,7 @@ class Order_Data {
 				async function(call){
 					if(!Str.check_is_null(cloud_data.order.id)){
 						let filter = { order_number: { $regex:String(order_number), $options: "i" } };
-						let search = Item_Logic.get_search(DataType.ORDER_SUB_ITEM,filter,{},1,0);
+						let search = App_Logic.get_search(DataType.ORDER_SUB_ITEM,filter,{},1,0);
 						const [error,data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,{});
 						if(error){
 							error=Log.append(error,biz_error);
@@ -560,13 +560,13 @@ class Order_Data {
 							query_field['id'] = { $regex:String(order_sub_item.parent_id), $options: "i" };
 							order_sub_item_list_query.$or.push(query_field);
 						});
-						let search = Item_Logic.get_search(DataType.ITEM,order_sub_item_list_query,{},1,0);
+						let search = App_Logic.get_search(DataType.ITEM,order_sub_item_list_query,{},1,0);
 						const [error,data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size);
 						if(error){
 							error=Log.append(error,biz_error);
 						}else{
 							order_sub_item_list.forEach(order_sub_item => {
-								order_sub_item.parent_item = data.item_list.find(item_find => item_find.id === order_sub_item.parent_id) ? data.item_list.find(item_find => item_find.id === order_sub_item.parent_id):Item_Logic.get_not_found(order_sub_item.parent_data_type,order_sub_item.parent_id,{app_id:database.app_id});
+								order_sub_item.parent_item = data.item_list.find(item_find => item_find.id === order_sub_item.parent_id) ? data.item_list.find(item_find => item_find.id === order_sub_item.parent_id):App_Logic.get_not_found(order_sub_item.parent_data_type,order_sub_item.parent_id,{app_id:database.app_id});
 							});
 						}
 					}
@@ -585,7 +585,7 @@ class Order_Data {
 				async function(call){
 					if(option.get_payment){
 						let filter = {order_number:order_number};
-						let search = Item_Logic.get_search(DataType.ORDER_PAYMENT,filter,{date_create:-1},0,1);
+						let search = App_Logic.get_search(DataType.ORDER_PAYMENT,filter,{date_create:-1},0,1);
 						const [error,data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size);
 						if(error){
 							error=Log.append(error,biz_error);
@@ -628,7 +628,7 @@ class Order_Data {
 					}
 				},
 				async function(call){
-					let search = Item_Logic.get_search(DataType.ORDER_ITEM,{order_number:cloud_data.order.order_number},{},1,0);
+					let search = App_Logic.get_search(DataType.ORDER_ITEM,{order_number:cloud_data.order.order_number},{},1,0);
 					const [error,data] = await Portal.delete_search(database,search.data_type,search.filter);
 					if(error){
 						error=Log.append(error,biz_error);
@@ -637,7 +637,7 @@ class Order_Data {
 					}
 				},
 				async function(call){
-					let search = Item_Logic.get_search(DataType.ORDER_SUB_ITEM,{order_number:cloud_data.order.order_number},{},1,0);
+					let search = App_Logic.get_search(DataType.ORDER_SUB_ITEM,{order_number:cloud_data.order.order_number},{},1,0);
 					const [error,data] = await Portal.delete_search(database,search.data_type,search.filter);
 					if(error){
 						error=Log.append(error,biz_error);
@@ -646,7 +646,7 @@ class Order_Data {
 					}
 				},
 				async function(call){
-					let search = Item_Logic.get_search(DataType.ORDER_PAYMENT,{order_number:cloud_data.order.order_number},{},1,0);
+					let search = App_Logic.get_search(DataType.ORDER_PAYMENT,{order_number:cloud_data.order.order_number},{},1,0);
 					const [error,data] = await Portal.delete_search(database,search.data_type,search.filter);
 					if(error){
 						error=Log.append(error,biz_error);
@@ -682,7 +682,7 @@ class Order_Data {
 						if(item_match){
 							item.parent_user = item_match;
 						}else{
-							item.parent_user = User_Logic.get_not_found(item.user_id);
+							item.parent_user = App_Logic.get_not_found(item.user_id);
 						}
 					});
 					if(error){
@@ -703,7 +703,7 @@ class Order_Data {
 							query_field['order_number'] = { $regex:String(order.order_number), $options: "i" };
 							order_number_list_query.$or.push(query_field);
 						});
-						let search = Item_Logic.get_search(DataType.ORDER_ITEM,order_number_list_query,{},1,0);
+						let search = App_Logic.get_search(DataType.ORDER_ITEM,order_number_list_query,{},1,0);
 						const [error,data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,{});
 						if(error){
 							error=Log.append(error,biz_error);
@@ -720,13 +720,13 @@ class Order_Data {
 							query_field['id'] = { $regex:String(order_item.parent_id), $options: "i" };
 							order_parent_item_list_query.$or.push(query_field);
 						});
-						let search = Item_Logic.get_search(parent_data_type,order_parent_item_list_query,{},1,0);
+						let search = App_Logic.get_search(parent_data_type,order_parent_item_list_query,{},1,0);
 						const [error,data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size);
 						if(error){
 							error=Log.append(error,biz_error);
 						}else{
 							order_item_list.forEach(order_item => {
-								order_item.parent_item = data.item_list.find(item_find => item_find.id === order_item.parent_id) ? data.item_list.find(item_find => item_find.id === order_item.parent_id):Item_Logic.get_not_found(order_item.parent_data_type,order_item.parent_id,{app_id:database.app_id});
+								order_item.parent_item = data.item_list.find(item_find => item_find.id === order_item.parent_id) ? data.item_list.find(item_find => item_find.id === order_item.parent_id):App_Logic.get_not_found(order_item.parent_data_type,order_item.parent_id,{app_id:database.app_id});
 							});
 						}
 					}
@@ -734,7 +734,7 @@ class Order_Data {
 				//get_order_sub_item_list
 				async function(call){
 					if(cloud_data.order_list.length>0){
-						let search = Item_Logic.get_search(DataType.ORDER_SUB_ITEM,order_number_list_query,{},1,0);
+						let search = App_Logic.get_search(DataType.ORDER_SUB_ITEM,order_number_list_query,{},1,0);
 						const [error,data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,{});
 						if(error){
 							error=Log.append(error,biz_error);
@@ -751,13 +751,13 @@ class Order_Data {
 							query_field['id'] = { $regex:String(order_sub_item.parent_id), $options: "i" };
 							order_parent_item_list_query.$or.push(query_field);
 						});
-						let search = Item_Logic.get_search(DataType.ITEM,order_parent_item_list_query,{},1,0);
+						let search = App_Logic.get_search(DataType.ITEM,order_parent_item_list_query,{},1,0);
 						const [error,data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size);
 						if(error){
 							error=Log.append(error,biz_error);
 						}else{
 							order_sub_item_list.forEach(order_sub_item => {
-								order_sub_item.parent_item = data.item_list.find(item_find => item_find.id === order_sub_item.parent_id) ? data.item_list.find(item_find => item_find.id === order_sub_item.parent_id):Item_Logic.get_not_found(order_sub_item.parent_data_type,order_sub_item.parent_id,{app_id:database.app_id});
+								order_sub_item.parent_item = data.item_list.find(item_find => item_find.id === order_sub_item.parent_id) ? data.item_list.find(item_find => item_find.id === order_sub_item.parent_id):App_Logic.get_not_found(order_sub_item.parent_data_type,order_sub_item.parent_id,{app_id:database.app_id});
 							});
 						}
 					}
@@ -940,7 +940,7 @@ class Cart_Data {
 				async function(call){
 					if(!Str.check_is_null(cloud_data.cart.id)){
 						let filter = { cart_number: { $regex:String(cart_number), $options: "i" } };
-						let search = Item_Logic.get_search(DataType.CART_ITEM,filter,{},1,0);
+						let search = App_Logic.get_search(DataType.CART_ITEM,filter,{},1,0);
 						const [error,data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,{});
 						if(error){
 							error=Log.append(error,biz_error);
@@ -957,13 +957,13 @@ class Cart_Data {
 							query_field['id'] = { $regex:String(cart_item.parent_id), $options: "i" };
 							cart_parent_item_list_query.$or.push(query_field);
 						});
-						let search = Item_Logic.get_search(cloud_data.cart.parent_data_type,cart_parent_item_list_query,{},1,0);
+						let search = App_Logic.get_search(cloud_data.cart.parent_data_type,cart_parent_item_list_query,{},1,0);
 						const [error,data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size);
 						if(error){
 							error=Log.append(error,biz_error);
 						}else{
 							cloud_data.cart.cart_item_list.forEach(cart_item => {
-								cart_item.parent_item = data.item_list.find(item_find => item_find.id === cart_item.parent_id) ? data.item_list.find(item_find => item_find.id === cart_item.parent_id):Item_Logic.get_not_found(cart_item.parent_data_type,cart_item.parent_id,{app_id:database.app_id});
+								cart_item.parent_item = data.item_list.find(item_find => item_find.id === cart_item.parent_id) ? data.item_list.find(item_find => item_find.id === cart_item.parent_id):App_Logic.get_not_found(cart_item.parent_data_type,cart_item.parent_id,{app_id:database.app_id});
 							});
 						}
 					}
@@ -972,7 +972,7 @@ class Cart_Data {
 				async function(call){
 					if(!Str.check_is_null(cloud_data.cart.id)){
 						let filter = { cart_number: { $regex:String(cart_number), $options: "i" } };
-						let search = Item_Logic.get_search(DataType.CART_SUB_ITEM,filter,{},1,0);
+						let search = App_Logic.get_search(DataType.CART_SUB_ITEM,filter,{},1,0);
 						const [error,data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,{});
 						if(error){
 							error=Log.append(error,biz_error);
@@ -989,13 +989,13 @@ class Cart_Data {
 							query_field['id'] = { $regex:String(cart_sub_item.parent_id), $options: "i" };
 							cart_sub_item_list_query.$or.push(query_field);
 						});
-						let search = Item_Logic.get_search(DataType.ITEM,cart_sub_item_list_query,{},1,0);
+						let search = App_Logic.get_search(DataType.ITEM,cart_sub_item_list_query,{},1,0);
 						const [error,data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size);
 						if(error){
 							error=Log.append(error,biz_error);
 						}else{
 							cart_sub_item_list.forEach(cart_sub_item => {
-								cart_sub_item.parent_item = data.item_list.find(item_find => item_find.id === cart_sub_item.parent_id) ? data.item_list.find(item_find => item_find.id === cart_sub_item.parent_id):Item_Logic.get_not_found(cart_sub_item.parent_data_type,cart_sub_item.parent_id,{app_id:database.app_id});
+								cart_sub_item.parent_item = data.item_list.find(item_find => item_find.id === cart_sub_item.parent_id) ? data.item_list.find(item_find => item_find.id === cart_sub_item.parent_id):App_Logic.get_not_found(cart_sub_item.parent_data_type,cart_sub_item.parent_id,{app_id:database.app_id});
 							});
 						}
 					}
@@ -1044,7 +1044,7 @@ class Cart_Data {
 					}
 				},
 				async function(call){
-					let search = Item_Logic.get_search(DataType.CART_ITEM,{cart_number:cloud_data.cart.cart_number},{},1,0);
+					let search = App_Logic.get_search(DataType.CART_ITEM,{cart_number:cloud_data.cart.cart_number},{},1,0);
 					const [error,data] = await Portal.delete_search(database,search.data_type,search.filter);
 					if(error){
 						error=Log.append(error,biz_error);
@@ -1053,7 +1053,7 @@ class Cart_Data {
 					}
 				},
 				async function(call){
-					let search = Item_Logic.get_search(DataType.CART_SUB_ITEM,{cart_number:cloud_data.cart.cart_number},{},1,0);
+					let search = App_Logic.get_search(DataType.CART_SUB_ITEM,{cart_number:cloud_data.cart.cart_number},{},1,0);
 					const [error,data] = await Portal.delete_search(database,search.data_type,search.filter);
 					if(error){
 						error=Log.append(error,biz_error);
@@ -1089,7 +1089,7 @@ class Cart_Data {
 						if(item_match){
 							item.parent_user = item_match;
 						}else{
-							item.parent_user = User_Logic.get_not_found(item.user_id);
+							item.parent_user = App_Logic.get_not_found(item.user_id);
 						}
 					});
 					if(error){
@@ -1110,7 +1110,7 @@ class Cart_Data {
 							query_field['cart_number'] = { $regex:String(cart.cart_number), $options: "i" };
 							cart_number_list_query.$or.push(query_field);
 						});
-						let search = Item_Logic.get_search(DataType.CART_ITEM,cart_number_list_query,{},1,0);
+						let search = App_Logic.get_search(DataType.CART_ITEM,cart_number_list_query,{},1,0);
 						const [error,data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,{});
 						if(error){
 							error=Log.append(error,biz_error);
@@ -1127,13 +1127,13 @@ class Cart_Data {
 							query_field['id'] = { $regex:String(cart_item.parent_id), $options: "i" };
 							cart_parent_item_list_query.$or.push(query_field);
 						});
-						let search = Item_Logic.get_search(parent_data_type,cart_parent_item_list_query,{},1,0);
+						let search = App_Logic.get_search(parent_data_type,cart_parent_item_list_query,{},1,0);
 						const [error,data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size);
 						if(error){
 							error=Log.append(error,biz_error);
 						}else{
 							cart_item_list.forEach(cart_item => {
-								cart_item.parent_item = data.item_list.find(item_find => item_find.id === cart_item.parent_id) ? data.item_list.find(item_find => item_find.id === cart_item.parent_id):Item_Logic.get_not_found(cart_item.parent_data_type,cart_item.parent_id,{app_id:database.app_id});
+								cart_item.parent_item = data.item_list.find(item_find => item_find.id === cart_item.parent_id) ? data.item_list.find(item_find => item_find.id === cart_item.parent_id):App_Logic.get_not_found(cart_item.parent_data_type,cart_item.parent_id,{app_id:database.app_id});
 							});
 						}
 					}
@@ -1141,7 +1141,7 @@ class Cart_Data {
 				//get_cart_sub_item_list
 				async function(call){
 					if(cloud_data.cart_list.length>0){
-						let search = Item_Logic.get_search(DataType.CART_SUB_ITEM,cart_number_list_query,{},1,0);
+						let search = App_Logic.get_search(DataType.CART_SUB_ITEM,cart_number_list_query,{},1,0);
 						const [error,data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,{});
 						if(error){
 							error=Log.append(error,biz_error);
@@ -1158,13 +1158,13 @@ class Cart_Data {
 							query_field['id'] = { $regex:String(cart_sub_item.parent_id), $options: "i" };
 							cart_parent_item_list_query.$or.push(query_field);
 						});
-						let search = Item_Logic.get_search(DataType.ITEM,cart_parent_item_list_query,{},1,0);
+						let search = App_Logic.get_search(DataType.ITEM,cart_parent_item_list_query,{},1,0);
 						const [error,data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size);
 						if(error){
 							error=Log.append(error,biz_error);
 						}else{
 							cart_sub_item_list.forEach(cart_sub_item => {
-								cart_sub_item.parent_item = data.item_list.find(item_find => item_find.id === cart_sub_item.parent_id) ? data.item_list.find(item_find => item_find.id === cart_sub_item.parent_id):Item_Logic.get_not_found(cart_sub_item.parent_data_type,cart_sub_item.parent_id,{app_id:database.app_id});
+								cart_sub_item.parent_item = data.item_list.find(item_find => item_find.id === cart_sub_item.parent_id) ? data.item_list.find(item_find => item_find.id === cart_sub_item.parent_id):App_Logic.get_not_found(cart_sub_item.parent_data_type,cart_sub_item.parent_id,{app_id:database.app_id});
 							});
 						}
 					}
@@ -1341,7 +1341,7 @@ class Review_Data {
 				//review_list
 				async function(call){
 					let query = {parent_id:parent_id,parent_data_type:parent_data_type};
-					let search = Item_Logic.get_search(DataType.REVIEW,query,{},page_current,page_size);
+					let search = App_Logic.get_search(DataType.REVIEW,query,{},page_current,page_size);
 					let option = {get_parent:true,parent_data_type:parent_data_type,parent_fields:'id,title,title_url,image_data',get_user:true,user_fields:'id,title,title_url,image_data'};
 					const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option);
 					if(biz_error){
@@ -1504,7 +1504,7 @@ class User_Data {
 			async.series([
 				//check email
 				async function(call){
-					let search = Item_Logic.get_search(DataType.USER,{email:data.user.email},{},1,0);
+					let search = App_Logic.get_search(DataType.USER,{email:data.user.email},{},1,0);
 					const [biz_error,biz_data] = await Portal.count(database,search.data_type,search.filter);
 					if(biz_error){
 						biz_error=Log.append(error,biz_error);
@@ -1516,7 +1516,7 @@ class User_Data {
 				},
 				//check title
 				async function(call){
-					let search = Item_Logic.get_search(DataType.USER,{title:data.user.title},{},1,0);
+					let search = App_Logic.get_search(DataType.USER,{title:data.user.title},{},1,0);
 					const [biz_error,biz_data] = await Portal.count(database,search.data_type,search.filter);
 					if(biz_error){
 						biz_error=Log.append(error,biz_error);
@@ -1606,7 +1606,7 @@ class User_Data {
 			async.series([
 				//check email,password
 				async function(call){
-					let search = Item_Logic.get_search(DataType.USER,{email:data.user.email,password:data.user.password},{},1,0);
+					let search = App_Logic.get_search(DataType.USER,{email:data.user.email,password:data.user.password},{},1,0);
 					const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size);
 					if(biz_error){
 						error=Log.append(error,biz_error);
@@ -1679,7 +1679,7 @@ class Favorite_Data {
 			async.series([
 				async function(call){
 					let favorite_filter = Favorite_Logic.get_search_filter(parent_data_type,parent_id,user_id);
-					let search = Item_Logic.get_search(DataType.FAVORITE,favorite_filter,{},1,0);
+					let search = App_Logic.get_search(DataType.FAVORITE,favorite_filter,{},1,0);
 					const [biz_error,biz_data] = await Portal.count(database,search.data_type,search.filter);
 					if(biz_error){
 						error=Log.append(biz_error,error);
@@ -1743,7 +1743,7 @@ class Portal {
 							if(!Str.check_is_null(biz_data.id)){
 								data = biz_data;
 							}else{
-								data = data_type != DataType.USER ? Item_Logic.get_not_found(data_type,key,{app_id:database.app_id}) : User_Logic.get_not_found(key,{app_id:database.app_id});
+								data = data_type != DataType.USER ? App_Logic.get_not_found(data_type,key,{app_id:database.app_id}) : App_Logic.get_not_found(key,{app_id:database.app_id});
 						}
 						}
 						call();
@@ -1783,7 +1783,7 @@ class Portal {
 						}else{
 							filter={top_id:data.top_id};
 						}
-						let search = Item_Logic.get_search(DataType.ITEM,filter,get_sort(data),1,0);
+						let search = App_Logic.get_search(DataType.ITEM,filter,get_sort(data),1,0);
 						Data.get_list(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size).then(([biz_error,item_list,item_count,page_count])=> {
 							if(biz_error){
 								error=Log.append(error,biz_error);
@@ -1874,7 +1874,7 @@ class Portal {
 			option = option ? option : {get_item:false,get_image:false};
 			async.series([
 				function(call){
-					let search = Item_Logic.get_search(data_type,!Obj.check_is_empty(filter)?filter:{},!Obj.check_is_empty(sort_by)?sort_by:{},!Str.check_is_null(page_current)?page_current:0,!Str.check_is_null(page_size)?page_size:0);
+					let search = App_Logic.get_search(data_type,!Obj.check_is_empty(filter)?filter:{},!Obj.check_is_empty(sort_by)?sort_by:{},!Str.check_is_null(page_current)?page_current:0,!Str.check_is_null(page_size)?page_size:0);
 					Data.get_list(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option).then(([biz_error,item_list,item_count,page_count])=>{
 						if(biz_error){
 							error=Log.append(error,biz_error);
@@ -1899,7 +1899,7 @@ class Portal {
 							query_field[option.count_field] = { $regex:String(item[option.count_value]), $options: "i" };
 							query.$or.push(query_field);
 						});
-						let search = Item_Logic.get_search(option.count_data_type,query,{},1,0);
+						let search = App_Logic.get_search(option.count_data_type,query,{},1,0);
 						Data.get_list(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size).then(([biz_error,item_list,item_count,page_count])=> {
 							if(biz_error){
 								error=Log.append(error,biz_error);
@@ -1932,7 +1932,7 @@ class Portal {
 							query_field[option.search_field] = { $regex:String(item[option.search_parent_field]), $options: "i" };
 							query.$or.push(query_field);
 						});
-						let search = Item_Logic.get_search(option.search_data_type,query,{},1,0);
+						let search = App_Logic.get_search(option.search_data_type,query,{},1,0);
 						Data.get_list(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size).then(([biz_error,item_list,item_count,page_count])=> {
 							if(biz_error){
 								error=Log.append(error,biz_error);
@@ -1965,7 +1965,7 @@ class Portal {
                             query_field['id'] = { $regex:String(item['parent_id']), $options: "i" };
 							query.$or.push(query_field);
 						});
-							let search = Item_Logic.get_search(option.parent_data_type,query,{},1,0);
+							let search = App_Logic.get_search(option.parent_data_type,query,{},1,0);
                       	    let parent_option = option.parent_fields ? {get_field:true,fields:option.parent_fields} : {};
                             Data.get_list(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,parent_option).then(([biz_error,item_list,item_count,page_count])=> {
 								if(biz_error){
@@ -1973,7 +1973,7 @@ class Portal {
                                 }else{
 									if(data.data_list.length> 0){
                                   	data.data_list.forEach(item => {
-                                    	item.parent_item = item_list.find(item_find => item_find.id === item.parent_id) ? item_list.find(item_find => item_find.id === item.parent_id):Item_Logic.get_not_found(item.parent_data_type,item.parent_id,{app_id:database.app_id});
+                                    	item.parent_item = item_list.find(item_find => item_find.id === item.parent_id) ? item_list.find(item_find => item_find.id === item.parent_id):App_Logic.get_not_found(item.parent_data_type,item.parent_id,{app_id:database.app_id});
 									});
 									}
 								}
@@ -1994,7 +1994,7 @@ class Portal {
 							query_field['id'] = { $regex:String(item['user_id']), $options: "i" };
 							query.$or.push(query_field);
 						});
-						let search = Item_Logic.get_search(DataType.USER,query,{},1,0);
+						let search = App_Logic.get_search(DataType.USER,query,{},1,0);
 						let user_option = option.user_fields ? {get_field:true,fields:option.user_fields} : {};
 						Data.get_list(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,user_option).then(([biz_error,item_list,item_count,page_count])=> {
 							if(biz_error){
@@ -2002,7 +2002,7 @@ class Portal {
 							}else{
 								if(data.data_list.length> 0){
 								data.data_list.forEach(item => {
-									item.user = item_list.find(item_find => item_find.id === item.user_id) ? item_list.find(item_find => item_find.id === item.user_id):User_Logic.get_not_found(item.user_id,{app_id:database.app_id});
+									item.user = item_list.find(item_find => item_find.id === item.user_id) ? item_list.find(item_find => item_find.id === item.user_id):App_Logic.get_not_found(item.user_id,{app_id:database.app_id});
 
 								});
 								}
@@ -2284,7 +2284,7 @@ class Portal {
 		 */
 		return new Promise((callback) => {
 			let error = null;
-			let data = {copy_success:false,app_id:database.app_id};
+			let data = DataItem.get_new(data_type,id);
 			let top_data = DataItem.get_new(data_type,0);
 			let copy_data = DataItem.get_new(data_type,0);
 			let data_list = [];
@@ -2301,7 +2301,7 @@ class Portal {
 				},
 				function(call){
 					let filter = {top_id:top_data.id};
-					let search = Item_Logic.get_search(DataType.ITEM,filter,{},1,0);
+					let search = App_Logic.get_search(DataType.ITEM,filter,{},1,0);
 					Data.get_list(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size).then(([biz_error,biz_data,item_count,page_count])=> {
 						if(biz_error){
 							error=Log.append(error,biz_error);
@@ -2313,7 +2313,7 @@ class Portal {
 						error = Log.append(error,err);
 						call();
 					});
-				},
+			},
 				function(call){
 					copy_data['title'] = 'Copy '+top_data['title'];
 					copy_data['title_url'] = 'copy_'+top_data['title_url'];
@@ -2326,7 +2326,7 @@ class Portal {
 						}
 					});
 					call();
-				},
+							},
 				function(call){
 					Data.post(database,copy_data.data_type,copy_data).then(([biz_error,biz_data])=> {
 						if(biz_error){
@@ -2334,14 +2334,14 @@ class Portal {
 						}else{
 							copy_data=biz_data;
 						}
-						call();
+					call();
 					}).catch(err => {
 						error=Log.append(error,err);
 						call();
 					});
 				},
 				function(call){
-					data_list.forEach(item => {
+					for(const item of data_list) {
 						let copy_sub_data=DataItem.get_new(copy_data.data_type,0,{top_id:copy_data.id,top_data_type:copy_data.data_type});
 						copy_sub_data['source_id'] = item['id'];
 						copy_sub_data['source_data_type'] = item['data_type'];
@@ -2351,14 +2351,13 @@ class Portal {
 
 						copy_sub_data['source_top_id'] = item['top_id'];
 						copy_sub_data['source_top_data_type'] = item['top_data_type'];
-
-						item.forEach(key => {
+ 						for(key in item){
 							if( key != 'id' && key != 'source' && key != 'parent_id' && key != 'parent_data_type'  && key != 'top_id' && key != 'top_data_type' ){
 								copy_sub_data[key] = item[key];
 							}
-						});
+  						}
 						copy_data_list.push(copy_sub_data);
-					});
+					};
 					call();
 				},
 				function(call){
@@ -2410,9 +2409,7 @@ class Portal {
 				},
 			]).then(result => {
 				if(copy_data.id){
-					data.copy_data = copy_data;
-					data.copy_data_list = copy_data_list;
-					data.copy_success = true;
+					data = copy_data;
 				}
 				callback([error,data]);
 			}).catch(err => {
@@ -2529,7 +2526,7 @@ class Stat_Data {
 							query_field['id'] = { $regex:String(parent_item_list[a].item_id), $options: "i" };
 							query.$or.push(query_field);
 						}
-						let search = Item_Logic.get_search(parent_data_type,query,{},1,0);
+						let search = App_Logic.get_search(parent_data_type,query,{},1,0);
 						const [error,data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size);
 						if(error){
 							error=Log.append(error,biz_error);
@@ -2554,7 +2551,7 @@ class Stat_Data {
 							query_field['user_id'] = { $regex:String(user_id), $options: "i" };
 							query.$or.push(query_field);
 						}
-						let search = Item_Logic.get_search(DataType.STAT,query,{},1,0);
+						let search = App_Logic.get_search(DataType.STAT,query,{},1,0);
 						const [error,data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size);
 						if(error){
 							error=Log.append(error,biz_error);
