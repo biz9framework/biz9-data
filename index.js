@@ -1486,8 +1486,8 @@ class User_Data {
 		return new Promise((callback) => {
 			let error = null;
 			let data = {
-					email_success:false,
-					title_success:false,
+					email_resultOK:false,
+					title_reultOK:false,
 				    user:post_data
 			};
 			async.series([
@@ -1499,13 +1499,13 @@ class User_Data {
 						biz_error=Log.append(error,biz_error);
 					}else{
 						if(Str.check_is_null(data.user.id) && biz_data.data_list.length<=0){
-							data.email_success = true;
+							data.email_resultOK = true;
 						}else if(biz_data.data_list.length>0){
 							if(data.user.id == biz_data.data_list[0].id){
-								data.email_success = true;
+								data.email_resultOK = true;
 							}
 						}else{
-							data.email_success = true;
+							data.email_resultOK = true;
 						}
 					}
 				},
@@ -1517,19 +1517,19 @@ class User_Data {
 						biz_error=Log.append(error,biz_error);
 					}else{
 						if(Str.check_is_null(data.user.id) && biz_data.data_list.length<=0){
-							data.title_success = true;
+							data.title_resultOK = true;
 						}else if(biz_data.data_list.length>0){
 							if(data.user.id == biz_data.data_list[0].id){
-								data.title_success = true;
+								data.title_resultOK = true;
 							}
 						}else{
-							data.title_success = true;
+							data.title_resultOK = true;
 						}
 					}
 				},
 				//post user
 				async function(call){
-					if(data.email_success && data.title_success){
+					if(data.email_resultOK && data.title_resultOK){
 						data.user.last_login = DateTime.get_new();
 						const [biz_error,biz_data] = await Portal.post(database,DataType.USER,post_data);
 						if(biz_error){
@@ -1565,8 +1565,8 @@ class User_Data {
 		return new Promise((callback) => {
 			let error = null;
 			let data = {
-					email_success:false,
-					title_success:false,
+					email_resultOK:false,
+					title_resultOK:false,
 				    user:post_data.user,
 					stat:DataItem.get_new(DataType.STAT,0)
 			};
@@ -1582,7 +1582,7 @@ class User_Data {
 						biz_error=Log.append(error,biz_error);
 					}else{
 						if(biz_data.count<=0){
-							data.email_success = true;
+							data.email_resultOK = true;
 						}
 					}
 				},
@@ -1594,13 +1594,13 @@ class User_Data {
 						biz_error=Log.append(error,biz_error);
 					}else{
 						if(biz_data.count<=0){
-							data.title_success = true;
+							data.title_resultOK = true;
 						}
 					}
 				},
 				//post user
 				async function(call){
-					if(data.email_success && data.title_success){
+					if(data.email_resultOK && data.title_resultOK){
 						data.user.last_login = DateTime.get_new();
 						const [biz_error,biz_data] = await Portal.post(database,DataType.USER,data.user);
 						if(biz_error){
@@ -1612,7 +1612,7 @@ class User_Data {
 				},
  				//get stat - ip - merge
         		async function(call){
-            		if(data.email_success && data.title_success && option.post_ip_address){
+            		if(data.email_resultOK && data.title_resultOK && option.post_ip_address){
 				    	data.ip_address = post_ip_address;
 				    	data.geo_key = post_geo_key;
                 		const [biz_error,biz_data] = await User_Data.get_ip(data.ip_address,data.geo_key);
@@ -1624,7 +1624,7 @@ class User_Data {
         		},
  				//get stat - device - merge
         		async function(call){
-            		if(data.email_success && data.title_success && option.post_device){
+            		if(data.email_resultOK && data.title_resultOK && option.post_device){
 				    	data.device = post_device;
                 		const biz_data = await User_Data.get_device(data.device);
                 		data.stat = Obj.merge(data.stat,biz_data);
@@ -1632,7 +1632,7 @@ class User_Data {
         		},
 				//post stat
         		async function(call){
-            		if(data.email_success && data.title_success && option.post_stat && option.post_device || option.post_ip){
+            		if(data.email_resultOK && data.title_resultOK && option.post_stat && option.post_device || option.post_ip){
                 		let post_new_stat = Stat_Logic.get_new_user(data.user.id,Type.STAT_REGISTER,data.stat);
             			const [biz_error,biz_data] = await Stat_Data.post_user(database,post_new_stat.user_id,post_new_stat.type,post_new_stat.data);
             		if(biz_error){
@@ -1668,7 +1668,7 @@ class User_Data {
 		return new Promise((callback) => {
 			let error = null;
 			let data = {
-				user_success:false,
+				user_resultOK:false,
 				user:post_data.user,
 				stat:DataItem.get_new(DataType.STAT,0)
 			};
@@ -1685,13 +1685,13 @@ class User_Data {
 					}else{
 						if(biz_data.data_list.length>0){
 							data.user = biz_data.data_list[0];
-							data.user_success = true;
+							data.user_resultOK = true;
 						}
 					}
 				},
 				//post user
 				async function(call){
-					if(data.user_success){
+					if(data.user_resultOK){
 						data.user.last_login = DateTime.get_new();
 						const [biz_error,biz_data] = await Portal.post(database,DataType.USER,data.user);
 						if(biz_error){
@@ -1701,7 +1701,7 @@ class User_Data {
 				},
 				//get stat - ip - merge
         		async function(call){
-            		if(data.user_success && option.post_ip_address){
+            		if(data.user_resultOK && option.post_ip_address){
 				    	data.ip_address = post_ip_address;
 				    	data.geo_key = post_geo_key;
             		const [biz_error,biz_data] = await User_Data.get_ip(data.ip_address,data.geo_key);
@@ -1713,7 +1713,7 @@ class User_Data {
         		},
  				//get stat - device - merge
         		async function(call){
-            		if(data.user_success && option.post_device){
+            		if(data.user_resultOK && option.post_device){
 						data.device = post_device;
             			const biz_data = await User_Data.get_device(data.device);
                 		data.stat = Obj.merge(data.stat,biz_data);
@@ -1721,7 +1721,7 @@ class User_Data {
         		},
 				//post stat
         		async function(call){
-            		if(data.user_success && option.post_stat && option.post_device || option.post_ip){
+            		if(data.user_resultOK && option.post_stat && option.post_device || option.post_ip){
                 		let post_new_stat = Stat_Logic.get_new_user(data.user.id,Type.STAT_LOGIN,data.stat);
             			const [biz_error,biz_data] = await Stat_Data.post_user(database,post_new_stat.user_id,post_new_stat.type,post_new_stat.data);
             		if(biz_error){
@@ -1784,7 +1784,7 @@ class Portal {
 	//9_portal_demo / required / type_logic.type_list
 	static demo_post = (database,data_type,type_list) => {
 		return new Promise((callback) => {
-			let data = {result_OK:false};
+			let data = {resultOK:false};
 			let error = null;
 			async.series([
 				async function(call){
@@ -1821,7 +1821,7 @@ class Portal {
 						error=Log.append(error,biz_error);
 					}else{
 						data.category_list = biz_data;
-						data.result_OK = true;
+						data.resultOK = true;
 					}
 					}
 				},
@@ -1841,12 +1841,12 @@ class Portal {
 						error=Log.append(error,biz_error);
 					}else{
 						data.product_list = biz_data;
-						data.result_OK = true;
+						data.resultOK = true;
 					}
 					}
 				},
 				async function(call){
-					data.result_OK = true;
+					data.resultOK = true;
 				},
 			]).then(result => {
 				callback([error,data]);
