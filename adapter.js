@@ -679,25 +679,21 @@ const get_count_item_list_adapter = (db_connect,data_type,filter,option) => {
 const post_bulk_adapter=(db_connect,data_type,item_data_list) => {
     return new Promise((callback) => {
         let cache_connect={};
-        let data ={result_ok:false};
+        let data ={result_OK:false};
         async.series([
             function(call){
-                console.log('aaaaaaaaaaaaaa');
-                Log.w('data_type',data_type);
-                Log.w('item_data_list',item_data_list);
-                console.log('bbbbbbbbb');
-                console.log('bbbbbbbbb');
-                post_bulk_main(db_connect,data_type,item_data_list).then(([error,data])=>{
-                    data.result_ok = true;
+                post_bulk_main(db_connect,data_type,item_data_list).then(([biz_error,biz_data])=>{
+                    if(biz_data.result_OK){
+                        data = biz_data;
+                    }
+                    Log.w('aaaaaa22',data);
                     call();
                 }).catch(error=>{
                     Log.error("Data-Adapter-Bulk-Item-Adapter-2",error);
-                    data.result_ok = false;
-                    callback([error,data.result_ok]);
+                    callback([error,data]);
                 });
             },
         ]).then(result => {
-            console.log('success');
             callback([error,data]);
         }).catch(error => {
             Log.error("Data-Adapter-Update-Item-Adapter-END",error);

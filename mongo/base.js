@@ -120,37 +120,35 @@ const post_item_base = (db_connect,data_type,item,option) => {
 }
 const post_bulk_base = (db_connect,data_type,data_list) => {
     return new Promise((callback) => {
-        console.log('3333333333333');
-        let data = null;
+        console.log('444444444');
+        let data = {result_OK:false};
         let bulk_list = [];
         let date_create = DateTime.get_new();
-        // { insertOne: { document: { _id: 3, type: "beef", size: "medium", price: 6 } } },
-
         for(let a = 0; a < data_list.length; a++){
-            let item = {insertOne:{document:{}}};
+            let item = {insertOne:{document:data_list[a]}};
             data_list[a].id = Str.get_guid();
             data_list[a].date_create = date_create;
-            data_list[a].date_save = date_create;
-            item.insertOne.document = data_list[a];
             bulk_list.push(item);
         }
-        console.log('4444444444');
-        Log.w('bulk_list',bulk_list);
-        Log.w('data_type',data_type);
-        console.log('5555555');
+
         if(check_db_connect_base(db_connect)){
             try {
-                //{ insertOne: { document: {  type: "beef", size: "medium", price: 6 } } },
-   db_connect.collection(data_type).bulkWrite( bulk_list,
-   { ordered: false } )
-} catch( error ) {
-        console.log('error');
-        Log.w('bulk_write_error',error);
-        Log.error("DATA-MONGO-BASE-DELETE-ITEM-BASE-ERROR",error);
- }
-
-        }
-    });
+                console.log('555555555');
+                console.log(data_list);
+                console.log(data_type);
+                db_connect.collection(data_type).bulkWrite(bulk_list,
+                { ordered: false } )
+                } catch( error ) {
+                    console.log('error');
+                    Log.w('bulk_write_error',error);
+                    Log.error("DATA-MONGO-BASE-DELETE-ITEM-BASE-ERROR",error);
+                }
+               data.result_OK= true;
+            console.log('66666666');
+                console.log('done'+Num.get_id());
+                callback([error,data]);
+            }
+        });
 }
 
 const delete_item_base = (db_connect,data_type,id,option) => {

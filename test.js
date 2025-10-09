@@ -583,11 +583,12 @@ describe('post_data', function(){ this.timeout(25000);
                 //
                 let post_type_list = [];
 
-                for(let a = 0; a<99999;a++){
-                    post_type_list.push(Product_Logic.get_test('Title '+Num.get_id()))
-                }
+                //for(let a = 0; a<9;a++){
+                    //post_type_list.push(Product_Logic.get_test('Title '+Num.get_id()))
+                //}
+                post_type_list = [Demo_Logic.get_new_type('Landing Page',{get_category:true,categorys:'Beauty,Pets',get_item:true,item_count:9,item_data_type:DataType.PRODUCT,category_data_type:DataType.PRODUCT})];
 
-                Log.w('post_product_type_list',post_type_list);
+                Log.w('post_type_list',post_type_list);
 
                 const [biz_error,biz_data] = await Portal.demo_post(database,DataType.PRODUCT,post_type_list);
                 //Log.w('parent_item',data);

@@ -8,7 +8,7 @@ const async = require('async');
 const {get_db_connect_main,check_db_connect_main,delete_db_connect_main,post_item_main,get_item_main,delete_item_main,get_id_list_main,delete_item_list_main,get_count_item_list_main,post_bulk_main} = require('./mongo/index.js');
 const {Scriptz}=require("biz9-scriptz");
 const {Log,Str,Num,Obj,DateTime}=require("/home/think2/www/doqbox/biz9-framework/biz9-utility/code");
-const {DataItem,DataType,Favorite_Logic,Stat_Logic,Review_Logic,Type,App_Logic,Product_Logic,Demo_Logic}=require("/home/think2/www/doqbox/biz9-framework/biz9-logic/code");
+const {DataItem,DataType,Favorite_Logic,Stat_Logic,Review_Logic,Type,App_Logic,Product_Logic,Demo_Logic,Category_Logic}=require("/home/think2/www/doqbox/biz9-framework/biz9-logic/code");
 const { get_db_connect_adapter,check_db_connect_adapter,delete_db_connect_adapter,post_item_adapter,post_item_list_adapter,post_bulk_adapter,get_item_adapter,delete_item_adapter,get_item_list_adapter,delete_item_list_adapter,get_count_item_list_adapter,delete_item_cache }  = require('./adapter.js');
 class Database {
 	static get = async (data_config,option) => {
@@ -1784,41 +1784,44 @@ class Portal {
 	//9_portal_demo / required / type_logic.type_list
 	static demo_post = (database,data_type,type_list) => {
 		return new Promise((callback) => {
-			let data = {result_ok:false};
+			let data = {result_OK:false};
 			let error = null;
 			async.series([
+				async function(call){
+					Log.w('type_list_33',type_list);
+					Log.w('data_type_44',data_type);
+				},
+
+				/*
 				//type_list
 				async function(call){
-					console.log('11111111111');
 					let post_type_list = [];
- 					type_list.forEach(item => {
+					for(const item of type_list) {
 						post_type_list.push(Demo_Logic.get_new_type(item.title));
-         			});
-					console.log('22222222');
-					Log.w(post_type_list,post_type_list);
-					Log.w(data_type,data_type);
-					const [biz_error,biz_data] = await Portal.post_bulk(database,data_type,post_type_list);
+         			};
+					const [biz_error,biz_data] = await Portal.post_bulk(database,DataType.TYPE,post_type_list);
+					Log.w('typer_done',biz_data);
 					if(biz_error){
 						error=Log.append(error,biz_error);
 					}else{
-						data.result_ok = true;
 					}
 				},
+				*/
 				//category_list
 				async function(call){
 					let post_category_list = [];
 					for(const item of type_list) {
 					for(const cat_item of item.categorys) {
-						post_category_list.push(cat_item);
+						post_category_list.push(Category_Logic.get_new(cat_item.title,cat_item.type,cat_item.category));
          				};
          			};
 					if(post_category_list.length>0){
-					const [biz_error,biz_data] = await Portal.post_bulk(database,data_type,post_category_list);
+					const [biz_error,biz_data] = await Portal.post_bulk(database,DataType.CATEGORY,post_category_list);
 					if(biz_error){
 						error=Log.append(error,biz_error);
 					}else{
 						data.category_list = biz_data;
-						data.result_ok = true;
+						data.result_OK = true;
 					}
 					}
 				},
@@ -1838,12 +1841,12 @@ class Portal {
 						error=Log.append(error,biz_error);
 					}else{
 						data.product_list = biz_data;
-						data.result_ok = true;
+						data.result_OK = true;
 					}
 					}
 				},
 				async function(call){
-					data.result_ok = true;
+					data.result_OK = true;
 				},
 			]).then(result => {
 				callback([error,data]);
