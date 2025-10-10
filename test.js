@@ -64,6 +64,30 @@ describe('connect', function(){ this.timeout(25000);
                 //APP-START
                 //APP-END
                 console.log('DATA-START');
+                let cart_number = "CA-10319";
+                let product_id = "49d15f34-c840-477c-9aba-32cc0575087f";
+                let cms_type_id = "b2e72744-85bf-4fd8-94e5-6aa8b4622dfb";
+                let hosting_type_id = "a80ecdc7-13ff-4d74-94bc-f873da165832";
+                let user_id = "44db96f9-4c51-4272-8159-9cdae914084a";
+                let cart = Cart_Logic.get_new(DataType.PRODUCT,user_id);
+                cart.cms_type_id = cms_type_id;
+                cart.hosting_type_id = hosting_type_id;
+
+                //cart item
+                let cart_item_product = Cart_Logic.get_new_cart_item(DataType.PRODUCT,product_id,cart.cart_number,1);
+                // cart sub item product_sub_cms_type
+                cart_item_product.cart_sub_item_list.push(Cart_Logic.get_new_cart_sub_item(DataType.PRODUCT,cms_type_id,cart.cart_number,1));
+                console.log('aaaaaaaaaaaa');
+                // cart sub item product_sub_hosting_type
+                cart_item_product.cart_sub_item_list.push(Cart_Logic.get_new_cart_sub_item(DataType.PRODUCT,hosting_type_id,cart.cart_number,1));
+                cart.cart_item_list.push(cart_item_product);
+                console.log('bbbbbbbbbb');
+                //const [biz_error,biz_data] = await Cart_Data.post(database,cart);
+                const [biz_error,biz_data] = await Cart_Data.get(database,cart_number);
+
+                //Log.w('cart',cart);
+                Log.w('data',biz_data);
+
                 //{ data_type: 'type_biz', id: '878290d1-8972-46bf-9716-c01f47a55cb4' }
                 //let data_type = DataType.TYPE;
                 //let id = '878290d1-8972-46bf-9716-c01f47a55cb4';
@@ -76,6 +100,7 @@ describe('connect', function(){ this.timeout(25000);
                 //let search = App_Logic.get_search(DataType.CATEGORY,{category:DataType.PRODUCT},{},1,0);
                 //let option = {get_distinct:true,distinct_field:"title"};
                 //const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option);
+                /*
                 let test_user = User_Logic.get_test();
                 test_user.title = '82020username--ddd';
                 test_user.id = '5cca8a08-bdb5-4bbc-a7cb-e198633cfb1a-dd';
@@ -84,7 +109,8 @@ describe('connect', function(){ this.timeout(25000);
                 //Log.w('test_user',test_user);
                 const [biz_error,biz_data] = await User_Data.post(database,test_user);
                 //console.log('cccccc');
-                Log.w('biz_data',biz_data);
+                */
+                //Log.w('biz_data',biz_data);
                 //Log.w('biz_data_len',biz_data.data_list.length);
                 //Log.w('biz_data_len',biz_data.data_list.length);
 
@@ -1250,7 +1276,7 @@ describe('get_data', function(){ this.timeout(25000);
                 //const [biz_error,biz_data] = await Cart_Data.get(database,key);
                 //const [biz_error,biz_data] = await Cart_Data.search(database,DataType.PRODUCT,search.filter,search.sort_by,search.parent_current,search.page_size);
                 //const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.parent_current,search.page_size,option);
-                Log.w('data',biz_data);
+                //Log.w('data',biz_data);
                 console.log('TEST-GET-SUCCESS');
                 console.log('TEST-GET-END');
             },
