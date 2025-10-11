@@ -648,7 +648,7 @@ class Cart_Data {
 		return new Promise((callback) => {
 			let data = {};
 			let error = null;
-			data.cart = DataItem.get_new(DataType.CART,cart.id,{cart_number:cart.cart_number,parent_data_type:cart.parent_data_type,user_id:cart.user_id,grand_total: Cart_Logic.get_grand_total(cart)});
+			data.cart = DataItem.get_new(DataType.CART,cart.id,{cart_number:cart.cart_number,parent_data_type:cart.parent_data_type,user_id:cart.user_id,grand_total: 0});
 			data.cart_item_list = [];
 			data.cart_sub_item_list = [];
 			async.series([
@@ -1459,10 +1459,6 @@ class Portal {
 			let data = {resultOK:false};
 			let error = null;
 			async.series([
-				async function(call){
-					Log.w('type_list_33',type_list);
-					Log.w('data_type_44',data_type);
-				},
 				//type_list
 				async function(call){
 					let post_type_list = [];
@@ -1558,7 +1554,7 @@ class Portal {
 							if(!Str.check_is_null(biz_data.id)){
 								data = biz_data;
 							}else{
-								data = data_type != DataType.USER ? App_Logic.get_not_found(DataType.USER,key,{app_id:database.app_id}) : App_Logic.get_not_found(DataType.USER,key,{app_id:database.app_id});
+								data = data_type != DataType.USER ? App_Logic.get_not_found(data_type,key,{app_id:database.app_id}) : App_Logic.get_not_found(DataType.USER,key,{app_id:database.app_id});
 						}
 						}
 						call();

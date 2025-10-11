@@ -4,7 +4,7 @@ const assert = require('node:assert');
 const {Data,Database,Category_Data,Product_Data,Page_Data,Blog_Post_Data,Content_Data,Stat_Data,List_Data,Review_Data,Favorite_Data,Search_Data,Admin_Data,Business_Data,Order_Data,User_Data,Faq_Data,Portal,Cart_Data,Activity_Data,Blog_Post} = require(".");
 
 const {Log,Num,Str} = require("biz9-utility");
-const {DataType,DataItem,Type_Logic,Item_Logic,App_Logic,Page_Logic,Template_Logic,Blog_Post_Logic,Content_Logic,Product_Logic,Field_Logic,Admin_Logic,Business_Logic,Service_Logic,Category_Logic,User_Logic,Order_Logic,FieldType,Cart_Logic,Stat_Logic,Review_Logic,PageType,BLog_Post_Logic,Sub_Item_Logic,Event_Logic,Demo_Logic} = require("/home/think2/www/doqbox/biz9-framework/biz9-logic/code");
+const {DataType,DataItem,Type_Logic,Item_Logic,App_Logic,Page_Logic,Template_Logic,Blog_Post_Logic,Content_Logic,Product_Logic,Field_Logic,Admin_Logic,Business_Logic,Service_Logic,Category_Logic,Type,User_Logic,Order_Logic,FieldType,Cart_Logic,Stat_Logic,Review_Logic,PageType,BLog_Post_Logic,Sub_Item_Logic,Event_Logic,Demo_Logic} = require("/home/think2/www/doqbox/biz9-framework/biz9-logic/code");
 /*
  * availble tests
 - connect
@@ -63,10 +63,23 @@ describe('connect', function(){ this.timeout(25000);
                 console.log(biz_error);
                 console.log('DATABASE-END');
             },
-
-            //- CART LOGIC -- START
+            //- LOGIC -- START
             async function(call){
-                console.log('DATA-START');
+                console.log('DATA-START-1');
+                //let key = "OR-43545";
+                let key = "CA-56147";
+                let option = {get_payment:true};
+                Log.w('key',key);
+                //const [biz_error,biz_data] = await Order_Data.get(database,key,option);
+                const [biz_error,biz_data] = await Cart_Data.get(database,key,option);
+                Log.w('biz_data',biz_data);
+                console.log('DATA-END');
+
+            },
+            //- LOGIC -- START
+            //- CART LOGIC -- START
+            /*
+            async function(call){
                 let cart_number = "CA-73551";
                 let order_number = 'OR-92773';
                 let product_id = "49d15f34-c840-477c-9aba-32cc0575087f";
@@ -107,6 +120,7 @@ describe('connect', function(){ this.timeout(25000);
                 const [biz_error,biz_data] = await Order_Data.post(database,Order_Logic.get_new(cart));
                 Log.w('order_get',biz_data);
             },
+            */
     /*
         async function(call){
                 const [error,data] = await Database.close(database);
