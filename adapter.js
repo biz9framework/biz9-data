@@ -686,7 +686,6 @@ const post_bulk_adapter=(db_connect,data_type,item_data_list) => {
                     if(biz_data.result_OK){
                         data = biz_data;
                     }
-                    Log.w('aaaaaa22',data);
                     call();
                 }).catch(error=>{
                     Log.error("Data-Adapter-Bulk-Item-Adapter-2",error);
