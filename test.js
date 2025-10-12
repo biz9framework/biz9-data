@@ -65,12 +65,12 @@ describe('connect', function(){ this.timeout(25000);
             //- LOGIC -- START
             async function(call){
                 console.log('DATA-START-1');
-                //let key = "OR-43545";
-                let key = "item_24184";
+                let key = "OR-83616";
+                //let key = "item_24184";
                 let option = {get_payment:true};
                 Log.w('key',key);
-                //const [biz_error,biz_data] = await Order_Data.get(database,key,option);
-                const [biz_error,biz_data] = await Blog_Post_Data.get(database,key,option);
+                const [biz_error,biz_data] = await Order_Data.get(database,key,option);
+                //const [biz_error,biz_data] = await Blog_Post_Data.get(database,key,option);
                 //const [biz_error,biz_data] = await Portal.get(database,DataType.EVENT,key,option);
                 Log.w('biz_data',biz_data);
                 console.log('DATA-END');

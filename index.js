@@ -446,7 +446,7 @@ class Order_Data {
 							parent_data_type:order.parent_data_type,
 							user_id:order.user_id,
 							cart_number:order.cart_number,
-							grand_total:Order_Logic.get_grand_total(order),
+							grand_total:order.grand_total,
 						}),order_item_list:[],order_sub_item_list:[]};
 			let error = null;
 			async.series([
@@ -514,6 +514,17 @@ class Order_Data {
 						}
 					}
 				},
+				//post - order_payment
+				async function(call){
+					let post_order_payment = Order_Logic.get_new_order_payment(order.order_number,order.last_payment_method_type,order.last_payment_amount);
+					const [biz_error,biz_data] = await Portal.post_list(database,DataType.ORDER_PAYMENT);
+					//here
+					if(biz_error){
+						error=Log.append(error,biz_error);
+					}else{
+						data.order_item_list = biz_data;
+					}
+				},
 				//get order
 				async function(call){
 					const [biz_error,biz_data] = await Order_Data.get(database,order.order_number);
@@ -523,7 +534,7 @@ class Order_Data {
 							data.order = biz_data;
 						}
 				},
-			]).then(result => {
+		]).then(result => {
 				callback([error,data.order]);
 			}).catch(err => {
 				Log.error("OrderData-Order-Item-Update",err);
@@ -543,7 +554,7 @@ class Order_Data {
 			async.series([
 				//get_order
 				async function(call){
-					let filter = { order_number: { $regex:String(order_number), $options: "i" } };
+					let filter = { order_number: order_number };
 					const [biz_error,biz_data] = await Portal.get(database,DataType.ORDER,order_number,{filter:filter});
 					if(biz_error){
 						error=Log.append(error,biz_error);
@@ -558,7 +569,7 @@ class Order_Data {
 				//get_order_item_list
 				async function(call){
 					if(!Str.check_is_null(data.order.id)){
-						let filter = { order_number: { $regex:String(order_number), $options: "i" } };
+						let filter = { order_number:order_number };
 						let search = App_Logic.get_search(DataType.ORDER_ITEM,filter,{},1,0);
 						const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,{});
 						if(biz_error){
@@ -627,8 +638,24 @@ class Order_Data {
 						order_item.order_sub_item_list = [...item_filter_list, ...order_item.order_sub_item_list];
 					});
 				},
+				//get_order_payment
+				async function(call){
+					if(!Str.check_is_null(data.order.id)){
+						let filter = { order_number:order_number };
+						let search = App_Logic.get_search(DataType.ORDER_PAYMENT,filter,{},1,0);
+						const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,{});
+						Log.w('filter',filter);
+						Log.w('search',search);
+						Log.w('data',biz_data);
+						if(biz_error){
+							error=Log.append(error,biz_error);
+						}else{
+							//data.order.order_payment_list = biz_data.data_list;
+						}
+					}
+				},
 				]).then(result => {
-				callback([error,data]);
+				callback([error,data.order]);
 			}).catch(err => {
 				Log.error("Order-Get",err);
 				callback([error,[]]);
@@ -808,7 +835,7 @@ class Cart_Data {
 			async.series([
 				//get_cart
 				async function(call){
-					let filter = { cart_number: { $regex:String(cart_number), $options: "i" } };
+					let filter = { cart_number:cart_number };
 					const [biz_error,biz_data] = await Portal.get(database,DataType.CART,cart_number,{filter:filter});
 					if(biz_error){
 						error=Log.append(error,biz_error);
@@ -823,7 +850,7 @@ class Cart_Data {
 				//get_cart_item_list
 				async function(call){
 					if(!Str.check_is_null(data.cart.id)){
-						let filter = { cart_number: { $regex:String(cart_number), $options: "i" } };
+						let filter = { cart_number:cart_number };
 						let search = App_Logic.get_search(DataType.CART_ITEM,filter,{},1,0);
 						const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,{});
 						if(biz_error){
@@ -855,7 +882,7 @@ class Cart_Data {
 				//get_cart_sub_item_list
 				async function(call){
 					if(!Str.check_is_null(data.cart.id)){
-						let filter = { cart_number: { $regex:String(cart_number), $options: "i" } };
+						let filter = { cart_number: cart_number };
 						let search = App_Logic.get_search(DataType.CART_SUB_ITEM,filter,{},1,0);
 						const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,{});
 						if(biz_error){
