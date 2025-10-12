@@ -2647,6 +2647,59 @@ class Data {
 		return [error,data] = await get_count_item_list_adapter(db_connect,data_type,filter);
 	};
 }
+class Service_Data {
+//9_service_get
+	static get = async (database,key,option) => {
+		return new Promise((callback) => {
+			let service = DataItem.get_new(DataType.SERVICE,0);
+			let error = null;
+			option = option ? option : {get_item:false,get_image:false};
+			async.series([
+				async function(call){
+					const [biz_error,biz_data] = await Portal.get(database,DataType.SERVICE,key,option);
+					if(biz_error){
+						error=Log.append(error,biz_error);
+					}else{
+						service = biz_data;
+					}
+				},
+			]).then(result => {
+				callback([error,service]);
+			}).catch(err => {
+				Log.error("Service-Get",err);
+				callback([err,null]);
+			});
+		});
+	};
+	//9_service_search
+	static search = (database,filter,sort_by,page_current,page_size,option) => {
+		return new Promise((callback) => {
+			let data = {item_count:0,page_count:1,filter:{},data_type:DataType.SERVICE,data_list:[]};
+			let error = null;
+			option = option ? option : {get_item:false,get_image:false};
+			async.series([
+				async function(call){
+					const [biz_error,biz_data] = await Portal.search(database,DataType.SERVICE,filter,sort_by,page_current,page_size,option);
+					if(biz_error){
+						error=Log.append(error,biz_error);
+					}else{
+						data.item_count = biz_data.item_count;
+						data.data_type = DataType.SERVICE;
+						data.page_count = biz_data.page_count;
+						data.filter = biz_data.filter;
+						data.service_list = biz_data.data_list;
+						data.app_id = database.app_id;
+					}
+				},
+			]).then(result => {
+				callback([error,data]);
+			}).catch(err => {
+				Log.error("Service-Search",err);
+				callback([err,[]]);
+			});
+		});
+	};
+}
 class Blank_Data {
 	//9_blank
 	static blank = (database) => {
@@ -2684,5 +2737,6 @@ module.exports = {
 	Review_Data,
 	User_Data,
 	Template_Data,
+	Service_Data,
 	Stat_Data,
 };
