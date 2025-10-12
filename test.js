@@ -1,7 +1,7 @@
 const async = require('async');
 const assert = require('node:assert');
 
-const {Data,Database,Category_Data,Product_Data,Page_Data,Blog_Post_Data,Content_Data,Stat_Data,List_Data,Review_Data,Favorite_Data,Search_Data,Admin_Data,Business_Data,Order_Data,User_Data,Faq_Data,Portal,Cart_Data,Activity_Data,Blog_Post} = require(".");
+const {Data,Database,Category_Data,Product_Data,Page_Data,Blog_Post_Data,Content_Data,Stat_Data,List_Data,Review_Data,Favorite_Data,Search_Data,Admin_Data,Business_Data,Order_Data,User_Data,Faq_Data,Portal,Cart_Data,Activity_Data,Blog_Post,Event_Data} = require(".");
 
 const {Log,Num,Str} = require("biz9-utility");
 const {DataType,DataItem,Type_Logic,Item_Logic,App_Logic,Page_Logic,Template_Logic,Blog_Post_Logic,Content_Logic,Product_Logic,Field_Logic,Admin_Logic,Business_Logic,Service_Logic,Category_Logic,Type,User_Logic,Order_Logic,FieldType,Cart_Logic,Stat_Logic,Review_Logic,PageType,BLog_Post_Logic,Sub_Item_Logic,Event_Logic,Demo_Logic} = require("/home/think2/www/doqbox/biz9-framework/biz9-logic/code");
@@ -56,7 +56,6 @@ describe('connect', function(){ this.timeout(25000);
             // GET - START
             async function(call){
                 console.log('DATABASE-START');
-                //const [error,data] = await Team.get_member(db_connect,title_url);
                 const [biz_error,biz_data] = await Database.get(DATA_CONFIG);
                 database = biz_data;
                 //console.log(database);
@@ -67,11 +66,12 @@ describe('connect', function(){ this.timeout(25000);
             async function(call){
                 console.log('DATA-START-1');
                 //let key = "OR-43545";
-                let key = "item_803793";
+                let key = "item_24184";
                 let option = {get_payment:true};
                 Log.w('key',key);
                 //const [biz_error,biz_data] = await Order_Data.get(database,key,option);
                 const [biz_error,biz_data] = await Blog_Post_Data.get(database,key,option);
+                //const [biz_error,biz_data] = await Portal.get(database,DataType.EVENT,key,option);
                 Log.w('biz_data',biz_data);
                 console.log('DATA-END');
 

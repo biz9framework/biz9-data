@@ -332,6 +332,59 @@ class Template_Data {
 		});
 	};
 }
+class Gallery_Data {
+	//9_gallery_data_get
+	static get = async (database,key,option) => {
+		return new Promise((callback) => {
+			let gallery = DataItem.get_new(DataType.GALLERY,0);
+			let error = null;
+			option = option ? option : {get_item:false,get_image:false};
+			async.series([
+				async function(call){
+					const [biz_error,biz_data] = await Portal.get(database,DataType.GALLERY,key,option);
+					if(biz_error){
+						error=Log.append(error,biz_error);
+					}else{
+						gallery = biz_data;
+					}
+				}, ]).then(result => { callback([error,gallery]);
+			}).catch(err => {
+				Log.error("Gallery-Get",err);
+				callback([err,null]);
+			});
+		});
+	};
+	//9_gallery_data_search
+	static search = (database,filter,sort_by,page_current,page_size,option) => {
+		return new Promise((callback) => {
+			let data = {gallery_count:0,page_count:1,filter:{},data_type:DataType.GALLERY,gallery_list:[]};
+			let error = null;
+			option = option ? option : {get_item:false,get_image:false};
+			async.series([
+				async function(call){
+					const [biz_error,biz_data] = await Portal.search(database,DataType.GALLERY,filter,sort_by,page_current,page_size,option);
+					if(biz_error){
+						error=Log.append(error,biz_error);
+					}else{
+						data.item_count = biz_data.item_count;
+						data.data_type = DataType.GALLERY;
+						data.page_count = biz_data.page_count;
+						data.filter = biz_data.filter;
+						data.data_type = biz_data.data_type;
+						data.gallery_list = biz_data.data_list;
+						data.app_id = database.app_id;
+					}
+				},
+			]).then(result => {
+				callback([error,data]);
+			}).catch(err => {
+				Log.error("Gallery-Search",err);
+				callback([err,[]]);
+			});
+		});
+	};
+}
+
 class Event_Data {
 	//9_event_data_get
 	static get = async (database,key,option) => {
@@ -345,7 +398,7 @@ class Event_Data {
 					if(biz_error){
 						error=Log.append(error,biz_error);
 					}else{
-						event = data;
+						event = biz_data;
 					}
 				}, ]).then(result => { callback([error,event]);
 			}).catch(err => {
@@ -2621,6 +2674,7 @@ module.exports = {
 	Content_Data,
 	Database,
 	Event_Data,
+	Gallery_Data,
 	Favorite_Data,
 	Faq_Data,
 	Order_Data,
