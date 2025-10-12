@@ -236,6 +236,9 @@ const get_item_adapter = (db_connect,data_type,key,option) => {
         }
         let cache_connect = {};
         item_data = DataItem.get_new(data_type,0,{app_id:db_connect.app_id,key:key});
+        Log.w('option',option);
+        Log.w('data_type',data_type);
+        Log.w('key',key);
         async.series([
             function(call) {
                 get_cache_connect_main(db_connect.data_config).then(([error,data]) => {
@@ -248,6 +251,7 @@ const get_item_adapter = (db_connect,data_type,key,option) => {
             },
             function(call) {
                 if(option.filter){
+                    console.log('trump');
                     let sort_by={};
                     let page_current=1;
                     let page_size=0;
@@ -268,8 +272,9 @@ const get_item_adapter = (db_connect,data_type,key,option) => {
                 else if(option.title_url && !Str.check_is_guid(option.title_url)){
                     item_data.title_url = option.title_url;
                     item_data.key = option.title_url;
-                    let filter={title_url:{ $regex: item_data.key, $options: 'i' }};
-                    let sort_by={};
+                    //let filter={title_url:{ $regex: item_data.key, $options: 'i' }};
+                    let filter={title_url:item_data.key};
+                    let sort_by={title:1};
                     let page_current=1;
                     let page_size=0;
                     get_item_list_adapter(db_connect,data_type,filter,sort_by,page_current,page_size,option).then(([error,data]) => {
@@ -284,6 +289,7 @@ const get_item_adapter = (db_connect,data_type,key,option) => {
                         Log.error("Adapter-Get-Item-Adapter-2",error);
                         callback([error,null]);
                     });
+
                 }else{
                     get_item_cache_db(cache_connect,db_connect,item_data.data_type,item_data.key,option).then(([error,data]) => {
                         if(data){
