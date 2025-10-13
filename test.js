@@ -60,6 +60,75 @@ describe('connect', function(){ this.timeout(25000);
                 database = biz_data;
                 console.log('DATABASE-END');
             },
+            //- CART-ORDER LOGIC -- START
+            async function(call){
+                console.log('CART-ORDER-START');
+                let cart_number = "CA-73551";
+                let order_number = 'OR-92773';
+                let product_id = "49d15f34-c840-477c-9aba-32cc0575087f";
+                let cms_type_id = "b2e72744-85bf-4fd8-94e5-6aa8b4622dfb";
+                let hosting_type_id = "a80ecdc7-13ff-4d74-94bc-f873da165832";
+                let user_id = "44db96f9-4c51-4272-8159-9cdae914084a";
+                console.log('rrrr');
+                console.log(DataType.PRODUCT);
+                console.log(user_id);
+                console.log('deee');
+                cart = Cart_Logic.get_new(DataType.PRODUCT,user_id);
+                console.log(cart);
+
+                console.log('bbbbbbbb');
+                //cart item
+                let cart_item_product = Cart_Logic.get_new_cart_item(DataType.PRODUCT,product_id,cart.cart_number,1,Num.get_id(9999));
+                // cart sub item product_sub_cms_type
+                cart_item_product.cart_sub_item_list.push(Cart_Logic.get_new_cart_sub_item(DataType.PRODUCT,cms_type_id,cart.cart_number,1,Num.get_id(99)));
+                //console.log('aaaaaaaaaaaa');
+                // cart sub item product_sub_hosting_type
+                cart_item_product.cart_sub_item_list.push(Cart_Logic.get_new_cart_sub_item(DataType.PRODUCT,hosting_type_id,cart.cart_number,1,Num.get_id(99)));
+                cart.cart_item_list.push(cart_item_product);
+                //let search = App_Logic.get_search(DataType.PRODUCT,{cart_number:cart_number},{},1,0);
+                //console.log('ccccccccc');
+                //Log.w('cart_22',cart_item_product);
+                console.log('sssssss');
+                const [biz_error,biz_data] = await Cart_Data.post(database,cart);
+                //const [biz_error,biz_data] = await Cart_Data.get(database,cart_number);
+               //const [biz_error,biz_data] = await Order_Data.get(database,order_number);
+                //console.log('33333333');
+                Log.w('data_cart_post',biz_data.cart);
+                console.log('aaaaaaa');
+                cart = biz_data.cart;
+                console.log(cart);
+                console.log('bbbbb');
+                //let product = Product_Logic.get_test();
+                //Log.w('product',product);
+                //Log.w('rrr',database);
+                //const [biz_error,biz_data] = await Portal.post(database,DataType.PRODUCT,product);
+                //const [biz_error,biz_data] = await Cart_Data.get(database,cart.cart_number);
+                //const [biz_error,biz_data] = await Cart_Data.search(database,DataType.PRODUCT,search,filter,search.sort_by,search.page_current,search.page_size);
+                //cart = biz_data.cart;
+                //call();
+            },
+            async function(call){
+                console.log('111111');
+                //order_number,payment_method_type,payment_amount
+                Log.w('rrrrrr',cart);
+                Log.w('ssss',Title.ORDER_PAYMENT_STATUS_OPEN);
+                let order_post = Order_Logic.get_new(cart,{get_payment_plan:true,payment_plan:Title.ORDER_PAYMENT_PLAN_1,payment_plan_status:Title.ORDER_PAYMENT_STATUS_OPEN});
+                console.log('3333');
+                Log.w('order_post_cool',order_post);
+                //Log.w('Title',Title.ORDER_PAYMENT_METHOD_TEST);
+                //Log.w('Amount',Num.get_id(333));
+                /*
+                let order_payment = Order_Logic.get_new_order_payment(order_post.order_number,Title.ORDER_PAYMENT_METHOD_TEST,Num.get_id(99));
+                Log.w('order_post',order_post);
+                Log.w('order_payment',order_payment);
+
+                const [biz_error,biz_data] = await Order_Data.post(database,order_post,[order_payment]);
+                Log.w('order_get',biz_data);
+                */
+            },
+            //- CART-ORDER LOGIC -- START
+
+            /*
             //- LOGIC -- START
             async function(call){
                 console.log('DATA-START-1');
@@ -76,58 +145,9 @@ describe('connect', function(){ this.timeout(25000);
                 console.log('DATA-END');
             },
             //- LOGIC -- START
+            */
             /*
-            //- CART-ORDER LOGIC -- START
-            async function(call){
-                let cart_number = "CA-73551";
-                let order_number = 'OR-92773';
-                let product_id = "49d15f34-c840-477c-9aba-32cc0575087f";
-                let cms_type_id = "b2e72744-85bf-4fd8-94e5-6aa8b4622dfb";
-                let hosting_type_id = "a80ecdc7-13ff-4d74-94bc-f873da165832";
-                let user_id = "44db96f9-4c51-4272-8159-9cdae914084a";
-                cart = Cart_Logic.get_new(DataType.PRODUCT,user_id);
-                cart.cms_type_id = cms_type_id;
-                cart.hosting_type_id = hosting_type_id;
-
-                //cart item
-                let cart_item_product = Cart_Logic.get_new_cart_item(DataType.PRODUCT,product_id,cart.cart_number,1,Num.get_id(9999));
-                // cart sub item product_sub_cms_type
-                cart_item_product.cart_sub_item_list.push(Cart_Logic.get_new_cart_sub_item(DataType.PRODUCT,cms_type_id,cart.cart_number,1,Num.get_id(99)));
-                //console.log('aaaaaaaaaaaa');
-                // cart sub item product_sub_hosting_type
-                cart_item_product.cart_sub_item_list.push(Cart_Logic.get_new_cart_sub_item(DataType.PRODUCT,hosting_type_id,cart.cart_number,1,Num.get_id(99)));
-                cart.cart_item_list.push(cart_item_product);
-                //let search = App_Logic.get_search(DataType.PRODUCT,{cart_number:cart_number},{},1,0);
-                //console.log('ccccccccc');
-                //Log.w('cart_22',cart_item_product);
-                const [biz_error,biz_data] = await Cart_Data.post(database,cart);
-                //const [biz_error,biz_data] = await Cart_Data.get(database,cart_number);
-               //const [biz_error,biz_data] = await Order_Data.get(database,order_number);
-                //console.log('33333333');
-                Log.w('data_cart_post',biz_data);
-                let cart_update = biz_data;
-                //let product = Product_Logic.get_test();
-                //Log.w('product',product);
-                //Log.w('rrr',database);
-                //const [biz_error,biz_data] = await Portal.post(database,DataType.PRODUCT,product);
-                //const [biz_error,biz_data] = await Cart_Data.get(database,cart.cart_number);
-                //const [biz_error,biz_data] = await Cart_Data.search(database,DataType.PRODUCT,search,filter,search.sort_by,search.page_current,search.page_size);
-                //cart = biz_data.cart;
-            },
-            async function(call){
-                //order_number,payment_method_type,payment_amount
-                let order_post = Order_Logic.get_new(cart);
-                Log.w('order_post',order_post);
-                //Log.w('Title',Title.ORDER_PAYMENT_METHOD_TEST);
-                //Log.w('Amount',Num.get_id(333));
-                let order_payment = Order_Logic.get_new_order_payment(order_post.order_number,Title.ORDER_PAYMENT_METHOD_TEST,Num.get_id(99));
-                Log.w('order_post',order_post);
-                Log.w('order_payment',order_payment);
-
-                const [biz_error,biz_data] = await Order_Data.post(database,order_post,[order_payment]);
-                Log.w('order_get',biz_data);
-            },
-            //- CART-ORDER LOGIC -- END
+           //- CART-ORDER LOGIC -- END
             */
         // GET - END
 

@@ -448,8 +448,21 @@ class Order_Data {
 							cart_number:order.cart_number,
 							grand_total:order.grand_total,
 						}),order_item_list:[],order_sub_item_list:[]};
-			let error = null;
+			if(order.payment_plan){
+				data.payment_plan = order.payment_plan;
+				data.payment_plan_status = order.payment_plan_status;
+			}
+			Log.w('rrrrrr',data);
+			Log.w('cool',order);
 			async.series([
+				/*
+			async function(call){
+				for(const key in order) {
+					if(Str.check_is_null(data.order[key]) && key != 'order_item_list' &&  key != 'order_item_list' && key != 'order_sub_item_list'){
+						data.order[key] = order[key];
+					}
+				}
+			},
 			async function(call){
 					const [biz_error,biz_data] = await Portal.post(database,DataType.ORDER,data.order);
 					if(biz_error){
@@ -535,6 +548,7 @@ class Order_Data {
 							data.order = biz_data;
 						}
 				},
+				*/
 		]).then(result => {
 				callback([error,data]);
 			}).catch(err => {
