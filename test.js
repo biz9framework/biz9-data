@@ -52,6 +52,7 @@ describe('connect', function(){ this.timeout(25000);
         let error=null;
         let database = {};
         let cart = {};
+        let order = {};
         async.series([
             // GET - START
             async function(call){
@@ -69,14 +70,8 @@ describe('connect', function(){ this.timeout(25000);
                 let cms_type_id = "b2e72744-85bf-4fd8-94e5-6aa8b4622dfb";
                 let hosting_type_id = "a80ecdc7-13ff-4d74-94bc-f873da165832";
                 let user_id = "44db96f9-4c51-4272-8159-9cdae914084a";
-                console.log('rrrr');
-                console.log(DataType.PRODUCT);
-                console.log(user_id);
-                console.log('deee');
                 cart = Cart_Logic.get_new(DataType.PRODUCT,user_id);
-                console.log(cart);
-
-                console.log('bbbbbbbb');
+                Log.w('cart',cart);
                 //cart item
                 let cart_item_product = Cart_Logic.get_new_cart_item(DataType.PRODUCT,product_id,cart.cart_number,1,Num.get_id(9999));
                 // cart sub item product_sub_cms_type
@@ -88,16 +83,14 @@ describe('connect', function(){ this.timeout(25000);
                 //let search = App_Logic.get_search(DataType.PRODUCT,{cart_number:cart_number},{},1,0);
                 //console.log('ccccccccc');
                 //Log.w('cart_22',cart_item_product);
-                console.log('sssssss');
                 const [biz_error,biz_data] = await Cart_Data.post(database,cart);
                 //const [biz_error,biz_data] = await Cart_Data.get(database,cart_number);
                //const [biz_error,biz_data] = await Order_Data.get(database,order_number);
                 //console.log('33333333');
-                Log.w('data_cart_post',biz_data.cart);
-                console.log('aaaaaaa');
-                cart = biz_data.cart;
-                console.log(cart);
-                console.log('bbbbb');
+                //Log.w('data_cart_post',biz_data.cart);
+                //cart = biz_data.cart;
+                //console.log(cart);
+                //console.log('bbbbb');
                 //let product = Product_Logic.get_test();
                 //Log.w('product',product);
                 //Log.w('rrr',database);
@@ -108,25 +101,25 @@ describe('connect', function(){ this.timeout(25000);
                 //call();
             },
             async function(call){
-                console.log('111111');
                 //order_number,payment_method_type,payment_amount
-                Log.w('rrrrrr',cart);
-                Log.w('ssss',Title.ORDER_PAYMENT_STATUS_OPEN);
-                let order_post = Order_Logic.get_new(cart,{get_payment_plan:true,payment_plan:Title.ORDER_PAYMENT_PLAN_1,payment_plan_status:Title.ORDER_PAYMENT_STATUS_OPEN});
-                console.log('3333');
-                Log.w('order_post_cool',order_post);
+                Log.w('11_test_cart',cart);
+                order = Order_Logic.get_new(cart,{get_payment_plan:true,payment_plan:Title.ORDER_PAYMENT_PLAN_1,payment_plan_status:Title.ORDER_PAYMENT_STATUS_OPEN});
+                Log.w('22_test_order',order);
+
                 //Log.w('Title',Title.ORDER_PAYMENT_METHOD_TEST);
                 //Log.w('Amount',Num.get_id(333));
-                /*
-                let order_payment = Order_Logic.get_new_order_payment(order_post.order_number,Title.ORDER_PAYMENT_METHOD_TEST,Num.get_id(99));
-                Log.w('order_post',order_post);
-                Log.w('order_payment',order_payment);
+                let order_payment = Order_Logic.get_new_order_payment(order.order_number,Title.ORDER_PAYMENT_METHOD_TEST,Num.get_id(99));
+                Log.w('33_order_post',order);
+                Log.w('44_order_payment',order_payment);
 
-                const [biz_error,biz_data] = await Order_Data.post(database,order_post,[order_payment]);
-                Log.w('order_get',biz_data);
-                */
+                const [biz_error,biz_data] = await Order_Data.post(database,order,[order_payment]);
+                Log.w('55_order',biz_data);
             },
             //- CART-ORDER LOGIC -- START
+            async function(call){
+                const [biz_error,biz_data] = await Order_Data.get(database,order.order_number,{get_payment:true});
+                Log.w('66_order',biz_data);
+            }
 
             /*
             //- LOGIC -- START

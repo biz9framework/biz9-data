@@ -442,20 +442,13 @@ class Order_Data {
 	static post = async (database,order,order_payment_list) => {
 		return new Promise((callback) => {
 			let data = {order:DataItem.get_new(DataType.ORDER,0, {
-							order_number:order.order_number,
+							order_number:0,
 							parent_data_type:order.parent_data_type,
-							user_id:order.user_id,
-							cart_number:order.cart_number,
-							grand_total:order.grand_total,
+							user_id:0,
+							cart_number:0,
+							grand_total:0,
 						}),order_item_list:[],order_sub_item_list:[]};
-			if(order.payment_plan){
-				data.payment_plan = order.payment_plan;
-				data.payment_plan_status = order.payment_plan_status;
-			}
-			Log.w('rrrrrr',data);
-			Log.w('cool',order);
 			async.series([
-				/*
 			async function(call){
 				for(const key in order) {
 					if(Str.check_is_null(data.order[key]) && key != 'order_item_list' &&  key != 'order_item_list' && key != 'order_sub_item_list'){
@@ -539,16 +532,6 @@ class Order_Data {
 					}
 					}
 				},
-				//get order
-				async function(call){
-					const [biz_error,biz_data] = await Order_Data.get(database,order.order_number);
-						if(biz_error){
-							error=Log.append(error,biz_error);
-						}else{
-							data.order = biz_data;
-						}
-				},
-				*/
 		]).then(result => {
 				callback([error,data]);
 			}).catch(err => {
