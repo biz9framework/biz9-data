@@ -439,7 +439,7 @@ class Event_Data {
 }
 class Order_Data {
 	//9_order_post
-	static post = async (database,order) => {
+	static post = async (database,order,order_payment_list) => {
 		return new Promise((callback) => {
 			let data = {order:DataItem.get_new(DataType.ORDER,0, {
 							order_number:order.order_number,
@@ -470,6 +470,7 @@ class Order_Data {
 										order_number:data.order.order_number,
 										user_id:data.order.user_id,
 										quanity:item.quanity,
+										cost:item.cost,
 										parent_data_type:item.parent_data_type,
 										parent_id:item.parent_id,
 										temp_row_id :item.temp_row_id
@@ -496,9 +497,9 @@ class Order_Data {
 											order_id:data.order.id,
 											order_number:data.order.order_number,
 											user_id:data.order.user_id,
-
 											order_item_id:data.order_item_list.find(item_find => item_find.temp_row_id === order_item.temp_row_id).id,
 											quanity:order_sub_item.quanity,
+											cost:order_sub_item.cost,
 											parent_data_type:order_sub_item.parent_data_type,
 											parent_id:order_sub_item.parent_id
 										}));
@@ -514,15 +515,15 @@ class Order_Data {
 						}
 					}
 				},
-				//post - order_payment
+				//post - order_payment_list
 				async function(call){
-					let post_order_payment = Order_Logic.get_new_order_payment(order.order_number,order.last_payment_method_type,order.last_payment_amount);
-					const [biz_error,biz_data] = await Portal.post_list(database,DataType.ORDER_PAYMENT);
-					//here
+					if(order_payment_list.length>0){
+					const [biz_error,biz_data] = await Portal.post_list(database,order_payment_list);
 					if(biz_error){
 						error=Log.append(error,biz_error);
 					}else{
-						data.order_item_list = biz_data;
+						data.order_payment_list = biz_data;
+					}
 					}
 				},
 				//get order
@@ -535,7 +536,7 @@ class Order_Data {
 						}
 				},
 		]).then(result => {
-				callback([error,data.order]);
+				callback([error,data]);
 			}).catch(err => {
 				Log.error("OrderData-Order-Item-Update",err);
 				callback([error,[]]);
@@ -644,13 +645,10 @@ class Order_Data {
 						let filter = { order_number:order_number };
 						let search = App_Logic.get_search(DataType.ORDER_PAYMENT,filter,{},1,0);
 						const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,{});
-						Log.w('filter',filter);
-						Log.w('search',search);
-						Log.w('data',biz_data);
 						if(biz_error){
 							error=Log.append(error,biz_error);
 						}else{
-							//data.order.order_payment_list = biz_data.data_list;
+							data.order.order_payment_list = biz_data.data_list;
 						}
 					}
 				},

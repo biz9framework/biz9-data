@@ -4,7 +4,7 @@ const assert = require('node:assert');
 const {Data,Database,Category_Data,Product_Data,Page_Data,Blog_Post_Data,Content_Data,Stat_Data,List_Data,Review_Data,Favorite_Data,Search_Data,Admin_Data,Business_Data,Order_Data,User_Data,Faq_Data,Portal,Cart_Data,Activity_Data,Blog_Post,Event_Data} = require(".");
 
 const {Log,Num,Str} = require("biz9-utility");
-const {DataType,DataItem,Type_Logic,Item_Logic,App_Logic,Page_Logic,Template_Logic,Blog_Post_Logic,Content_Logic,Product_Logic,Field_Logic,Admin_Logic,Business_Logic,Service_Logic,Category_Logic,Type,User_Logic,Order_Logic,FieldType,Cart_Logic,Stat_Logic,Review_Logic,PageType,BLog_Post_Logic,Sub_Item_Logic,Event_Logic,Demo_Logic} = require("/home/think2/www/doqbox/biz9-framework/biz9-logic/code");
+const {DataType,DataItem,Type_Logic,Item_Logic,App_Logic,Page_Logic,Template_Logic,Blog_Post_Logic,Content_Logic,Product_Logic,Field_Logic,Admin_Logic,Business_Logic,Service_Logic,Category_Logic,Type,User_Logic,Order_Logic,Title,FieldType,Cart_Logic,Stat_Logic,Review_Logic,PageType,BLog_Post_Logic,Sub_Item_Logic,Event_Logic,Demo_Logic} = require("/home/think2/www/doqbox/biz9-framework/biz9-logic/code");
 /*
  * availble tests
 - connect
@@ -58,27 +58,26 @@ describe('connect', function(){ this.timeout(25000);
                 console.log('DATABASE-START');
                 const [biz_error,biz_data] = await Database.get(DATA_CONFIG);
                 database = biz_data;
-                //console.log(database);
-                console.log(biz_error);
                 console.log('DATABASE-END');
             },
             //- LOGIC -- START
             async function(call){
                 console.log('DATA-START-1');
-                let key = "OR-83616";
+                let key = "OR-16505";
                 //let key = "item_24184";
                 let option = {get_payment:true};
                 Log.w('key',key);
                 const [biz_error,biz_data] = await Order_Data.get(database,key,option);
                 //const [biz_error,biz_data] = await Blog_Post_Data.get(database,key,option);
                 //const [biz_error,biz_data] = await Portal.get(database,DataType.EVENT,key,option);
-                Log.w('biz_data',biz_data);
+                let order = Order_Logic.get_total(biz_data);
+                //Log.w('biz_data',order);
+                //Log.w('biz_dat_22a',order.grand_total);
                 console.log('DATA-END');
-
             },
             //- LOGIC -- START
-            //- CART LOGIC -- START
             /*
+            //- CART-ORDER LOGIC -- START
             async function(call){
                 let cart_number = "CA-73551";
                 let order_number = 'OR-92773';
@@ -101,34 +100,35 @@ describe('connect', function(){ this.timeout(25000);
                 //let search = App_Logic.get_search(DataType.PRODUCT,{cart_number:cart_number},{},1,0);
                 //console.log('ccccccccc');
                 //Log.w('cart_22',cart_item_product);
-                //const [biz_error,biz_data] = await Cart_Data.post(database,cart);
+                const [biz_error,biz_data] = await Cart_Data.post(database,cart);
                 //const [biz_error,biz_data] = await Cart_Data.get(database,cart_number);
-                const [biz_error,biz_data] = await Order_Data.get(database,order_number);
+               //const [biz_error,biz_data] = await Order_Data.get(database,order_number);
                 //console.log('33333333');
-                Log.w('data_44',biz_data);
-                //let cart_update = biz_data;
+                Log.w('data_cart_post',biz_data);
+                let cart_update = biz_data;
                 //let product = Product_Logic.get_test();
                 //Log.w('product',product);
                 //Log.w('rrr',database);
                 //const [biz_error,biz_data] = await Portal.post(database,DataType.PRODUCT,product);
                 //const [biz_error,biz_data] = await Cart_Data.get(database,cart.cart_number);
                 //const [biz_error,biz_data] = await Cart_Data.search(database,DataType.PRODUCT,search,filter,search.sort_by,search.page_current,search.page_size);
-                cart = biz_data.cart;
+                //cart = biz_data.cart;
             },
-            //- CART LOGIC -- END
             async function(call){
-                const [biz_error,biz_data] = await Order_Data.post(database,Order_Logic.get_new(cart));
+                //order_number,payment_method_type,payment_amount
+                let order_post = Order_Logic.get_new(cart);
+                Log.w('order_post',order_post);
+                //Log.w('Title',Title.ORDER_PAYMENT_METHOD_TEST);
+                //Log.w('Amount',Num.get_id(333));
+                let order_payment = Order_Logic.get_new_order_payment(order_post.order_number,Title.ORDER_PAYMENT_METHOD_TEST,Num.get_id(99));
+                Log.w('order_post',order_post);
+                Log.w('order_payment',order_payment);
+
+                const [biz_error,biz_data] = await Order_Data.post(database,order_post,[order_payment]);
                 Log.w('order_get',biz_data);
             },
+            //- CART-ORDER LOGIC -- END
             */
-    /*
-        async function(call){
-                const [error,data] = await Database.close(database);
-                Log.w('data_close',data);
-               console.log('DATABASE-CLOSE');
-    //call();
-        },
-        */
         // GET - END
 
 
