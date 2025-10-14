@@ -1468,8 +1468,11 @@ class User_Data {
         		},
 				//post stat
         		async function(call){
+					Log.w('22b_userResultOK',data.user_resultOK);
+					Log.w('33b_option',option);
             		if(data.user_resultOK && option.post_stat && option.post_device || option.post_ip){
                 		let post_new_stat = Stat_Logic.get_new_user(data.user.id,Type.STAT_LOGIN,data.stat);
+						Log.w('44_post_new_stat',post_new_stat);
             			const [biz_error,biz_data] = await Stat_Data.post_user(database,post_new_stat.user_id,post_new_stat.type,post_new_stat.data);
             		if(biz_error){
                 		error=Log.append(error,biz_error);
