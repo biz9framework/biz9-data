@@ -83,12 +83,13 @@ describe('connect', function(){ this.timeout(25000);
                 //let search = App_Logic.get_search(DataType.PRODUCT,{cart_number:cart_number},{},1,0);
                 //console.log('ccccccccc');
                 //Log.w('cart_22',cart_item_product);
-                const [biz_error,biz_data] = await Cart_Data.post(database,cart);
+                let option_post_cart = {post_stat:true};
+                const [biz_error,biz_data] = await Cart_Data.post(database,cart,option_post_cart);
                 //const [biz_error,biz_data] = await Cart_Data.get(database,cart_number);
                //const [biz_error,biz_data] = await Order_Data.get(database,order_number);
                 //console.log('33333333');
-                //Log.w('data_cart_post',biz_data.cart);
-                //cart = biz_data.cart;
+                cart = biz_data.cart;
+                Log.w('11_cart',biz_data);
                 //console.log(cart);
                 //console.log('bbbbb');
                 //let product = Product_Logic.get_test();
@@ -102,43 +103,44 @@ describe('connect', function(){ this.timeout(25000);
             },
             async function(call){
                 //order_number,payment_method_type,payment_amount
-                Log.w('11_test_cart',cart);
-                order = Order_Logic.get_new(cart,{get_payment_plan:true,payment_plan:Title.ORDER_PAYMENT_PLAN_1,payment_plan_status:Title.ORDER_PAYMENT_STATUS_OPEN});
+                console.log('11111111');
+                console.log(cart);
+                let order = Order_Logic.get_new(cart,{get_payment_plan:true,payment_plan:Title.ORDER_PAYMENT_PLAN_1,payment_plan_status:Title.ORDER_PAYMENT_STATUS_OPEN});
                 Log.w('22_test_order',order);
 
                 //Log.w('Title',Title.ORDER_PAYMENT_METHOD_TEST);
                 //Log.w('Amount',Num.get_id(333));
-                let order_payment = Order_Logic.get_new_order_payment(order.order_number,Title.ORDER_PAYMENT_METHOD_TEST,Num.get_id(99));
-                Log.w('33_order_post',order);
-                Log.w('44_order_payment',order_payment);
+                //let order_payment = Order_Logic.get_new_order_payment(order.order_number,Title.ORDER_PAYMENT_METHOD_TEST,Num.get_id(99));
+                //Log.w('33_order_post',order);
+                //Log.w('44_order_payment',order_payment);
 
-                const [biz_error,biz_data] = await Order_Data.post(database,order,[order_payment]);
-                Log.w('55_order',biz_data);
+                //const [biz_error,biz_data] = await Order_Data.post(database,order,[order_payment]);
+                //Log.w('55_order',biz_data);
             },
+            /*/
             //- CART-ORDER LOGIC -- START
             async function(call){
                 const [biz_error,biz_data] = await Order_Data.get(database,order.order_number,{get_payment:true});
                 Log.w('66_order',biz_data);
             }
+            */
 
-            /*
             //- LOGIC -- START
             async function(call){
                 console.log('DATA-START-1');
                 let key = "OR-16505";
                 //let key = "item_24184";
                 let option = {get_payment:true};
-                Log.w('key',key);
-                const [biz_error,biz_data] = await Order_Data.get(database,key,option);
+                //Log.w('key',key);
+                //const [biz_error,biz_data] = await Order_Data.get(database,key,option);
                 //const [biz_error,biz_data] = await Blog_Post_Data.get(database,key,option);
                 //const [biz_error,biz_data] = await Portal.get(database,DataType.EVENT,key,option);
-                let order = Order_Logic.get_total(biz_data);
-                //Log.w('biz_data',order);
+                //let order = Order_Logic.get_total(biz_data);
+                //Log.w('99_biz_data',order);
                 //Log.w('biz_dat_22a',order.grand_total);
                 console.log('DATA-END');
             },
             //- LOGIC -- START
-            */
             /*
            //- CART-ORDER LOGIC -- END
             */

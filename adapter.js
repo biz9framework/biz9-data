@@ -236,9 +236,6 @@ const get_item_adapter = (db_connect,data_type,key,option) => {
         }
         let cache_connect = {};
         item_data = DataItem.get_new(data_type,0,{app_id:db_connect.app_id,key:key});
-        Log.w('option',option);
-        Log.w('data_type',data_type);
-        Log.w('key',key);
         async.series([
             function(call) {
                 get_cache_connect_main(db_connect.data_config).then(([error,data]) => {

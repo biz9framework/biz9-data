@@ -723,6 +723,7 @@ class Cart_Data {
 		return new Promise((callback) => {
 			let data = {};
 			let error = null;
+			option = option ? option : {post_stat:false};
 			data.cart = DataItem.get_new(DataType.CART,cart.id,{cart_number:cart.cart_number,parent_data_type:cart.parent_data_type,user_id:cart.user_id,grand_total: 0});
 			data.cart_item_list = [];
 			data.cart_sub_item_list = [];
@@ -802,15 +803,18 @@ class Cart_Data {
 						}
 					}
 				},
-				//get cart
-				async function(call){
-					const [biz_error,biz_data] = await Cart_Data.get(database,cart.cart_number);
-						if(biz_error){
-							error=Log.append(error,biz_error);
-						}else{
-							data.cart = biz_data;
-						}
-				},
+				//post stat
+        		async function(call){
+            		if(data.cart.id && option.post_stat){
+                		let post_stat_list = Stat_Logic.get_new(data.cart.user_id,Type.STAT_CART,data.cart_item_list,{});
+            			const [biz_error,biz_data] = await Stat_Data.post(database,post_stat_list);
+            		if(biz_error){
+                		error=Log.append(error,biz_error);
+            		}else{
+                		data.stat = biz_data;
+            		}
+					}
+            	},
 			]).then(result => {
 				callback([error,data]);
 			}).catch(err => {
@@ -1422,6 +1426,7 @@ class User_Data {
 			let post_ip_address = post_data.ip_address?post_data.ip_address:null;
 			let post_geo_key = post_data.geo_key?post_data.geo_key:null;
 			let post_device = post_data.device?post_data.device:null;
+			option = option ? option :{post_stat:false,post_ip_address:false,post_device:false,post_ip:false};
 			async.series([
 				//check email,password
 				async function(call){
@@ -1468,11 +1473,8 @@ class User_Data {
         		},
 				//post stat
         		async function(call){
-					Log.w('22b_userResultOK',data.user_resultOK);
-					Log.w('33b_option',option);
             		if(data.user_resultOK && option.post_stat && option.post_device || option.post_ip){
                 		let post_new_stat = Stat_Logic.get_new_user(data.user.id,Type.STAT_LOGIN,data.stat);
-						Log.w('44_post_new_stat',post_new_stat);
             			const [biz_error,biz_data] = await Stat_Data.post_user(database,post_new_stat.user_id,post_new_stat.type,post_new_stat.data);
             		if(biz_error){
                 		error=Log.append(error,biz_error);
@@ -2428,6 +2430,29 @@ class Faq_Data{
 }
 //9_stat_data
 class Stat_Data {
+	static post = (database,stat_list,option) => {
+		return new Promise((callback) => {
+			let data = [];
+			let error = null;
+			async.series([
+				//post_stat
+				async function(call){
+					const [biz_error,biz_data] = await Portal.post_list(database,stat_list);
+					if(biz_error){
+						error=Log.append(error,biz_error);
+					}else{
+						data = biz_data;
+					}
+				}
+			]).then(result => {
+				callback([error,data]);
+			}).catch(err => {
+				Log.error("Stat-Data-Post",err);
+				callback([error,[]]);
+			});
+		});
+	};
+
 	static post_user = (database,user_id,stat_type,post_data,option) => {
 		return new Promise((callback) => {
 			let post_stat = DataItem.get_new(DataType.STAT,0,{user_id:user_id,type:stat_type});
@@ -2480,157 +2505,6 @@ class Stat_Data {
 			});
 		});
 	};
-
-
-	/*
-	//9_stat_post
-	static post = (database,parent_data_type,user_id,stat_type_id,parent_item_list,option) => {
-		return new Promise((callback) => {
-			let data = {};
-			data.stat_new = true;
-			data.stat_item_list = [];
-			data.stat_item_list = [];
-			let error = null;
-			if(!parent_item_list){
-				parent_item_list = [];
-			}
-			async.series([
-				//get parent items
-				async function(call){
-					if(parent_item_list.length>0){
-						let query = { $or: [] };
-						for(let a = 0;a < parent_item_list.length;a++){
-							let query_field = {};
-							query_field['id'] = { $regex:String(parent_item_list[a].item_id), $options: "i" };
-							query.$or.push(query_field);
-						}
-						let search = App_Logic.get_search(parent_data_type,query,{},1,0);
-						const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size);
-						if(biz_error){
-							error=Log.append(error,biz_error);
-						}else{
-							for(let a = 0; a < parent_item_list.length; a++){
-								parent_item_list[a].item = DataItem.get_new(parent_data_type,0);
-								for(let b = 0; b < data.item_list.length; b++){
-									if(parent_item_list[a].item_id == data.item_list[b].id){
-										parent_item_list[a].item_item = data.item_list[b];
-									}
-								}
-							}
-						}
-					}
-				},
-				//get user stats
-				async function(call){
-					if(parent_item_list.length>0){
-						let query = { $or: [] };
-						for(let a = 0;a < parent_item_list.length;a++){
-							let query_field = {};
-							query_field['user_id'] = { $regex:String(user_id), $options: "i" };
-							query.$or.push(query_field);
-						}
-						let search = App_Logic.get_search(DataType.STAT,query,{},1,0);
-						const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size);
-						if(biz_error){
-							error=Log.append(error,biz_error);
-						}else{
-							for(let a = 0; a < parent_item_list.length; a++){
-								let str = get_stat_str(stat_type_id);
-								parent_item_list[a][str] = !Str.check_is_null(parent_item_list[a].item[str]) ? parseInt(parent_item_list[a].item[str]) + 1 : 1;
-								parent_item_list[a].item[str] = parent_item_list[a][str];
-								parent_item_list[a].stat_new = true;
-								for(let b = 0; b < data.item_list.length; b++){
-									if(parent_item_list[a].id == data.item_list[b].item_id && parent_item_list[a].data_type == data.item_list[b].parent_data_type && stat_type_id== data.item_list[b].type_id){
-										parent_item_list[a].stat_new = false;
-									}
-								}
-							}
-						}
-					}
-				},
-				//save stat list
-				async function(call){
-					if(parent_item_list.length>0){
-						let str = get_stat_str(stat_type_id);
-						for(let a = 0; a < parent_item_list.length; a++){
-							if(parent_item_list[a].stat_new){
-								let stat_item = DataItem.get_new(DataType.STAT,0,{
-									parent_data_type:parent_item_list[a].parent_data_type,
-									item_id:parent_item_list[a].item_id,
-									stat_type_id:stat_type_id,
-									stat_new:parent_item_list[a].stat_new
-								});
-								stat_item[str] = parent_item_list[a][str];
-								data.stat_item_list.push(stat_item);
-							}
-						}
-						const [biz_error,biz_data] = await Portal.post_list(database,data.stat_item_list);
-						if(biz_error){
-							error=Log.append(error,biz_error);
-						}else{
-							data.stat_item_list = data;
-						}
-					}
-				},
-				//save item list
-				async function(call){
-					if(parent_item_list.length>0){
-						let stat_item_list = [];
-						let str = get_stat_str(stat_type_id);
-						for(let a = 0; a < parent_item_list.length; a++){
-							if(parent_item_list[a].stat_new && stat_type_id != Stat_Logic.TYPE_STAT_REVIEW){
-								let item = DataItem.get_new(parent_item_list[a].item.data_type,parent_item_list[a].item.id);
-								item[str] = parent_item_list[a][str];
-								data.stat_item_list.push(item);
-							}
-						}
-						if(data.stat_item_list.length>0){
-							const [biz_error,biz_data] = await Portal.post_list(database,data.stat_item_list);
-							if(biz_error){
-								error=Log.append(error,biz_error);
-							}else{
-								data.stat_item_list = data;
-							}
-						}
-					}
-				},
-			]).then(result => {
-				callback([error,data]);
-			}).catch(err => {
-				Log.error("-Update-Item-View-Count-",err);
-				callback([error,[]]);
-			});
-			function get_stat_str(stat_type_id){
-				let str = "";
-				switch(stat_type_id){
-					case Stat_Logic.TYPE_STAT_VIEW:
-						str = 'view_count';
-						break;
-					case Stat_Logic.TYPE_STAT_LIKE:
-						str = 'like_count';
-						break;
-					case Stat_Logic.TYPE_STAT_FAVORITE:
-						str = 'favorite_count';
-						break;
-					case Stat_Logic.TYPE_STAT_CART:
-						str = 'cart_count';
-						break;
-					case Stat_Logic.TYPE_STAT_ORDER:
-						str = 'order_count';
-						break;
-					case Stat_Logic.TYPE_STAT_REVIEW:
-						str = 'review_count';
-						break;
-					default:
-						str = 'view_count';
-						break;
-				}
-				return str;
-
-			}
-		});
-	};
-	*/
 }
 class Data {
 	//9_data
