@@ -1522,7 +1522,7 @@ class Favorite_Data {
 		return new Promise((callback) => {
 			let error = null;
 			let data = {};
-			data.is_unique = false;
+			data.unique_resultOK = false;
 			let favorite = Favorite_Logic.get_new(parent_data_type,parent_id,user_id);
 			async.series([
 				async function(call){
@@ -1533,12 +1533,12 @@ class Favorite_Data {
 						error=Log.append(biz_error,error);
 					}else{
 						if(biz_data.count<=0){
-							data.is_unique = true;
+							data.unique_resultOK = true;
 						}
 					}
 				},
 				async function(call){
-					if(data.is_unique){
+					if(data.unique_resultOK){
 						const [biz_error,biz_data] = await Portal.post(database,DataType.FAVORITE,favorite);
 						if(biz_error){
 							error=Log.append(error,biz_error);
@@ -1638,10 +1638,12 @@ class Portal {
 		   - fields / type. string / ex. field1,field2 / default. throw error
 		 * Items
 		   - get_item / bool / ex. true,false / def. true
-		 * Photos
+	  	* Photos
 		   - get_image / bool / ex. true,false / def. true
 		   - image_count / int / ex. 1-999 / def. 19
 		   - image_sort_by / query obj / ex. {date_create:1}
+		* Favorite
+		   - get_favorite / bool / ex. true,false / def. true
 		 */
 		return new Promise((callback) => {
 			let error = null;
@@ -1674,7 +1676,6 @@ class Portal {
 						call();
 					});
 				},
-
 				function(call){
 					function get_sort(data){
 						let sort_order = {};
@@ -1746,6 +1747,9 @@ class Portal {
 						}
 					}
 				},
+				async function(call){
+					//here
+				}
 			]).then(result => {
 				callback([error,data]);
 			}).catch(err => {

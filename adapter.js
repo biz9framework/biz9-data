@@ -248,7 +248,6 @@ const get_item_adapter = (db_connect,data_type,key,option) => {
             },
             function(call) {
                 if(option.filter){
-                    console.log('trump');
                     let sort_by={};
                     let page_current=1;
                     let page_size=0;
