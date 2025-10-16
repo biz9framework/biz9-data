@@ -439,7 +439,7 @@ class Event_Data {
 }
 class Order_Data {
 	//9_order_post
-	static post = async (database,order,order_payment_list) => {
+	static post = async (database,order,order_payment_list,option) => {
 		return new Promise((callback) => {
 			let data = {order:DataItem.get_new(DataType.ORDER,0, {
 							order_number:0,
@@ -521,7 +521,7 @@ class Order_Data {
 						}
 					}
 				},
-				//post - order_payment_list
+			//post - order_payment_list
 				async function(call){
 					if(order_payment_list.length>0){
 					const [biz_error,biz_data] = await Portal.post_list(database,order_payment_list);
@@ -532,6 +532,30 @@ class Order_Data {
 					}
 					}
 				},
+				//post-order-stat
+        		async function(call){
+            		if(data.order.id && option.post_stat){
+                		let post_stat_list = Stat_Logic.get_new(data.order.user_id,Type.STAT_ORDER,data.order_item_list,{});
+            			const [biz_error,biz_data] = await Stat_Data.post(database,post_stat_list);
+            		if(biz_error){
+                		error=Log.append(error,biz_error);
+            		}else{
+                		data.stat_order = biz_data;
+            		}
+					}
+            	},
+				//post-order-payment-stat
+        		async function(call){
+            		if(data.order.id && option.post_stat){
+                		let post_stat_list = Stat_Logic.get_new(data.order.user_id,Type.STAT_ORDER_PAYMENT,data.order_payment_list,{});
+            			const [biz_error,biz_data] = await Stat_Data.post(database,post_stat_list);
+            		if(biz_error){
+                		error=Log.append(error,biz_error);
+            		}else{
+                		data.stat_order_payment = biz_data;
+            		}
+					}
+            	},
 		]).then(result => {
 				callback([error,data]);
 			}).catch(err => {
@@ -1569,22 +1593,28 @@ class Portal {
 					}
 					}
 				},
-				//product_list
+				//item_list
 				async function(call){
-					let post_product_list = [];
+					let post_item_list = [];
 					for(const item of type_list) {
+						if(!item.categorys){
+							item.categorys=[];
+						}
 						for(const cat_item of item.categorys) {
+							if(!cat_item.items){
+								cat_item.items = [];
+							}
 							for(const item of cat_item.items) {
-								post_product_list.push(item);
+								post_item_list.push(item);
 							};
          				};
          			};
-					if(post_product_list.length>0){
-					const [biz_error,biz_data] = await Portal.post_bulk(database,data_type,post_product_list);
+					if(post_item_list.length>0){
+					const [biz_error,biz_data] = await Portal.post_bulk(database,data_type,post_item_list);
 					if(biz_error){
 						error=Log.append(error,biz_error);
 					}else{
-						data.product_list = biz_data;
+						data.item_list = biz_data;
 						data.resultOK = true;
 					}
 					}

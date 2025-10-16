@@ -61,7 +61,45 @@ describe('connect', function(){ this.timeout(25000);
                 database = biz_data;
                 console.log('DATABASE-END');
             },
-            //- CART-ORDER LOGIC -- START
+             async function(call){
+                console.log('TEST-DATA-DEMO-START');
+  let category_type = DataType.PRODUCT;
+        let category_count = 12;
+        let item_count = 500;
+        let category_type_title_list = ['Add On','Admin Panel','Hosting','Landing Page','Mobile','Website'];
+        let category_title_list = ['Beauty','Church','Fashion','Food Trucks','Health Care','Music','Pets','Services','Service Repair','Sports','Trucking'];
+        let item_title_list = [];
+		let post_type_list = [];
+        let val_category_title = '';
+        let cat_max = 0;
+        let option = {get_category:true,category_count:category_count,category_data_type:category_type,categorys:val_category_title?val_category_title:null,
+                   get_item:true,item_count:item_count,item_data_type:category_type,items:null}
+
+        if(category_title_list.length >0){
+            cat_max = category_title_list.length;
+        }else{
+            if(category_count.length){
+                cat_max = category_count;
+            }else{
+                cat_max = 0;
+            }
+        }
+        option.item_count = item_count / cat_max;
+        for(const item of category_type_title_list){
+            post_type_list.push(
+            Demo_Logic.get_new_type(item,option));
+        }
+
+        Log.w('11_post_type_list',post_type_list);
+        Log.w('22_post_type_list_item',post_type_list[0].categorys[0]);
+
+        const [biz_error,biz_data] = await Portal.demo_post(database,DataType.PRODUCT,post_type_list);
+        Log.w('biz_data',biz_data);
+        console.log('TEST-DATA-DEMO-END');
+    },
+
+//- CART-ORDER LOGIC -- START
+            /*
             async function(call){
                 console.log('CART-ORDER-START');
                 let cart_number = "CA-73551";
@@ -90,6 +128,7 @@ describe('connect', function(){ this.timeout(25000);
                 //console.log('33333333');
                 cart = biz_data.cart;
                 Log.w('11_cart',biz_data);
+                Log.w('22_cart',biz_data.cart.cart_number);
                 //console.log(cart);
                 //console.log('bbbbb');
                 //let product = Product_Logic.get_test();
@@ -102,22 +141,24 @@ describe('connect', function(){ this.timeout(25000);
                 //call();
             },
             async function(call){
-                //order_number,payment_method_type,payment_amount
-                console.log('11111111');
-                console.log(cart);
+                const [biz_error,biz_data] = await Cart_Data.get(database,cart.cart_number);
+                cart = biz_data;
+                Log.w('33_cart',cart);
+             },
+
+            async function(call){
                 let order = Order_Logic.get_new(cart,{get_payment_plan:true,payment_plan:Title.ORDER_PAYMENT_PLAN_1,payment_plan_status:Title.ORDER_PAYMENT_STATUS_OPEN});
-                Log.w('22_test_order',order);
+                Log.w('44_test_order',order);
 
                 //Log.w('Title',Title.ORDER_PAYMENT_METHOD_TEST);
                 //Log.w('Amount',Num.get_id(333));
-                //let order_payment = Order_Logic.get_new_order_payment(order.order_number,Title.ORDER_PAYMENT_METHOD_TEST,Num.get_id(99));
+                let order_payment = Order_Logic.get_new_order_payment(order.order_number,Title.ORDER_PAYMENT_METHOD_TEST,Num.get_id(99));
                 //Log.w('33_order_post',order);
-                //Log.w('44_order_payment',order_payment);
-
-                //const [biz_error,biz_data] = await Order_Data.post(database,order,[order_payment]);
-                //Log.w('55_order',biz_data);
+                Log.w('55_order_payment',order_payment);
+                let option_post_order = {post_stat:true};
+                const [biz_error,biz_data] = await Order_Data.post(database,order,[order_payment],option_post_order);
+                //Log.w('66_order_post',biz_data);
             },
-            /*/
             //- CART-ORDER LOGIC -- START
             async function(call){
                 const [biz_error,biz_data] = await Order_Data.get(database,order.order_number,{get_payment:true});
@@ -125,6 +166,7 @@ describe('connect', function(){ this.timeout(25000);
             }
             */
 
+            /*
             //- LOGIC -- START
             async function(call){
                 console.log('DATA-START-1');
@@ -140,8 +182,7 @@ describe('connect', function(){ this.timeout(25000);
                 //Log.w('biz_dat_22a',order.grand_total);
                 console.log('DATA-END');
             },
-            //- LOGIC -- START
-            /*
+            //- LOGIC -- END
            //- CART-ORDER LOGIC -- END
             */
         // GET - END
