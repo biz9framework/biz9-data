@@ -535,7 +535,7 @@ class Order_Data {
 				//post-order-stat
         		async function(call){
             		if(data.order.id && option.post_stat){
-                		let post_stat_list = Stat_Logic.get_new(data.order.user_id,Type.STAT_ORDER,data.order_item_list,{});
+                		let post_stat_list = Stat_Logic.get_new(data.order.user_id,Type.STAT_ORDER,data.order_item_list);
             			const [biz_error,biz_data] = await Stat_Data.post(database,post_stat_list);
             		if(biz_error){
                 		error=Log.append(error,biz_error);
@@ -547,7 +547,7 @@ class Order_Data {
 				//post-order-payment-stat
         		async function(call){
             		if(data.order.id && option.post_stat){
-                		let post_stat_list = Stat_Logic.get_new(data.order.user_id,Type.STAT_ORDER_PAYMENT,data.order_payment_list,{});
+                		let post_stat_list = Stat_Logic.get_new(data.order.user_id,Type.STAT_ORDER_PAYMENT,data.order_payment_list);
             			const [biz_error,biz_data] = await Stat_Data.post(database,post_stat_list);
             		if(biz_error){
                 		error=Log.append(error,biz_error);
@@ -830,7 +830,7 @@ class Cart_Data {
 				//post stat
         		async function(call){
             		if(data.cart.id && option.post_stat){
-                		let post_stat_list = Stat_Logic.get_new(data.cart.user_id,Type.STAT_CART,data.cart_item_list,{});
+                		let post_stat_list = Stat_Logic.get_new(data.cart.user_id,Type.STAT_CART,data.cart_item_list);
             			const [biz_error,biz_data] = await Stat_Data.post(database,post_stat_list);
             		if(biz_error){
                 		error=Log.append(error,biz_error);
@@ -1566,6 +1566,8 @@ class Favorite_Data {
 					}
 				},
 				async function(call){
+					data.unique_resultOK = true;
+
 					if(data.unique_resultOK){
 						const [biz_error,biz_data] = await Portal.post(database,DataType.FAVORITE,favorite);
 						if(biz_error){
@@ -1576,6 +1578,19 @@ class Favorite_Data {
 						}
 					}
 				},
+				//post-favorite-stat
+        		async function(call){
+            		if(data.unique_resultOK){
+						let post_stat_list = Stat_Logic.get_new(user_id,Type.STAT_FAVORITE,[data.favorite]);
+            			const [biz_error,biz_data] = await Stat_Data.post(database,post_stat_list);
+            		if(biz_error){
+                		error=Log.append(error,biz_error);
+            		}else{
+                		data.stat_favorite = biz_data;
+            		}
+					}
+            	},
+
 			]).then(result => {
 				callback([error,data.favorite_add_resultOK]);
 			}).catch(err => {
@@ -1584,6 +1599,32 @@ class Favorite_Data {
 			});
 		});
 	};
+	//9_favorite_delete
+	static delete = (database,parent_data_type,parent_id,user_id) => {
+		return new Promise((callback) => {
+			let error = null;
+			let data = {};
+			data.is_favorite = false;
+			async.series([
+				async function(call){
+					let favorite_filter = Favorite_Logic.get_search_filter(parent_data_type,parent_id,user_id);
+					let search = App_Logic.get_search(DataType.FAVORITE,favorite_filter,{},1,0);
+					const [biz_error,biz_data] = await Portal.delete_search(database,search.data_type,search.filter);
+					if(biz_error){
+						error=Log.append(biz_error,error);
+					}else{
+						data = biz_data;
+					}
+				},
+			]).then(result => {
+				callback([error,data]);
+			}).catch(err => {
+				Log.error("Favorite-Delete",err);
+				callback([error,[]]);
+			});
+		});
+	};
+
 }
 class Portal {
 	//9_portal_demo / required / type_logic.type_list
