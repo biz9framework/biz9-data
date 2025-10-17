@@ -2164,7 +2164,7 @@ class Portal {
 		return new Promise((callback) => {
 			let error = null;
 			let data = {};
-			option = option ? option : {delete_ok:false,get_item:false,get_image:false,delete_item:false,delete_item_filter:{},delete_image:false,delete_image_filter:{}};
+			option = option ? option : {delete_resultOK:false,get_item:false,get_image:false,delete_item:false,delete_item_filter:{},delete_image:false,delete_image_filter:{}};
 			async.series([
 				function(call){
 					Data.delete(database,data_type,id).then(([biz_error,biz_data])=> {
@@ -2172,7 +2172,7 @@ class Portal {
 							error=Log.append(error,biz_error);
 						}else{
 							data.data = biz_data;
-							data.delete_ok = true;
+							data.delete_resultOK = true;
 						}
 						call();
 					}).catch(err => {
@@ -2184,12 +2184,12 @@ class Portal {
 					if(option.delete_item){
 						let data_type = DataType.ITEM;
 						let filter = option.delete_item_query;
-						data.delete_data_list = false;
+						data.delete_data_list_resultOK = false;
 						Data.delete_list(database,data_type,filter).then(([biz_error,biz_data])=> {
 							if(biz_error){
 								error=Log.append(error,biz_error);
 							}else{
-								data.delete_data_list = true;
+								data.delete_data_list_resultOK = true;
 							}
 							call();
 						}).catch(err => {
@@ -2204,12 +2204,12 @@ class Portal {
 					if(option.delete_image){
 						let data_type = DataType.IMAGE;
 						let filter = option.delete_image_query;
-						data.delete_image = false;
+						data.delete_image_resultOK = false;
 						Data.delete_list(database,data_type,filter).then(([biz_error,biz_data])=> {
 							if(biz_error){
 								error=Log.append(error,biz_error);
 							}else{
-								data.delete_image = true;
+								data.delete_image_resultOK = true;
 							}
 							call();
 						}).catch(err => {
@@ -2265,8 +2265,8 @@ class Portal {
 		 */
 		return new Promise((callback) => {
 			let error = null;
-			let data = {delete_ok:false,delete_data_list:false,delete_image:false};
-			option = option ? option : {delete_ok:false,get_item:false,get_image:false,delete_item:false,delete_item_filter:{},delete_image:false,delete_image_filter:{}};
+			let data = {delete_resultOK:false,delete_data_list_resultOK:false,delete_image_resultOK:false};
+			option = option ? option : {delete_resultOK:false,get_item:false,get_image:false,delete_item:false,delete_item_filter:{},delete_image_resultOK:false,delete_image_filter:{}};
 			async.series([
 				//delete_item_list
 				function(call){
@@ -2275,7 +2275,7 @@ class Portal {
 							error=Log.append(error,biz_error);
 						}else{
 							data = biz_data;
-							data.delete_ok = true;
+							data.delete_resultOK = true;
 						}
 						call();
 					}).catch(err => {
@@ -2287,12 +2287,12 @@ class Portal {
 					if(option.delete_item){
 						let data_type = DataType.ITEM;
 						let filter = option.delete_item_query;
-						data.delete_data_list = false;
+						data.delete_data_list_resultOK = false;
 						Data.delete_list(database,data_type,filter).then(([biz_error,biz_data])=> {
 							if(biz_error){
 								error=Log.append(error,biz_error);
 							}else{
-								data.delete_data_list = true;
+								data.delete_data_list_resultOK = true;
 							}
 							call();
 						}).catch(err => {
@@ -2307,12 +2307,12 @@ class Portal {
 					if(option.delete_image){
 						let data_type = DataType.IMAGE;
 						let filter = option.delete_image_query;
-						data.delete_image = false;
+						data.delete_image_resultOK = false;
 						Data.delete_list(database,data_type,filter).then(([biz_error,biz_data])=> {
 							if(biz_error){
 								error=Log.append(error,biz_error);
 							}else{
-								data.delete_image = true;
+								data.delete_image_resultOK = true;
 							}
 							call();
 						}).catch(err => {
