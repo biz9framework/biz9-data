@@ -1845,7 +1845,7 @@ class Portal {
 			option = option ? option : {get_item:false,get_image:false};
 			async.series([
 				function(call){
-					let search = App_Logic.get_search(data_type,!Obj.check_is_empty(filter)?filter:{},!Obj.check_is_empty(sort_by)?sort_by:{},!Str.check_is_null(page_current)?page_current:0,!Str.check_is_null(page_size)?page_size:0);
+					let search = App_Logic.get_search(data_type,filter,sort_by,page_current,page_size);
 					Data.get_list(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option).then(([biz_error,item_list,item_count,page_count])=>{
 						if(biz_error){
 							error=Log.append(error,biz_error);
@@ -1853,6 +1853,7 @@ class Portal {
 							 data.data_type=data_type;
                              data.item_count=item_count;
                              data.page_count=page_count;
+                             data.search=search;
                              data.filter=filter;
                              data.data_list=item_list;
                              data.app_id = database.app_id;
@@ -1974,7 +1975,6 @@ class Portal {
 								if(data.data_list.length> 0){
 								data.data_list.forEach(item => {
 									item.user = item_list.find(item_find => item_find.id === item.user_id) ? item_list.find(item_find => item_find.id === item.user_id):App_Logic.get_not_found(DataType.USER,item.user_id,{app_id:database.app_id});
-
 								});
 								}
 							}
@@ -2001,29 +2001,43 @@ class Portal {
 					}
 				},
 				function(call){
-					//call();
-					console.log('here');
-					Log.w('22_data_list',data.data_list.length);
-					Log.w('22_option',option);
-					console.log('cool');
 					if(option.get_favorite && data.data_list.length>0){
-						console.log('333333333');
 						let query = { $or:[] };
-						console.log(query);
                       	data.data_list.forEach(item => {
                           	let query_field = {$or:[],$and:[]};
 							query_field.$or.push({parent_id:item.id});
-							query_field.$and.push({user_id:item.id});
+							query_field.$and.push({user_id:option.favorite_user_id});
 							query.$or.push(query_field);
 						});
-
-						Log.w('my_fav_list',query);
-						Log.w('33_query',query);
-					}
+						let favorite_match_search = App_Logic.get_search(DataType.FAVORITE,query,{},1,0);
+						let favorite_match_option =  {get_field:true,fields:'id,parent_id,parent_data_type'};
+						Data.get_list(database,
+							favorite_match_search.data_type,
+							favorite_match_search.filter,
+							favorite_match_search.sort_by,
+							favorite_match_search.page_current,
+							favorite_match_search.page_size,
+							favorite_match_option).then(([biz_error,item_list,item_count,page_count])=> {
+							if(biz_error){
+								error=Log.append(error,biz_error);
+							}else{
+								if(data.data_list.length> 0){
+								data.data_list.forEach(item => {
+									item.is_favorite = item_list.find(item_find => item_find.parent_id === item.id) ? true:false
+								});
+								}
+							}
+							call();
+						}).catch(err => {
+							error = Log.append(error,err);
+							call();
+						});
+					}else{
+						call();
+					};
 				},
-
 			]).then(result => {
-				//callback([error,data]);
+				callback([error,data]);
 			}).catch(err => {
 				Log.error("Portal-Search",err);
 				callback([err,[]]);

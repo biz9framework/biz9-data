@@ -66,20 +66,17 @@ describe('connect', function(){ this.timeout(25000);
             async function(call){
                 console.log('FAVORITE-START');
                 let parent_data_type = DataType.PRODUCT;
-                let parent_id = '7aa51a11-b8c2-4b39-9466-497646d033c7';
-                let user_id = 'a954d764-b1ff-43bd-a3f2-0ef6b557098f';
+                let parent_id = '29e4d06d-cecb-48f6-b1f7-8a5ec44b998b';
+                let user_id = 'd34bd73c-5102-431c-adc3-4a010694c8fd';
                 let option = {get_favorite:true,favorite_parent_data_type:parent_data_type,favorite_user_id:user_id};
                 //let option = {get_favorite:true,favorite_user_id:user_id};
-                console.log('11111111');
-                console.log(parent_data_type);
-                console.log(parent_id);
-                console.log(user_id);
+                //console.log('11111111');
                 //const [biz_error,biz_data] = await Favorite_Data.get(database,parent_data_type,parent_id,user_id);
                 //const [biz_error,biz_data] = await Favorite_Data.post(database,parent_data_type,parent_id,user_id);
                 //const [biz_error,biz_data] = await Portal.get(database,parent_data_type,parent_id,option);
-                let search = App_Logic.get_search(DataType.PRODUCT,{},{},1,0);
+                let search = App_Logic.get_search(DataType.PRODUCT,{category:'Category 1'},{},1,0);
                 const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option);
-                //Log.w('biz_data',biz_data);
+                Log.w('biz_data',biz_data);
                 //Log.w('biz_data',biz_data.length);
                 //console.log('FAVORITE-END');
             },
