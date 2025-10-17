@@ -1517,12 +1517,40 @@ class User_Data {
 	};
 }
 class Favorite_Data {
+	//9_favorite_get
+	static get = (database,parent_data_type,parent_id,user_id) => {
+		return new Promise((callback) => {
+			let error = null;
+			let data = {};
+			data.is_favorite = false;
+			async.series([
+				async function(call){
+					let favorite_filter = Favorite_Logic.get_search_filter(parent_data_type,parent_id,user_id);
+					let search = App_Logic.get_search(DataType.FAVORITE,favorite_filter,{},1,0);
+					const [biz_error,biz_data] = await Portal.count(database,search.data_type,search.filter);
+					if(biz_error){
+						error=Log.append(biz_error,error);
+					}else{
+						if(biz_data.count>0){
+							data.is_favorite = true;
+						}
+					}
+				},
+			]).then(result => {
+				callback([error,data.is_favorite]);
+			}).catch(err => {
+				Log.error("Favorite-Get",err);
+				callback([error,[]]);
+			});
+		});
+	};
 	//9_favorite_post
 	static post = async (database,parent_data_type,parent_id,user_id) => {
 		return new Promise((callback) => {
 			let error = null;
 			let data = {};
 			data.unique_resultOK = false;
+			data.favorite_add_resultOK = false;
 			let favorite = Favorite_Logic.get_new(parent_data_type,parent_id,user_id);
 			async.series([
 				async function(call){
@@ -1544,11 +1572,12 @@ class Favorite_Data {
 							error=Log.append(error,biz_error);
 						}else{
 							data.favorite = biz_data;
+							data.favorite_add_resultOK = true;
 						}
 					}
 				},
 			]).then(result => {
-				callback([error,data]);
+				callback([error,data.favorite_add_resultOK]);
 			}).catch(err => {
 				Log.error("Favorite-Data-Update",err);
 				callback([err,{}]);
@@ -1644,6 +1673,9 @@ class Portal {
 		   - image_sort_by / query obj / ex. {date_create:1}
 		* Favorite
 		   - get_favorite / bool / ex. true,false / def. true
+		   - favorite_user_id / bool / ex. true,false / def. true
+		   - favorite_parent_id / id / ex. 123 / def. error
+		   - favorite_parent_data_type / DataType / ex. DataType.PRODUCT / def. error
 		 */
 		return new Promise((callback) => {
 			let error = null;
@@ -1748,9 +1780,19 @@ class Portal {
 					}
 				},
 				async function(call){
-					//here
-				}
-			]).then(result => {
+					if(option.get_favorite && data.id){
+						data.is_favorite = false;
+					const [biz_error,biz_data] = await Favorite_Data.get(database,data.data_type,data.id,option.favorite_user_id);
+					if(biz_error){
+						error=Log.append(biz_error,error);
+					}else{
+						if(biz_data==true){
+							data.is_favorite = true;
+						}
+					}
+					}
+				},
+				]).then(result => {
 				callback([error,data]);
 			}).catch(err => {
 				Log.error("Portal-Get",err);
@@ -1853,7 +1895,7 @@ class Portal {
 						call();
 					}
 				},
-			function(call){
+				function(call){
 					if(option.get_search && data.data_list.length>0){
 						let query = { $or: [] };
 						data.data_list.forEach(item => {
@@ -1958,8 +2000,30 @@ class Portal {
 						call();
 					}
 				},
+				function(call){
+					//call();
+					console.log('here');
+					Log.w('22_data_list',data.data_list.length);
+					Log.w('22_option',option);
+					console.log('cool');
+					if(option.get_favorite && data.data_list.length>0){
+						console.log('333333333');
+						let query = { $or:[] };
+						console.log(query);
+                      	data.data_list.forEach(item => {
+                          	let query_field = {$or:[],$and:[]};
+							query_field.$or.push({parent_id:item.id});
+							query_field.$and.push({user_id:item.id});
+							query.$or.push(query_field);
+						});
+
+						Log.w('my_fav_list',query);
+						Log.w('33_query',query);
+					}
+				},
+
 			]).then(result => {
-				callback([error,data]);
+				//callback([error,data]);
 			}).catch(err => {
 				Log.error("Portal-Search",err);
 				callback([err,[]]);
@@ -2637,11 +2701,12 @@ class Blank_Data {
 	//9_blank
 	static blank = (database) => {
 		return new Promise((callback) => {
-			let data = DataItem.get_new(DataType.BLANK,0);
 			let error = null;
+			let data = DataItem.get_new(DataType.BLANK,0);
+			data.test_resultOK = false;
 			async.series([
 				async function(call){
-					const [biz_error,biz_data] = await Portal.post(database,DataType.BLANK,post_data);
+					const [biz_error,biz_data] = await Portal.post(database,DataType.BLANK,{});
 					call();
 				},
 			]).then(result => {
