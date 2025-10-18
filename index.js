@@ -1102,23 +1102,20 @@ class Review_Data {
 				},
 				//post-review-stat
 				async function(call){
-					if(option.post_stat && data.id){
+					if(option.post_stat && data.parent_item.id){
+						let new_stat = DataItem.get_new(DataType.REVIEW,0,{parent_id:parent_id,parent_data_type:parent_data_type,rating:post_review.rating});
 						let post_stat_list = Stat_Logic.get_new(option.user_id,Type.STAT_REVIEW,[DataItem.get_new(DataType.REVIEW,0,{parent_id:parent_id,parent_data_type:parent_data_type,rating:post_review.rating})]);
-						//here
-						Log.w('33_post_stat_list',post_stat_list);
-						/*
 						const [biz_error,biz_data] = await Stat_Data.post(database,post_stat_list);
 						if(biz_error){
 							error=Log.append(error,biz_error);
 						}else{
-							data.stat_favorite = biz_data;
+							data.stat_review = biz_data;
 						}
-						*/
 					}
 				},
 
 			]).then(result => {
-				callback([error,data]);
+				callback([error,data.review]);
 			}).catch(err => {
 				Log.error("Review-Data-Portal",err);
 				callback([err,[]]);
@@ -1134,8 +1131,8 @@ class Review_Data {
 				//review_list
 				async function(call){
 					let query = {parent_id:parent_id,parent_data_type:parent_data_type};
-					let search = App_Logic.get_search(DataType.REVIEW,query,{},page_current,page_size);
-					let option = {get_parent:true,parent_data_type:parent_data_type,parent_fields:'id,title,title_url,image_data',get_user:true,user_fields:'id,title,title_url,image_data'};
+					let search = App_Logic.get_search(DataType.REVIEW,query,sort_by,page_current,page_size);
+					let option = {get_parent:true,parent_data_type:parent_data_type,parent_fields:'id,title,title_url,rating',get_user:true,user_fields:'id,title,title_url,image_filename,city,country,state'};
 					const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option);
 					if(biz_error){
 						error=Log.append(error,biz_error);
