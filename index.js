@@ -348,10 +348,10 @@ class Gallery_Data {
 						gallery = biz_data;
 					}
 				}, ]).then(result => { callback([error,gallery]);
-			}).catch(err => {
-				Log.error("Gallery-Get",err);
-				callback([err,null]);
-			});
+				}).catch(err => {
+					Log.error("Gallery-Get",err);
+					callback([err,null]);
+				});
 		});
 	};
 	//9_gallery_data_search
@@ -401,10 +401,10 @@ class Event_Data {
 						event = biz_data;
 					}
 				}, ]).then(result => { callback([error,event]);
-			}).catch(err => {
-				Log.error("Event-Get",err);
-				callback([err,null]);
-			});
+				}).catch(err => {
+					Log.error("Event-Get",err);
+					callback([err,null]);
+				});
 		});
 	};
 	//9_event_data_search
@@ -442,21 +442,21 @@ class Order_Data {
 	static post = async (database,order,order_payment_list,option) => {
 		return new Promise((callback) => {
 			let data = {order:DataItem.get_new(DataType.ORDER,0, {
-							order_number:0,
-							parent_data_type:order.parent_data_type,
-							user_id:0,
-							cart_number:0,
-							grand_total:0,
-						}),order_item_list:[],order_sub_item_list:[]};
+				order_number:0,
+				parent_data_type:order.parent_data_type,
+				user_id:0,
+				cart_number:0,
+				grand_total:0,
+			}),order_item_list:[],order_sub_item_list:[]};
 			async.series([
-			async function(call){
-				for(const key in order) {
-					if(Str.check_is_null(data.order[key]) && key != 'order_item_list' &&  key != 'order_item_list' && key != 'order_sub_item_list'){
-						data.order[key] = order[key];
+				async function(call){
+					for(const key in order) {
+						if(Str.check_is_null(data.order[key]) && key != 'order_item_list' &&  key != 'order_item_list' && key != 'order_sub_item_list'){
+							data.order[key] = order[key];
+						}
 					}
-				}
-			},
-			async function(call){
+				},
+				async function(call){
 					const [biz_error,biz_data] = await Portal.post(database,DataType.ORDER,data.order);
 					if(biz_error){
 						error=Log.append(error,biz_error);
@@ -521,42 +521,42 @@ class Order_Data {
 						}
 					}
 				},
-			//post - order_payment_list
+				//post - order_payment_list
 				async function(call){
 					if(order_payment_list.length>0){
-					const [biz_error,biz_data] = await Portal.post_list(database,order_payment_list);
-					if(biz_error){
-						error=Log.append(error,biz_error);
-					}else{
-						data.order_payment_list = biz_data;
-					}
+						const [biz_error,biz_data] = await Portal.post_list(database,order_payment_list);
+						if(biz_error){
+							error=Log.append(error,biz_error);
+						}else{
+							data.order_payment_list = biz_data;
+						}
 					}
 				},
 				//post-order-stat
-        		async function(call){
-            		if(data.order.id && option.post_stat){
-                		let post_stat_list = Stat_Logic.get_new(data.order.user_id,Type.STAT_ORDER,data.order_item_list);
-            			const [biz_error,biz_data] = await Stat_Data.post(database,post_stat_list);
-            		if(biz_error){
-                		error=Log.append(error,biz_error);
-            		}else{
-                		data.stat_order = biz_data;
-            		}
+				async function(call){
+					if(data.order.id && option.post_stat){
+						let post_stat_list = Stat_Logic.get_new(data.order.user_id,Type.STAT_ORDER,data.order_item_list);
+						const [biz_error,biz_data] = await Stat_Data.post(database,post_stat_list);
+						if(biz_error){
+							error=Log.append(error,biz_error);
+						}else{
+							data.stat_order = biz_data;
+						}
 					}
-            	},
+				},
 				//post-order-payment-stat
-        		async function(call){
-            		if(data.order.id && option.post_stat){
-                		let post_stat_list = Stat_Logic.get_new(data.order.user_id,Type.STAT_ORDER_PAYMENT,data.order_payment_list);
-            			const [biz_error,biz_data] = await Stat_Data.post(database,post_stat_list);
-            		if(biz_error){
-                		error=Log.append(error,biz_error);
-            		}else{
-                		data.stat_order_payment = biz_data;
-            		}
+				async function(call){
+					if(data.order.id && option.post_stat){
+						let post_stat_list = Stat_Logic.get_new(data.order.user_id,Type.STAT_ORDER_PAYMENT,data.order_payment_list);
+						const [biz_error,biz_data] = await Stat_Data.post(database,post_stat_list);
+						if(biz_error){
+							error=Log.append(error,biz_error);
+						}else{
+							data.stat_order_payment = biz_data;
+						}
 					}
-            	},
-		]).then(result => {
+				},
+			]).then(result => {
 				callback([error,data]);
 			}).catch(err => {
 				Log.error("OrderData-Order-Item-Update",err);
@@ -620,7 +620,7 @@ class Order_Data {
 						}
 					}
 				},
-			//get_order_sub_item_list
+				//get_order_sub_item_list
 				async function(call){
 					if(!Str.check_is_null(data.order.id)){
 						let filter = { order_number: { $regex:String(order_number), $options: "i" } };
@@ -673,7 +673,7 @@ class Order_Data {
 						}
 					}
 				},
-				]).then(result => {
+			]).then(result => {
 				callback([error,data.order]);
 			}).catch(err => {
 				Log.error("Order-Get",err);
@@ -742,7 +742,7 @@ class Order_Data {
 	};
 }
 class Cart_Data {
-//9_cart_post
+	//9_cart_post
 	static post = async (database,cart,option) => {
 		return new Promise((callback) => {
 			let data = {};
@@ -828,17 +828,17 @@ class Cart_Data {
 					}
 				},
 				//post stat
-        		async function(call){
-            		if(data.cart.id && option.post_stat){
-                		let post_stat_list = Stat_Logic.get_new(data.cart.user_id,Type.STAT_CART,data.cart_item_list);
-            			const [biz_error,biz_data] = await Stat_Data.post(database,post_stat_list);
-            		if(biz_error){
-                		error=Log.append(error,biz_error);
-            		}else{
-                		data.stat = biz_data;
-            		}
+				async function(call){
+					if(data.cart.id && option.post_stat){
+						let post_stat_list = Stat_Logic.get_new(data.cart.user_id,Type.STAT_CART,data.cart_item_list);
+						const [biz_error,biz_data] = await Stat_Data.post(database,post_stat_list);
+						if(biz_error){
+							error=Log.append(error,biz_error);
+						}else{
+							data.stat = biz_data;
+						}
 					}
-            	},
+				},
 			]).then(result => {
 				callback([error,data]);
 			}).catch(err => {
@@ -1003,7 +1003,7 @@ class Cart_Data {
 	};
 }
 class Product_Data {
-//9_product_get
+	//9_product_get
 	static get = async (database,key,option) => {
 		return new Promise((callback) => {
 			let product = DataItem.get_new(DataType.PRODUCT,0);
@@ -1057,11 +1057,12 @@ class Product_Data {
 }
 class Review_Data {
 	//9_review_post
-	static post = async(database,parent_data_type,parent_id,user_id,post_review) => {
+	static post = async(database,parent_data_type,parent_id,user_id,post_review,option) => {
 		return new Promise((callback) => {
 			let error = null;
 			let data = {parent_item:DataItem.get_new(parent_data_type,parent_id),review:DataItem.get_new(DataType.REVIEW,0)};
 			let review = Review_Logic.get_new(parent_data_type,parent_id,user_id,post_review.title,post_review.comment,post_review.rating);
+			option = option ? option : {post_stat:false,user_id:0};
 			async.series([
 				//review_post
 				async function(call){
@@ -1099,6 +1100,23 @@ class Review_Data {
 						}
 					}
 				},
+				//post-review-stat
+				async function(call){
+					if(option.post_stat && data.id){
+						let post_stat_list = Stat_Logic.get_new(option.user_id,Type.STAT_REVIEW,[DataItem.get_new(DataType.REVIEW,0,{parent_id:parent_id,parent_data_type:parent_data_type,rating:post_review.rating})]);
+						//here
+						Log.w('33_post_stat_list',post_stat_list);
+						/*
+						const [biz_error,biz_data] = await Stat_Data.post(database,post_stat_list);
+						if(biz_error){
+							error=Log.append(error,biz_error);
+						}else{
+							data.stat_favorite = biz_data;
+						}
+						*/
+					}
+				},
+
 			]).then(result => {
 				callback([error,data]);
 			}).catch(err => {
@@ -1122,13 +1140,13 @@ class Review_Data {
 					if(biz_error){
 						error=Log.append(error,biz_error);
 					}else{
-							data.option = option;
-							data.data_type=biz_data.data_type;
-							data.item_count=biz_data.item_count;
-							data.page_count=biz_data.page_count;
-							data.filter=biz_data.filter;
-							data.review_list=biz_data.data_list;
-							data.app_id = database.app_id;
+						data.option = option;
+						data.data_type=biz_data.data_type;
+						data.item_count=biz_data.item_count;
+						data.page_count=biz_data.page_count;
+						data.filter=biz_data.filter;
+						data.review_list=biz_data.data_list;
+						data.app_id = database.app_id;
 					}
 				},
 			]).then(result => {
@@ -1210,44 +1228,44 @@ class User_Data {
 				callback([error,null]);
 			}
 			else{
-			let ip_info ={country_name:"N/A",region_name:"N/A",district:"N/A",city_name:"N/A",latitude:"N/A",longitude:"N/A",zip_code:"N/A",isp:"N/A",ip_address:"N/A"};
-			var https = require('https');
-			let url = 'https://api.ip2location.io/?key=' + geo_key + '&ip=' + ip_address + '&format=json';
-			let response = '';
-			let req = https.get(url, function (res) {
-				res.on('error', (e) => console.log('GEO_LOCATION ERROR: ' + e));
+				let ip_info ={country_name:"N/A",region_name:"N/A",district:"N/A",city_name:"N/A",latitude:"N/A",longitude:"N/A",zip_code:"N/A",isp:"N/A",ip_address:"N/A"};
 				var https = require('https');
-				var key = geo_key;
-				var ip = !Str.check_is_null(ip_address) ? ip_address : "0.0.0.0" ;
-				let url = 'https://api.ip2location.io/?key=' + key + '&ip=' + ip + '&format=json';
+				let url = 'https://api.ip2location.io/?key=' + geo_key + '&ip=' + ip_address + '&format=json';
 				let response = '';
 				let req = https.get(url, function (res) {
-					res.on('data', (chunk) => (response = response + chunk));
-					res.on('error', (e) => console.log('ERROR: ' + e));
-					res.on("end", function () {
-						try {
-							let geo_data = JSON.parse(response);
-							ip_info =
-								{
-									country_name:!Str.check_is_null(geo_data.country_name) ? geo_data.country_name : "N/A",
-									region_name:!Str.check_is_null(geo_data.region_name) ?geo_data.region_name : "N/A",
-									is_proxy:!Str.check_is_null(geo_data.is_proxy) ?geo_data.is_proxy : "N/A",
-									district:!Str.check_is_null(geo_data.district) ?geo_data.district : "N/A",
-									city_name:!Str.check_is_null(geo_data.city_name) ?geo_data.city_name : "N/A",
-									latitude:!Str.check_is_null(geo_data.latitude) ?geo_data.latitude : "N/A",
-									longitude:!Str.check_is_null(geo_data.longitude) ?geo_data.longitude : "N/A",
-									zip_code:!Str.check_is_null(geo_data.zip_code) ?geo_data.zip_code : "N/A",
-									isp:!Str.check_is_null(geo_data.as) ?geo_data.as : "N/A",
-									ip_address:!Str.check_is_null(geo_data.ip) ?geo_data.ip : "N/A"
-								};
-							callback([error,ip_info]);
-						}
-						catch (e) {
-							callback([e,ip_info]);
-						}
+					res.on('error', (e) => console.log('GEO_LOCATION ERROR: ' + e));
+					var https = require('https');
+					var key = geo_key;
+					var ip = !Str.check_is_null(ip_address) ? ip_address : "0.0.0.0" ;
+					let url = 'https://api.ip2location.io/?key=' + key + '&ip=' + ip + '&format=json';
+					let response = '';
+					let req = https.get(url, function (res) {
+						res.on('data', (chunk) => (response = response + chunk));
+						res.on('error', (e) => console.log('ERROR: ' + e));
+						res.on("end", function () {
+							try {
+								let geo_data = JSON.parse(response);
+								ip_info =
+									{
+										country_name:!Str.check_is_null(geo_data.country_name) ? geo_data.country_name : "N/A",
+										region_name:!Str.check_is_null(geo_data.region_name) ?geo_data.region_name : "N/A",
+										is_proxy:!Str.check_is_null(geo_data.is_proxy) ?geo_data.is_proxy : "N/A",
+										district:!Str.check_is_null(geo_data.district) ?geo_data.district : "N/A",
+										city_name:!Str.check_is_null(geo_data.city_name) ?geo_data.city_name : "N/A",
+										latitude:!Str.check_is_null(geo_data.latitude) ?geo_data.latitude : "N/A",
+										longitude:!Str.check_is_null(geo_data.longitude) ?geo_data.longitude : "N/A",
+										zip_code:!Str.check_is_null(geo_data.zip_code) ?geo_data.zip_code : "N/A",
+										isp:!Str.check_is_null(geo_data.as) ?geo_data.as : "N/A",
+										ip_address:!Str.check_is_null(geo_data.ip) ?geo_data.ip : "N/A"
+									};
+								callback([error,ip_info]);
+							}
+							catch (e) {
+								callback([e,ip_info]);
+							}
+						});
 					});
 				});
-			});
 			}
 		});
 	};
@@ -1256,14 +1274,14 @@ class User_Data {
 		/* Post Data
 		 *  - user / type. obj / ex. {email:myemail@gmail.com,title:my_title} / default. error
 		 *
-		/* Options
-		*/
+			/* Options
+			*/
 		return new Promise((callback) => {
 			let error = null;
 			let data = {
-					email_resultOK:false,
-					title_reultOK:false,
-				    user:post_data
+				email_resultOK:false,
+				title_reultOK:false,
+				user:post_data
 			};
 			async.series([
 				//check email
@@ -1314,7 +1332,7 @@ class User_Data {
 						}
 					}
 				},
-		]).then(result => {
+			]).then(result => {
 				callback([error,data]);
 			}).catch(err => {
 				Log.error("User-Data-Register",err);
@@ -1331,19 +1349,19 @@ class User_Data {
 		 *  - geo_key / type. string / ex. Geo Location Key / default. blank
 		 *  - device / type. opj / ex. Geo Location Key / default. blank  / https://www.npmjs.com/package/platform
 		 *
-		/* Options
-		 * IP Address Information
-		 * - post_stat / type. bool / ex.true,false / default. false
-		 * - post_ip_address / type. bool / ex.true,false / default. false
-		 * - post_device / type. bool / ex.true,false / default. false
-		*/
+			/* Options
+			 * IP Address Information
+			 * - post_stat / type. bool / ex.true,false / default. false
+			 * - post_ip_address / type. bool / ex.true,false / default. false
+			 * - post_device / type. bool / ex.true,false / default. false
+			 */
 		return new Promise((callback) => {
 			let error = null;
 			let data = {
-					email_resultOK:false,
-					title_resultOK:false,
-				    user:post_data.user,
-					stat:DataItem.get_new(DataType.STAT,0)
+				email_resultOK:false,
+				title_resultOK:false,
+				user:post_data.user,
+				stat:DataItem.get_new(DataType.STAT,0)
 			};
 			let post_ip_address = post_data.ip_address?post_data.ip_address:null;
 			let post_geo_key = post_data.geo_key?post_data.geo_key:null;
@@ -1385,39 +1403,39 @@ class User_Data {
 						}
 					}
 				},
- 				//get stat - ip - merge
-        		async function(call){
-            		if(data.email_resultOK && data.title_resultOK && option.post_ip_address){
-				    	data.ip_address = post_ip_address;
-				    	data.geo_key = post_geo_key;
-                		const [biz_error,biz_data] = await User_Data.get_ip(data.ip_address,data.geo_key);
-                	if(biz_error){
-                    	error=Log.append(error,biz_error);
-                	}
-                		data.stat = Obj.merge(data.stat,biz_data);
-            		}
-        		},
- 				//get stat - device - merge
-        		async function(call){
-            		if(data.email_resultOK && data.title_resultOK && option.post_device){
-				    	data.device = post_device;
-                		const biz_data = await User_Data.get_device(data.device);
-                		data.stat = Obj.merge(data.stat,biz_data);
-            		}
-        		},
+				//get stat - ip - merge
+				async function(call){
+					if(data.email_resultOK && data.title_resultOK && option.post_ip_address){
+						data.ip_address = post_ip_address;
+						data.geo_key = post_geo_key;
+						const [biz_error,biz_data] = await User_Data.get_ip(data.ip_address,data.geo_key);
+						if(biz_error){
+							error=Log.append(error,biz_error);
+						}
+						data.stat = Obj.merge(data.stat,biz_data);
+					}
+				},
+				//get stat - device - merge
+				async function(call){
+					if(data.email_resultOK && data.title_resultOK && option.post_device){
+						data.device = post_device;
+						const biz_data = await User_Data.get_device(data.device);
+						data.stat = Obj.merge(data.stat,biz_data);
+					}
+				},
 				//post stat
-        		async function(call){
-            		if(data.email_resultOK && data.title_resultOK && option.post_stat && option.post_device || option.post_ip){
-                		let post_new_stat = Stat_Logic.get_new_user(data.user.id,Type.STAT_REGISTER,data.stat);
-            			const [biz_error,biz_data] = await Stat_Data.post_user(database,post_new_stat.user_id,post_new_stat.type,post_new_stat.data);
-            		if(biz_error){
-                		error=Log.append(error,biz_error);
-            		}else{
-                		data.stat = biz_data;
-            		}
-            	}
-        		},
-		]).then(result => {
+				async function(call){
+					if(data.email_resultOK && data.title_resultOK && option.post_stat && option.post_device || option.post_ip){
+						let post_new_stat = Stat_Logic.get_new_user(data.user.id,Type.STAT_REGISTER,data.stat);
+						const [biz_error,biz_data] = await Stat_Data.post_user(database,post_new_stat.user_id,post_new_stat.type,post_new_stat.data);
+						if(biz_error){
+							error=Log.append(error,biz_error);
+						}else{
+							data.stat = biz_data;
+						}
+					}
+				},
+			]).then(result => {
 				callback([error,data]);
 			}).catch(err => {
 				Log.error("User-Data-Register",err);
@@ -1433,12 +1451,12 @@ class User_Data {
 		 *  - geo_key / type. string / ex. Geo Location Key / default. blank
 		 *  - device / type. opj / ex. Geo Location Key / default. blank  / https://www.npmjs.com/package/platform
 		 *
-		/* Options
-		 * IP Address Information
-		 * - post_stat / type. bool / ex.true,false / default. false
-		 * - post_ip_address / type. bool / ex.true,false / default. false
-		 * - post_device / type. bool / ex.true,false / default. false
-		*/
+			/* Options
+			 * IP Address Information
+			 * - post_stat / type. bool / ex.true,false / default. false
+			 * - post_ip_address / type. bool / ex.true,false / default. false
+			 * - post_device / type. bool / ex.true,false / default. false
+			 */
 
 		return new Promise((callback) => {
 			let error = null;
@@ -1476,38 +1494,38 @@ class User_Data {
 					}
 				},
 				//get stat - ip - merge
-        		async function(call){
-            		if(data.user_resultOK && option.post_ip_address){
-				    	data.ip_address = post_ip_address;
-				    	data.geo_key = post_geo_key;
-            		const [biz_error,biz_data] = await User_Data.get_ip(data.ip_address,data.geo_key);
-                		if(biz_error){
-                    		error=Log.append(error,biz_error);
-                		}
-                			data.stat = Obj.merge(data.stat,biz_data);
-            		}
-        		},
- 				//get stat - device - merge
-        		async function(call){
-            		if(data.user_resultOK && option.post_device){
+				async function(call){
+					if(data.user_resultOK && option.post_ip_address){
+						data.ip_address = post_ip_address;
+						data.geo_key = post_geo_key;
+						const [biz_error,biz_data] = await User_Data.get_ip(data.ip_address,data.geo_key);
+						if(biz_error){
+							error=Log.append(error,biz_error);
+						}
+						data.stat = Obj.merge(data.stat,biz_data);
+					}
+				},
+				//get stat - device - merge
+				async function(call){
+					if(data.user_resultOK && option.post_device){
 						data.device = post_device;
-            			const biz_data = await User_Data.get_device(data.device);
-                		data.stat = Obj.merge(data.stat,biz_data);
-            		}
-        		},
+						const biz_data = await User_Data.get_device(data.device);
+						data.stat = Obj.merge(data.stat,biz_data);
+					}
+				},
 				//post stat
-        		async function(call){
-            		if(data.user_resultOK && option.post_stat && option.post_device || option.post_ip){
-                		let post_new_stat = Stat_Logic.get_new_user(data.user.id,Type.STAT_LOGIN,data.stat);
-            			const [biz_error,biz_data] = await Stat_Data.post_user(database,post_new_stat.user_id,post_new_stat.type,post_new_stat.data);
-            		if(biz_error){
-                		error=Log.append(error,biz_error);
-            		}else{
-                		data.stat = biz_data;
-            		}
-            	}
-        		},
-		]).then(result => {
+				async function(call){
+					if(data.user_resultOK && option.post_stat && option.post_device || option.post_ip){
+						let post_new_stat = Stat_Logic.get_new_user(data.user.id,Type.STAT_LOGIN,data.stat);
+						const [biz_error,biz_data] = await Stat_Data.post_user(database,post_new_stat.user_id,post_new_stat.type,post_new_stat.data);
+						if(biz_error){
+							error=Log.append(error,biz_error);
+						}else{
+							data.stat = biz_data;
+						}
+					}
+				},
+			]).then(result => {
 				callback([error,data]);
 			}).catch(err => {
 				Log.error("User-Data-Login",err);
@@ -1579,18 +1597,17 @@ class Favorite_Data {
 					}
 				},
 				//post-favorite-stat
-        		async function(call){
-            		if(data.unique_resultOK){
+				async function(call){
+					if(data.unique_resultOK){
 						let post_stat_list = Stat_Logic.get_new(user_id,Type.STAT_FAVORITE,[data.favorite]);
-            			const [biz_error,biz_data] = await Stat_Data.post(database,post_stat_list);
-            		if(biz_error){
-                		error=Log.append(error,biz_error);
-            		}else{
-                		data.stat_favorite = biz_data;
-            		}
+						const [biz_error,biz_data] = await Stat_Data.post(database,post_stat_list);
+						if(biz_error){
+							error=Log.append(error,biz_error);
+						}else{
+							data.stat_favorite = biz_data;
+						}
 					}
-            	},
-
+				},
 			]).then(result => {
 				callback([error,data.favorite_add_resultOK]);
 			}).catch(err => {
@@ -1638,7 +1655,7 @@ class Portal {
 					let post_type_list = [];
 					for(const item of type_list) {
 						post_type_list.push(Demo_Logic.get_new_type(item.title));
-         			};
+					};
 					const [biz_error,biz_data] = await Portal.post_bulk(database,DataType.TYPE,post_type_list);
 					if(biz_error){
 						error=Log.append(error,biz_error);
@@ -1649,18 +1666,18 @@ class Portal {
 				async function(call){
 					let post_category_list = [];
 					for(const item of type_list) {
-					for(const cat_item of item.categorys) {
-						post_category_list.push(Category_Logic.get_new(cat_item.title,cat_item.type,cat_item.category));
-         				};
-         			};
+						for(const cat_item of item.categorys) {
+							post_category_list.push(Category_Logic.get_new(cat_item.title,cat_item.type,cat_item.category));
+						};
+					};
 					if(post_category_list.length>0){
-					const [biz_error,biz_data] = await Portal.post_bulk(database,DataType.CATEGORY,post_category_list);
-					if(biz_error){
-						error=Log.append(error,biz_error);
-					}else{
-						data.category_list = biz_data;
-						data.resultOK = true;
-					}
+						const [biz_error,biz_data] = await Portal.post_bulk(database,DataType.CATEGORY,post_category_list);
+						if(biz_error){
+							error=Log.append(error,biz_error);
+						}else{
+							data.category_list = biz_data;
+							data.resultOK = true;
+						}
 					}
 				},
 				//item_list
@@ -1677,16 +1694,16 @@ class Portal {
 							for(const item of cat_item.items) {
 								post_item_list.push(item);
 							};
-         				};
-         			};
+						};
+					};
 					if(post_item_list.length>0){
-					const [biz_error,biz_data] = await Portal.post_bulk(database,data_type,post_item_list);
-					if(biz_error){
-						error=Log.append(error,biz_error);
-					}else{
-						data.item_list = biz_data;
-						data.resultOK = true;
-					}
+						const [biz_error,biz_data] = await Portal.post_bulk(database,data_type,post_item_list);
+						if(biz_error){
+							error=Log.append(error,biz_error);
+						}else{
+							data.item_list = biz_data;
+							data.resultOK = true;
+						}
 					}
 				},
 				async function(call){
@@ -1708,22 +1725,27 @@ class Portal {
 		   - fields / type. string / ex. field1,field2 / default. throw error
 		 * Items
 		   - get_item / bool / ex. true,false / def. true
-	  	* Photos
+		 * Photos
 		   - get_image / bool / ex. true,false / def. true
 		   - image_count / int / ex. 1-999 / def. 19
 		   - image_sort_by / query obj / ex. {date_create:1}
-		* Favorite
+		 * Favorite
 		   - get_favorite / bool / ex. true,false / def. true
-		   - favorite_user_id / bool / ex. true,false / def. true
+		   - user_id / bool / ex. true,false / def. true
 		   - favorite_parent_id / id / ex. 123 / def. error
 		   - favorite_parent_data_type / DataType / ex. DataType.PRODUCT / def. error
-		 */
+		 * Favorite
+		   - get_favorite / bool / ex. true,false / def. true
+		 * Stat
+		   - post_stat / bool / ex. true,false / def. true
+		   - user_id / id / ex. 123 / def. error
+		   */
 		return new Promise((callback) => {
 			let error = null;
 			let data = DataItem.get_new(data_type,0,{key:key?key:'blank'});
 			let full_data_list = [];
 			let new_data_list = [];
-			option = option ? option : {get_item:false,get_image:false};
+			option = option ? option : {get_item:false,get_image:false,post_stat:false,user_id:0};
 			async.series([
 				function(call){
 					if(!Str.check_is_guid(key)){
@@ -1740,7 +1762,7 @@ class Portal {
 								data = biz_data;
 							}else{
 								data = data_type != DataType.USER ? App_Logic.get_not_found(data_type,key,{app_id:database.app_id}) : App_Logic.get_not_found(DataType.USER,key,{app_id:database.app_id});
-						}
+							}
 						}
 						call();
 					}).catch(err => {
@@ -1784,13 +1806,13 @@ class Portal {
 								error=Log.append(error,biz_error);
 							}else{
 								item_list.forEach(item => {
-								if(item.parent_id == data.id){
-									let item_title_url = Str.get_title_url(item.title);
-									data[item_title_url] = new Object();
-									data[item_title_url] = item;
-									data.items.push(item);
-								}
-						});
+									if(item.parent_id == data.id){
+										let item_title_url = Str.get_title_url(item.title);
+										data[item_title_url] = new Object();
+										data[item_title_url] = item;
+										data.items.push(item);
+									}
+								});
 							}
 							call();
 						}).catch(err => {
@@ -1823,17 +1845,29 @@ class Portal {
 				async function(call){
 					if(option.get_favorite && data.id){
 						data.is_favorite = false;
-					const [biz_error,biz_data] = await Favorite_Data.get(database,data.data_type,data.id,option.favorite_user_id);
-					if(biz_error){
-						error=Log.append(biz_error,error);
-					}else{
-						if(biz_data==true){
-							data.is_favorite = true;
+						const [biz_error,biz_data] = await Favorite_Data.get(database,data.data_type,data.id,option.user_id);
+						if(biz_error){
+							error=Log.append(biz_error,error);
+						}else{
+							if(biz_data==true){
+								data.is_favorite = true;
+							}
 						}
 					}
+				},
+				//post-favorite-stat
+				async function(call){
+					if(option.post_stat && data.id){
+						let post_stat_list = Stat_Logic.get_new(option.user_id,Type.STAT_VIEW,[data]);
+						const [biz_error,biz_data] = await Stat_Data.post(database,post_stat_list);
+						if(biz_error){
+							error=Log.append(error,biz_error);
+						}else{
+							data.stat_favorite = biz_data;
+						}
 					}
 				},
-				]).then(result => {
+			]).then(result => {
 				callback([error,data]);
 			}).catch(err => {
 				Log.error("Portal-Get",err);
@@ -1852,34 +1886,34 @@ class Portal {
 		   - get_field / type. bool / ex. true,false / default. false
 		   - fields / type. string / ex. field1,field2 / default. throw error
 		 * Items
-		    - get_item / type. bool / ex. true,false / default. false
+			- get_item / type. bool / ex. true,false / default. false
 		 * Photos
-		    - get_image / type. bool / ex. true,false / default. false
-		    - image_count / type. int / ex. 1-999 / default. 19
-		    - image_sort_by / type. {} / ex. {date_create:1} / default. {}
+			- get_image / type. bool / ex. true,false / default. false
+			- image_count / type. int / ex. 1-999 / default. 19
+			- image_sort_by / type. {} / ex. {date_create:1} / default. {}
 		 *  Count
-		    - get_count / type. bool / ex. true,false / default. false
+			- get_count / type. bool / ex. true,false / default. false
 			  - count_data_type / type. string / ex. PRODUCT / default. throw error
 			  - count_field / type. number / ex. category /  default. throw error
 			  - count_value / type. string / ex. title / default. throw error
 		 *  Search
-		    - get_search / type. bool / ex. true,false / default. false
+			- get_search / type. bool / ex. true,false / default. false
 			  - search_data_type / type. string / ex. PRODUCT / default. throw error
 			  - search_field / type. string / ex. category_title / default. throw error
 			  - search_parent_field / type. string / ex. title / default. throw error
- 			- get_parent / type. bool / ex. true,false / default. false
+			- get_parent / type. bool / ex. true,false / default. false
 			  - parent_data_type / type. string / ex. PRODUCT / ex. throw error
-   			  - parent_fields / type. string / ex. field1,field2 / default. empty
+			  - parent_fields / type. string / ex. field1,field2 / default. empty
 			- get_user / type. bool / ex. true,false / default. false
 			  - user_fields / type. string / ex. field1,field2 / default. empty
-		* Return
+		 * Return
 			- data_type
 			- item_count
 			- page_count
 			- filter
 			- item_list
 			- app_id
-	     */
+			*/
 		return new Promise((callback) => {
 			let data = {data_type:data_type,item_count:0,page_count:1,filter:{},data_list:[],app_id:database.app_id};
 			let error=null;
@@ -1891,13 +1925,13 @@ class Portal {
 						if(biz_error){
 							error=Log.append(error,biz_error);
 						}else{
-							 data.data_type=data_type;
-                             data.item_count=item_count;
-                             data.page_count=page_count;
-                             data.search=search;
-                             data.filter=filter;
-                             data.data_list=item_list;
-                             data.app_id = database.app_id;
+							data.data_type=data_type;
+							data.item_count=item_count;
+							data.page_count=page_count;
+							data.search=search;
+							data.filter=filter;
+							data.data_list=item_list;
+							data.app_id = database.app_id;
 							call();
 						}
 					}).catch(err => {
@@ -1918,14 +1952,14 @@ class Portal {
 								error=Log.append(error,biz_error);
 							}else{
 								if(data.data_list.length> 0 && item_list.length>0){
-								data.data_list.forEach(item => {
-									item.item_count = 0;
-									item_list.forEach(item_count => {
-										if(item[option.count_value] == item_count[option.count_field]){
-											item.item_count = item.item_count + 1;
-										}
+									data.data_list.forEach(item => {
+										item.item_count = 0;
+										item_list.forEach(item_count => {
+											if(item[option.count_value] == item_count[option.count_field]){
+												item.item_count = item.item_count + 1;
+											}
+										});
 									});
-								});
 								}
 							}
 							call();
@@ -1951,14 +1985,14 @@ class Portal {
 								error=Log.append(error,biz_error);
 							}else{
 								if(data.data_list.length> 0 && item_list.length>0){
-								data.data_list.forEach(item => {
-									item.data_search_list = [];
-									item_list.forEach(item_search => {
-										if(item[option.search_parent_field] == item_search[option.search_field]){
-											item.data_search_list.push(item_search);
-										}
+									data.data_list.forEach(item => {
+										item.data_search_list = [];
+										item_list.forEach(item_search => {
+											if(item[option.search_parent_field] == item_search[option.search_field]){
+												item.data_search_list.push(item_search);
+											}
+										});
 									});
-								});
 								}
 							}
 							call();
@@ -1973,25 +2007,25 @@ class Portal {
 				function(call){
 					if(option.get_parent && data.data_list.length>0){
 						let query = { $or: [] };
-                        data.data_list.forEach(item => {
-                          	let query_field = {};
-                            query_field['id'] = { $regex:String(item['parent_id']), $options: "i" };
+						data.data_list.forEach(item => {
+							let query_field = {};
+							query_field['id'] = { $regex:String(item['parent_id']), $options: "i" };
 							query.$or.push(query_field);
 						});
-							let search = App_Logic.get_search(option.parent_data_type,query,{},1,0);
-                      	    let parent_option = option.parent_fields ? {get_field:true,fields:option.parent_fields} : {};
-                            Data.get_list(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,parent_option).then(([biz_error,item_list,item_count,page_count])=> {
-								if(biz_error){
-									error=Log.append(error,biz_error);
-                                }else{
-									if(data.data_list.length> 0){
-                                  	data.data_list.forEach(item => {
-                                    	item.parent_item = item_list.find(item_find => item_find.id === item.parent_id) ? item_list.find(item_find => item_find.id === item.parent_id):App_Logic.get_not_found(item.parent_data_type,item.parent_id,{app_id:database.app_id});
+						let search = App_Logic.get_search(option.parent_data_type,query,{},1,0);
+						let parent_option = option.parent_fields ? {get_field:true,fields:option.parent_fields} : {};
+						Data.get_list(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,parent_option).then(([biz_error,item_list,item_count,page_count])=> {
+							if(biz_error){
+								error=Log.append(error,biz_error);
+							}else{
+								if(data.data_list.length> 0){
+									data.data_list.forEach(item => {
+										item.parent_item = item_list.find(item_find => item_find.id === item.parent_id) ? item_list.find(item_find => item_find.id === item.parent_id):App_Logic.get_not_found(item.parent_data_type,item.parent_id,{app_id:database.app_id});
 									});
-									}
 								}
-								call();
-								}).catch(err => {
+							}
+							call();
+						}).catch(err => {
 							error = Log.append(error,err);
 							call();
 						});
@@ -2014,9 +2048,9 @@ class Portal {
 								error=Log.append(error,biz_error);
 							}else{
 								if(data.data_list.length> 0){
-								data.data_list.forEach(item => {
-									item.user = item_list.find(item_find => item_find.id === item.user_id) ? item_list.find(item_find => item_find.id === item.user_id):App_Logic.get_not_found(DataType.USER,item.user_id,{app_id:database.app_id});
-								});
+									data.data_list.forEach(item => {
+										item.user = item_list.find(item_find => item_find.id === item.user_id) ? item_list.find(item_find => item_find.id === item.user_id):App_Logic.get_not_found(DataType.USER,item.user_id,{app_id:database.app_id});
+									});
 								}
 							}
 							call();
@@ -2030,9 +2064,9 @@ class Portal {
 				},
 				function(call){
 					if(option.get_distinct && data.data_list.length>0){
- 					 	data.data_list = data.data_list.filter((obj, index, self) =>
-                    		index === self.findIndex((t) => t[option.distinct_field] === obj[option.distinct_field])
-                		);
+						data.data_list = data.data_list.filter((obj, index, self) =>
+							index === self.findIndex((t) => t[option.distinct_field] === obj[option.distinct_field])
+						);
 						let distinct_sort_by = option.distinct_sort ? option.distinct_sort : 'asc';
 						data.data_list = Obj.sort_list_by_field(data.data_list,'title',distinct_sort_by);
 						call();
@@ -2044,10 +2078,10 @@ class Portal {
 				function(call){
 					if(option.get_favorite && data.data_list.length>0){
 						let query = { $or:[] };
-                      	data.data_list.forEach(item => {
-                          	let query_field = {$or:[],$and:[]};
+						data.data_list.forEach(item => {
+							let query_field = {$or:[],$and:[]};
 							query_field.$or.push({parent_id:item.id});
-							query_field.$and.push({user_id:option.favorite_user_id});
+							query_field.$and.push({user_id:option.user_id});
 							query.$or.push(query_field);
 						});
 						let favorite_match_search = App_Logic.get_search(DataType.FAVORITE,query,{},1,0);
@@ -2059,20 +2093,20 @@ class Portal {
 							favorite_match_search.page_current,
 							favorite_match_search.page_size,
 							favorite_match_option).then(([biz_error,item_list,item_count,page_count])=> {
-							if(biz_error){
-								error=Log.append(error,biz_error);
-							}else{
-								if(data.data_list.length> 0){
-								data.data_list.forEach(item => {
-									item.is_favorite = item_list.find(item_find => item_find.parent_id === item.id) ? true:false
-								});
+								if(biz_error){
+									error=Log.append(error,biz_error);
+								}else{
+									if(data.data_list.length> 0){
+										data.data_list.forEach(item => {
+											item.is_favorite = item_list.find(item_find => item_find.parent_id === item.id) ? true:false
+										});
+									}
 								}
-							}
-							call();
-						}).catch(err => {
-							error = Log.append(error,err);
-							call();
-						});
+								call();
+							}).catch(err => {
+								error = Log.append(error,err);
+								call();
+							});
 					}else{
 						call();
 					};
@@ -2447,20 +2481,20 @@ class Portal {
 						error = Log.append(error,err);
 						call();
 					});
-			},
+				},
 				function(call){
 					copy_data['title'] = 'Copy '+top_data['title'];
 					copy_data['title_url'] = 'copy_'+top_data['title_url'];
 					copy_data['source_id'] = top_data.id;
 					copy_data['source_data_type'] = top_data.data_type;
 					const keys = Object.keys(top_data);
-					  keys.forEach(key => {
+					keys.forEach(key => {
 						if(key!='id'&&key!='source'&&key!='title'&&key!='title_url'){
 							copy_data[key]=top_data[key];
 						}
 					});
 					call();
-							},
+				},
 				function(call){
 					Data.post(database,copy_data.data_type,copy_data).then(([biz_error,biz_data])=> {
 						if(biz_error){
@@ -2468,7 +2502,7 @@ class Portal {
 						}else{
 							copy_data=biz_data;
 						}
-					call();
+						call();
 					}).catch(err => {
 						error=Log.append(error,err);
 						call();
@@ -2485,58 +2519,58 @@ class Portal {
 
 						copy_sub_data['source_top_id'] = item['top_id'];
 						copy_sub_data['source_top_data_type'] = item['top_data_type'];
- 						for(key in item){
+						for(key in item){
 							if( key != 'id' && key != 'source' && key != 'parent_id' && key != 'parent_data_type'  && key != 'top_id' && key != 'top_data_type' ){
 								copy_sub_data[key] = item[key];
 							}
-  						}
+						}
 						copy_data_list.push(copy_sub_data);
 					};
 					call();
 				},
 				function(call){
 					if(copy_data_list.length>0){
-					Data.post_list(database,copy_data_list).then(([biz_error,biz_data])=> {
-						if(biz_error){
-							error=Log.append(error,biz_error);
-						}
-						copy_data_list=biz_data;
-						call();
-					})
+						Data.post_list(database,copy_data_list).then(([biz_error,biz_data])=> {
+							if(biz_error){
+								error=Log.append(error,biz_error);
+							}
+							copy_data_list=biz_data;
+							call();
+						})
 					}else{
 						call();
 					}
 				},
 				function(call){
 					if(copy_data_list.length>0){
-					copy_data_list.forEach(item => {
-						if(item['source_parent_id'] == top_data['ID']){
-							item['parent_id'] = copy_data['ID'];
-							item['parent_data_type']  = copy_data['data_type'];
-						}else{
-							copy_data_list.forEach(item_sub => {
-								if(item['source_parent_id'] == item_sub['source_id']){
-									item['parent_id'] = item_sub['id'];
-									item['parent_data_type'] = item_sub['data_type'];
-								}
+						copy_data_list.forEach(item => {
+							if(item['source_parent_id'] == top_data['ID']){
+								item['parent_id'] = copy_data['ID'];
+								item['parent_data_type']  = copy_data['data_type'];
+							}else{
+								copy_data_list.forEach(item_sub => {
+									if(item['source_parent_id'] == item_sub['source_id']){
+										item['parent_id'] = item_sub['id'];
+										item['parent_data_type'] = item_sub['data_type'];
+									}
 
-							});
-						}
-					});
-					call();
+								});
+							}
+						});
+						call();
 					}else{
 						call();
 					}
 				},
 				function(call){
 					if(copy_data_list.length>0){
-					Data.post_list(database,copy_data_list).then(([biz_error,biz_data])=> {
-						if(biz_error){
-							error=Log.append(error,biz_error);
-						}
-						copy_data_list=biz_data;
-						call();
-					})
+						Data.post_list(database,copy_data_list).then(([biz_error,biz_data])=> {
+							if(biz_error){
+								error=Log.append(error,biz_error);
+							}
+							copy_data_list=biz_data;
+							call();
+						})
 					}else{
 						call();
 					}
@@ -2700,7 +2734,7 @@ class Data {
 	};
 }
 class Service_Data {
-//9_service_get
+	//9_service_get
 	static get = async (database,key,option) => {
 		return new Promise((callback) => {
 			let service = DataItem.get_new(DataType.SERVICE,0);
