@@ -323,7 +323,7 @@ const post_cache_item = (cache_connect,data_type,id,item_data) => {
         let prop_list = [];
         async.series([
             function(call) {
-                for (prop in item_data) {
+                for (const prop in item_data) {
                     if(prop != '_id' && prop != 'source'){
                         prop_list.push({title:prop,value:item_data[prop]});
                     }

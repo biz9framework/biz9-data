@@ -5,6 +5,7 @@ License GNU General Public License v3.0
 Description: BiZ9 Framework: Data
 */
 const async = require('async');
+const dayjs = require('dayjs');
 const {get_db_connect_main,check_db_connect_main,delete_db_connect_main,post_item_main,get_item_main,delete_item_main,get_id_list_main,delete_item_list_main,get_count_item_list_main,post_bulk_main} = require('./mongo/index.js');
 const {Scriptz}=require("biz9-scriptz");
 const {Log,Str,Num,Obj,DateTime}=require("/home/think2/www/doqbox/biz9-framework/biz9-utility/code");
@@ -451,7 +452,7 @@ class Order_Data {
 			async.series([
 				async function(call){
 					for(const key in order) {
-						if(Str.check_is_null(data.order[key]) && key != 'order_item_list' &&  key != 'order_item_list' && key != 'order_sub_item_list'){
+						if(Str.check_is_null(data.order[key]) && key != 'order_item_list' && key != 'order_sub_item_list'){
 							data.order[key] = order[key];
 						}
 					}
@@ -754,7 +755,7 @@ class Cart_Data {
 			async.series([
 				async function(call){
 					for(const key in cart) {
-						if(Str.check_is_null(data.cart[key]) && key != 'cart_item_list' &&  key != 'cart_item_list' && key != 'cart_sub_item_list'){
+						if(Str.check_is_null(data.cart[key]) && key != 'cart_item_list' && key != 'cart_sub_item_list'){
 							data.cart[key] = cart[key];
 						}
 					}
@@ -1368,10 +1369,10 @@ class User_Data {
 				async function(call){
 					let search = App_Logic.get_search(DataType.USER,{email:data.user.email},{},1,0);
 					const [biz_error,biz_data] = await Portal.count(database,search.data_type,search.filter);
-					if(biz_error){
+				if(biz_error){
 						biz_error=Log.append(error,biz_error);
 					}else{
-						if(biz_data.count<=0){
+						if(biz_data<=0){
 							data.email_resultOK = true;
 						}
 					}
@@ -1383,7 +1384,7 @@ class User_Data {
 					if(biz_error){
 						biz_error=Log.append(error,biz_error);
 					}else{
-						if(biz_data.count<=0){
+						if(biz_data<=0){
 							data.title_resultOK = true;
 						}
 					}
@@ -1546,7 +1547,7 @@ class Favorite_Data {
 					if(biz_error){
 						error=Log.append(biz_error,error);
 					}else{
-						if(biz_data.count>0){
+						if(biz_data>0){
 							data.is_favorite = true;
 						}
 					}
@@ -1575,7 +1576,7 @@ class Favorite_Data {
 					if(biz_error){
 						error=Log.append(biz_error,error);
 					}else{
-						if(biz_data.count<=0){
+						if(biz_data<=0){
 							data.unique_resultOK = true;
 						}
 					}
@@ -1852,16 +1853,21 @@ class Portal {
 						}
 					}
 				},
-				//post-favorite-stat
+				//post-view-stat
 				async function(call){
 					if(option.post_stat && data.id){
-						let post_stat_list = Stat_Logic.get_new(option.user_id,Type.STAT_VIEW,[data]);
-						const [biz_error,biz_data] = await Stat_Data.post(database,post_stat_list);
+						//let post_stat_list = Stat_Logic.get_new(option.user_id,Type.STAT_VIEW,[data]);
+						let post_stat = Stat_Logic.get_new(option.user_id,Type.STAT_VIEW,[data]);
+						let post_stat_item = Stat_Logic.get_new_stat_item(option.user_id,Type.STAT_VIEW,[data]);
+						//Log.w('22_get_item_post_stat',post_stat);
+						/*
+						const [biz_error,biz_data] = await Stat_Data.post(database,user_id,post_stat.type,data);
 						if(biz_error){
 							error=Log.append(error,biz_error);
 						}else{
 							data.stat_favorite = biz_data;
 						}
+						*/
 					}
 				},
 			]).then(result => {
@@ -2083,7 +2089,7 @@ class Portal {
 						});
 						let favorite_match_search = App_Logic.get_search(DataType.FAVORITE,query,{},1,0);
 						let favorite_match_option =  {get_field:true,fields:'id,parent_id,parent_data_type'};
-						Data.get_list(database,
+						Portal.search(database,
 							favorite_match_search.data_type,
 							favorite_match_search.filter,
 							favorite_match_search.sort_by,
@@ -2417,7 +2423,7 @@ class Portal {
 						if(biz_error){
 							error=Log.append(error,biz_error);
 						}else{
-							data = biz_data;
+							data = biz_data.count;
 						}
 						call();
 					}).catch(err => {
@@ -2612,9 +2618,162 @@ class Faq_Data{
 		});
 	}
 }
-//9_stat_data
 class Stat_Data {
-	static post = (database,stat_list,option) => {
+	//9_stat_post
+	static post = async (database,stat,option) => {
+		return new Promise((callback) => {
+			let data = {};
+			let error = null;
+			option = option ? option : {post_unique:false};
+			let unique_resultOK = option.post_unique;
+			data.stat = DataItem.get_new(DataType.STAT,stat.id,{stat_number:stat.stat_number,parent_data_type:stat.parent_data_type,user_id:stat.user_id});
+			data.stat_item_list = [];
+			data.stat_sub_item_list = [];
+			async.series([
+				async function(call){
+					for(const key in stat) {
+						if(Str.check_is_null(data.stat[key]) && key != 'stat_item_list' && key != 'stat_sub_item_list'){
+							data.stat[key] = stat[key];
+						}
+					}
+				},
+				//get - stat
+				async function(call){
+					if(unique_resultOK){
+						const todayEnd = dayjs();
+						const todayStart = todayEnd.subtract(1, 'day')
+
+						let query_field = {$and:[]};
+						query_field.$and.push({parent_id:stat.stat_item_list[0].parent_id});
+						query_field.$and.push({user_id:stat.user_id});
+						query_field.$and.push({ date_create: {$gte: todayStart.toISOString(),$lte: todayEnd.toISOString()}});
+						let search = App_Logic.get_search(DataType.STAT_ITEM,query_field,{},1,0);
+					const [biz_error,biz_data] = await Portal.count(database,search.data_type,search.filter);
+						Log.w('33_Query_Query',query_field);
+						Log.w('33_Query_Get',biz_data);
+						Log.w('33_todayStart',todayStart.toISOString());
+						Log.w('33_todayEnd',todayEnd.toISOString());
+						if(biz_error){
+						error=Log.append(error,biz_error);
+					}else{
+						if(biz_data){
+							unique_resultOK = false;
+						}
+					}
+					}
+				},
+				/*
+				//post - stat
+				async function(call){
+						console.log('11111111111');
+					if(unique_resultOK){
+						console.log('222222');
+					const [biz_error,biz_data] = await Portal.post(database,DataType.STAT,data.stat);
+					if(biz_error){
+						error=Log.append(error,biz_error);
+					}else{
+						data.stat = biz_data;
+						Log.w('88_data',biz_data);
+					}
+					}
+				},
+				//post - stat items
+				async function(call){
+					if(stat.stat_item_list.length>0){
+						stat.stat_item_list.forEach(item => {
+							item.temp_row_id = Num.get_id();
+							data.stat_item_list.push(
+								DataItem.get_new(DataType.STAT_ITEM,0,
+									{
+										stat_id:data.stat.id,
+										stat_number:data.stat.stat_number,
+										stat_type:data.stat.stat_type,
+										user_id:data.stat.user_id,
+										parent_data_type:item.parent_data_type,
+										parent_id:item.parent_id,
+
+										temp_row_id :item.temp_row_id
+									}));
+						});
+						//Log.w('99_stat_item_list',data.stat_item_list);
+						if(data.stat_item_list.length>0){
+							const [biz_error,biz_data] = await Portal.post_list(database,data.stat_item_list);
+							if(biz_error){
+								error=Log.append(error,biz_error);
+							}else{
+								data.stat_item_list = biz_data;
+							}
+							Log.w('100_data_items',data.stat_item_list);
+						}
+					}
+				},
+				*/
+			]).then(result => {
+				callback([error,data]);
+			}).catch(err => {
+				Log.error("StatData-Stat-Update",err);
+				callback([error,[]]);
+			});
+		});
+	};
+
+	//9_stat_post
+	static post_old = (database,user_id,stat_type,post_data_list,option) => {
+		return new Promise((callback) => {
+			let data = [];
+			let is_unique = false;
+			let error = null;
+			//post_stat = Obj.merge(post_stat,post_data);
+			async.series([
+				async function(call){
+					switch(stat_type){
+						case Type.STAT_VIEW:
+							is_unique = true;
+							break;
+						default:
+							break;
+					}
+				},
+				async function(call){
+					let query = {};
+					if(is_unique){
+						data.data_list.forEach(item => {
+							let query_field = {$and:[]};
+							query_field.$and.push({parent_id:item.id});
+							query_field.$and.push({user_id:user_id});
+							query.$or.push(query_field);
+						});
+						const [biz_error,biz_data] = await Portal.count(database,search.data_type,search.filter);
+						if(biz_error){
+							error=Log.append(error,biz_error);
+						}else{
+							data = biz_data;
+						}
+						Log.w('22_is_unique',data);
+					}
+				},
+				/*
+				//post_stat
+				async function(call){
+					const [biz_error,biz_data] = await Portal.post_list(database,stat_list);
+					if(biz_error){
+						error=Log.append(error,biz_error);
+					}else{
+						data = biz_data;
+					}
+				}
+				*/
+			]).then(result => {
+				//callback([error,data]);
+			}).catch(err => {
+				Log.error("Stat-Data-Post",err);
+				callback([error,[]]);
+			});
+		});
+	};
+
+
+	static old_post = (database,stat_list,option) => {
 		return new Promise((callback) => {
 			let data = [];
 			let error = null;

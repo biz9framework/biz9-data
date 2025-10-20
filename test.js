@@ -55,6 +55,10 @@ describe('connect', function(){ this.timeout(25000);
         let cart = {};
         let order = {};
         let data = {};
+        let data_type = DataType.PRODUCT;
+        let id = "95fc25b7-43d0-49ff-bb86-0f5ba207cf18";
+        let user_id = "f63d6bd2-ce86-4a36-808f-40fe59069077";
+        let option = {post_stat:true,user_id:user_id};
         async.series([
             async function(call){
                 console.log('DATABASE-START');
@@ -62,13 +66,46 @@ describe('connect', function(){ this.timeout(25000);
                 database = biz_data;
                 console.log('DATABASE-END');
             },
+             //- STAT - START
             async function(call){
+                const [biz_error,biz_data] = await Portal.get(database,data_type,id);
+                data.item = biz_data;
+             },
+            async function(call){
+                let post_stat = Stat_Logic.get_new(data_type,Type.STAT_VIEW,user_id);
+                let post_stat_item = Stat_Logic.get_new_stat_item(post_stat,data.item);
+                let option = {post_unique:true,post_stat:true};
+                post_stat.stat_item_list.push(post_stat_item);
+                //Log.w('22_post_stat_item',post_stat_item);
+                const [biz_error,biz_data] = await Stat_Data.post(database,post_stat,option);
+                //data.item = biz_data;
+                //Log.w('22_caIrt',data);
+             },
+
+             //- STAT - END
+            /*
+            //- GET_ITEM - START
+            async function(call){
+                let data_type = DataType.PRODUCT;
+                let id = "95fc25b7-43d0-49ff-bb86-0f5ba207cf18";
+                let user_id = "f63d6bd2-ce86-4a36-808f-40fe59069077";
+                let option = {post_stat:true,user_id:user_id};
+                console.log('111111111111111');
+                console.log('111111111111111');
+                const [biz_error,biz_data] = await Portal.get(database,data_type,id,option);
+                //cart = biz_data;
+                //Log.w('33_cart',cart);
+             },
+            //- GET_ITEM - END
+            */
+            /*
             //- REVIEW - START
+            async function(call){
                 console.log('REVIEW-START');
                 let parent_data_type = DataType.PRODUCT;
                 let parent_id = "95fc25b7-43d0-49ff-bb86-0f5ba207cf18";
-                let user_id = "80009d4a-1df4-421a-9105-d9450ebc5e01";
-                let review = Review_Logic.get_new(parent_data_type,parent_id,user_id,Num.get_id()+"_My_Title",Num.get_id()+"_Comment_",Num.get_id(5));
+                let user_id = "f63d6bd2-ce86-4a36-808f-40fe59069077";
+                //let review = Review_Logic.get_new(parent_data_type,parent_id,user_id,Num.get_id()+"_My_Title",Num.get_id()+"_Comment_",Num.get_id(5));
                 let option = {post_stat:true,user_id:user_id};
                 //Log.w('review',review);
                 //const [biz_error,biz_data] = await Review_Data.post(database,parent_data_type,parent_id,user_id,review,option);
@@ -77,8 +114,9 @@ describe('connect', function(){ this.timeout(25000);
                 console.log(biz_data.review_list[0].title);
                 console.log(biz_data.review_list[1].title);
                 console.log('REVIEW-END');
-                //- REVIEW - END
             },
+            //- REVIEW - END
+            */
             /*
             //-- FAVORITE -- START
             async function(call){
