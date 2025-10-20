@@ -76,7 +76,7 @@ describe('connect', function(){ this.timeout(25000);
                 let post_stat_item = Stat_Logic.get_new_stat_item(post_stat,data.item);
                 let option = {post_unique:true,post_stat:true};
                 post_stat.stat_item_list.push(post_stat_item);
-                //Log.w('22_post_stat_item',post_stat_item);
+                Log.w('11_post_stat_item',post_stat_item);
                 const [biz_error,biz_data] = await Stat_Data.post(database,post_stat,option);
                 //data.item = biz_data;
                 //Log.w('22_caIrt',data);
