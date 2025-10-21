@@ -71,8 +71,8 @@ const post_item_list_adapter=(db_connect,item_data_list,option)=>{
                 async.forEachOf(item_data_list,(item,key,go)=>{
                     if(item){
                         post_item_main(db_connect,item.data_type,item).then(([error,data]) => {
-                            item.id=data.id;
                             if(data){
+                                item.id=data.id;
                                 delete_cache_string_main(cache_connect,get_cache_item_attr_list_key(item.data_type,data.id)).then(([error,data]) => {
                                     go();
                                 }).catch(error => {

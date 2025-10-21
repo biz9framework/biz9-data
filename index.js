@@ -536,6 +536,7 @@ class Order_Data {
 				//post-order-stat
 				async function(call){
 					if(data.order.id && option.post_stat){
+						/*
 						let post_stat_list = Stat_Logic.get_new(data.order.user_id,Type.STAT_ORDER,data.order_item_list);
 						const [biz_error,biz_data] = await Stat_Data.post(database,post_stat_list);
 						if(biz_error){
@@ -543,11 +544,13 @@ class Order_Data {
 						}else{
 							data.stat_order = biz_data;
 						}
+						*/
 					}
 				},
 				//post-order-payment-stat
 				async function(call){
 					if(data.order.id && option.post_stat){
+						/*
 						let post_stat_list = Stat_Logic.get_new(data.order.user_id,Type.STAT_ORDER_PAYMENT,data.order_payment_list);
 						const [biz_error,biz_data] = await Stat_Data.post(database,post_stat_list);
 						if(biz_error){
@@ -555,6 +558,7 @@ class Order_Data {
 						}else{
 							data.stat_order_payment = biz_data;
 						}
+						*/
 					}
 				},
 			]).then(result => {
@@ -828,16 +832,34 @@ class Cart_Data {
 						}
 					}
 				},
-				//post stat
+				//post stat cart here
 				async function(call){
 					if(data.cart.id && option.post_stat){
-						let post_stat_list = Stat_Logic.get_new(data.cart.user_id,Type.STAT_CART,data.cart_item_list);
-						const [biz_error,biz_data] = await Stat_Data.post(database,post_stat_list);
-						if(biz_error){
+						data.stat_list = [];
+ 						for(const cart_item of data.cart_item_list){
+							let post_stat = Stat_Logic.get_new(DataType.REVIEW,data.review.id,Type.STAT_REVIEW,user_id,data.review);
+        					let option = {post_unique:false};
+							const [biz_error,biz_data] = await Stat_Data.post(database,stat,option);
+							if(biz_error){
+								error=Log.append(error,biz_error);
+							}else{
+								data.stat_list.push(biz_data);
+							}
+						}
+						Log.w('my_stat_list',data.stat_list);
+						/*
+						let post_stat_list =[];
+						data.cart_item_list.forEach(cart_item => {
+							post_stat_list.push(Stat_Logic.get_new(data.cart.user_id,Type.STAT_CART,data.cart_item_list));
+						});
+						let option = {post_unique:false};
+						const [biz_error,biz_data] = await Stat_Data.post(database,post_stat_list,option);
+												if(biz_error){
 							error=Log.append(error,biz_error);
 						}else{
-							data.stat = biz_data;
+							data.stat_list = biz_data;
 						}
+						*/
 					}
 				},
 			]).then(result => {
@@ -1104,9 +1126,9 @@ class Review_Data {
 				//post-review-stat
 				async function(call){
 					if(option.post_stat && data.parent_item.id){
-						let new_stat = DataItem.get_new(DataType.REVIEW,0,{parent_id:parent_id,parent_data_type:parent_data_type,rating:post_review.rating});
-						let post_stat_list = Stat_Logic.get_new(option.user_id,Type.STAT_REVIEW,[DataItem.get_new(DataType.REVIEW,0,{parent_id:parent_id,parent_data_type:parent_data_type,rating:post_review.rating})]);
-						const [biz_error,biz_data] = await Stat_Data.post(database,post_stat_list);
+						let post_stat = Stat_Logic.get_new(DataType.REVIEW,data.review.id,Type.STAT_REVIEW,user_id,data.review);
+                		let option = {post_unique:false};
+ 						const [biz_error,biz_data] = await Stat_Data.post(database,post_stat,option);
 						if(biz_error){
 							error=Log.append(error,biz_error);
 						}else{
@@ -1231,7 +1253,7 @@ class User_Data {
 				let url = 'https://api.ip2location.io/?key=' + geo_key + '&ip=' + ip_address + '&format=json';
 				let response = '';
 				let req = https.get(url, function (res) {
-					res.on('error', (e) => console.log('GEO_LOCATION ERROR: ' + e));
+					res.on('error', (e) => console.error('GEO_LOCATION ERROR: ' + e));
 					var https = require('https');
 					var key = geo_key;
 					var ip = !Str.check_is_null(ip_address) ? ip_address : "0.0.0.0" ;
@@ -1239,7 +1261,7 @@ class User_Data {
 					let response = '';
 					let req = https.get(url, function (res) {
 						res.on('data', (chunk) => (response = response + chunk));
-						res.on('error', (e) => console.log('ERROR: ' + e));
+						res.on('error', (e) => console.error('ERROR: ' + e));
 						res.on("end", function () {
 							try {
 								let geo_data = JSON.parse(response);
@@ -1393,6 +1415,7 @@ class User_Data {
 				async function(call){
 					if(data.email_resultOK && data.title_resultOK){
 						data.user.last_login = DateTime.get_new();
+						Log.w('11_post_user',data.user);
 						const [biz_error,biz_data] = await Portal.post(database,DataType.USER,data.user);
 						if(biz_error){
 							biz_error=Log.append(error,biz_error);
@@ -1401,6 +1424,7 @@ class User_Data {
 						}
 					}
 				},
+				/*
 				//get stat - ip - merge
 				async function(call){
 					if(data.email_resultOK && data.title_resultOK && option.post_ip_address){
@@ -1421,18 +1445,22 @@ class User_Data {
 						data.stat = Obj.merge(data.stat,biz_data);
 					}
 				},
+				*/
 				//post stat
+				/*
 				async function(call){
 					if(data.email_resultOK && data.title_resultOK && option.post_stat && option.post_device || option.post_ip){
-						let post_new_stat = Stat_Logic.get_new_user(data.user.id,Type.STAT_REGISTER,data.stat);
-						const [biz_error,biz_data] = await Stat_Data.post_user(database,post_new_stat.user_id,post_new_stat.type,post_new_stat.data);
-						if(biz_error){
-							error=Log.append(error,biz_error);
-						}else{
-							data.stat = biz_data;
-						}
+						let post_stat = Stat_Logic.get_new(DataType.USER,data.user.id,Type.STAT_REGISTER,data.user.id,data.stat);
+                		let option = {post_unique:false};
+ 							const [biz_error,biz_data] = await Stat_Data.post(database,post_stat,option);
+							if(biz_error){
+								error=Log.append(error,biz_error);
+							}else{
+								data.stat = biz_data;
+							}
 					}
 				},
+				*/
 			]).then(result => {
 				callback([error,data]);
 			}).catch(err => {
@@ -1470,7 +1498,6 @@ class User_Data {
 			async.series([
 				//check email,password
 				async function(call){
-					Log.w('33_option',option);
 					let search = App_Logic.get_search(DataType.USER,{email:data.user.email,password:data.user.password},{},1,0);
 					const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size);
 					if(biz_error){
@@ -1515,10 +1542,8 @@ class User_Data {
 				//post stat
 				async function(call){
 					if(data.user_resultOK && option.post_stat && option.post_device || option.post_ip){
- 						let post_stat = Stat_Logic.get_new(DataType.USER,Type.STAT_LOGIN,data.user.id);
-                		let post_stat_item = Stat_Logic.get_new_stat_item(post_stat,data.stat);
-                		let option = {post_unique:false,post_stat:true};
-                		post_stat.stat_item_list.push(post_stat_item);
+ 						let post_stat = Stat_Logic.get_new(DataType.USER,data.user.id,Type.STAT_LOGIN,data.user.id,data.stat);
+                		let option = {post_unique:false};
  						const [biz_error,biz_data] = await Stat_Data.post(database,post_stat,option);
 						if(biz_error){
 							error=Log.append(error,biz_error);
@@ -1601,6 +1626,17 @@ class Favorite_Data {
 				//post-favorite-stat
 				async function(call){
 					if(data.unique_resultOK){
+						let post_stat = Stat_Logic.get_new(parent_data_type,parent_id,Type.STAT_FAVORITE,user_id,data.favorite);
+                		let option = {post_unique:false};
+ 						const [biz_error,biz_data] = await Stat_Data.post(database,post_stat,option);
+						if(biz_error){
+							error=Log.append(error,biz_error);
+						}else{
+							data.stat_favorite = biz_data;
+							Log.w('33_post_stat',data.stat_favorite);
+						}
+
+						/*
 						let post_stat_list = Stat_Logic.get_new(user_id,Type.STAT_FAVORITE,[data.favorite]);
 						const [biz_error,biz_data] = await Stat_Data.post(database,post_stat_list);
 						if(biz_error){
@@ -1608,6 +1644,7 @@ class Favorite_Data {
 						}else{
 							data.stat_favorite = biz_data;
 						}
+						*/
 					}
 				},
 			]).then(result => {
@@ -1768,12 +1805,12 @@ class Portal {
 						}
 						call();
 					}).catch(err => {
-						Log.error("Portal-Get-Key-A",err);
+						Log.error("ERROR-PORTAL-GET-1",err);
 						error = Log.append(error,err);
 						call();
 					});
 				},
-				function(call){
+				async function(call){
 					function get_sort(data){
 						let sort_order = {};
 						switch(data.setting_sort_type)
@@ -1803,11 +1840,11 @@ class Portal {
 							filter={top_id:data.top_id};
 						}
 						let search = App_Logic.get_search(DataType.ITEM,filter,get_sort(data),1,0);
-						Data.get_list(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size).then(([biz_error,item_list,item_count,page_count])=> {
+						const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option);
 							if(biz_error){
 								error=Log.append(error,biz_error);
 							}else{
-								item_list.forEach(item => {
+								biz_data.data_list.forEach(item => {
 									if(item.parent_id == data.id){
 										let item_title_url = Str.get_title_url(item.title);
 										data[item_title_url] = new Object();
@@ -1816,13 +1853,6 @@ class Portal {
 									}
 								});
 							}
-							call();
-						}).catch(err => {
-							error = Log.append(error,err);
-							call();
-						});
-					}else{
-						call();
 					}
 				},
 				async function(call){
@@ -1859,25 +1889,25 @@ class Portal {
 				},
 				//post-view-stat
 				async function(call){
+					/*
 					if(option.post_stat && data.id){
 						//let post_stat_list = Stat_Logic.get_new(option.user_id,Type.STAT_VIEW,[data]);
-						let post_stat = Stat_Logic.get_new(option.user_id,Type.STAT_VIEW,[data]);
-						let post_stat_item = Stat_Logic.get_new_stat_item(option.user_id,Type.STAT_VIEW,[data]);
+						let post_stat = Stat_Logic.get_new(parent_data_type,parent_id,STAT_FAVORITE,option.user_id,data);
+						let post_stat_item = Stat_Logic.get_new_stat_item(option.user_id,Type.STAT_VIEW,data);
 						//Log.w('22_get_item_post_stat',post_stat);
-						/*
 						const [biz_error,biz_data] = await Stat_Data.post(database,user_id,post_stat.type,data);
 						if(biz_error){
 							error=Log.append(error,biz_error);
 						}else{
 							data.stat_favorite = biz_data;
 						}
-						*/
 					}
+					*/
 				},
 			]).then(result => {
 				callback([error,data]);
 			}).catch(err => {
-				Log.error("Portal-Get",err);
+				Log.error("ERROR-PORTAL-GET-2",err);
 				callback([error,{}]);
 			});
 		});
@@ -1942,6 +1972,7 @@ class Portal {
 							call();
 						}
 					}).catch(err => {
+						Log.error('DATA-SEARCH-ERROR-1',err);
 						error=Log.append(error,err);
 					});
 				},
@@ -1971,6 +2002,7 @@ class Portal {
 							}
 							call();
 						}).catch(err => {
+							Log.error('DATA-SEARCH-ERROR-2',err);
 							error = Log.append(err,biz_error);
 							call();
 						});
@@ -2004,6 +2036,7 @@ class Portal {
 							}
 							call();
 						}).catch(err => {
+							Log.error('DATA-SEARCH-ERROR-3',err);
 							error = Log.append(error,err);
 							call();
 						});
@@ -2022,7 +2055,7 @@ class Portal {
 						let search = App_Logic.get_search(option.parent_data_type,query,{},1,0);
 						let parent_option = option.parent_fields ? {get_field:true,fields:option.parent_fields} : {};
 						Data.get_list(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,parent_option).then(([biz_error,item_list,item_count,page_count])=> {
-							if(biz_error){
+						if(biz_error){
 								error=Log.append(error,biz_error);
 							}else{
 								if(data.data_list.length> 0){
@@ -2033,6 +2066,7 @@ class Portal {
 							}
 							call();
 						}).catch(err => {
+							Log.error('DATA-SEARCH-ERROR-4',err);
 							error = Log.append(error,err);
 							call();
 						});
@@ -2062,6 +2096,7 @@ class Portal {
 							}
 							call();
 						}).catch(err => {
+							Log.error('DATA-SEARCH-ERROR-5',err);
 							error = Log.append(error,err);
 							call();
 						});
@@ -2093,7 +2128,7 @@ class Portal {
 						});
 						let favorite_match_search = App_Logic.get_search(DataType.FAVORITE,query,{},1,0);
 						let favorite_match_option =  {get_field:true,fields:'id,parent_id,parent_data_type'};
-						Portal.search(database,
+						Data.get_list(database,
 							favorite_match_search.data_type,
 							favorite_match_search.filter,
 							favorite_match_search.sort_by,
@@ -2111,6 +2146,7 @@ class Portal {
 								}
 								call();
 							}).catch(err => {
+								Log.error('DATA-SEARCH-ERROR-6',err);
 								error = Log.append(error,err);
 								call();
 							});
@@ -2121,6 +2157,7 @@ class Portal {
 			]).then(result => {
 				callback([error,data]);
 			}).catch(err => {
+				Log.error('DATA-SEARCH-ERROR-7',err);
 				Log.error("Portal-Search",err);
 				callback([err,[]]);
 			});
@@ -2137,7 +2174,7 @@ class Portal {
 			option = option ? option : {get_item:false,get_image:false};
 			async.series([
 				function(call){
-					Data.post(database,data_type,item,option).then(([biz_error,biz_data])=> {
+					 Data.post(database,data_type,item,option).then(([biz_error,biz_data])=> {
 						if(biz_error){
 							error=Log.append(error,biz_error);
 						}else{
@@ -2630,7 +2667,7 @@ class Stat_Data {
 			let error = null;
 			option = option ? option : {post_unique:false};
 			let unique_resultOK = option.post_unique ? false : true;
-			data.stat = DataItem.get_new(DataType.STAT,stat.id,{stat_number:stat.stat_number,parent_data_type:stat.parent_data_type,user_id:stat.user_id});
+			data.stat = DataItem.get_new(DataType.STAT,stat.id,{parent_data_type:stat.parent_data_type,user_id:stat.user_id});
 			data.stat_item_list = [];
 			data.stat_sub_item_list = [];
 			async.series([
@@ -2665,43 +2702,13 @@ class Stat_Data {
 				//post - stat
 				async function(call){
 					if(unique_resultOK && option.post_unique || unique_resultOK && !option.post_unique){
-					const [biz_error,biz_data] = await Portal.post(database,DataType.STAT,data.stat);
+						const [biz_error,biz_data] = await Portal.post(database,DataType.STAT,data.stat);
 					if(biz_error){
 						error=Log.append(error,biz_error);
 					}else{
 						data.stat = biz_data;
 					}
 					}
-				},
-				//post - stat items
-				async function(call){
-				if(unique_resultOK && option.post_unique && stat.stat_item_list.length>0 ||  unique_resultOK && !option.post_unique  && stat.stat_item_list.length>0 ){
-					if(stat.stat_item_list.length>0){
-						stat.stat_item_list.forEach(item => {
-							item.temp_row_id = Num.get_id();
-							data.stat_item_list.push(
-								DataItem.get_new(DataType.STAT_ITEM,0,
-									{
-										stat_id:data.stat.id,
-										stat_number:data.stat.stat_number,
-										stat_type:data.stat.stat_type,
-										user_id:data.stat.user_id,
-										parent_data_type:item.parent_data_type,
-										parent_id:item.parent_id,
-
-										temp_row_id :item.temp_row_id
-									}));
-						});
-						if(data.stat_item_list.length>0){
-							const [biz_error,biz_data] = await Portal.post_list(database,data.stat_item_list);
-							if(biz_error){
-								error=Log.append(error,biz_error);
-							}else{
-								data.stat_item_list = biz_data;
-							}
-						}
-					}
-				}
 				},
 			]).then(result => {
 				callback([error,data]);
@@ -2711,85 +2718,6 @@ class Stat_Data {
 			});
 		});
 	};
-	//9_stat_post
-	static post_old = (database,user_id,stat_type,post_data_list,option) => {
-		return new Promise((callback) => {
-			let data = [];
-			let is_unique = false;
-			let error = null;
-			//post_stat = Obj.merge(post_stat,post_data);
-			async.series([
-				async function(call){
-					switch(stat_type){
-						case Type.STAT_VIEW:
-							is_unique = true;
-							break;
-						default:
-							break;
-					}
-				},
-				async function(call){
-					let query = {};
-					if(is_unique){
-						data.data_list.forEach(item => {
-							let query_field = {$and:[]};
-							query_field.$and.push({parent_id:item.id});
-							query_field.$and.push({user_id:user_id});
-							query.$or.push(query_field);
-						});
-						const [biz_error,biz_data] = await Portal.count(database,search.data_type,search.filter);
-						if(biz_error){
-							error=Log.append(error,biz_error);
-						}else{
-							data = biz_data;
-						}
-						Log.w('22_is_unique',data);
-					}
-				},
-				/*
-				//post_stat
-				async function(call){
-					const [biz_error,biz_data] = await Portal.post_list(database,stat_list);
-					if(biz_error){
-						error=Log.append(error,biz_error);
-					}else{
-						data = biz_data;
-					}
-				}
-				*/
-			]).then(result => {
-				//callback([error,data]);
-			}).catch(err => {
-				Log.error("Stat-Data-Post",err);
-				callback([error,[]]);
-			});
-		});
-	};
-
-
-	static old_post = (database,stat_list,option) => {
-		return new Promise((callback) => {
-			let data = [];
-			let error = null;
-			async.series([
-				//post_stat
-				async function(call){
-					const [biz_error,biz_data] = await Portal.post_list(database,stat_list);
-					if(biz_error){
-						error=Log.append(error,biz_error);
-					}else{
-						data = biz_data;
-					}
-				}
-			]).then(result => {
-				callback([error,data]);
-			}).catch(err => {
-				Log.error("Stat-Data-Post",err);
-				callback([error,[]]);
-			});
-		});
-	};
-
 	static post_user = (database,user_id,stat_type,post_data,option) => {
 		return new Promise((callback) => {
 			let post_stat = DataItem.get_new(DataType.STAT,0,{user_id:user_id,type:stat_type});
@@ -2946,9 +2874,18 @@ class Blank_Data {
 			async.series([
 				async function(call){
 					const [biz_error,biz_data] = await Portal.post(database,DataType.BLANK,{});
-					call();
 				},
-			]).then(result => {
+				async function(call){
+					let post_stat = Stat_Logic.get_new(DataType.USER,data.user.id,Type.STAT_LOGIN,data.user.id,data.stat);
+                	let option = {post_unique:false};
+ 					const [biz_error,biz_data] = await Stat_Data.post(database,post_stat,option);
+					if(biz_error){
+						error=Log.append(error,biz_error);
+					}else{
+						data.stat = biz_data;
+					}
+				},
+ 				]).then(result => {
 				callback([error,data]);
 			}).catch(err => {
 				Log.error("Blank-Get",err);
