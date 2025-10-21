@@ -533,35 +533,59 @@ class Order_Data {
 						}
 					}
 				},
-				//post-order-stat
+				//post_stat_order
 				async function(call){
 					if(data.order.id && option.post_stat){
-						/*
-						let post_stat_list = Stat_Logic.get_new(data.order.user_id,Type.STAT_ORDER,data.order_item_list);
-						const [biz_error,biz_data] = await Stat_Data.post(database,post_stat_list);
+						data.stat_order = [];
+						let post_order_stat = Stat_Logic.get_new(DataType.ORDER,order.id,Type.STAT_ORDER,data.order.user_id,order);
+						post_order_stat.grand_total = Order_Logic.get_total(order).grand_total;
+                		let option = {post_unique:false};
+ 						const [biz_error,biz_data] = await Stat_Data.post(database,post_order_stat,option);
 						if(biz_error){
 							error=Log.append(error,biz_error);
 						}else{
-							data.stat_order = biz_data;
-						}
-						*/
+							data.stat_order =  biz_data;
+							}
 					}
 				},
-				//post-order-payment-stat
+				/*
+				//post stat order_item_list
 				async function(call){
 					if(data.order.id && option.post_stat){
-						/*
-						let post_stat_list = Stat_Logic.get_new(data.order.user_id,Type.STAT_ORDER_PAYMENT,data.order_payment_list);
-						const [biz_error,biz_data] = await Stat_Data.post(database,post_stat_list);
-						if(biz_error){
-							error=Log.append(error,biz_error);
-						}else{
-							data.stat_order_payment = biz_data;
+						data.stat_order_item_list = [];
+ 						for(const order_item of order.order_item_list){
+							let post_order_item_stat = Stat_Logic.get_new(DataType.ORDER_ITEM,order_item.id,Type.STAT_ORDER_ITEM,order.user_id,order_item);
+                			let option = {post_unique:false};
+ 							const [biz_error,biz_data] = await Stat_Data.post(database,post_order_item_stat,option);
+							if(biz_error){
+								error=Log.append(error,biz_error);
+							}else{
+								data.stat_order_item_list.push(biz_data);
+							}
 						}
-						*/
 					}
 				},
-			]).then(result => {
+				//post stat order_sub_item_list
+				async function(call){
+					if(data.order.id && option.post_stat){
+						data.stat_order_sub_item_list = [];
+ 						for(const order_item of order.order_item_list){
+ 							for(const order_sub_item of order_item.order_sub_item_list){
+								let post_order_sub_item_stat = Stat_Logic.get_new(DataType.ORDER_SUB_ITEM,order_sub_item.id,Type.STAT_ORDER_SUB_ITEM,order.user_id,order_sub_item);
+                				let option = {post_unique:false};
+ 								const [biz_error,biz_data] = await Stat_Data.post(database,post_order_sub_item_stat,option);
+								if(biz_error){
+									error=Log.append(error,biz_error);
+								}else{
+									data.stat_order_sub_item_list.push(biz_data);
+								}
+							}
+						}
+						data.stat_order_sub_item_list = data.stat_order_sub_item_list
+					}
+				},
+				*/
+]).then(result => {
 				callback([error,data]);
 			}).catch(err => {
 				Log.error("OrderData-Order-Item-Update",err);
@@ -832,38 +856,58 @@ class Cart_Data {
 						}
 					}
 				},
-				//post stat cart here
+				//post_stat_cart
 				async function(call){
 					if(data.cart.id && option.post_stat){
-						data.stat_list = [];
- 						for(const cart_item of data.cart_item_list){
-							let post_stat = Stat_Logic.get_new(DataType.REVIEW,data.review.id,Type.STAT_REVIEW,user_id,data.review);
-        					let option = {post_unique:false};
-							const [biz_error,biz_data] = await Stat_Data.post(database,stat,option);
+						data.stat_cart = [];
+						let post_cart_stat = Stat_Logic.get_new(DataType.CART,cart.id,Type.STAT_CART,data.cart.user_id,cart);
+						post_cart_stat.grand_total = Cart_Logic.get_total(cart).grand_total;
+                		let option = {post_unique:false};
+ 						const [biz_error,biz_data] = await Stat_Data.post(database,post_cart_stat,option);
+						if(biz_error){
+							error=Log.append(error,biz_error);
+						}else{
+							data.stat_cart =  biz_data;
+							}
+					}
+				},
+				//post stat cart_item_list
+				async function(call){
+					if(data.cart.id && option.post_stat){
+						data.stat_cart_item_list = [];
+ 						for(const cart_item of cart.cart_item_list){
+							let post_cart_item_stat = Stat_Logic.get_new(DataType.CART_ITEM,cart_item.id,Type.STAT_CART_ITEM,cart.user_id,cart_item);
+                			let option = {post_unique:false};
+ 							const [biz_error,biz_data] = await Stat_Data.post(database,post_cart_item_stat,option);
 							if(biz_error){
 								error=Log.append(error,biz_error);
 							}else{
-								data.stat_list.push(biz_data);
+								data.stat_cart_item_list.push(biz_data);
 							}
 						}
-						Log.w('my_stat_list',data.stat_list);
-						/*
-						let post_stat_list =[];
-						data.cart_item_list.forEach(cart_item => {
-							post_stat_list.push(Stat_Logic.get_new(data.cart.user_id,Type.STAT_CART,data.cart_item_list));
-						});
-						let option = {post_unique:false};
-						const [biz_error,biz_data] = await Stat_Data.post(database,post_stat_list,option);
-												if(biz_error){
-							error=Log.append(error,biz_error);
-						}else{
-							data.stat_list = biz_data;
+					}
+				},
+				//post stat cart_sub_item_list
+				async function(call){
+					if(data.cart.id && option.post_stat){
+						data.stat_cart_sub_item_list = [];
+ 						for(const cart_item of cart.cart_item_list){
+ 							for(const cart_sub_item of cart_item.cart_sub_item_list){
+								let post_cart_sub_item_stat = Stat_Logic.get_new(DataType.CART_SUB_ITEM,cart_sub_item.id,Type.STAT_CART_SUB_ITEM,cart.user_id,cart_sub_item);
+                				let option = {post_unique:false};
+ 								const [biz_error,biz_data] = await Stat_Data.post(database,post_cart_sub_item_stat,option);
+								if(biz_error){
+									error=Log.append(error,biz_error);
+								}else{
+									data.stat_cart_sub_item_list.push(biz_data);
+								}
+							}
 						}
-						*/
+						data.stat_cart_sub_item_list = data.stat_cart_sub_item_list
 					}
 				},
 			]).then(result => {
-				callback([error,data]);
+				callback([error,data.cart]);
 			}).catch(err => {
 				Log.error("CartData-Cart-Item-Update",err);
 				callback([error,[]]);
@@ -965,6 +1009,10 @@ class Cart_Data {
 						cart_item.cart_sub_item_list = [...item_filter_list, ...cart_item.cart_sub_item_list];
 					});
 				},
+				async function(call){
+					data.cart = Cart_Logic.get_total(data.cart);
+				},
+
 			]).then(result => {
 				callback([error,data.cart]);
 			}).catch(err => {
@@ -1424,7 +1472,6 @@ class User_Data {
 						}
 					}
 				},
-				/*
 				//get stat - ip - merge
 				async function(call){
 					if(data.email_resultOK && data.title_resultOK && option.post_ip_address){
@@ -1445,22 +1492,19 @@ class User_Data {
 						data.stat = Obj.merge(data.stat,biz_data);
 					}
 				},
-				*/
 				//post stat
-				/*
 				async function(call){
 					if(data.email_resultOK && data.title_resultOK && option.post_stat && option.post_device || option.post_ip){
 						let post_stat = Stat_Logic.get_new(DataType.USER,data.user.id,Type.STAT_REGISTER,data.user.id,data.stat);
                 		let option = {post_unique:false};
- 							const [biz_error,biz_data] = await Stat_Data.post(database,post_stat,option);
-							if(biz_error){
-								error=Log.append(error,biz_error);
-							}else{
-								data.stat = biz_data;
-							}
+ 						const [biz_error,biz_data] = await Stat_Data.post(database,post_stat,option);
+						if(biz_error){
+							error=Log.append(error,biz_error);
+						}else{
+							data.stat = biz_data;
+						}
 					}
 				},
-				*/
 			]).then(result => {
 				callback([error,data]);
 			}).catch(err => {
@@ -2668,8 +2712,6 @@ class Stat_Data {
 			option = option ? option : {post_unique:false};
 			let unique_resultOK = option.post_unique ? false : true;
 			data.stat = DataItem.get_new(DataType.STAT,stat.id,{parent_data_type:stat.parent_data_type,user_id:stat.user_id});
-			data.stat_item_list = [];
-			data.stat_sub_item_list = [];
 			async.series([
 				async function(call){
 					for(const key in stat) {

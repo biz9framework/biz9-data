@@ -66,6 +66,7 @@ describe('connect', function(){ this.timeout(25000);
                 database = biz_data;
                 console.log('DATABASE-END');
             },
+            /*
              //- STAT - START
             async function(call){
                 const [biz_error,biz_data] = await Portal.get(database,data_type,id);
@@ -81,8 +82,9 @@ describe('connect', function(){ this.timeout(25000);
                 //data.item = biz_data;
                 //Log.w('22_caIrt',data);
              },
-
              //- STAT - END
+            */
+
             /*
             //- GET_ITEM - START
             async function(call){
@@ -182,46 +184,34 @@ describe('connect', function(){ this.timeout(25000);
             //-- DEMO -- END
             */
             //- CART-ORDER LOGIC -- START
-            /*
             async function(call){
                 console.log('CART-ORDER-START');
-                let cart_number = "CA-73551";
-                let order_number = 'OR-92773';
-                let product_id = "49d15f34-c840-477c-9aba-32cc0575087f";
-                let cms_type_id = "b2e72744-85bf-4fd8-94e5-6aa8b4622dfb";
-                let hosting_type_id = "a80ecdc7-13ff-4d74-94bc-f873da165832";
-                let user_id = "44db96f9-4c51-4272-8159-9cdae914084a";
+                //let cart_number = "CA-73551";
+                //let order_number = 'OR-92773';
+                let product_id = "95fc25b7-43d0-49ff-bb86-0f5ba207cf18";
+                let cms_type_id = "fbc0ed54-8dd9-4b36-8bc0-039fa96b8ed8";
+                let hosting_type_id = "035bdda6-d8cd-4c0b-ab34-7fd7f511151e";
+                let user_id = "bb10aa9c-ed88-43f3-b196-a0251db954fa";
                 cart = Cart_Logic.get_new(DataType.PRODUCT,user_id);
-                Log.w('cart',cart);
-    //cart item
+                //Log.w('cart',cart);
+                //cart item
                 let cart_item_product = Cart_Logic.get_new_cart_item(DataType.PRODUCT,product_id,cart.cart_number,1,Num.get_id(9999));
-    // cart sub item product_sub_cms_type
+                // cart sub item product_sub_cms_type
                 cart_item_product.cart_sub_item_list.push(Cart_Logic.get_new_cart_sub_item(DataType.PRODUCT,cms_type_id,cart.cart_number,1,Num.get_id(99)));
-            //console.log('aaaaaaaaaaaa');
-            // cart sub item product_sub_hosting_type
+                // cart sub item product_sub_hosting_type
                 cart_item_product.cart_sub_item_list.push(Cart_Logic.get_new_cart_sub_item(DataType.PRODUCT,hosting_type_id,cart.cart_number,1,Num.get_id(99)));
                 cart.cart_item_list.push(cart_item_product);
+                //Log.w('11_cart',cart);
             //let search = App_Logic.get_search(DataType.PRODUCT,{cart_number:cart_number},{},1,0);
             //console.log('ccccccccc');
             //Log.w('cart_22',cart_item_product);
-                let option_post_cart = {post_stat:true};
-                const [biz_error,biz_data] = await Cart_Data.post(database,cart,option_post_cart);
+               let option_post_cart = {post_stat:true};
+               const [biz_error,biz_data] = await Cart_Data.post(database,cart,option_post_cart,option);
             //const [biz_error,biz_data] = await Cart_Data.get(database,cart_number);
             //const [biz_error,biz_data] = await Order_Data.get(database,order_number);
             //console.log('33333333');
-                cart = biz_data.cart;
-                Log.w('11_cart',biz_data);
-                Log.w('22_cart',biz_data.cart.cart_number);
-//console.log(cart);
-//console.log('bbbbb');
-//let product = Product_Logic.get_test();
-//Log.w('product',product);
-//Log.w('rrr',database);
-//const [biz_error,biz_data] = await Portal.post(database,DataType.PRODUCT,product);
-//const [biz_error,biz_data] = await Cart_Data.get(database,cart.cart_number);
-//const [biz_error,biz_data] = await Cart_Data.search(database,DataType.PRODUCT,search,filter,search.sort_by,search.page_current,search.page_size);
-//cart = biz_data.cart;
-//call();
+                cart = biz_data;
+                Log.w('22_cart',biz_data);
             },
             async function(call){
                 const [biz_error,biz_data] = await Cart_Data.get(database,cart.cart_number);
@@ -229,6 +219,7 @@ describe('connect', function(){ this.timeout(25000);
                 Log.w('33_cart',cart);
              },
 
+            /*
             async function(call){
                 let order = Order_Logic.get_new(cart,{get_payment_plan:true,payment_plan:Title.ORDER_PAYMENT_PLAN_1,payment_plan_status:Title.ORDER_PAYMENT_STATUS_OPEN});
                 Log.w('44_test_order',order);
@@ -242,11 +233,12 @@ describe('connect', function(){ this.timeout(25000);
                 const [biz_error,biz_data] = await Order_Data.post(database,order,[order_payment],option_post_order);
             //Log.w('66_order_post',biz_data);
             },
-            //- CART-ORDER LOGIC -- START
             async function(call){
                 const [biz_error,biz_data] = await Order_Data.get(database,order.order_number,{get_payment:true});
                 Log.w('66_order',biz_data);
             }
+            //- CART-ORDER LOGIC -- END
+            */
                        /*
             //- LOGIC -- START
             async function(call){
