@@ -219,20 +219,16 @@ describe('connect', function(){ this.timeout(25000);
                 Log.w('33_cart',cart);
              },
 
-            /*
             async function(call){
                 let order = Order_Logic.get_new(cart,{get_payment_plan:true,payment_plan:Title.ORDER_PAYMENT_PLAN_1,payment_plan_status:Title.ORDER_PAYMENT_STATUS_OPEN});
                 Log.w('44_test_order',order);
-
-//Log.w('Title',Title.ORDER_PAYMENT_METHOD_TEST);
-//Log.w('Amount',Num.get_id(333));
                 let order_payment = Order_Logic.get_new_order_payment(order.order_number,Title.ORDER_PAYMENT_METHOD_TEST,Num.get_id(99));
-//Log.w('33_order_post',order);
                 Log.w('55_order_payment',order_payment);
                 let option_post_order = {post_stat:true};
                 const [biz_error,biz_data] = await Order_Data.post(database,order,[order_payment],option_post_order);
-            //Log.w('66_order_post',biz_data);
+                //Log.w('66_order_post',biz_data);
             },
+            /*
             async function(call){
                 const [biz_error,biz_data] = await Order_Data.get(database,order.order_number,{get_payment:true});
                 Log.w('66_order',biz_data);

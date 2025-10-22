@@ -538,7 +538,6 @@ class Order_Data {
 					if(data.order.id && option.post_stat){
 						data.stat_order = [];
 						let post_order_stat = Stat_Logic.get_new(DataType.ORDER,order.id,Type.STAT_ORDER,data.order.user_id,order);
-						post_order_stat.grand_total = Order_Logic.get_total(order).grand_total;
                 		let option = {post_unique:false};
  						const [biz_error,biz_data] = await Stat_Data.post(database,post_order_stat,option);
 						if(biz_error){
@@ -548,7 +547,6 @@ class Order_Data {
 							}
 					}
 				},
-				/*
 				//post stat order_item_list
 				async function(call){
 					if(data.order.id && option.post_stat){
@@ -584,9 +582,35 @@ class Order_Data {
 						data.stat_order_sub_item_list = data.stat_order_sub_item_list
 					}
 				},
-				*/
-]).then(result => {
-				callback([error,data]);
+				//post stat order_payment_list
+				async function(call){
+					if(data.order.id && option.post_stat){
+						data.stat_order_payment_list = [];
+ 						for(const order_payment of order_payment_list){
+							let post_order_payment_stat = Stat_Logic.get_new(DataType.ORDER_PAYMENT,order_payment.id,Type.STAT_ORDER_PAYMENT,order.user_id,order_payment);
+                			let option = {post_unique:false};
+ 							const [biz_error,biz_data] = await Stat_Data.post(database,post_order_payment_stat,option);
+							if(biz_error){
+								error=Log.append(error,biz_error);
+							}else{
+								data.stat_order_payment_list.push(biz_data);
+							}
+						}
+					}
+				},
+				//get - order
+				async function(call){
+					let option = {get_payment:true};
+					const [biz_error,biz_data] = await Order_Data.get(database,data.order.order_number,option);
+					if(biz_error){
+						error=Log.append(error,biz_error);
+					}else{
+						data.order = biz_data;
+					}
+				},
+
+			]).then(result => {
+				callback([error,data.order]);
 			}).catch(err => {
 				Log.error("OrderData-Order-Item-Update",err);
 				callback([error,[]]);
@@ -904,6 +928,15 @@ class Cart_Data {
 							}
 						}
 						data.stat_cart_sub_item_list = data.stat_cart_sub_item_list
+					}
+				},
+				//get - cart
+				async function(call){
+					const [biz_error,biz_data] = await Cart_Data.get(database,data.cart.cart_number);
+					if(biz_error){
+						error=Log.append(error,biz_error);
+					}else{
+						data.cart = biz_data;
 					}
 				},
 			]).then(result => {
@@ -2753,7 +2786,7 @@ class Stat_Data {
 					}
 				},
 			]).then(result => {
-				callback([error,data]);
+				callback([error,data.stat]);
 			}).catch(err => {
 				Log.error("StatData-Stat-Update",err);
 				callback([error,[]]);
