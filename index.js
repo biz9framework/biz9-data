@@ -452,7 +452,7 @@ class Order_Data {
 			async.series([
 				async function(call){
 					for(const key in order) {
-						if(Str.check_is_null(data.order[key]) && key != 'order_item_list' && key != 'order_sub_item_list'){
+						if(Str.check_is_null(data.order[key]) && key != Type.ORDER_ITEM_LIST && key != Type.ORDER_SUB_ITEM_LIST){
 							data.order[key] = order[key];
 						}
 					}
@@ -659,7 +659,7 @@ class Order_Data {
 					if(!Str.check_is_null(data.order.id)){
 						data.order.order_item_list.forEach(order_item => {
 							let query_field = {};
-							query_field['id'] = { $regex:String(order_item.parent_id), $options: "i" };
+							query_field[Type.ID] = { $regex:String(order_item.parent_id), $options: "i" };
 							order_parent_item_list_query.$or.push(query_field);
 						});
 						let search = App_Logic.get_search(data.order.parent_data_type,order_parent_item_list_query,{},1,0);
@@ -807,7 +807,7 @@ class Cart_Data {
 			async.series([
 				async function(call){
 					for(const key in cart) {
-						if(Str.check_is_null(data.cart[key]) && key != 'cart_item_list' && key != 'cart_sub_item_list'){
+						if(Str.check_is_null(data.cart[key]) && key != Type.CART_ITEM_LIST && key != Type.CART_SUB_ITEM_LIST){
 							data.cart[key] = cart[key];
 						}
 					}
@@ -826,7 +826,9 @@ class Cart_Data {
 					if(cart.cart_item_list.length>0){
 						cart.cart_item_list.forEach(item => {
 							item.temp_row_id = Num.get_id();
+
 							data.cart_item_list.push(
+
 								DataItem.get_new(DataType.CART_ITEM,0,
 									{
 										cart_id:data.cart.id,
@@ -839,8 +841,9 @@ class Cart_Data {
 										parent_id:item.parent_id,
 
 										temp_row_id :item.temp_row_id
-									}));
-						});
+								}));
+
+							});
 						if(data.cart_item_list.length>0){
 							const [biz_error,biz_data] = await Portal.post_list(database,data.cart_item_list);
 							if(biz_error){
@@ -988,7 +991,7 @@ class Cart_Data {
 					if(!Str.check_is_null(data.cart.id)){
 						data.cart.cart_item_list.forEach(cart_item => {
 							let query_field = {};
-							query_field['id'] = { $regex:String(cart_item.parent_id), $options: "i" };
+							query_field[Type.ID] = { $regex:String(cart_item.parent_id), $options: "i" };
 							cart_parent_item_list_query.$or.push(query_field);
 						});
 						let search = App_Logic.get_search(data.cart.parent_data_type,cart_parent_item_list_query,{},1,0);
@@ -1020,7 +1023,7 @@ class Cart_Data {
 					if(!Str.check_is_null(data.cart.id)){
 						cart_sub_item_list.forEach(cart_sub_item => {
 							let query_field = {};
-							query_field['id'] = { $regex:String(cart_sub_item.parent_id), $options: "i" };
+							query_field[Type.ID] = { $regex:String(cart_sub_item.parent_id), $options: "i" };
 							cart_sub_item_list_query.$or.push(query_field);
 						});
 						let search = App_Logic.get_search(DataType.PRODUCT,cart_sub_item_list_query,{},1,0);
@@ -1313,11 +1316,11 @@ class User_Data {
 	static get_device = async (device) => {
 		return new Promise((callback) => {
 			let dev = {};
-			dev.platform_name = !Str.check_is_null(device.name) ? device.name : 'N/A';
-			dev.platform_version = !Str.check_is_null(device.version) ? device.version : 'N/A';
-			dev.platform_layout = !Str.check_is_null(device.layout) ? device.layout : 'N/A';
-			dev.platform_os = !Str.check_is_null(device.os) ? device.os : 'N/A';
-			dev.platform_description = !Str.check_is_null(device.description) ? device.description : 'N/A';
+			dev.platform_name = !Str.check_is_null(device.name) ? device.name : Type.N_A;
+			dev.platform_version = !Str.check_is_null(device.version) ? device.version : Type.N_A;
+			dev.platform_layout = !Str.check_is_null(device.layout) ? device.layout : Type.N_A;
+			dev.platform_os = !Str.check_is_null(device.os) ? device.os : Type.N_A;
+			dev.platform_description = !Str.check_is_null(device.description) ? device.description : Type.N_A;
 			callback(dev);
 		});
 	}
@@ -1329,7 +1332,7 @@ class User_Data {
 				callback([error,null]);
 			}
 			else{
-				let ip_info ={country_name:"N/A",region_name:"N/A",district:"N/A",city_name:"N/A",latitude:"N/A",longitude:"N/A",zip_code:"N/A",isp:"N/A",ip_address:"N/A"};
+				let ip_info ={country_name:Type.N_A,region_name:Type.N_A,district:Type.N_A,city_name:Type.N_A,latitude:Type.N_A,longitude:Type.N_A,zip_code:Type.N_A,isp:Type.N_A,ip_address:Type.N_A};
 				var https = require('https');
 				let url = 'https://api.ip2location.io/?key=' + geo_key + '&ip=' + ip_address + '&format=json';
 				let response = '';
@@ -1348,16 +1351,16 @@ class User_Data {
 								let geo_data = JSON.parse(response);
 								ip_info =
 									{
-										country_name:!Str.check_is_null(geo_data.country_name) ? geo_data.country_name : "N/A",
-										region_name:!Str.check_is_null(geo_data.region_name) ?geo_data.region_name : "N/A",
-										is_proxy:!Str.check_is_null(geo_data.is_proxy) ?geo_data.is_proxy : "N/A",
-										district:!Str.check_is_null(geo_data.district) ?geo_data.district : "N/A",
-										city_name:!Str.check_is_null(geo_data.city_name) ?geo_data.city_name : "N/A",
-										latitude:!Str.check_is_null(geo_data.latitude) ?geo_data.latitude : "N/A",
-										longitude:!Str.check_is_null(geo_data.longitude) ?geo_data.longitude : "N/A",
-										zip_code:!Str.check_is_null(geo_data.zip_code) ?geo_data.zip_code : "N/A",
-										isp:!Str.check_is_null(geo_data.as) ?geo_data.as : "N/A",
-										ip_address:!Str.check_is_null(geo_data.ip) ?geo_data.ip : "N/A"
+										country_name: ! Str.check_is_null(geo_data.country_name) ? geo_data.country_name : Type.N_A,
+										region_name: ! Str.check_is_null(geo_data.region_name) ?geo_data.region_name: Type.N_A,
+										is_proxy: ! Str.check_is_null(geo_data.is_proxy) ?geo_data.is_proxy : Type.N_A,
+										district: ! Str.check_is_null(geo_data.district) ?geo_data.district : Type.N_A,
+										city_name: ! Str.check_is_null(geo_data.city_name) ?geo_data.city_name : Type.N_A,
+										latitude: ! Str.check_is_null(geo_data.latitude) ?geo_data.latitude : Type.N_A,
+										longitude: ! Str.check_is_null(geo_data.longitude) ?geo_data.longitude : Type.N_A,
+										zip_code: ! Str.check_is_null(geo_data.zip_code) ?geo_data.zip_code : Type.N_A,
+										isp: ! Str.check_is_null(geo_data.as) ?geo_data.as : Type.N_A,
+										ip_address: ! Str.check_is_null(geo_data.ip) ? geo_data.ip : Type.N_A,
 									};
 								callback([error,ip_info]);
 							}
@@ -1858,7 +1861,7 @@ class Portal {
 		   */
 		return new Promise((callback) => {
 			let error = null;
-			let data = DataItem.get_new(data_type,0,{key:key?key:'blank'});
+			let data = DataItem.get_new(data_type,0,{key:key?key:Type.BLANK});
 			let full_data_list = [];
 			let new_data_list = [];
 			option = option ? option : {get_item:false,get_image:false,post_stat:false,user_id:0};
@@ -2126,7 +2129,7 @@ class Portal {
 						let query = { $or: [] };
 						data.data_list.forEach(item => {
 							let query_field = {};
-							query_field['id'] = { $regex:String(item['parent_id']), $options: "i" };
+							query_field['id'] = { $regex:String(item[Type.PARENT_ID]), $options: "i" };
 							query.$or.push(query_field);
 						});
 						let search = App_Logic.get_search(option.parent_data_type,query,{},1,0);
@@ -2156,7 +2159,7 @@ class Portal {
 						let query = { $or: [] };
 						data.data_list.forEach(item => {
 							let query_field = {};
-							query_field['id'] = { $regex:String(item['user_id']), $options: "i" };
+							query_field[Type.ID] = { $regex:String(item[Type.USER_ID]), $options: "i" };
 							query.$or.push(query_field);
 						});
 						let search = App_Logic.get_search(DataType.USER,query,{},1,0);
@@ -2235,7 +2238,6 @@ class Portal {
 				callback([error,data]);
 			}).catch(err => {
 				Log.error('DATA-SEARCH-ERROR-7',err);
-				Log.error("Portal-Search",err);
 				callback([err,[]]);
 			});
 		});
@@ -2604,13 +2606,13 @@ class Portal {
 					});
 				},
 				function(call){
-					copy_data['title'] = 'Copy '+top_data['title'];
-					copy_data['title_url'] = 'copy_'+top_data['title_url'];
-					copy_data['source_id'] = top_data.id;
-					copy_data['source_data_type'] = top_data.data_type;
+					copy_data[Type.TITLE] = 'Copy '+top_data[Type.TITLE];
+					copy_data[Type.TITLE_URL] = 'copy_'+top_data[Type.TITLE_URL];
+					copy_data[Type.SOURCE_ID] = top_data.id;
+					copy_data[Type.SOURCE_DATA_TYPE] = top_data.data_type;
 					const keys = Object.keys(top_data);
 					keys.forEach(key => {
-						if(key!='id'&&key!='source'&&key!='title'&&key!='title_url'){
+						if(key!=Type.ID&&key!=Type.SOURCE&&key!=Type.TITLE&&key!=Type.TITLE_URL){
 							copy_data[key]=top_data[key];
 						}
 					});
@@ -2632,16 +2634,16 @@ class Portal {
 				function(call){
 					for(const item of data_list) {
 						let copy_sub_data=DataItem.get_new(copy_data.data_type,0,{top_id:copy_data.id,top_data_type:copy_data.data_type});
-						copy_sub_data['source_id'] = item['id'];
-						copy_sub_data['source_data_type'] = item['data_type'];
+						copy_sub_data[Type.SOURCE_ID] = item[Type.ID];
+						copy_sub_data[Type.SOURCE_DATA_TYPE] = item[Type.DATA_TYPE];
 
-						copy_sub_data['source_parent_id'] = item['parent_id'];
-						copy_sub_data['source_parent_data_type'] = item['parent_data_type'];
+						copy_sub_data[Type.SOURCE_PARENT_ID] = item[Type.PARENT_ID];
+						copy_sub_data[Type.SOURCE_PARENT_DATA_TYPE] = item[Type.PARENT_DATA_TYPE];
 
-						copy_sub_data['source_top_id'] = item['top_id'];
-						copy_sub_data['source_top_data_type'] = item['top_data_type'];
+						copy_sub_data[Type.SOURCE_TOP_ID] = item[Type.TOP_ID];
+						copy_sub_data[Type.SOURCE_TOP_DATA_TYPE] = item[Type.TOP_DATA_TYPE];
 						for(key in item){
-							if( key != 'id' && key != 'source' && key != 'parent_id' && key != 'parent_data_type'  && key != 'top_id' && key != 'top_data_type' ){
+							if( key != Type.ID && key != Type.SOURCE && key != Type.PARENT_ID && key != Type.PARENT_DATA_TYPE  && key != Type.TOP_ID && key != Type.TOP_DATA_TYPE ){
 								copy_sub_data[key] = item[key];
 							}
 						}
@@ -2665,14 +2667,14 @@ class Portal {
 				function(call){
 					if(copy_data_list.length>0){
 						copy_data_list.forEach(item => {
-							if(item['source_parent_id'] == top_data['ID']){
-								item['parent_id'] = copy_data['ID'];
-								item['parent_data_type']  = copy_data['data_type'];
+							if(item[Type.SOURCE_PARENT_ID] == top_data[Type.ID]){
+								item[Type.PARENT_ID] = copy_data[Type.ID];
+								item[Type.PARENT_DATA_TYPE]  = copy_data[Type.DataType];
 							}else{
 								copy_data_list.forEach(item_sub => {
-									if(item['source_parent_id'] == item_sub['source_id']){
-										item['parent_id'] = item_sub['id'];
-										item['parent_data_type'] = item_sub['data_type'];
+									if(item[Type.SOURCE_PARENT_ID] == item_sub[Type.SOURCE_ID]){
+										item[Type.PARENT_ID] = item_sub[Type.ID];
+										item[Type.PARENT_DATA_TYPE] = item_sub[Type.DATA_TYPE];
 									}
 
 								});
@@ -2748,7 +2750,7 @@ class Stat_Data {
 			async.series([
 				async function(call){
 					for(const key in stat) {
-						if(Str.check_is_null(data.stat[key]) && key != 'stat_item_list' && key != 'stat_sub_item_list'){
+						if(Str.check_is_null(data.stat[key]) && key != Type.STAT_ITEM_LIST && key != Type.STAT_SUB_ITEM_LIST){
 							data.stat[key] = stat[key];
 						}
 					}
