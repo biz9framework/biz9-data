@@ -450,14 +450,20 @@ class Order_Data {
 				grand_total:0,
 			}),order_item_list:[],order_sub_item_list:[]};
 			async.series([
+				//post - order
 				async function(call){
 					for(const key in order) {
-						if(Str.check_is_null(data.order[key]) && key != Type.ORDER_ITEM_LIST && key != Type.ORDER_SUB_ITEM_LIST){
-							data.order[key] = order[key];
+						if(Str.check_is_null(data.order[key])
+							&& key != Type.ID && key != Type.DATA_TYPE
+							&& key != Type.PARENT_ITEM && key != Type.USER
+							&& key != Type.CART_ITEM_LIST && key != Type.CART_SUB_ITEM_LIST
+							&& key != Type.ORDER_ITEM_LIST && key != Type.ORDER_SUB_ITEM_LIST
+							&& key != Type.SOURCE && key != Type.SOURCE_ID
+							&& key != Type.STAT_ITEM_LIST && key != Type.STAT_SUB_ITEM_LIST
+							&& key != Type.DATE_CREATE && key != Type.DATE_SAVE){
+								data.order[key] = order[key];
 						}
 					}
-				},
-				async function(call){
 					const [biz_error,biz_data] = await Portal.post(database,DataType.ORDER,data.order);
 					if(biz_error){
 						error=Log.append(error,biz_error);
@@ -468,57 +474,59 @@ class Order_Data {
 				//post - order items
 				async function(call){
 					if(order.order_item_list.length>0){
-						order.order_item_list.forEach(item => {
-							item.temp_row_id = Num.get_id();
-							data.order_item_list.push(
-								DataItem.get_new(DataType.ORDER_ITEM,0,
-									{
-										order_id:data.order.id,
-										order_number:data.order.order_number,
-										user_id:data.order.user_id,
-										quanity:item.quanity,
-										cost:item.cost,
-										parent_data_type:item.parent_data_type,
-										parent_id:item.parent_id,
-										temp_row_id :item.temp_row_id
-									}));
-						});
-						if(data.order_item_list.length>0){
-							const [biz_error,biz_data] = await Portal.post_list(database,data.order_item_list);
-							if(biz_error){
-								error=Log.append(error,biz_error);
-							}else{
-								data.order_item_list = biz_data;
+					for(const order_item of order.order_item_list){
+						let post_order_item = DataItem.get_new(DataType.ORDER_ITEM,0);
+						for(const key in order_item){
+							order_item.temp_row_id = Num.get_id();
+							if(!Str.check_is_null(order_item[key])
+								&& key != Type.ID && key != Type.DATA_TYPE
+								&& key != Type.PARENT_ITEM && key != Type.USER
+								&& key != Type.CART_ITEM_LIST && key != Type.CART_SUB_ITEM_LIST
+								&& key != Type.ORDER_ITEM_LIST && key != Type.ORDER_SUB_ITEM_LIST
+								&& key != Type.SOURCE && key != Type.SOURCE_ID
+								&& key != Type.STAT_ITEM_LIST && key != Type.STAT_SUB_ITEM_LIST
+								&& key != Type.DATE_CREATE && key != Type.DATE_SAVE){
+								post_order_item[key] = order_item[key];
+								}
 							}
+							post_order_item.temp_row_id = order_item.temp_row_id;
+							data.order_item_list.push(post_order_item);
+						}
+						const [biz_error,biz_data] = await Portal.post_list(database,data.order_item_list);
+						if(biz_error){
+							error=Log.append(error,biz_error);
+						}else{
+							data.order_item_list = biz_data;
 						}
 					}
 				},
-				//post - order_sub_item_list
+				//post - order sub items
 				async function(call){
 					if(order.order_item_list.length>0){
-						order.order_item_list.forEach(order_item => {
-							order_item.order_sub_item_list.forEach(order_sub_item => {
-								data.order_sub_item_list.push(
-									DataItem.get_new(DataType.ORDER_SUB_ITEM,0,
-										{
-											order_id:data.order.id,
-											order_number:data.order.order_number,
-											user_id:data.order.user_id,
-											order_item_id:data.order_item_list.find(item_find => item_find.temp_row_id === order_item.temp_row_id).id,
-											quanity:order_sub_item.quanity,
-											cost:order_sub_item.cost,
-											parent_data_type:order_sub_item.parent_data_type,
-											parent_id:order_sub_item.parent_id
-										}));
-							});
-						});
-						if(data.order_sub_item_list.length>0){
-							const [biz_error,biz_data] = await Portal.post_list(database,data.order_sub_item_list);
-							if(biz_error){
-								error=Log.append(error,biz_error);
-							}else{
-								data.order_sub_item_list = biz_data;
+						for(const order_item of order.order_item_list){
+							for(const order_sub_item of order_item.order_sub_item_list){
+								let post_order_sub_item = DataItem.get_new(DataType.ORDER_SUB_ITEM,0);
+									for(const key in order_sub_item){
+										order_sub_item.temp_row_id = Num.get_id();
+										if(!Str.check_is_null(order_sub_item[key])
+										&& key != Type.ID && key != Type.DATA_TYPE
+										&& key != Type.PARENT_ITEM && key != Type.USER
+										&& key != Type.ORDER_ITEM_LIST && key != Type.ORDER_SUB_ITEM_LIST
+										&& key != Type.SOURCE && key != Type.SOURCE_ID
+										&& key != Type.STAT_ITEM_LIST && key != Type.STAT_SUB_ITEM_LIST
+										&& key != Type.DATE_CREATE && key != Type.DATE_SAVE){
+										post_order_sub_item[key] = order_sub_item[key];
+									}
 							}
+							post_order_sub_item.order_item_id =data.order_item_list.find(item_find => item_find.temp_row_id === order_item.temp_row_id).id,
+							data.order_sub_item_list.push(post_order_sub_item);
+						}
+						}
+						const [biz_error,biz_data] = await Portal.post_list(database,data.order_sub_item_list);
+						if(biz_error){
+							error=Log.append(error,biz_error);
+						}else{
+							data.order_sub_item_list = biz_data;
 						}
 					}
 				},
@@ -608,7 +616,6 @@ class Order_Data {
 						data.order = biz_data;
 					}
 				},
-
 			]).then(result => {
 				callback([error,data.order]);
 			}).catch(err => {
@@ -620,7 +627,7 @@ class Order_Data {
 	//9_order_get
 	static get = (database,order_number,option) => {
 		return new Promise((callback) => {
-			let data = {order:DataItem.get_new(DataType.ORDER,0,{order_number:order_number,grand_total:0,order_item_list:[],parent_user:DataItem.get_new(DataType.USER,0)})};
+			let data = {order:DataItem.get_new(DataType.ORDER,0,{order_number:order_number,grand_total:0,order_item_list:[],user:DataItem.get_new(DataType.USER,0)})};
 			let order_parent_item_list_query = { $or: [] };
 			let order_sub_item_list_query = { $or: [] };
 			let error = null;
@@ -639,7 +646,7 @@ class Order_Data {
 				},
 				async function(call){
 					const [biz_error,biz_data] = await Portal.get(database,DataType.USER,data.order.user_id);
-					data.order.parent_user=biz_data;
+					data.order.user=biz_data;
 				},
 				//get_order_item_list
 				async function(call){
@@ -809,6 +816,8 @@ class Cart_Data {
 				async function(call){
 					for(const key in cart) {
 						if(Str.check_is_null(data.cart[key])
+							&& key != Type.ID && key != Type.DATA_TYPE
+							&& key != Type.PARENT_ITEM && key != Type.USER
 							&& key != Type.CART_ITEM_LIST && key != Type.CART_SUB_ITEM_LIST
 							&& key != Type.ORDER_ITEM_LIST && key != Type.ORDER_SUB_ITEM_LIST
 							&& key != Type.SOURCE && key != Type.SOURCE_ID
@@ -832,6 +841,8 @@ class Cart_Data {
 						for(const key in cart_item){
 							cart_item.temp_row_id = Num.get_id();
 							if(!Str.check_is_null(cart_item[key])
+								&& key != Type.ID && key != Type.DATA_TYPE
+								&& key != Type.PARENT_ITEM && key != Type.USER
 								&& key != Type.CART_ITEM_LIST && key != Type.CART_SUB_ITEM_LIST
 								&& key != Type.ORDER_ITEM_LIST && key != Type.ORDER_SUB_ITEM_LIST
 								&& key != Type.SOURCE && key != Type.SOURCE_ID
@@ -840,6 +851,7 @@ class Cart_Data {
 								post_cart_item[key] = cart_item[key];
 								}
 							}
+							post_cart_item.temp_row_id = cart_item.temp_row_id;
 							data.cart_item_list.push(post_cart_item);
 						}
 						const [biz_error,biz_data] = await Portal.post_list(database,data.cart_item_list);
@@ -859,6 +871,8 @@ class Cart_Data {
 									for(const key in cart_sub_item){
 										cart_sub_item.temp_row_id = Num.get_id();
 										if(!Str.check_is_null(cart_sub_item[key])
+										&& key != Type.ID && key != Type.DATA_TYPE
+										&& key != Type.PARENT_ITEM && key != Type.USER
 										&& key != Type.CART_ITEM_LIST && key != Type.CART_SUB_ITEM_LIST
 										&& key != Type.ORDER_ITEM_LIST && key != Type.ORDER_SUB_ITEM_LIST
 										&& key != Type.SOURCE && key != Type.SOURCE_ID
@@ -867,6 +881,7 @@ class Cart_Data {
 										post_cart_sub_item[key] = cart_sub_item[key];
 									}
 							}
+							post_cart_sub_item.cart_item_id =data.cart_item_list.find(item_find => item_find.temp_row_id === cart_item.temp_row_id).id,
 							data.cart_sub_item_list.push(post_cart_sub_item);
 						}
 						}
@@ -876,7 +891,6 @@ class Cart_Data {
 						}else{
 							data.cart_sub_item_list = biz_data;
 						}
-						Log.w('44_cart_sub_item_list',data.cart_sub_item_list);
 					}
 				},
 				//post_stat_cart
@@ -893,7 +907,6 @@ class Cart_Data {
 							data.stat_cart =  biz_data;
 							}
 					}
-					Log.w('data.stat_cart',data.stat_cart);
 				},
 				//post stat cart_item_list
 				async function(call){
@@ -927,9 +940,7 @@ class Cart_Data {
 								}
 							}
 						}
-						data.stat_cart_sub_item_list = data.stat_cart_sub_item_list
 					}
-					Log.w('data.sta_cart_sub_item_list',data.stat_cart_sub_item_list);
 				},
 				//get - cart
 				async function(call){
@@ -941,7 +952,7 @@ class Cart_Data {
 					}
 				},
 			]).then(result => {
-				//callback([error,data.cart]);
+				callback([error,data.cart]);
 			}).catch(err => {
 				Log.error("CartData-Cart-Item-Update",err);
 				callback([error,[]]);
@@ -951,7 +962,7 @@ class Cart_Data {
 	//9_cart_get
 	static get = (database,cart_number) => {
 		return new Promise((callback) => {
-			let data = {cart:DataItem.get_new(DataType.CART,0,{cart_number:cart_number,cart_item_list:[],parent_user:DataItem.get_new(DataType.USER,0)})};
+			let data = {cart:DataItem.get_new(DataType.CART,0,{cart_number:cart_number,cart_item_list:[],user:DataItem.get_new(DataType.USER,0)})};
 			let cart_parent_item_list_query = { $or: [] };
 			let cart_sub_item_list_query = { $or: [] };
 			let error = null;
@@ -969,7 +980,7 @@ class Cart_Data {
 				},
 				async function(call){
 					const [biz_error,biz_data] = await Portal.get(database,DataType.USER,data.cart.user_id);
-					data.cart.parent_user=biz_data;
+					data.cart.user=biz_data;
 				},
 				//get_cart_item_list
 				async function(call){

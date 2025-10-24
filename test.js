@@ -195,19 +195,21 @@ describe('connect', function(){ this.timeout(25000);
                 let hosting_type_id = "035bdda6-d8cd-4c0b-ab34-7fd7f511151e";
                 let user_id = "bb10aa9c-ed88-43f3-b196-a0251db954fa";
                 cart = Cart_Logic.get_new(DataType.PRODUCT,user_id);
-                cart.cool_me = '11234';
-                //Log.w('cart',cart);
+                cart.cool_me = 'what_aaa';
+                cart.cool_me_2 = 'who_bbb';
                 //cart item
                 let cart_item_product = Cart_Logic.get_new_cart_item(DataType.PRODUCT,product_id,cart.cart_number,1,Num.get_id(9999));
                 cart_item_product.cool = 'cool_bean';
+                cart_item_product.cool_2 = 'cool_bean_2';
                 // cart sub item product_sub_cms_type
                 let cart_sub_cms_type = Cart_Logic.get_new_cart_sub_item(DataType.PRODUCT,cms_type_id,cart.cart_number,1,Num.get_id(99))
                 cart_sub_cms_type.what = "bean_water";
+                cart_sub_cms_type.what_2 = "bean_water_2";
                 cart_item_product.cart_sub_item_list.push(cart_sub_cms_type);
                 // cart sub item product_sub_hosting_type
                 let cart_sub_hosting_type = Cart_Logic.get_new_cart_sub_item(DataType.PRODUCT,hosting_type_id,cart.cart_number,1,Num.get_id(99));
                 cart_sub_hosting_type.what = "bean_sauce";
-
+                cart_sub_hosting_type.what_2 = "bean_sauce_2";
                 cart_item_product.cart_sub_item_list.push(cart_sub_hosting_type);
                 cart.cart_item_list.push(cart_item_product);
                 //Log.w('11_cart',cart);
@@ -219,55 +221,44 @@ describe('connect', function(){ this.timeout(25000);
             //const [biz_error,biz_data] = await Cart_Data.get(database,cart_number);
             //const [biz_error,biz_data] = await Order_Data.get(database,order_number);
             //console.log('33333333');
-                //cart = biz_data;
-                //Log.w('22_cart',biz_data);
+                cart = biz_data;
+                //Log.w('22_cart',cart);
+            },
+            async function(call){
+                let order = Order_Logic.get_new(cart,{get_payment_plan:true,payment_plan:Title.ORDER_PAYMENT_PLAN_1,payment_plan_status:Title.ORDER_PAYMENT_STATUS_OPEN});
+                order.what='today';
+                Log.w('33_order',order);
+                let order_payment = Order_Logic.get_new_order_payment(order.order_number,Title.ORDER_PAYMENT_METHOD_TEST,Num.get_id(99));
+                //Log.w('44_order_payment',order_payment);
+                let option_post_order = {post_stat:true};
+                const [biz_error,biz_data] = await Order_Data.post(database,order,[order_payment],option_post_order);
+                //Log.w('55_order_post',biz_data);
             },
             /*
             async function(call){
-                const [biz_error,biz_data] = await Cart_Data.get(database,cart.cart_number);
-                cart = biz_data;
-                Log.w('33_cart',cart);
-             },
-
-            async function(call){
-                let order = Order_Logic.get_new(cart,{get_payment_plan:true,payment_plan:Title.ORDER_PAYMENT_PLAN_1,payment_plan_status:Title.ORDER_PAYMENT_STATUS_OPEN});
-                Log.w('44_test_order',order);
-                let order_payment = Order_Logic.get_new_order_payment(order.order_number,Title.ORDER_PAYMENT_METHOD_TEST,Num.get_id(99));
-                Log.w('55_order_payment',order_payment);
-                let option_post_order = {post_stat:true};
-                const [biz_error,biz_data] = await Order_Data.post(database,order,[order_payment],option_post_order);
-                //Log.w('66_order_post',biz_data);
-            },
-            async function(call){
                 const [biz_error,biz_data] = await Order_Data.get(database,order.order_number,{get_payment:true});
                 Log.w('66_order',biz_data);
-            }
+            },
             //- CART-ORDER LOGIC -- END
-            */
-                       /*
             //- LOGIC -- START
             async function(call){
                 console.log('DATA-START-1');
                 let key = "OR-16505";
-        //let key = "item_24184";
+                //let key = "item_24184";
                 let option = {get_payment:true};
-            //Log.w('key',key);
-            //const [biz_error,biz_data] = await Order_Data.get(database,key,option);
-            //const [biz_error,biz_data] = await Blog_Post_Data.get(database,key,option);
-            //const [biz_error,biz_data] = await Portal.get(database,DataType.EVENT,key,option);
-            //let order = Order_Logic.get_total(biz_data);
-            //Log.w('99_biz_data',order);
-            //Log.w('biz_dat_22a',order.grand_total);
+                //Log.w('key',key);
+                //const [biz_error,biz_data] = await Order_Data.get(database,key,option);
+                //const [biz_error,biz_data] = await Blog_Post_Data.get(database,key,option);
+                //const [biz_error,biz_data] = await Portal.get(database,DataType.EVENT,key,option);
+                //let order = Order_Logic.get_total(biz_data);
+                //Log.w('99_biz_data',order);
+                //Log.w('biz_dat_22a',order.grand_total);
                 console.log('DATA-END');
             },
             //- LOGIC -- END
             //- CART-ORDER LOGIC -- END
-            */
             // GET - END
-
-
             // CONNECT - START
-            /*
         async function(call){
                 console.log('DATABASE-START');
                 let title_url = 'sales_team';
