@@ -805,15 +805,18 @@ class Cart_Data {
 			data.cart_item_list = [];
 			data.cart_sub_item_list = [];
 			async.series([
-				async function(call){
-					for(const key in cart) {
-						if(Str.check_is_null(data.cart[key]) && key != Type.CART_ITEM_LIST && key != Type.CART_SUB_ITEM_LIST){
-							data.cart[key] = cart[key];
-						}
-					}
-				},
 				//post - cart
 				async function(call){
+					for(const key in cart) {
+						if(Str.check_is_null(data.cart[key])
+							&& key != Type.CART_ITEM_LIST && key != Type.CART_SUB_ITEM_LIST
+							&& key != Type.ORDER_ITEM_LIST && key != Type.ORDER_SUB_ITEM_LIST
+							&& key != Type.SOURCE && key != Type.SOURCE_ID
+							&& key != Type.STAT_ITEM_LIST && key != Type.STAT_SUB_ITEM_LIST
+							&& key != Type.DATE_CREATE && key != Type.DATE_SAVE){
+								data.cart[key] = cart[key];
+						}
+					}
 					const [biz_error,biz_data] = await Portal.post(database,DataType.CART,data.cart);
 					if(biz_error){
 						error=Log.append(error,biz_error);
@@ -824,63 +827,56 @@ class Cart_Data {
 				//post - cart items
 				async function(call){
 					if(cart.cart_item_list.length>0){
-						cart.cart_item_list.forEach(item => {
-							item.temp_row_id = Num.get_id();
-
-							data.cart_item_list.push(
-
-								DataItem.get_new(DataType.CART_ITEM,0,
-									{
-										cart_id:data.cart.id,
-										cart_number:data.cart.cart_number,
-										user_id:data.cart.user_id,
-
-										quanity:item.quanity,
-										cost:item.cost,
-										parent_data_type:item.parent_data_type,
-										parent_id:item.parent_id,
-
-										temp_row_id :item.temp_row_id
-								}));
-
-							});
-						if(data.cart_item_list.length>0){
-							const [biz_error,biz_data] = await Portal.post_list(database,data.cart_item_list);
-							if(biz_error){
-								error=Log.append(error,biz_error);
-							}else{
-								data.cart_item_list = biz_data;
+					for(const cart_item of cart.cart_item_list){
+						let post_cart_item = DataItem.get_new(DataType.CART_ITEM,0);
+						for(const key in cart_item){
+							cart_item.temp_row_id = Num.get_id();
+							if(!Str.check_is_null(cart_item[key])
+								&& key != Type.CART_ITEM_LIST && key != Type.CART_SUB_ITEM_LIST
+								&& key != Type.ORDER_ITEM_LIST && key != Type.ORDER_SUB_ITEM_LIST
+								&& key != Type.SOURCE && key != Type.SOURCE_ID
+								&& key != Type.STAT_ITEM_LIST && key != Type.STAT_SUB_ITEM_LIST
+								&& key != Type.DATE_CREATE && key != Type.DATE_SAVE){
+								post_cart_item[key] = cart_item[key];
+								}
 							}
+							data.cart_item_list.push(post_cart_item);
+						}
+						const [biz_error,biz_data] = await Portal.post_list(database,data.cart_item_list);
+						if(biz_error){
+							error=Log.append(error,biz_error);
+						}else{
+							data.cart_item_list = biz_data;
 						}
 					}
 				},
-				//post - cart_sub_item_list
+				//post - cart sub items
 				async function(call){
 					if(cart.cart_item_list.length>0){
-						cart.cart_item_list.forEach(cart_item => {
-							cart_item.cart_sub_item_list.forEach(cart_sub_item => {
-								data.cart_sub_item_list.push(
-									DataItem.get_new(DataType.CART_SUB_ITEM,0,
-										{
-											cart_id:data.cart.id,
-											cart_number:data.cart.cart_number,
-											user_id:data.cart.user_id,
-											cart_item_id:data.cart_item_list.find(item_find => item_find.temp_row_id === cart_item.temp_row_id).id,
-											quanity:cart_sub_item.quanity,
-											cost:cart_sub_item.cost,
-											parent_data_type:cart_sub_item.parent_data_type,
-											parent_id:cart_sub_item.parent_id
-										}));
-							});
-						});
-						if(data.cart_sub_item_list.length>0){
-							const [biz_error,biz_data] = await Portal.post_list(database,data.cart_sub_item_list);
-							if(biz_error){
-								error=Log.append(error,biz_error);
-							}else{
-								data.cart_sub_item_list = biz_data;
+						for(const cart_item of cart.cart_item_list){
+							for(const cart_sub_item of cart_item.cart_sub_item_list){
+								let post_cart_sub_item = DataItem.get_new(DataType.CART_SUB_ITEM,0);
+									for(const key in cart_sub_item){
+										cart_sub_item.temp_row_id = Num.get_id();
+										if(!Str.check_is_null(cart_sub_item[key])
+										&& key != Type.CART_ITEM_LIST && key != Type.CART_SUB_ITEM_LIST
+										&& key != Type.ORDER_ITEM_LIST && key != Type.ORDER_SUB_ITEM_LIST
+										&& key != Type.SOURCE && key != Type.SOURCE_ID
+										&& key != Type.STAT_ITEM_LIST && key != Type.STAT_SUB_ITEM_LIST
+										&& key != Type.DATE_CREATE && key != Type.DATE_SAVE){
+										post_cart_sub_item[key] = cart_sub_item[key];
+									}
 							}
+							data.cart_sub_item_list.push(post_cart_sub_item);
 						}
+						}
+						const [biz_error,biz_data] = await Portal.post_list(database,data.cart_sub_item_list);
+						if(biz_error){
+							error=Log.append(error,biz_error);
+						}else{
+							data.cart_sub_item_list = biz_data;
+						}
+						Log.w('44_cart_sub_item_list',data.cart_sub_item_list);
 					}
 				},
 				//post_stat_cart
@@ -897,6 +893,7 @@ class Cart_Data {
 							data.stat_cart =  biz_data;
 							}
 					}
+					Log.w('data.stat_cart',data.stat_cart);
 				},
 				//post stat cart_item_list
 				async function(call){
@@ -932,6 +929,7 @@ class Cart_Data {
 						}
 						data.stat_cart_sub_item_list = data.stat_cart_sub_item_list
 					}
+					Log.w('data.sta_cart_sub_item_list',data.stat_cart_sub_item_list);
 				},
 				//get - cart
 				async function(call){
@@ -943,7 +941,7 @@ class Cart_Data {
 					}
 				},
 			]).then(result => {
-				callback([error,data.cart]);
+				//callback([error,data.cart]);
 			}).catch(err => {
 				Log.error("CartData-Cart-Item-Update",err);
 				callback([error,[]]);
@@ -1896,16 +1894,16 @@ class Portal {
 						switch(data.setting_sort_type)
 						{
 							case 'title':
-								sort_order = data.setting_sort_order == 'desc' ? {title:1} :  {title:-1};
+								sort_order = data.setting_sort_order == Type.DESC ? {title:1} :  {title:-1};
 								break;
 							case 'order':
-								sort_order = data.setting_sort_order == 'asc' ? {setting_order:1} : {setting_order:-1};
+								sort_order = data.setting_sort_order == Type.ASC ? {setting_order:1} : {setting_order:-1};
 								break;
 							case 'date':
-								sort_order = data.setting_sort_order == 'desc' ? {date_create:1} : {date_create:-1};
+								sort_order = data.setting_sort_order == Type.DESC ? {date_create:1} : {date_create:-1};
 								break;
 							default:
-								sort_order = data.setting_sort_order == 'desc' ? {title:-1} :  {title:1};
+								sort_order = data.setting_sort_order == Type.DESC ? {title:-1} :  {title:1};
 								break;
 						}
 						return sort_order;

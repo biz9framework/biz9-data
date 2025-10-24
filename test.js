@@ -66,6 +66,8 @@ describe('connect', function(){ this.timeout(25000);
                 database = biz_data;
                 console.log('DATABASE-END');
             },
+
+
             /*
              //- STAT - START
             async function(call){
@@ -193,26 +195,34 @@ describe('connect', function(){ this.timeout(25000);
                 let hosting_type_id = "035bdda6-d8cd-4c0b-ab34-7fd7f511151e";
                 let user_id = "bb10aa9c-ed88-43f3-b196-a0251db954fa";
                 cart = Cart_Logic.get_new(DataType.PRODUCT,user_id);
+                cart.cool_me = '11234';
                 //Log.w('cart',cart);
                 //cart item
                 let cart_item_product = Cart_Logic.get_new_cart_item(DataType.PRODUCT,product_id,cart.cart_number,1,Num.get_id(9999));
+                cart_item_product.cool = 'cool_bean';
                 // cart sub item product_sub_cms_type
-                cart_item_product.cart_sub_item_list.push(Cart_Logic.get_new_cart_sub_item(DataType.PRODUCT,cms_type_id,cart.cart_number,1,Num.get_id(99)));
+                let cart_sub_cms_type = Cart_Logic.get_new_cart_sub_item(DataType.PRODUCT,cms_type_id,cart.cart_number,1,Num.get_id(99))
+                cart_sub_cms_type.what = "bean_water";
+                cart_item_product.cart_sub_item_list.push(cart_sub_cms_type);
                 // cart sub item product_sub_hosting_type
-                cart_item_product.cart_sub_item_list.push(Cart_Logic.get_new_cart_sub_item(DataType.PRODUCT,hosting_type_id,cart.cart_number,1,Num.get_id(99)));
+                let cart_sub_hosting_type = Cart_Logic.get_new_cart_sub_item(DataType.PRODUCT,hosting_type_id,cart.cart_number,1,Num.get_id(99));
+                cart_sub_hosting_type.what = "bean_sauce";
+
+                cart_item_product.cart_sub_item_list.push(cart_sub_hosting_type);
                 cart.cart_item_list.push(cart_item_product);
                 //Log.w('11_cart',cart);
             //let search = App_Logic.get_search(DataType.PRODUCT,{cart_number:cart_number},{},1,0);
             //console.log('ccccccccc');
             //Log.w('cart_22',cart_item_product);
-               let option_post_cart = {post_stat:true};
-               const [biz_error,biz_data] = await Cart_Data.post(database,cart,option_post_cart,option);
+            let option_post_cart = {post_stat:true};
+            const [biz_error,biz_data] = await Cart_Data.post(database,cart,option_post_cart,option);
             //const [biz_error,biz_data] = await Cart_Data.get(database,cart_number);
             //const [biz_error,biz_data] = await Order_Data.get(database,order_number);
             //console.log('33333333');
-                cart = biz_data;
-                Log.w('22_cart',biz_data);
+                //cart = biz_data;
+                //Log.w('22_cart',biz_data);
             },
+            /*
             async function(call){
                 const [biz_error,biz_data] = await Cart_Data.get(database,cart.cart_number);
                 cart = biz_data;
@@ -228,7 +238,6 @@ describe('connect', function(){ this.timeout(25000);
                 const [biz_error,biz_data] = await Order_Data.post(database,order,[order_payment],option_post_order);
                 //Log.w('66_order_post',biz_data);
             },
-            /*
             async function(call){
                 const [biz_error,biz_data] = await Order_Data.get(database,order.order_number,{get_payment:true});
                 Log.w('66_order',biz_data);
@@ -711,7 +720,7 @@ describe('item_update', function(){ this.timeout(25000);
             async function(call){
                 console.log('CART-UPDATE-START');
                 let user_id = "f7765250-75bf-4d43-b17e-5f01154acad0";
-                let parent_data_type = DataType.PRODUCT;
+                let parent_data_type = DataType.SERVICE;
                 let parent_id = "a9956e2f-a9ca-4c32-a432-993ecccff0ad";
                 let sub_item_1_data_type = DataType.ITEM;
                 let sub_item_1_id = "cd2cd782-cdc8-4eef-8284-779d0b065969";
@@ -720,22 +729,24 @@ describe('item_update', function(){ this.timeout(25000);
 
                 let cart = Cart_Logic.get_cart(user_id);
                 //cart item
-                let cart_item_product = Cart_Logic.get_cart_item(parent_data_type,parent_id,cart.cart_number,user_id,1);
+                //let cart_item_product = Cart_Logic.get_cart_item(parent_data_type,parent_id,cart.cart_number,user_id,1);
+                //cart_item_product.apple = 'butter';
                 // cart sub item 1
-                let cart_sub_item_cms_type = Cart_Logic.get_cart_item(sub_item_1_data_type,sub_item_1_id,cart.cart_number,user_id,1);
+                //let cart_sub_item_cms_type = Cart_Logic.get_cart_item(sub_item_1_data_type,sub_item_1_id,cart.cart_number,user_id,1);
                 // cart sub item 2
-                let cart_sub_item_hosting_type = Cart_Logic.get_cart_item(sub_item_2_data_type,sub_item_2_id,cart.cart_number,user_id,1);
-                cart_item_product.cart_sub_item_list.push(cart_sub_item_cms_type);
-                cart_item_product.cart_sub_item_list.push(cart_sub_item_hosting_type);
+                //let cart_sub_item_hosting_type = Cart_Logic.get_cart_item(sub_item_2_data_type,sub_item_2_id,cart.cart_number,user_id,1);
+                //cart_item_product.cart_sub_item_list.push(cart_sub_item_cms_type);
+                //cart_item_product.cart_sub_item_list.push(cart_sub_item_hosting_type);
                 cart.cart_item_list.push(cart_item_product);
                 //Log.w('cart',cart.cart_item_list);
 
-                const [error,data] = await Cart_Data.update(database,parent_data_type,user_id,cart);
+                //const [error,data] = await Cart_Data.update(database,parent_data_type,user_id,cart);
                 //Log.w('data',cart);
 
+                Log.w('rrrrr',cart);
                 //Log.w('data',data);
                 //Log.w('data_item_list',data.cart.cart_item_list);
-                console.log('CART-UPDATE-END');
+                //console.log('CART-UPDATE-END');
 
             },
 
