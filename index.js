@@ -2028,7 +2028,9 @@ class Portal {
 			  - search_field / type. string / ex. category_title / default. throw error
 			  - search_parent_field / type. string / ex. title / default. throw error
 			- get_parent / type. bool / ex. true,false / default. false
-			  - parent_data_type / type. string / ex. PRODUCT / ex. throw error
+			  - parent_child_field_id_list / type. obj list / ex. [{parent_data_type:PRODUCT,child_id_field:'product_id',parent_id_field:'id'}] {parent_data_type:child_parent_id_field} / ex. throw error
+			  //-old parent_data_types / type. string / ex. PRODUCT / ex. throw error
+			  //-old child_parent_id_fields / type. string / ex. PRODUCT / ex. throw error
 			  - parent_fields / type. string / ex. field1,field2 / default. empty
 			- get_user / type. bool / ex. true,false / default. false
 			  - user_fields / type. string / ex. field1,field2 / default. empty
@@ -2045,6 +2047,7 @@ class Portal {
 			let error=null;
 			option = option ? option : {get_item:false,get_image:false};
 			async.series([
+				//get list
 				function(call){
 					let search = App_Logic.get_search(data_type,filter,sort_by,page_current,page_size);
 					Data.get_list(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option).then(([biz_error,item_list,item_count,page_count])=>{
@@ -2065,6 +2068,7 @@ class Portal {
 						error=Log.append(error,err);
 					});
 				},
+				//get count
 				function(call){
 					if(option.get_count && data.data_list.length>0){
 						let query = { $or: [] };
@@ -2099,6 +2103,7 @@ class Portal {
 						call();
 					}
 				},
+				//get search
 				function(call){
 					if(option.get_search && data.data_list.length>0){
 						let query = { $or: [] };
@@ -2133,16 +2138,89 @@ class Portal {
 						call();
 					}
 				},
+				//get parent
+				function(call){
+					if(option.get_parent && data.data_list.length>0){
+						let parent_search_item_list = [];
+						for(let a = 0; a < option.parent_child_field_id_list.length; a++){
+							parent_search_item_list.push({
+								parent_data_type : option.parent_child_field_id_list[a].parent_data_type,
+								child_id_field : option.parent_child_field_id_list[a].child_id_field,
+								parent_id_field : option.parent_child_field_id_list[a].parent_id_field,
+								data_list : []
+							});
+ 						};
+						Log.w('my_option',option);
+						Log.w('parent_search_item_list',parent_search_item_list);
+						async.forEachOf(parent_search_item_list,(search_item,key,go)=>{
+							let query = { $or: [] };
+							data.data_list.forEach(data_item => {
+								let query_field = {};
+								query_field[search_item.parent_id_field] = { $regex:String(data_item[search_item.child_id_field]), $options: "i" };
+								query.$or.push(query_field);
+								console.log(data_item);
+								console.log(query.$or);
+							});
+							let search = App_Logic.get_search(search_item.parent_data_type,query,{},1,0);
+							let parent_option = option.parent_fields ? {get_field:false,fields:option.parent_fields} : {};
+							Data.get_list(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size).then(([biz_error,item_list,item_count,page_count])=> {
+								if(biz_error){
+									error=Log.append(error,biz_error);
+								}else{
+									//Log.w('run_me_'+search_item.parent_data_type,item_list);
+									//search_item.data_list = item_list;
+									Log.w('data_list',item_list);
+                    				//go();
+								}
+							}).catch(err => {
+								Log.error('DATA-SEARCH-ERROR-4',err);
+								error = Log.append(error,err);
+							});
+                			}, error => {
+								console.log(error);
+                			});
+						//Log.w('apple',parent_search_item_list);
+						/*
+						data.data_list.forEach(item => {
+							let query_field = {};
+							query_field['id'] = { $regex:String(item[option.parent_id_field]), $options: "i" };
+							query.$or.push(query_field);
+						});
+						/*
+						let search = App_Logic.get_search(option.parent_data_type,query,{},1,0);
+						let parent_option = option.parent_fields ? {get_field:false,fields:option.parent_fields} : {};
+						Data.get_list(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,parent_option).then(([biz_error,item_list,item_count,page_count])=> {
+						if(biz_error){
+								error=Log.append(error,biz_error);
+							}else{
+								if(data.data_list.length> 0){
+									data.data_list.forEach(item => {
+										item.parent_item = item_list.find(item_find => item_find.id === item.parent_id) ? item_list.find(item_find => item_find.id === item.parent_id):App_Logic.get_not_found(item.parent_data_type,item.parent_id,{app_id:database.app_id});
+									});
+								}
+							}
+							call();
+						}).catch(err => {
+							Log.error('DATA-SEARCH-ERROR-4',err);
+							error = Log.append(error,err);
+							call();
+						});
+						*/
+					}else{
+						call();
+					}
+				},
+				/* get_parent_old
 				function(call){
 					if(option.get_parent && data.data_list.length>0){
 						let query = { $or: [] };
 						data.data_list.forEach(item => {
 							let query_field = {};
-							query_field['id'] = { $regex:String(item[Type.PARENT_ID]), $options: "i" };
+							query_field['id'] = { $regex:String(item[option.parent_id_field]), $options: "i" };
 							query.$or.push(query_field);
 						});
 						let search = App_Logic.get_search(option.parent_data_type,query,{},1,0);
-						let parent_option = option.parent_fields ? {get_field:true,fields:option.parent_fields} : {};
+						let parent_option = option.parent_fields ? {get_field:false,fields:option.parent_fields} : {};
 						Data.get_list(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,parent_option).then(([biz_error,item_list,item_count,page_count])=> {
 						if(biz_error){
 								error=Log.append(error,biz_error);
@@ -2163,6 +2241,8 @@ class Portal {
 						call();
 					}
 				},
+				*/
+				//get user
 				function(call){
 					if(option.get_user && data.data_list.length>0){
 						let query = { $or: [] };
@@ -2193,6 +2273,7 @@ class Portal {
 						call();
 					}
 				},
+				//get distinct
 				function(call){
 					if(option.get_distinct && data.data_list.length>0){
 						data.data_list = data.data_list.filter((obj, index, self) =>
@@ -2206,6 +2287,7 @@ class Portal {
 						call();
 					}
 				},
+				//get favorite
 				function(call){
 					if(option.get_favorite && data.data_list.length>0){
 						let query = { $or:[] };
