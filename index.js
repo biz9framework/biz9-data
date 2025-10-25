@@ -2023,13 +2023,13 @@ class Portal {
 			  - count_field / type. number / ex. category /  default. throw error
 			  - count_value / type. string / ex. title / default. throw error
 		 *  Search
+		 	- get_join / type. bool / ex. true,false / default. false
+			  - field_key_list / type. obj list / ex. [{parent_data_type:PRODUCT,parent_field:'product_id',child_field:'id'}] / ex. throw error
 			- get_search / type. bool / ex. true,false / default. false
 			  - search_data_type / type. string / ex. PRODUCT / default. throw error
 			  - search_field / type. string / ex. category_title / default. throw error
 			  - search_parent_field / type. string / ex. title / default. throw error
-			- get_parent_child_match / type. bool / ex. true,false / default. false
-			  - parent_child_field_id_list / type. obj list / ex. [{parent_data_type:PRODUCT,child_id_field:'product_id',parent_id_field:'id'}] {parent_data_type:child_parent_id_field} / ex. throw error
-			  //-old parent_data_types / type. string / ex. PRODUCT / ex. throw error
+		  //-old parent_data_types / type. string / ex. PRODUCT / ex. throw error
 			  //-old child_parent_id_fields / type. string / ex. PRODUCT / ex. throw error
 			  - parent_fields / type. string / ex. field1,field2 / default. empty
 			- get_user / type. bool / ex. true,false / default. false
@@ -2138,15 +2138,15 @@ class Portal {
 						call();
 					}
 				},
-				//get_parent_child_match
+				//get_join
 				function(call){
-					if(option.get_parent_child_match && data.data_list.length>0){
+					if(option.get_join && data.data_list.length>0){
 						let parent_search_item_list = [];
-						for(let a = 0; a < option.parent_child_field_id_list.length; a++){
+						for(let a = 0; a < option.field_key_list.length; a++){
 							parent_search_item_list.push({
-								parent_data_type : option.parent_child_field_id_list[a].parent_data_type,
-								child_id_field : option.parent_child_field_id_list[a].child_id_field,
-								parent_id_field : option.parent_child_field_id_list[a].parent_id_field,
+								parent_data_type : option.field_key_list[a].parent_data_type,
+								child_id_field : option.field_key_list[a].child_id_field,
+								parent_id_field : option.field_key_list[a].parent_id_field,
 								data_list : []
 							});
  						};
@@ -2172,11 +2172,11 @@ class Portal {
 							for(const parent_search_item of parent_search_item_list){
 								console.log('11111111');
 								console.log(parent_search_item.parent_id_field);
-								console.log(parent_search_item.parent_id_field.replace(" ","_"));
+								console.log(parent_search_item.parent_id_field);
 								console.log(parent_search_item.child_id_field);
 								console.log('222222222');
 								for(const data_item of data.data_list){
-									data_item[Type.get_type_title(parent_search_item.parent_data_type.replace(" ","_"))] = parent_search_item.data_list.find(item_find => item_find[parent_search_item.parent_id_field] === data_item[parent_search_item.child_id_field]);
+									data_item[parent_search_item.parent_data_type.replace('_biz','')] = parent_search_item.data_list.find(item_find => item_find[parent_search_item.parent_id_field] === data_item[parent_search_item.child_id_field]);
 								}
 							}
 							console.log('aaaaaa');
