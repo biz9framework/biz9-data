@@ -268,7 +268,7 @@ describe('connect', function(){ this.timeout(25000);
             //app list
             async function(call){
                 let search = App_Logic.get_search(DataType.APP,{},{title:1},1,0);
-                let option = {get_parent:true,parent_child_field_id_list:[
+                let option = {get_parent_child_match:true,parent_child_field_id_list:[
                     {parent_data_type:DataType.PRODUCT,child_id_field:'product_id',parent_id_field:'id'},
                     {parent_data_type:DataType.BLOG_POST,child_id_field:'blog_post_id',parent_id_field:'id'}
                 ]};

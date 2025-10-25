@@ -2027,7 +2027,7 @@ class Portal {
 			  - search_data_type / type. string / ex. PRODUCT / default. throw error
 			  - search_field / type. string / ex. category_title / default. throw error
 			  - search_parent_field / type. string / ex. title / default. throw error
-			- get_parent / type. bool / ex. true,false / default. false
+			- get_parent_child_match / type. bool / ex. true,false / default. false
 			  - parent_child_field_id_list / type. obj list / ex. [{parent_data_type:PRODUCT,child_id_field:'product_id',parent_id_field:'id'}] {parent_data_type:child_parent_id_field} / ex. throw error
 			  //-old parent_data_types / type. string / ex. PRODUCT / ex. throw error
 			  //-old child_parent_id_fields / type. string / ex. PRODUCT / ex. throw error
@@ -2138,9 +2138,9 @@ class Portal {
 						call();
 					}
 				},
-				//get parent
+				//get_parent_child_match
 				function(call){
-					if(option.get_parent && data.data_list.length>0){
+					if(option.get_parent_child_match && data.data_list.length>0){
 						let parent_search_item_list = [];
 						for(let a = 0; a < option.parent_child_field_id_list.length; a++){
 							parent_search_item_list.push({
@@ -2150,37 +2150,57 @@ class Portal {
 								data_list : []
 							});
  						};
-						Log.w('my_option',option);
-						Log.w('parent_search_item_list',parent_search_item_list);
-						async.forEachOf(parent_search_item_list,(search_item,key,go)=>{
+						async.forEachOf(parent_search_item_list,(parent_search_item,key,go)=>{
 							let query = { $or: [] };
-							data.data_list.forEach(data_item => {
+ 							for(const data_item of data.data_list){
 								let query_field = {};
-								query_field[search_item.parent_id_field] = { $regex:String(data_item[search_item.child_id_field]), $options: "i" };
+								query_field[parent_search_item.parent_id_field] = { $regex:String(data_item[parent_search_item.child_id_field]), $options: "i" };
 								query.$or.push(query_field);
-								console.log(data_item);
 								console.log(query.$or);
-							});
-							let search = App_Logic.get_search(search_item.parent_data_type,query,{},1,0);
+							};
+							let search = App_Logic.get_search(parent_search_item.parent_data_type,query,{},1,0);
 							let parent_option = option.parent_fields ? {get_field:false,fields:option.parent_fields} : {};
 							Data.get_list(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size).then(([biz_error,item_list,item_count,page_count])=> {
 								if(biz_error){
 									error=Log.append(error,biz_error);
 								}else{
-									//Log.w('run_me_'+search_item.parent_data_type,item_list);
-									//search_item.data_list = item_list;
-									Log.w('data_list',item_list);
-                    				//go();
+									parent_search_item.data_list = item_list;
+									go();
+									//Log.w('parent_search_item_list',parent_search_item_list);
+									console.log('done');
+						if(parent_search_item_list.length> 0){
+							for(const parent_search_item of parent_search_item_list){
+								console.log('11111111');
+								console.log(parent_search_item.parent_id_field);
+								console.log(parent_search_item.parent_id_field.replace(" ","_"));
+								console.log(parent_search_item.child_id_field);
+								console.log('222222222');
+								for(const data_item of data.data_list){
+									data_item[Type.get_type_title(parent_search_item.parent_data_type.replace(" ","_"))] = parent_search_item.data_list.find(item_find => item_find[parent_search_item.parent_id_field] === data_item[parent_search_item.child_id_field]);
+								}
+							}
+							console.log('aaaaaa');
+							console.log(data.data_list[0]);
+							console.log('bbbbbb');
+						}
+
 								}
 							}).catch(err => {
-								Log.error('DATA-SEARCH-ERROR-4',err);
-								error = Log.append(error,err);
+								if(err){
+									Log.error('DATA-SEARCH-ERROR-4',err);
+									error = Log.append(error,err);
+								}
 							});
-                			}, error => {
-								console.log(error);
+                			}, err => {
+								//console.log(error);
                 			});
-						//Log.w('apple',parent_search_item_list);
-						/*
+					/*
+						 *	data_item['cool'+ parent_search_item.parent_id_field] = parent_search_item.data_list.find(item_find => item_find[parent_search_item.parent_id_field] === data_item[parent_search_item.child_id_field]) ? parent_search_item.data_list.find(item_find => item_find[parent_search_item.child_id_field] === item[parent_search_item.parent_id_field]):App_Logic.get_not_found(data_item[parent_search_item.child_id_field],data_item[parent_search_item.parent_id_field],{app_id:database.app_id});
+
+						 *	data.data_list.forEach(item => {
+								item.parent_item = item.data_list.find(item_find => item_find.id === item.parent_id) ? item.data_list.find(item_find => item_find.id === item.parent_id):App_Logic.get_not_found(item.parent_data_type,item.parent_id,{app_id:database.app_id});
+							});
+
 						data.data_list.forEach(item => {
 							let query_field = {};
 							query_field['id'] = { $regex:String(item[option.parent_id_field]), $options: "i" };
@@ -2244,6 +2264,7 @@ class Portal {
 				*/
 				//get user
 				function(call){
+					console.log('get_user_here');
 					if(option.get_user && data.data_list.length>0){
 						let query = { $or: [] };
 						data.data_list.forEach(item => {
