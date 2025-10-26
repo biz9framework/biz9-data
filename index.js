@@ -2009,7 +2009,6 @@ class Portal {
 		   - distinct_field / type. string / ex. field1 / default. throw error
 		   - distinct_sort / type. string / ex. asc,desc / default. asc
 		 * Fields
-		   - get_field / type. bool / ex. true,false / default. false
 		   - fields / type. string / ex. field1,field2 / default. throw error
 		 * Items
 			- get_item / type. bool / ex. true,false / default. false
@@ -2039,12 +2038,14 @@ class Portal {
 		return new Promise((callback) => {
 			let data = {data_type:data_type,item_count:0,page_count:1,filter:{},data_list:[],app_id:database.app_id};
 			let error=null;
-			option = option ? option : {get_item:false,get_image:false};
+			let search_option = option ? option : {get_item:false,get_image:false,get_field:false};
+			search_option.get_field = search_option.fields ? true : false;
+			Log.w('33_search_option',search_option);
 			async.series([
 				//get list
 				function(call){
 					let search = App_Logic.get_search(data_type,filter,sort_by,page_current,page_size);
-					Data.get_list(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option).then(([biz_error,item_list,item_count,page_count])=>{
+					Data.get_list(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,search_option).then(([biz_error,item_list,item_count,page_count])=>{
 						if(biz_error){
 							error=Log.append(error,biz_error);
 						}else{
@@ -2107,6 +2108,7 @@ class Portal {
 								primary_field : option.field_key_list[a].primary_field,
 								item_field : option.field_key_list[a].item_field,
 								title : option.field_key_list[a].title,
+								fields : option.field_key_list[a].fields ? option.field_key_list[a].fields : {},
 								data_list : []
 							});
  						};
@@ -2119,33 +2121,21 @@ class Portal {
 								query.$or.push(query_field);
 							};
 							let search = App_Logic.get_search(parent_search_item.primary_data_type,query,{},1,0);
-							//let join_option = parent_search_item.fields ? {get_field:true,fields:parent_search_item.fields} : {};
-							let join_option = {};
-							Data.get_list(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size).then(([biz_error,item_list,item_count,page_count])=> {
+							let join_option = parent_search_item.fields ? {get_field:true,fields:parent_search_item.fields} : {};
+							Log.w('parent_search_item',parent_search_item);
+							Log.w('options',join_option);
+							Data.get_list(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,join_option).then(([biz_error,item_list,item_count,page_count])=> {
 								if(biz_error){
 									error=Log.append(error,biz_error);
 								}else{
 									parent_search_item.data_list = item_list;
-									console.log('1111');
 								if(parent_search_item_list.length> 0){
-									console.log('22222');
 									for(const parent_search_item of parent_search_item_list){
-										console.log('333333');
 										for(const data_item of data.data_list){
-											console.log('444444444');
-											console.log(parent_search_item.data_list.find(item_find => item_find[parent_search_item.primary_field] === data_item[parent_search_item.item_field]));
 											data_item[parent_search_item.title] = parent_search_item.data_list.find(item_find => item_find[parent_search_item.primary_field] === data_item[parent_search_item.item_field]);
 											data_item['cool'] = 'apple';
-											console.log(data_item);
-											console.log(parent_search_item.title);
-											console.log('555555555555');
-											//console.log(data_item);
 										}
 									}
-									console.log('6666666666');
-									console.log(data.data_list);
-									console.log('777777777');
-									console.log('777777777');
 									go();
 								}else{
 									go();
@@ -2162,13 +2152,7 @@ class Portal {
 								console.log(err);
 							}
 							call();
-								//console.log(error);
                 			});
-						console.log('hreeee');
-						console.log('hreeee');
-						console.log('hreeee');
-						//console.log(data.data_list);
-						console.log('done');
 						//call();
 					}else{
 						call();
@@ -2176,8 +2160,11 @@ class Portal {
 				},
 				function(call){
 					console.log('1111111111111');
-					Log.w('aaaaaaa',data.data_list);
-					console.log('22222222');
+					Log.w('data_full',data.data_list);
+					console.log('2222222222');
+				},
+				function(call){
+				console.log('22222222');
 					if(option.get_user && data.data_list.length>0){
 						let query = { $or: [] };
 						data.data_list.forEach(item => {
