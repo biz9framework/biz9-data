@@ -1642,6 +1642,7 @@ class User_Data {
 					}
 				},
 			]).then(result => {
+				Log.w('done_user_login',data);
 				callback([error,data]);
 			}).catch(err => {
 				Log.error("User-Data-Login",err);
@@ -2040,7 +2041,6 @@ class Portal {
 			let error=null;
 			let search_option = option ? option : {get_item:false,get_image:false,get_field:false};
 			search_option.get_field = search_option.fields ? true : false;
-			Log.w('33_search_option',search_option);
 			async.series([
 				//get list
 				function(call){
