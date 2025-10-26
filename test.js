@@ -194,6 +194,7 @@ describe('connect', function(){ this.timeout(25000);
             //-- DEMO -- END
             */
             //- CART-ORDER-APP LOGIC -- START
+            /*
             async function(call){
                 console.log('CART-ORDER-START');
                 //let cart_number = "CA-73551";
@@ -263,18 +264,17 @@ describe('connect', function(){ this.timeout(25000);
                 //Log.w('66_app',app);
                 const [biz_error,biz_data] = await Portal.post(database,DataType.APP,app);
                 //Log.w('66_app',biz_data);
-
             },
+            */
             //app list
             async function(call){
                 let search = App_Logic.get_search(DataType.APP,{},{title:1},1,0);
                 let option = {get_join:true,field_key_list:[
                     {primary_data_type:DataType.PRODUCT,primary_field:'id',item_field:'product_id',title:'product_1'},
-                    {primary_data_type:DataType.BLOG_POST,primary_field:'id',item_field:'blog_post_id',title:'blog_post_1'}
+                    {primary_data_type:DataType.BLOG_POST,primary_field:'id',item_field:'blog_post_id',title:'blog_post_1',fields:'id,title'}
                 ]};
                 const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option);
                 //Log.w('77_search_app',biz_data);
-
 
             },
 

@@ -1248,7 +1248,7 @@ class Review_Data {
 				async function(call){
 					let query = {parent_id:parent_id,parent_data_type:parent_data_type};
 					let search = App_Logic.get_search(DataType.REVIEW,query,sort_by,page_current,page_size);
-					let option = {get_parent:true,parent_data_type:parent_data_type,parent_fields:'id,title,title_url,rating',get_user:true,user_fields:'id,title,title_url,image_filename,city,country,state'};
+					let option = {get_join:true,field_key_list:[{primary_data_type:parent_data_type,primary_field:'id',item_field:'product',title:'parent_item'}],get_user:true};
 					const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option);
 					if(biz_error){
 						error=Log.append(error,biz_error);
@@ -2024,17 +2024,10 @@ class Portal {
 			  - count_value / type. string / ex. title / default. throw error
 		 *  Search
 		 	- get_join / type. bool / ex. true,false / default. false
-			  - field_key_list / type. obj list / ex. [{primary_data_type:PRODUCT,primary_field:'product_id',item_field:'id'}] / ex. throw error
-
-			- get_search / type. bool / ex. true,false / default. false
-			  - search_data_type / type. string / ex. PRODUCT / default. throw error
-			  - search_field / type. string / ex. category_title / default. throw error
-			  - search_parent_field / type. string / ex. title / default. throw error
-		  //-old parent_data_types / type. string / ex. PRODUCT / ex. throw error
-			  //-old child_parent_id_fields / type. string / ex. PRODUCT / ex. throw error
-			  - parent_fields / type. string / ex. field1,field2 / default. empty
-			- get_user / type. bool / ex. true,false / default. false
-			  - user_fields / type. string / ex. field1,field2 / default. empty
+			  - field_key_list / type. obj list / ex. [{primary_data_type:DataType.PRODUCT,primary_field:'id',item_field:'parent_id',title:'field_title',fields:'id,title,title_url'}] / ex. throw error
+	 	 * User
+		 - get_user / type. bool / ex. true,false / default. false
+		   - user_fields / type. string / ex. field1,field2 / default. empty
 		 * Return
 			- data_type
 			- item_count
@@ -2104,43 +2097,6 @@ class Portal {
 						call();
 					}
 				},
-				//get search
-				function(call){
-					/*
-					if(option.get_search_old && data.data_list.length>0){
-						let query = { $or: [] };
-						data.data_list.forEach(item => {
-							let query_field = {};
-							query_field[option.search_field] = { $regex:String(item[option.search_parent_field]), $options: "i" };
-							query.$or.push(query_field);
-						});
-						let search = App_Logic.get_search(option.search_data_type,query,{},1,0);
-						Data.get_list(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size).then(([biz_error,item_list,item_count,page_count])=> {
-							if(biz_error){
-								error=Log.append(error,biz_error);
-							}else{
-								if(data.data_list.length> 0 && item_list.length>0){
-									data.data_list.forEach(item => {
-										item.data_search_list = [];
-										item_list.forEach(item_search => {
-											if(item[option.search_parent_field] == item_search[option.search_field]){
-												item.data_search_list.push(item_search);
-											}
-										});
-									});
-								}
-							}
-							call();
-						}).catch(err => {
-							Log.error('DATA-SEARCH-ERROR-3',err);
-							error = Log.append(error,err);
-							call();
-						});
-					}else{
-						call();
-					}
-					*/
-				},
 				//get_join
 				function(call){
 					if(option.get_join && data.data_list.length>0){
@@ -2154,6 +2110,7 @@ class Portal {
 								data_list : []
 							});
  						};
+						//fields : option.field_key_list[a].fields ? option.field_key_list[a].fields : null,
 						async.forEachOf(parent_search_item_list,(parent_search_item,key,go)=>{
 							let query = { $or: [] };
  							for(const data_item of data.data_list){
@@ -2162,20 +2119,37 @@ class Portal {
 								query.$or.push(query_field);
 							};
 							let search = App_Logic.get_search(parent_search_item.primary_data_type,query,{},1,0);
-							let parent_option = option.parent_fields ? {get_field:false,fields:option.parent_fields} : {};
+							//let join_option = parent_search_item.fields ? {get_field:true,fields:parent_search_item.fields} : {};
+							let join_option = {};
 							Data.get_list(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size).then(([biz_error,item_list,item_count,page_count])=> {
 								if(biz_error){
 									error=Log.append(error,biz_error);
 								}else{
 									parent_search_item.data_list = item_list;
-									go();
+									console.log('1111');
 								if(parent_search_item_list.length> 0){
+									console.log('22222');
 									for(const parent_search_item of parent_search_item_list){
-									for(const data_item of data.data_list){
-										data_item[parent_search_item.title] = parent_search_item.data_list.find(item_find => item_find[parent_search_item.primary_field] === data_item[parent_search_item.item_field]);
+										console.log('333333');
+										for(const data_item of data.data_list){
+											console.log('444444444');
+											console.log(parent_search_item.data_list.find(item_find => item_find[parent_search_item.primary_field] === data_item[parent_search_item.item_field]));
+											data_item[parent_search_item.title] = parent_search_item.data_list.find(item_find => item_find[parent_search_item.primary_field] === data_item[parent_search_item.item_field]);
+											data_item['cool'] = 'apple';
+											console.log(data_item);
+											console.log(parent_search_item.title);
+											console.log('555555555555');
+											//console.log(data_item);
+										}
+									}
+									console.log('6666666666');
+									console.log(data.data_list);
+									console.log('777777777');
+									console.log('777777777');
+									go();
+								}else{
+									go();
 								}
-							}
-							}
 							}
 							}).catch(err => {
 								if(err){
@@ -2184,79 +2158,26 @@ class Portal {
 								}
 							});
                			}, err => {
+							if(err){
+								console.log(err);
+							}
+							call();
 								//console.log(error);
                 			});
-					/*
-						 *	data_item['cool'+ parent_search_item.parent_id_field] = parent_search_item.data_list.find(item_find => item_find[parent_search_item.parent_id_field] === data_item[parent_search_item.child_id_field]) ? parent_search_item.data_list.find(item_find => item_find[parent_search_item.child_id_field] === item[parent_search_item.parent_id_field]):App_Logic.get_not_found(data_item[parent_search_item.child_id_field],data_item[parent_search_item.parent_id_field],{app_id:database.app_id});
-
-						 *	data.data_list.forEach(item => {
-								item.parent_item = item.data_list.find(item_find => item_find.id === item.parent_id) ? item.data_list.find(item_find => item_find.id === item.parent_id):App_Logic.get_not_found(item.parent_data_type,item.parent_id,{app_id:database.app_id});
-							});
-
-						data.data_list.forEach(item => {
-							let query_field = {};
-							query_field['id'] = { $regex:String(item[option.parent_id_field]), $options: "i" };
-							query.$or.push(query_field);
-						});
-						/*
-						let search = App_Logic.get_search(option.parent_data_type,query,{},1,0);
-						let parent_option = option.parent_fields ? {get_field:false,fields:option.parent_fields} : {};
-						Data.get_list(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,parent_option).then(([biz_error,item_list,item_count,page_count])=> {
-						if(biz_error){
-								error=Log.append(error,biz_error);
-							}else{
-								if(data.data_list.length> 0){
-									data.data_list.forEach(item => {
-										item.parent_item = item_list.find(item_find => item_find.id === item.parent_id) ? item_list.find(item_find => item_find.id === item.parent_id):App_Logic.get_not_found(item.parent_data_type,item.parent_id,{app_id:database.app_id});
-									});
-								}
-							}
-							call();
-						}).catch(err => {
-							Log.error('DATA-SEARCH-ERROR-4',err);
-							error = Log.append(error,err);
-							call();
-						});
-						*/
+						console.log('hreeee');
+						console.log('hreeee');
+						console.log('hreeee');
+						//console.log(data.data_list);
+						console.log('done');
+						//call();
 					}else{
 						call();
 					}
 				},
-				/* get_parent_old
 				function(call){
-					if(option.get_parent && data.data_list.length>0){
-						let query = { $or: [] };
-						data.data_list.forEach(item => {
-							let query_field = {};
-							query_field['id'] = { $regex:String(item[option.parent_id_field]), $options: "i" };
-							query.$or.push(query_field);
-						});
-						let search = App_Logic.get_search(option.parent_data_type,query,{},1,0);
-						let parent_option = option.parent_fields ? {get_field:false,fields:option.parent_fields} : {};
-						Data.get_list(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,parent_option).then(([biz_error,item_list,item_count,page_count])=> {
-						if(biz_error){
-								error=Log.append(error,biz_error);
-							}else{
-								if(data.data_list.length> 0){
-									data.data_list.forEach(item => {
-										item.parent_item = item_list.find(item_find => item_find.id === item.parent_id) ? item_list.find(item_find => item_find.id === item.parent_id):App_Logic.get_not_found(item.parent_data_type,item.parent_id,{app_id:database.app_id});
-									});
-								}
-							}
-							call();
-						}).catch(err => {
-							Log.error('DATA-SEARCH-ERROR-4',err);
-							error = Log.append(error,err);
-							call();
-						});
-					}else{
-						call();
-					}
-				},
-				*/
-				//get user
-				function(call){
-					console.log('get_user_here');
+					console.log('1111111111111');
+					Log.w('aaaaaaa',data.data_list);
+					console.log('22222222');
 					if(option.get_user && data.data_list.length>0){
 						let query = { $or: [] };
 						data.data_list.forEach(item => {
@@ -2288,7 +2209,6 @@ class Portal {
 				},
 				//get distinct
 				function(call){
-					console.log('get_distinct');
 					if(option.get_distinct && data.data_list.length>0){
 						data.data_list = data.data_list.filter((obj, index, self) =>
 							index === self.findIndex((t) => t[option.distinct_field] === obj[option.distinct_field])
