@@ -379,7 +379,7 @@ const get_item_cache_db = (cache_connect,db_connect,data_type,id,option) => {
         let cache_key_list = null;
         let item_data = DataItem.get_new(data_type,id,{app_id:db_connect.app_id});
         let cache_string_list = [];
-        option = option ? option : {get_field:false};
+        option = option ? option : {get_field:false,fields:""};
         async.series([
             function(call) {
                 get_cache_string_main(cache_connect,get_cache_item_attr_list_key(data_type,id)).then(([error,data]) => {
@@ -408,6 +408,9 @@ const get_item_cache_db = (cache_connect,db_connect,data_type,id,option) => {
                     }
                 }else{
                     if(cache_key_list!=null){
+                        if(!option.fields){
+                            option.fields = "";
+                        }
                         cache_found = true;
                         cache_string_list =option.fields.split(',');
                     }

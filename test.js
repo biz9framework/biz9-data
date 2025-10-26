@@ -274,7 +274,7 @@ describe('connect', function(){ this.timeout(25000);
                     {primary_data_type:DataType.BLOG_POST,primary_field:'id',item_field:'blog_post_id',title:'blog_post_2',fields:'id,title,data_type,type'}
                 ]};
                 const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option);
-                //Log.w('77_search_app',biz_data);
+                Log.w('77_search_app',biz_data);
 
             },
 

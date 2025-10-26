@@ -1508,7 +1508,6 @@ class User_Data {
 				async function(call){
 					if(data.email_resultOK && data.title_resultOK){
 						data.user.last_login = DateTime.get_new();
-						Log.w('11_post_user',data.user);
 						const [biz_error,biz_data] = await Portal.post(database,DataType.USER,data.user);
 						if(biz_error){
 							biz_error=Log.append(error,biz_error);
@@ -1642,7 +1641,6 @@ class User_Data {
 					}
 				},
 			]).then(result => {
-				Log.w('done_user_login',data);
 				callback([error,data]);
 			}).catch(err => {
 				Log.error("User-Data-Login",err);
@@ -1723,7 +1721,6 @@ class Favorite_Data {
 							error=Log.append(error,biz_error);
 						}else{
 							data.stat_favorite = biz_data;
-							Log.w('33_post_stat',data.stat_favorite);
 						}
 
 						/*
@@ -1874,7 +1871,8 @@ class Portal {
 			let data = DataItem.get_new(data_type,0,{key:key?key:Type.BLANK});
 			let full_data_list = [];
 			let new_data_list = [];
-			option = option ? option : {get_item:false,get_image:false,post_stat:false,user_id:0};
+			option = option ? option : {get_item:false,get_image:false,get_field:false,post_stat:false,user_id:0};
+			option.get_field = option.fields ? true : false;
 			async.series([
 				function(call){
 					if(!Str.check_is_guid(key)){
@@ -1984,7 +1982,6 @@ class Portal {
 						//let post_stat_list = Stat_Logic.get_new(option.user_id,Type.STAT_VIEW,[data]);
 						let post_stat = Stat_Logic.get_new(parent_data_type,parent_id,STAT_FAVORITE,option.user_id,data);
 						let post_stat_item = Stat_Logic.get_new_stat_item(option.user_id,Type.STAT_VIEW,data);
-						//Log.w('22_get_item_post_stat',post_stat);
 						const [biz_error,biz_data] = await Stat_Data.post(database,user_id,post_stat.type,data);
 						if(biz_error){
 							error=Log.append(error,biz_error);
@@ -2039,13 +2036,13 @@ class Portal {
 		return new Promise((callback) => {
 			let data = {data_type:data_type,item_count:0,page_count:1,filter:{},data_list:[],app_id:database.app_id};
 			let error=null;
-			let search_option = option ? option : {get_item:false,get_image:false,get_field:false};
-			search_option.get_field = search_option.fields ? true : false;
+			option = option ? option : {get_item:false,get_image:false,get_field:false,get_count:false};
+			option.get_field = option.fields ? true : false;
 			async.series([
 				//get list
 				function(call){
 					let search = App_Logic.get_search(data_type,filter,sort_by,page_current,page_size);
-					Data.get_list(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,search_option).then(([biz_error,item_list,item_count,page_count])=>{
+					Data.get_list(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option).then(([biz_error,item_list,item_count,page_count])=>{
 						if(biz_error){
 							error=Log.append(error,biz_error);
 						}else{
@@ -2108,11 +2105,10 @@ class Portal {
 								primary_field : option.field_key_list[a].primary_field,
 								item_field : option.field_key_list[a].item_field,
 								title : option.field_key_list[a].title,
-								fields : option.field_key_list[a].fields ? option.field_key_list[a].fields : {},
+								fields : option.field_key_list[a].fields ? option.field_key_list[a].fields : "",
 								data_list : []
 							});
  						};
-						//fields : option.field_key_list[a].fields ? option.field_key_list[a].fields : null,
 						async.forEachOf(parent_search_item_list,(parent_search_item,key,go)=>{
 							let query = { $or: [] };
  							for(const data_item of data.data_list){
@@ -2122,8 +2118,6 @@ class Portal {
 							};
 							let search = App_Logic.get_search(parent_search_item.primary_data_type,query,{},1,0);
 							let join_option = parent_search_item.fields ? {get_field:true,fields:parent_search_item.fields} : {};
-							Log.w('parent_search_item',parent_search_item);
-							Log.w('options',join_option);
 							Data.get_list(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,join_option).then(([biz_error,item_list,item_count,page_count])=> {
 								if(biz_error){
 									error=Log.append(error,biz_error);
@@ -2153,18 +2147,11 @@ class Portal {
 							}
 							call();
                 			});
-						//call();
 					}else{
 						call();
 					}
 				},
 				function(call){
-					console.log('1111111111111');
-					Log.w('data_full',data.data_list);
-					console.log('2222222222');
-				},
-				function(call){
-				console.log('22222222');
 					if(option.get_user && data.data_list.length>0){
 						let query = { $or: [] };
 						data.data_list.forEach(item => {
@@ -2173,7 +2160,7 @@ class Portal {
 							query.$or.push(query_field);
 						});
 						let search = App_Logic.get_search(DataType.USER,query,{},1,0);
-						let user_option = option.user_fields ? {get_field:true,fields:option.user_fields} : {};
+						let user_option = option.user_fields ? {get_field:true,fields:option.user_fields? option.user_fields:""} : {};
 						Data.get_list(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,user_option).then(([biz_error,item_list,item_count,page_count])=> {
 							if(biz_error){
 								error=Log.append(error,biz_error);
