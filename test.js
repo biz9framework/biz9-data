@@ -104,6 +104,7 @@ describe('connect', function(){ this.timeout(25000);
                 console.log('111111111111111');
                 console.log('111111111111111');
                 const [biz_error,biz_data] = await Portal.get(database,data_type,id,option);
+                Log.w('22_get_data',biz_data);
                 //cart = biz_data;
                 //Log.w('33_cart',cart);
              },
@@ -416,8 +417,6 @@ describe('post_data', function(){ this.timeout(25000);
 
                 /*
                 try {
-                    console.log('aaaaaaaa');
-                    console.log('aaaaaaaa');
                     database.collection('blog_post_biz').bulkWrite( [
                         { insertOne: { document: {  type: "beef", size: "medium", price: 6 } } },
                         { insertOne: { document: {  type: "sausage", size: "large", price: 10 } } }

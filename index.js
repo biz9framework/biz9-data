@@ -1978,8 +1978,6 @@ class Portal {
 				async function(call){
 					if(option.post_stat && data.id){
 						let post_stat_view = Stat_Logic.get_new(data.data_type,data.id,Type.STAT_VIEW,option.user_id,data);
-						//Log.w('22_post_stat_view',post_stat_view);
-						//Log.w('33_stat_view',stat_view);
 						const [biz_error,biz_data] = await Stat_Data.post(database,post_stat_view,option);
 						if(biz_error){
 							error=Log.append(error,biz_error);
@@ -1987,20 +1985,18 @@ class Portal {
 							stat_view = biz_data;
 						}
 					}
-					//Log.w('44-data',stat_view);
 				},
 				//item-update-view-count
 				async function(call){
 					if(option.post_stat && data.id && stat_view.resultOK){
-						data.view_count = data.view_count ? parseInt(data.view_count) + 1 : 1;
-						const [biz_error,biz_data] = await Portal.post(database,data.data_type,data);
+						data.view_count = parseInt(data.view_count) + 1  ? data.view_count : 1;
+						let item_update = DataItem.get_new(data.data_type,data.id,{view_count:data.view_count ? parseInt(data.view_count) + 1 : 1});
+						const [biz_error,biz_data] = await Portal.post(database,data.data_type,item_update);
 						if(biz_error){
 							error=Log.append(biz_error,error);
-						}else{
 						}
 					}
 				},
-
 			]).then(result => {
 				callback([error,data]);
 			}).catch(err => {
@@ -2153,7 +2149,7 @@ class Portal {
 							});
                			}, err => {
 							if(err){
-								console.log(err);
+									error = Log.append(error,err);
 							}
 							call();
                 			});
@@ -2754,7 +2750,7 @@ class Stat_Data {
 			let data = {};
 			let error = null;
 			option = option ? option : {post_unique:false};
-			let unique_resultOK = option.post_unique ? true : false;
+			let resultOK = true;
 			data.stat = DataItem.get_new(DataType.STAT,stat.id,{parent_data_type:stat.parent_data_type,user_id:stat.user_id});
 			async.series([
 				async function(call){
@@ -2766,7 +2762,7 @@ class Stat_Data {
 				},
 				//get - stat
 				async function(call){
-					if(unique_resultOK && option.post_unique){
+					if(option.post_unique){
 						const todayEnd = dayjs();
 						const todayStart = todayEnd.subtract(1, 'day')
 						let query_field = {$and:[]};
@@ -2778,23 +2774,23 @@ class Stat_Data {
 						if(biz_error){
 						error=Log.append(error,biz_error);
 						}else{
-							if(biz_data){
-								unique_resultOK = false;
+							if(biz_data>=1){
+								resultOK = false;
 							}
 						}
 					}
 				},
 				//post - stat
 				async function(call){
-					if(unique_resultOK && option.post_unique || unique_resultOK && !option.post_unique){
+					if(resultOK){
 						const [biz_error,biz_data] = await Portal.post(database,DataType.STAT,data.stat);
 					if(biz_error){
 						error=Log.append(error,biz_error);
 					}else{
 						data.stat = biz_data;
-						data.stat.resultOK=true;
 					}
 					}
+					data.stat.resultOK = resultOK;
 				},
 			]).then(result => {
 				callback([error,data.stat]);
