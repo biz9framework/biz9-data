@@ -95,13 +95,12 @@ describe('connect', function(){ this.timeout(25000);
              //- STAT - END
             */
 
-            /*
             //- GET_ITEM - START
             async function(call){
                 let data_type = DataType.PRODUCT;
-                let id = "95fc25b7-43d0-49ff-bb86-0f5ba207cf18";
+                let id = "3e6cbb33-afa8-47d4-95c0-9df60e02b3ee";
                 let user_id = "f63d6bd2-ce86-4a36-808f-40fe59069077";
-                let option = {post_stat:true,user_id:user_id};
+                let option = {post_stat:true,post_unique:true,user_id:user_id};
                 console.log('111111111111111');
                 console.log('111111111111111');
                 const [biz_error,biz_data] = await Portal.get(database,data_type,id,option);
@@ -109,7 +108,7 @@ describe('connect', function(){ this.timeout(25000);
                 //Log.w('33_cart',cart);
              },
             //- GET_ITEM - END
-            */
+
             /*
             //- REVIEW - START
             async function(call){
@@ -266,7 +265,8 @@ describe('connect', function(){ this.timeout(25000);
                 //Log.w('66_app',biz_data);
             },
             */
-            //app list
+            //- APP-START
+            /*
             async function(call){
                 let search = App_Logic.get_search(DataType.APP,{},{title:1},1,0);
                 let option = {get_join:true,fields:'id,title,data_type,product_id,blog_post_id',field_key_list:[
@@ -277,8 +277,8 @@ describe('connect', function(){ this.timeout(25000);
                 Log.w('77_search_app',biz_data);
 
             },
-
-            //- CART-ORDER-APP LOGIC -- END
+            */
+            //- APP-END
             /*
             //- LOGIC -- START
             async function(call){

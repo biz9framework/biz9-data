@@ -1869,8 +1869,7 @@ class Portal {
 		return new Promise((callback) => {
 			let error = null;
 			let data = DataItem.get_new(data_type,0,{key:key?key:Type.BLANK});
-			let full_data_list = [];
-			let new_data_list = [];
+			let stat_view = DataItem.get_new(DataType.STAT,0,{resultOK:false});
 			option = option ? option : {get_item:false,get_image:false,get_field:false,post_stat:false,user_id:0};
 			option.get_field = option.fields ? true : false;
 			async.series([
@@ -1977,20 +1976,31 @@ class Portal {
 				},
 				//post-view-stat
 				async function(call){
-					/*
 					if(option.post_stat && data.id){
-						//let post_stat_list = Stat_Logic.get_new(option.user_id,Type.STAT_VIEW,[data]);
-						let post_stat = Stat_Logic.get_new(parent_data_type,parent_id,STAT_FAVORITE,option.user_id,data);
-						let post_stat_item = Stat_Logic.get_new_stat_item(option.user_id,Type.STAT_VIEW,data);
-						const [biz_error,biz_data] = await Stat_Data.post(database,user_id,post_stat.type,data);
+						let post_stat_view = Stat_Logic.get_new(data.data_type,data.id,Type.STAT_VIEW,option.user_id,data);
+						//Log.w('22_post_stat_view',post_stat_view);
+						//Log.w('33_stat_view',stat_view);
+						const [biz_error,biz_data] = await Stat_Data.post(database,post_stat_view,option);
 						if(biz_error){
 							error=Log.append(error,biz_error);
 						}else{
-							data.stat_favorite = biz_data;
+							stat_view = biz_data;
 						}
 					}
-					*/
+					//Log.w('44-data',stat_view);
 				},
+				//item-update-view-count
+				async function(call){
+					if(option.post_stat && data.id && stat_view.resultOK){
+						data.view_count = data.view_count ? parseInt(data.view_count) + 1 : 1;
+						const [biz_error,biz_data] = await Portal.post(database,data.data_type,data);
+						if(biz_error){
+							error=Log.append(biz_error,error);
+						}else{
+						}
+					}
+				},
+
 			]).then(result => {
 				callback([error,data]);
 			}).catch(err => {
@@ -2744,12 +2754,12 @@ class Stat_Data {
 			let data = {};
 			let error = null;
 			option = option ? option : {post_unique:false};
-			let unique_resultOK = option.post_unique ? false : true;
+			let unique_resultOK = option.post_unique ? true : false;
 			data.stat = DataItem.get_new(DataType.STAT,stat.id,{parent_data_type:stat.parent_data_type,user_id:stat.user_id});
 			async.series([
 				async function(call){
 					for(const key in stat) {
-						if(Str.check_is_null(data.stat[key]) && key != Type.STAT_ITEM_LIST && key != Type.STAT_SUB_ITEM_LIST){
+						if(Str.check_is_null(data.stat[key])){
 							data.stat[key] = stat[key];
 						}
 					}
@@ -2759,20 +2769,19 @@ class Stat_Data {
 					if(unique_resultOK && option.post_unique){
 						const todayEnd = dayjs();
 						const todayStart = todayEnd.subtract(1, 'day')
-
 						let query_field = {$and:[]};
-						query_field.$and.push({parent_id:stat.stat_item_list[0].parent_id});
+						query_field.$and.push({parent_id:stat.parent_id});
 						query_field.$and.push({user_id:stat.user_id});
 						query_field.$and.push({ date_create: {$gte: todayStart.toISOString(),$lte: todayEnd.toISOString()}});
-						let search = App_Logic.get_search(DataType.STAT_ITEM,query_field,{},1,0);
-					const [biz_error,biz_data] = await Portal.count(database,search.data_type,search.filter);
+						let search = App_Logic.get_search(DataType.STAT,query_field,{},1,0);
+						const [biz_error,biz_data] = await Portal.count(database,search.data_type,search.filter);
 						if(biz_error){
 						error=Log.append(error,biz_error);
-					}else{
-						if(biz_data){
-							unique_resultOK = false;
+						}else{
+							if(biz_data){
+								unique_resultOK = false;
+							}
 						}
-					}
 					}
 				},
 				//post - stat
@@ -2783,6 +2792,7 @@ class Stat_Data {
 						error=Log.append(error,biz_error);
 					}else{
 						data.stat = biz_data;
+						data.stat.resultOK=true;
 					}
 					}
 				},
@@ -2952,13 +2962,13 @@ class Blank_Data {
 					const [biz_error,biz_data] = await Portal.post(database,DataType.BLANK,{});
 				},
 				async function(call){
-					let post_stat = Stat_Logic.get_new(DataType.USER,data.user.id,Type.STAT_LOGIN,data.user.id,data.stat);
+					let post_stat_login = Stat_Logic.get_new(DataType.USER,data.user.id,Type.STAT_LOGIN,data.user.id,data.stat);
                 	let option = {post_unique:false};
- 					const [biz_error,biz_data] = await Stat_Data.post(database,post_stat,option);
+ 					const [biz_error,biz_data] = await Stat_Data.post(database,post_stat_login,option);
 					if(biz_error){
 						error=Log.append(error,biz_error);
 					}else{
-						data.stat = biz_data;
+						data.stat_login = biz_data;
 					}
 				},
  				]).then(result => {
