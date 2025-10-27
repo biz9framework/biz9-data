@@ -2103,7 +2103,12 @@ class Portal {
 				},
 				//get_join
 				function(call){
+					console.log('1111111111111111');
+					console.log('1111111111111111');
 					if(option.get_join && data.data_list.length>0){
+						console.log('2222222222');
+						console.log(option);
+						console.log('2222222222');
 						let parent_search_item_list = [];
 						for(let a = 0; a < option.field_key_list.length; a++){
 							parent_search_item_list.push({
@@ -2131,9 +2136,14 @@ class Portal {
 									parent_search_item.data_list = item_list;
 								if(parent_search_item_list.length> 0){
 									for(const parent_search_item of parent_search_item_list){
+										Log.w('rrr',parent_search_item);
 										for(const data_item of data.data_list){
-											data_item[parent_search_item.title] = parent_search_item.data_list.find(item_find => item_find[parent_search_item.primary_field] === data_item[parent_search_item.item_field]);
-											data_item['cool'] = 'apple';
+											data_item[parent_search_item.title] = parent_search_item.data_list.find(item_find => item_find[parent_search_item.primary_field] === data_item[parent_search_item.item_field]) ? parent_search_item.data_list.find(item_find => item_find[parent_search_item.primary_field] === data_item[parent_search_item.item_field]) :
+												App_Logic.get_not_found(parent_search_item.primary_data_type,data_item[parent_search_item.item_field],{app_id:database.app_id})
+												;
+											//data_item[parent_search_item.title] =
+												//parent_search_item.data_list.find(item_find => item_find[parent_search_item.primary_field] === data_item[parent_search_item.item_field]) ? biz_data.data_list.find(item_find => item_find.id === cart_sub_item.parent_id):App_Logic.get_not_found(cart_sub_item.parent_data_type,cart_sub_item.parent_id,{app_id:database.app_id});
+
 										}
 									}
 									go();

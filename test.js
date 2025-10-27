@@ -95,6 +95,7 @@ describe('connect', function(){ this.timeout(25000);
              //- STAT - END
             */
 
+            /*
             //- GET_ITEM - START
             async function(call){
                 let data_type = DataType.PRODUCT;
@@ -109,6 +110,7 @@ describe('connect', function(){ this.timeout(25000);
                 //Log.w('33_cart',cart);
              },
             //- GET_ITEM - END
+            */
 
             /*
             //- REVIEW - START
@@ -267,18 +269,17 @@ describe('connect', function(){ this.timeout(25000);
             },
             */
             //- APP-START
-            /*
             async function(call){
                 let search = App_Logic.get_search(DataType.APP,{},{title:1},1,0);
-                let option = {get_join:true,fields:'id,title,data_type,product_id,blog_post_id',field_key_list:[
-                    {primary_data_type:DataType.PRODUCT,primary_field:'id',item_field:'product_id',title:'product_2',fields:'id,title,data_type,category'},
-                    {primary_data_type:DataType.BLOG_POST,primary_field:'id',item_field:'blog_post_id',title:'blog_post_2',fields:'id,title,data_type,type'}
+                let option = {get_join:true,field_key_list:[
+                    {primary_data_type:DataType.PRODUCT,primary_field:'id',item_field:'product_id',title:'product'},
+                    {primary_data_type:DataType.PRODUCT,primary_field:'id',item_field:'cms_id',title:'cms'}
                 ]};
                 const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option);
                 Log.w('77_search_app',biz_data);
+                Log.w('88_search_app',biz_data.data_list[0]);
 
             },
-            */
             //- APP-END
             /*
             //- LOGIC -- START
