@@ -1872,6 +1872,7 @@ class Portal {
 			let stat_view = DataItem.get_new(DataType.STAT,0,{resultOK:false});
 			option = option ? option : {get_item:false,get_image:false,get_field:false,post_stat:false,user_id:0};
 			option.get_field = option.fields ? true : false;
+			let parent_search_item_list = [];
 			async.series([
 				function(call){
 					if(!Str.check_is_guid(key)){
@@ -1974,6 +1975,64 @@ class Portal {
 						}
 					}
 				},
+				//get_join
+				async function(call){
+					if(option.get_join && data.id){
+						for(let a = 0; a < option.field_key_list.length; a++){
+							parent_search_item_list.push({
+								primary_data_type : option.field_key_list[a].primary_data_type,
+								primary_field : option.field_key_list[a].primary_field,
+								item_field : option.field_key_list[a].item_field,
+								title : option.field_key_list[a].title,
+								fields : option.field_key_list[a].fields ? option.field_key_list[a].fields : "",
+								data : []
+							});
+ 						};
+							  for (const parent_search_item of parent_search_item_list) {
+								let join_option = parent_search_item.fields ? {get_field:true,fields:parent_search_item.fields} : {};
+								const [biz_error,biz_data] = await Portal.get(database,parent_search_item.primary_data_type,data[parent_search_item.item_field]);
+								console.log('bbbbb');
+								console.log(biz_data);
+								if(biz_error){
+									error=Log.append(error,biz_error);
+								}else{
+								  	data[parent_search_item.title] = biz_data;
+								}
+								/*
+								Data.get(database,data_type,id).then(([biz_error,biz_data])=> {
+								console.log(biz_data.title);
+								if(biz_error){
+									error=Log.append(error,biz_error);
+								}else{
+									data[parent_search_item.title] = biz_data;
+									if(biz_data.id){
+										data[parent_search_item.title] = biz_data;
+									}else{
+										data[parent_search_item.title] = App_Logic.get_not_found(parent_search_item.data_type,data[parent_search_item.item_field],{app_id:database.app_id});
+									}
+								}
+								go();
+							}).catch(err => {
+								if(err){
+									Log.error('DATA-SEARCH-ERROR-4',err);
+									error = Log.append(error,err);
+								}
+							});
+								*/
+							  }
+					}else{
+						//call();
+					}
+
+					//Log.w('rrrr',parent_search_item_list);
+							//call();
+				},
+				async function(call){
+					Log.w('fact',data);
+					//Log.w('my_data',data);
+				},
+
+				/*
 				//post-view-stat
 				async function(call){
 					if(option.post_stat && data.id){
@@ -1997,6 +2056,7 @@ class Portal {
 						}
 					}
 				},
+				*/
 			]).then(result => {
 				callback([error,data]);
 			}).catch(err => {
@@ -2103,12 +2163,7 @@ class Portal {
 				},
 				//get_join
 				function(call){
-					console.log('1111111111111111');
-					console.log('1111111111111111');
 					if(option.get_join && data.data_list.length>0){
-						console.log('2222222222');
-						console.log(option);
-						console.log('2222222222');
 						let parent_search_item_list = [];
 						for(let a = 0; a < option.field_key_list.length; a++){
 							parent_search_item_list.push({
@@ -2136,14 +2191,10 @@ class Portal {
 									parent_search_item.data_list = item_list;
 								if(parent_search_item_list.length> 0){
 									for(const parent_search_item of parent_search_item_list){
-										Log.w('rrr',parent_search_item);
 										for(const data_item of data.data_list){
 											data_item[parent_search_item.title] = parent_search_item.data_list.find(item_find => item_find[parent_search_item.primary_field] === data_item[parent_search_item.item_field]) ? parent_search_item.data_list.find(item_find => item_find[parent_search_item.primary_field] === data_item[parent_search_item.item_field]) :
 												App_Logic.get_not_found(parent_search_item.primary_data_type,data_item[parent_search_item.item_field],{app_id:database.app_id})
 												;
-											//data_item[parent_search_item.title] =
-												//parent_search_item.data_list.find(item_find => item_find[parent_search_item.primary_field] === data_item[parent_search_item.item_field]) ? biz_data.data_list.find(item_find => item_find.id === cart_sub_item.parent_id):App_Logic.get_not_found(cart_sub_item.parent_data_type,cart_sub_item.parent_id,{app_id:database.app_id});
-
 										}
 									}
 									go();
