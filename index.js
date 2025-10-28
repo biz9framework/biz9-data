@@ -1979,7 +1979,8 @@ class Portal {
 								item_field : option.field_key_list[a].item_field,
 								title : option.field_key_list[a].title,
 								fields : option.field_key_list[a].fields ? option.field_key_list[a].fields : "",
-								data : []
+								make_flat : option.field_key_list[a].make_flat ? option.field_key_list[a].make_flat : false,
+								data : [],
 							});
  						};
 							  for (const parent_search_item of parent_search_item_list) {
@@ -1988,7 +1989,13 @@ class Portal {
 								if(biz_error){
 									error=Log.append(error,biz_error);
 								}else{
-								  	data[parent_search_item.title] = biz_data;
+									if(parent_search_item.make_flat){
+ 										for (const prop in biz_data) {
+											data[parent_search_item.title+"_"+prop] = biz_data[prop];
+										}
+									}else{
+								  		data[parent_search_item.title] = biz_data;
+									}
 								}
 							  }
 					}
@@ -2129,6 +2136,7 @@ class Portal {
 								item_field : option.field_key_list[a].item_field,
 								title : option.field_key_list[a].title,
 								fields : option.field_key_list[a].fields ? option.field_key_list[a].fields : "",
+								make_flat : option.field_key_list[a].make_flat ? option.field_key_list[a].make_flat : false,
 								data_list : []
 							});
  						};
@@ -2149,8 +2157,23 @@ class Portal {
 								if(parent_search_item_list.length> 0){
 									for(const parent_search_item of parent_search_item_list){
 										for(const data_item of data.data_list){
-											data_item[parent_search_item.title] = parent_search_item.data_list.find(item_find => item_find[parent_search_item.primary_field] === data_item[parent_search_item.item_field]) ? parent_search_item.data_list.find(item_find => item_find[parent_search_item.primary_field] === data_item[parent_search_item.item_field]) :
-												App_Logic.get_not_found(parent_search_item.primary_data_type,data_item[parent_search_item.item_field]);
+											let item_found = parent_search_item.data_list.find(item_find => item_find[parent_search_item.primary_field] === data_item[parent_search_item.item_field])
+											if(item_found){
+												if(parent_search_item.make_flat){
+ 													for(const prop in item_found) {
+														data_item[parent_search_item.title+"_"+prop] = item_found[prop];
+													}
+												}else{
+													data_item[parent_search_item.title] = item_found;
+												}
+											}else{
+												if(parent_search_item.make_flat){
+													data_item[parent_search_item.title+"_title"] = 'not_found';
+
+												}else{
+													data_item[parent_search_item.title] = App_Logic.get_not_found(parent_search_item.primary_data_type,data_item[parent_search_item.item_field]);
+												}
+											}
 										}
 									}
 									go();
