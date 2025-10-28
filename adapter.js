@@ -99,7 +99,6 @@ const post_item_list_adapter=(db_connect,item_data_list,option)=>{
             async function(call){
                 for(const item of item_data_list) {
                     item.source=DB_TITLE;
-                    item.app_id = db_connect.data_config.APP_ID;
                     item_data_new_list.push(item);
                 }
             },
@@ -141,7 +140,6 @@ const post_item_adapter=(db_connect,data_type,item_data,option) => {
                 });
             },
             function(call){
-                item_data.app_id=db_connect.data_config.APP_ID;
                 if(item_data.id){
                     item_data.source=DB_TITLE;
                 }
@@ -235,7 +233,7 @@ const get_item_adapter = (db_connect,data_type,key,option) => {
             option = {};
         }
         let cache_connect = {};
-        item_data = DataItem.get_new(data_type,0,{app_id:db_connect.app_id,key:key});
+        item_data = DataItem.get_new(data_type,0,{key:key});
         async.series([
             function(call) {
                 get_cache_connect_main(db_connect.data_config).then(([error,data]) => {
@@ -258,7 +256,6 @@ const get_item_adapter = (db_connect,data_type,key,option) => {
                             item_data.source = NOT_FOUND_TITLE;
                             item_data.filter = option.filter;
                         }
-                        item_data.app_id = db_connect.app_id;
                         call();
                     }).catch(error => {
                         Log.error("Adapter-Get-Item-Adapter-1",error);
@@ -279,7 +276,6 @@ const get_item_adapter = (db_connect,data_type,key,option) => {
                         }else{
                             item_data.source = NOT_FOUND_TITLE;
                         }
-                        item_data.app_id = db_connect.app_id;
                         call();
                     }).catch(error => {
                         Log.error("Adapter-Get-Item-Adapter-2",error);
@@ -293,7 +289,6 @@ const get_item_adapter = (db_connect,data_type,key,option) => {
                         }else{
                             item_data.source = NOT_FOUND_TITLE;
                         }
-                        item_data.app_id = db_connect.app_id;
                         call();
                     }).catch(error => {
                         Log.error("Adapter-Get-Item-Adapter-3",error);
@@ -377,7 +372,7 @@ const get_item_cache_db = (cache_connect,db_connect,data_type,id,option) => {
     return new Promise((callback) => {
         let cache_found = false;
         let cache_key_list = null;
-        let item_data = DataItem.get_new(data_type,id,{app_id:db_connect.app_id});
+        let item_data = DataItem.get_new(data_type,id);
         let cache_string_list = [];
         option = option ? option : {get_field:false,fields:""};
         async.series([
@@ -471,7 +466,6 @@ const get_item_cache_db = (cache_connect,db_connect,data_type,id,option) => {
                 }
             },
             function(call) {
-                item_data.app_id=db_connect.data_config.APP_ID;
                 call();
             },
         ]).then(result => {
@@ -526,7 +520,7 @@ const delete_item_cache=(db_connect,data_type,id,option)=>{
         let cache_connect = {};
         let cache_key_list = '';
         let cache_string_list = '';
-        let item_data = DataItem.get_new(data_type,id,{app_id:db_connect.app_id});
+        let item_data = DataItem.get_new(data_type,id);
         async.series([
             function(call) {
                 get_cache_connect_main(db_connect.data_config).then(([error,data]) => {
@@ -589,7 +583,7 @@ const delete_item_cache_db = (db_connect,data_type,id) => {
         let cache_connect = {};
         let cache_key_list = '';
         let cache_string_list = '';
-        let item_data = DataItem.get_new(data_type,id,{app_id:db_connect.app_id});
+        let item_data = DataItem.get_new(data_type,id);
         async.series([
             function(call) {
                 get_cache_connect_main(db_connect.data_config).then(([error,data]) => {
@@ -646,7 +640,6 @@ const delete_item_cache_db = (db_connect,data_type,id) => {
                 });
             },
             function(call) {
-                item_data.app_id=db_connect.data_config.APP_ID;
                 call();
             },
         ]).then(result => {
@@ -664,7 +657,6 @@ const get_count_item_list_adapter = (db_connect,data_type,filter,option) => {
             function(call) {
                 get_count_item_list_main(db_connect,data_type,filter).then(([error,data]) => {
                     item_data.count = data;
-                    item_data.app_id = db_connect.app_id;
                     item_data.data_type = data_type;
                     item_data.filter = filter;
                     call();

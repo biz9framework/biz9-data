@@ -110,7 +110,6 @@ class Blog_Post_Data {
 						data.page_count = biz_data.page_count;
 						data.filter = biz_data.filter;
 						data.blog_post_list = biz_data.data_list;
-						data.app_id = database.app_id;
 					}
 				},
 			]).then(result => {
@@ -162,7 +161,6 @@ class Category_Data { //9_category_get
 						data.page_count = biz_data.page_count;
 						data.filter = biz_data.filter;
 						data.category_list = biz_data.data_list;
-						data.app_id = database.app_id;
 					}
 				},
 			]).then(result => {
@@ -215,7 +213,6 @@ class Content_Data {
 						data.page_count = biz_data.page_count;
 						data.filter = biz_data.filter;
 						data.content_list = biz_data.data_list;
-						data.app_id = database.app_id;
 					}
 				},
 			]).then(result => {
@@ -268,7 +265,6 @@ class Page_Data {
 						data.page_count = biz_data.page_count;
 						data.filter = biz_data.filter;
 						data.page_list = biz_data.data_list;
-						data.app_id = database.app_id;
 					}
 				},
 			]).then(result => {
@@ -321,7 +317,6 @@ class Template_Data {
 						data.page_count = biz_data.page_count;
 						data.filter = biz_data.filter;
 						data.template_list = biz_data.data_list;
-						data.app_id = database.app_id;
 					}
 				},
 			]).then(result => {
@@ -373,7 +368,6 @@ class Gallery_Data {
 						data.filter = biz_data.filter;
 						data.data_type = biz_data.data_type;
 						data.gallery_list = biz_data.data_list;
-						data.app_id = database.app_id;
 					}
 				},
 			]).then(result => {
@@ -426,7 +420,6 @@ class Event_Data {
 						data.filter = biz_data.filter;
 						data.data_type = biz_data.data_type;
 						data.event_list = biz_data.data_list;
-						data.app_id = database.app_id;
 					}
 				},
 			]).then(result => {
@@ -675,7 +668,7 @@ class Order_Data {
 							error=Log.append(error,biz_error);
 						}else{
 							data.order.order_item_list.forEach(order_item => {
-								order_item.parent_item = biz_data.data_list.find(item_find => item_find.id === order_item.parent_id) ? biz_data.data_list.find(item_find => item_find.id === order_item.parent_id):App_Logic.get_not_found(order_item.parent_data_type,order_item.parent_id,{app_id:database.app_id});
+								order_item.parent_item = biz_data.data_list.find(item_find => item_find.id === order_item.parent_id) ? biz_data.data_list.find(item_find => item_find.id === order_item.parent_id):App_Logic.get_not_found(order_item.parent_data_type,order_item.parent_id);
 							});
 						}
 					}
@@ -707,7 +700,7 @@ class Order_Data {
 							error=Log.append(error,biz_error);
 						}else{
 							order_sub_item_list.forEach(order_sub_item => {
-								order_sub_item.parent_item = biz_data.data_list.find(item_find => item_find.id === order_sub_item.parent_id) ? biz_data.data_list.find(item_find => item_find.id === order_sub_item.parent_id):App_Logic.get_not_found(order_sub_item.parent_data_type,order_sub_item.parent_id,{app_id:database.app_id});
+								order_sub_item.parent_item = biz_data.data_list.find(item_find => item_find.id === order_sub_item.parent_id) ? biz_data.data_list.find(item_find => item_find.id === order_sub_item.parent_id):App_Logic.get_not_found(order_sub_item.parent_data_type,order_sub_item.parent_id);
 							});
 						}
 					}
@@ -1009,7 +1002,7 @@ class Cart_Data {
 							error=Log.append(error,biz_error);
 						}else{
 							data.cart.cart_item_list.forEach(cart_item => {
-								cart_item.parent_item = biz_data.data_list.find(item_find => item_find.id === cart_item.parent_id) ? biz_data.data_list.find(item_find => item_find.id === cart_item.parent_id):App_Logic.get_not_found(cart_item.parent_data_type,cart_item.parent_id,{app_id:database.app_id});
+								cart_item.parent_item = biz_data.data_list.find(item_find => item_find.id === cart_item.parent_id) ? biz_data.data_list.find(item_find => item_find.id === cart_item.parent_id):App_Logic.get_not_found(cart_item.parent_data_type,cart_item.parent_id);
 							});
 						}
 					}
@@ -1041,7 +1034,7 @@ class Cart_Data {
 							error=Log.append(error,biz_error);
 						}else{
 							cart_sub_item_list.forEach(cart_sub_item => {
-								cart_sub_item.parent_item = biz_data.data_list.find(item_find => item_find.id === cart_sub_item.parent_id) ? biz_data.data_list.find(item_find => item_find.id === cart_sub_item.parent_id):App_Logic.get_not_found(cart_sub_item.parent_data_type,cart_sub_item.parent_id,{app_id:database.app_id});
+								cart_sub_item.parent_item = biz_data.data_list.find(item_find => item_find.id === cart_sub_item.parent_id) ? biz_data.data_list.find(item_find => item_find.id === cart_sub_item.parent_id):App_Logic.get_not_found(cart_sub_item.parent_data_type,cart_sub_item.parent_id);
 							});
 						}
 					}
@@ -1159,7 +1152,6 @@ class Product_Data {
 						data.page_count = biz_data.page_count;
 						data.filter = biz_data.filter;
 						data.product_list = biz_data.data_list;
-						data.app_id = database.app_id;
 					}
 				},
 			]).then(result => {
@@ -1259,7 +1251,6 @@ class Review_Data {
 						data.page_count=biz_data.page_count;
 						data.filter=biz_data.filter;
 						data.review_list=biz_data.data_list;
-						data.app_id = database.app_id;
 					}
 				},
 			]).then(result => {
@@ -1891,7 +1882,7 @@ class Portal {
 							if(!Str.check_is_null(biz_data.id)){
 								data = biz_data;
 							}else{
-								data = data_type != DataType.USER ? App_Logic.get_not_found(data_type,key,{app_id:database.app_id}) : App_Logic.get_not_found(DataType.USER,key,{app_id:database.app_id});
+								data = data_type != DataType.USER ? App_Logic.get_not_found(data_type,key) : App_Logic.get_not_found(DataType.USER,key);
 							}
 						}
 						call();
@@ -2065,10 +2056,9 @@ class Portal {
 			- page_count
 			- filter
 			- item_list
-			- app_id
 			*/
 		return new Promise((callback) => {
-			let data = {data_type:data_type,item_count:0,page_count:1,filter:{},data_list:[],app_id:database.app_id};
+			let data = {data_type:data_type,item_count:0,page_count:1,filter:{},data_list:[]};
 			let error=null;
 			option = option ? option : {get_item:false,get_image:false,get_field:false,get_count:false};
 			option.get_field = option.fields ? true : false;
@@ -2086,7 +2076,6 @@ class Portal {
 							data.search=search;
 							data.filter=filter;
 							data.data_list=item_list;
-							data.app_id = database.app_id;
 							call();
 						}
 					}).catch(err => {
@@ -2161,7 +2150,7 @@ class Portal {
 									for(const parent_search_item of parent_search_item_list){
 										for(const data_item of data.data_list){
 											data_item[parent_search_item.title] = parent_search_item.data_list.find(item_find => item_find[parent_search_item.primary_field] === data_item[parent_search_item.item_field]) ? parent_search_item.data_list.find(item_find => item_find[parent_search_item.primary_field] === data_item[parent_search_item.item_field]) :
-												App_Logic.get_not_found(parent_search_item.primary_data_type,data_item[parent_search_item.item_field],{app_id:database.app_id});
+												App_Logic.get_not_found(parent_search_item.primary_data_type,data_item[parent_search_item.item_field]);
 										}
 									}
 									go();
@@ -2201,7 +2190,7 @@ class Portal {
 							}else{
 								if(data.data_list.length> 0){
 									data.data_list.forEach(item => {
-										item.user = item_list.find(item_find => item_find.id === item.user_id) ? item_list.find(item_find => item_find.id === item.user_id):App_Logic.get_not_found(DataType.USER,item.user_id,{app_id:database.app_id});
+										item.user = item_list.find(item_find => item_find.id === item.user_id) ? item_list.find(item_find => item_find.id === item.user_id):App_Logic.get_not_found(DataType.USER,item.user_id);
 									});
 								}
 							}
@@ -2868,7 +2857,6 @@ class Stat_Data {
 						data.page_count = biz_data.page_count;
 						data.filter = biz_data.filter;
 						data.stat_list = biz_data.data_list;
-						data.app_id = database.app_id;
 					}
 					call();
 				},
@@ -2962,7 +2950,6 @@ class Service_Data {
 						data.page_count = biz_data.page_count;
 						data.filter = biz_data.filter;
 						data.service_list = biz_data.data_list;
-						data.app_id = database.app_id;
 					}
 				},
 			]).then(result => {
