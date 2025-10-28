@@ -1849,6 +1849,9 @@ class Portal {
 		 * Fields
 		   - get_field / type. bool / ex. true,false / default. false
 		   - fields / type. string / ex. field1,field2 / default. throw error
+		 *  Join
+		 	- get_join / type. bool / ex. true,false / default. false
+			  	- field_key_list / type. obj list / ex. [{primary_data_type:DataType.PRODUCT,primary_field:'id',item_field:'parent_id',title:'field_title',fields:'id,title,title_url'}] / ex. throw error
 		 * Items
 		   - get_item / bool / ex. true,false / def. true
 		 * Photos
@@ -1990,49 +1993,15 @@ class Portal {
  						};
 							  for (const parent_search_item of parent_search_item_list) {
 								let join_option = parent_search_item.fields ? {get_field:true,fields:parent_search_item.fields} : {};
-								const [biz_error,biz_data] = await Portal.get(database,parent_search_item.primary_data_type,data[parent_search_item.item_field]);
-								console.log('bbbbb');
-								console.log(biz_data);
+								const [biz_error,biz_data] = await Portal.get(database,parent_search_item.primary_data_type,data[parent_search_item.item_field],join_option);
 								if(biz_error){
 									error=Log.append(error,biz_error);
 								}else{
 								  	data[parent_search_item.title] = biz_data;
 								}
-								/*
-								Data.get(database,data_type,id).then(([biz_error,biz_data])=> {
-								console.log(biz_data.title);
-								if(biz_error){
-									error=Log.append(error,biz_error);
-								}else{
-									data[parent_search_item.title] = biz_data;
-									if(biz_data.id){
-										data[parent_search_item.title] = biz_data;
-									}else{
-										data[parent_search_item.title] = App_Logic.get_not_found(parent_search_item.data_type,data[parent_search_item.item_field],{app_id:database.app_id});
-									}
-								}
-								go();
-							}).catch(err => {
-								if(err){
-									Log.error('DATA-SEARCH-ERROR-4',err);
-									error = Log.append(error,err);
-								}
-							});
-								*/
 							  }
-					}else{
-						//call();
 					}
-
-					//Log.w('rrrr',parent_search_item_list);
-							//call();
 				},
-				async function(call){
-					Log.w('fact',data);
-					//Log.w('my_data',data);
-				},
-
-				/*
 				//post-view-stat
 				async function(call){
 					if(option.post_stat && data.id){
@@ -2056,7 +2025,6 @@ class Portal {
 						}
 					}
 				},
-				*/
 			]).then(result => {
 				callback([error,data]);
 			}).catch(err => {
@@ -2193,8 +2161,7 @@ class Portal {
 									for(const parent_search_item of parent_search_item_list){
 										for(const data_item of data.data_list){
 											data_item[parent_search_item.title] = parent_search_item.data_list.find(item_find => item_find[parent_search_item.primary_field] === data_item[parent_search_item.item_field]) ? parent_search_item.data_list.find(item_find => item_find[parent_search_item.primary_field] === data_item[parent_search_item.item_field]) :
-												App_Logic.get_not_found(parent_search_item.primary_data_type,data_item[parent_search_item.item_field],{app_id:database.app_id})
-												;
+												App_Logic.get_not_found(parent_search_item.primary_data_type,data_item[parent_search_item.item_field],{app_id:database.app_id});
 										}
 									}
 									go();
