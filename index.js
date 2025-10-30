@@ -2325,7 +2325,7 @@ class Portal {
 		return new Promise((callback) => {
 			let error = null;
 			let data = DataItem.get_new(data_type,0);
-			option = option ? option : {get_item:false,get_image:false};
+			option = option ? option : {get_item:false,get_image:false,post_stat:false,user_id:0,stat_type:null};
 			async.series([
 				function(call){
 					 Data.post(database,data_type,item,option).then(([biz_error,biz_data])=> {
@@ -2340,6 +2340,25 @@ class Portal {
 						call();
 					});
 				},
+				async function(call){
+					if(option.post_stat){
+						console.log('here');
+						Log.w('option',option);
+						let post_stat = Stat_Logic.get_new(data_type,item.id,option.stat_type,option.user_id,item);
+						Log.w('post_stat',post_stat);
+						const [biz_error,biz_data] = await Stat_Data.post(database,post_stat,option);
+						Log.w('aaaa',biz_data);
+						/*
+						if(biz_error){
+							error=Log.append(error,biz_error);
+						}else{
+							data.stat = biz_data;
+						}
+						*/
+						//data.stat.resultOK = resultOK;
+					}
+				},
+
 			]).then(result => {
 				callback([error,data]);
 			}).catch(err => {

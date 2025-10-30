@@ -66,6 +66,23 @@ describe('connect', function(){ this.timeout(25000);
                 database = biz_data;
                 console.log('DATABASE-END');
             },
+            //- POST_ITEM - START
+            async function(call){
+                let data_type = DataType.ORDER_PAYMENT;
+                let id = "3e6cbb33-afa8-47d4-95c0-9df60e02b3ee";
+                let user_id = "f63d6bd2-ce86-4a36-808f-40fe59069077";
+                let option = {post_stat:true,post_unique:false,user_id:user_id,stat_type:Type.STAT_ORDER_PAYMENT};
+                let order_number = "OR-55453";
+                let order_payment = Order_Logic.get_new_order_payment(order_number,Title.ORDER_PAYMENT_METHOD_TEST,Num.get_id(99));
+                //Log.w('order_payment',order_payment);
+                //Log.w('option',option);
+                const [biz_error,biz_data] = await Portal.post(database,data_type,order_payment,option);
+                //Log.w('22_post',biz_data);
+                //cart = biz_data;
+                //Log.w('33_cart',cart);
+             },
+            //- POST_ITEM - END
+            //- GET_ITEM - END
             //- SEARCH - START
             /*
             async function(call){
@@ -269,6 +286,7 @@ describe('connect', function(){ this.timeout(25000);
             },
             */
             //- APP-START
+            /*
             async function(call){
                 let id = "25c278ad-7553-4850-ab33-24a4917045c0";
                 let data_type = DataType.APP;
@@ -287,6 +305,7 @@ describe('connect', function(){ this.timeout(25000);
                 //Log.w('88_search_app',biz_data.data_list[0]);
 
             },
+            */
             //- APP-END
             /*
             //- LOGIC -- START
