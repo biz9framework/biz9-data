@@ -273,13 +273,13 @@ describe('connect', function(){ this.timeout(25000);
                 let id = "25c278ad-7553-4850-ab33-24a4917045c0";
                 let data_type = DataType.APP;
                 let search = App_Logic.get_search(DataType.APP,{},{title:1},1,0);
-                let option = {get_join:true,field_key_list:[
+                let option = {get_user:true,make_user_flat:true,get_join:true,field_key_list:[
                     {make_flat:true,primary_data_type:DataType.PRODUCT,primary_field:'id',item_field:'product_id',title:'product',fields:'title,id,category,type'},
                     {make_flat:true,primary_data_type:DataType.PRODUCT,primary_field:'id',item_field:'product_cms_id',title:'cms',fields:'title,id,category,type'},
                     {make_flat:true,primary_data_type:DataType.PRODUCT,primary_field:'id',item_field:'product_hosting_id',title:'hosting',fields:'title,id,category,type'},
                 ]};
-                //const [biz_error,biz_data] = await Portal.get(database,data_type,id,option);
-                const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option);
+                const [biz_error,biz_data] = await Portal.get(database,data_type,id,option);
+                //const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option);
                 Log.w('77_search_app',biz_data);
                 Log.w('88_search_app',biz_data.product);
                 Log.w('99_search_app',biz_data.cms);

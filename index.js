@@ -1859,6 +1859,9 @@ class Portal {
 		 * Stat
 		   - post_stat / bool / ex. true,false / def. true
 		   - user_id / id / ex. 123 / def. error
+ 		 * get_user / type. bool / ex. true,false / default. false
+		   - user_fields / type. string / ex. field1,field2 / default. empty
+		   	 - make_user_flat / type. bool / ex. true,false / default. false
 		   */
 		return new Promise((callback) => {
 			let error = null;
@@ -1953,6 +1956,23 @@ class Portal {
 						const [biz_error,biz_data] = await Portal.search(database,DataType.IMAGE,filter,sort_by,page_current,page_size,option);
 						if(biz_data.data_list.length > 0){
 							data.images = biz_data.data_list;
+						}
+					}
+				},
+				//get_user
+				async function(call){
+					if(option.get_user && data.id){
+						const [biz_error,biz_data] = await Portal.get(database,DataType.USER,data.user_id);
+						if(biz_error){
+							error=Log.append(biz_error,error);
+						}else{
+							if(!option.make_user_flat){
+								data.user = biz_data;
+							}else{
+								for(const prop in biz_data) {
+									data["user_"+prop] = biz_data[prop];
+								}
+							}
 						}
 					}
 				},
@@ -2054,9 +2074,11 @@ class Portal {
 		 *  Search
 		 	- get_join / type. bool / ex. true,false / default. false
 			  - field_key_list / type. obj list / ex. [{primary_data_type:DataType.PRODUCT,primary_field:'id',item_field:'parent_id',title:'field_title',fields:'id,title,title_url'}] / ex. throw error
+			  - make_flat / type. bool / ex. true,false / default. false
 	 	 * User
 		 - get_user / type. bool / ex. true,false / default. false
 		   - user_fields / type. string / ex. field1,field2 / default. empty
+		   	 - make_user_flat / type. bool / ex. true,false / default. false
 		 * Return
 			- data_type
 			- item_count
@@ -2213,7 +2235,15 @@ class Portal {
 							}else{
 								if(data.data_list.length> 0){
 									data.data_list.forEach(item => {
-										item.user = item_list.find(item_find => item_find.id === item.user_id) ? item_list.find(item_find => item_find.id === item.user_id):App_Logic.get_not_found(DataType.USER,item.user_id);
+										if(option.make_user_flat){
+											let user = item_list.find(item_find => item_find.id === item.user_id) ? item_list.find(item_find => item_find.id === item.user_id):App_Logic.get_not_found(DataType.USER,item.user_id);
+											for (const prop in user) {
+												item["user_"+prop] = user[prop];
+											}
+										}else{
+											item.user = item_list.find(item_find => item_find.id === item.user_id) ? item_list.find(item_find => item_find.id === item.user_id):App_Logic.get_not_found(DataType.USER,item.user_id);
+										}
+
 									});
 								}
 							}
