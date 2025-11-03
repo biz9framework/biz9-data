@@ -120,7 +120,6 @@ const post_item_base = (db_connect,data_type,item,option) => {
 }
 const post_bulk_base = (db_connect,data_type,data_list) => {
     return new Promise((callback) => {
-        console.log('444444444');
         let data = {result_OK:false};
         let bulk_list = [];
         let date_create = DateTime.get_new();
@@ -133,24 +132,17 @@ const post_bulk_base = (db_connect,data_type,data_list) => {
 
         if(check_db_connect_base(db_connect)){
             try {
-                console.log('555555555');
-                console.log(data_list);
-                console.log(data_type);
                 db_connect.collection(data_type).bulkWrite(bulk_list,
                 { ordered: false } )
                 } catch( error ) {
-                    console.log('error');
                     Log.w('bulk_write_error',error);
                     Log.error("DATA-MONGO-BASE-DELETE-ITEM-BASE-ERROR",error);
                 }
                data.result_OK= true;
-            console.log('66666666');
-                console.log('done'+Num.get_id());
                 callback([error,data]);
             }
         });
 }
-
 const delete_item_base = (db_connect,data_type,id,option) => {
     return new Promise((callback) => {
         let data = null;

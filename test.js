@@ -66,32 +66,35 @@ describe('connect', function(){ this.timeout(25000);
                 database = biz_data;
                 console.log('DATABASE-END');
             },
+            /*
             //- POST_ITEM - START
             async function(call){
+
                 let data_type = DataType.ORDER_PAYMENT;
                 let id = "3e6cbb33-afa8-47d4-95c0-9df60e02b3ee";
-                let user_id = "f63d6bd2-ce86-4a36-808f-40fe59069077";
-                let option = {post_stat:true,post_unique:false,user_id:user_id,stat_type:Type.STAT_ORDER_PAYMENT};
-                let order_number = "OR-55453";
+                let user_id = "63e7b9ea-7bf8-4780-bf90-5050e501f44c";
+                let option = {post_stat:true,post_unique:false,user_id:user_id,stat_type:Type.STAT_ORDER_PAYMENT,order_payment_list_sort_by:{date_create:'-1'}};
+                let order_number = "OR-4249";
                 let order_payment = Order_Logic.get_new_order_payment(order_number,Title.ORDER_PAYMENT_METHOD_TEST,Num.get_id(99));
                 //Log.w('order_payment',order_payment);
                 //Log.w('option',option);
-                const [biz_error,biz_data] = await Portal.post(database,data_type,order_payment,option);
-                //Log.w('22_post',biz_data);
+                //const [biz_error,biz_data] = await Portal.post(database,data_type,order_payment,option);
+                const [biz_error,biz_data] = await Order_Data.get(database,order_number,option);
+                Log.w('33_post',biz_data);
                 //cart = biz_data;
                 //Log.w('33_cart',cart);
              },
             //- POST_ITEM - END
+            */
             //- GET_ITEM - END
             //- SEARCH - START
-            /*
             async function(call){
-                let search = App_Logic.get_search(DataType.PRODUCT,{category:'Music'},{},1,0);
-                //let option = {get_parent:true,search_field:
-                const [biz_error,biz_data] = await Portal.search(database,data_type,id);
-                data.item = biz_data;
+                let search = App_Logic.get_search(DataType.REVIEW,{},{},1,0);
+                let option = {get_join:true,field_key_list:[{primary_data_type:DataType.PRODUCT,primary_field:'id',item_field:'parent_id',title:'product',make_flat:true}],get_user:true,make_user_flat:true};
+                //const [biz_error,biz_data] = await Portal.search(database,data_type,id);
+                const [biz_error,biz_data] = await Review_Data.search(database,search.filter,search.sort_by,search.page_current,search.page_size,option);
+                Log.w('search_data',biz_data);
              },
-             */
             //- SEARCH - END
             /*
              //- STAT - START

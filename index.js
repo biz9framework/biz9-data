@@ -713,11 +713,12 @@ class Order_Data {
 						order_item.order_sub_item_list = [...item_filter_list, ...order_item.order_sub_item_list];
 					});
 				},
-				//get_order_payment
+				//get_order_payment_list
 				async function(call){
 					if(!Str.check_is_null(data.order.id)){
 						let filter = { order_number:order_number };
-						let search = App_Logic.get_search(DataType.ORDER_PAYMENT,filter,{},1,0);
+						let sort_order = option.order_payment_list_sort_by ? option.order_payment_list_sort_by : {date_create:-1};
+						let search = App_Logic.get_search(DataType.ORDER_PAYMENT,filter,sort_order,1,0);
 						const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,{});
 						if(biz_error){
 							error=Log.append(error,biz_error);
@@ -1230,6 +1231,34 @@ class Review_Data {
 			});
 		});
 	};
+	//9_review_search
+	static search = (database,filter,sort_by,page_current,page_size,option) => {
+		return new Promise((callback) => {
+			let data = {item_count:0,page_count:1,filter:{},data_type:DataType.REVIEW,data_list:[]};
+			let error = null;
+			option = option ? option : {get_item:false,get_image:false};
+			async.series([
+				async function(call){
+					const [biz_error,biz_data] = await Portal.search(database,DataType.REVIEW,filter,sort_by,page_current,page_size,option);
+					if(biz_error){
+						error=Log.append(error,biz_error);
+					}else{
+						data.item_count = biz_data.item_count;
+						data.data_type = DataType.REVIEW;
+						data.page_count = biz_data.page_count;
+						data.filter = biz_data.filter;
+						data.review_list = biz_data.data_list;
+					}
+				},
+			]).then(result => {
+				callback([error,data]);
+			}).catch(err => {
+				Log.error("Review-Search",err);
+				callback([err,[]]);
+			});
+		});
+	};
+
 	//9_review_get
 	static get = async (database,parent_data_type,parent_id,sort_by,page_current,page_size) => {
 		return new Promise((callback) => {
@@ -2342,23 +2371,17 @@ class Portal {
 				},
 				async function(call){
 					if(option.post_stat){
-						console.log('here');
-						Log.w('option',option);
 						let post_stat = Stat_Logic.get_new(data_type,item.id,option.stat_type,option.user_id,item);
 						Log.w('post_stat',post_stat);
 						const [biz_error,biz_data] = await Stat_Data.post(database,post_stat,option);
-						Log.w('aaaa',biz_data);
-						/*
 						if(biz_error){
 							error=Log.append(error,biz_error);
 						}else{
-							data.stat = biz_data;
+							//data.stat = biz_data;
 						}
-						*/
 						//data.stat.resultOK = resultOK;
 					}
 				},
-
 			]).then(result => {
 				callback([error,data]);
 			}).catch(err => {
