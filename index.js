@@ -67,6 +67,32 @@ class Database {
 			});
 		});
 	}
+	static info = async (database,option) => {
+		/* return
+		 * tbd
+		 */
+		return new Promise((callback) => {
+			let data = [];
+			let error = null;
+			option = option ? option : {};
+			async.series([
+				async function(call){
+					const collections = await database.listCollections().toArray();
+					 for (const collectionInfo of collections) {
+      					const collectionName = collectionInfo.name;
+      					const collection = database.collection(collectionName);
+      					const count = await collection.estimatedDocumentCount();
+						 data.push({title:collectionName,item_count:count});
+    				}
+				},
+			]).then(result => {
+				callback([error,data]);
+			}).catch(err => {
+				Log.error("Database-Info",err);
+				callback([err,null]);
+			});
+		});
+	}
 }
 class Blog_Post_Data {
 	//9_blog_post_get

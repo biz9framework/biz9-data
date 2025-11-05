@@ -66,10 +66,14 @@ describe('connect', function(){ this.timeout(25000);
                 database = biz_data;
                 console.log('DATABASE-END');
             },
+            async function(call){
+                const [biz_error,biz_data] = await Database.info(database,{});
+                Log.w('search_data',biz_data);
+             },
+
             /*
             //- POST_ITEM - START
             async function(call){
-
                 let data_type = DataType.ORDER_PAYMENT;
                 let id = "3e6cbb33-afa8-47d4-95c0-9df60e02b3ee";
                 let user_id = "63e7b9ea-7bf8-4780-bf90-5050e501f44c";
@@ -88,6 +92,7 @@ describe('connect', function(){ this.timeout(25000);
             */
             //- GET_ITEM - END
             //- SEARCH - START
+            /*
             async function(call){
                 let search = App_Logic.get_search(DataType.REVIEW,{},{},1,0);
                 let option = {get_join:true,field_key_list:[{primary_data_type:DataType.PRODUCT,primary_field:'id',item_field:'parent_id',title:'product',make_flat:true}],get_user:true,make_user_flat:true};
@@ -95,6 +100,7 @@ describe('connect', function(){ this.timeout(25000);
                 const [biz_error,biz_data] = await Review_Data.search(database,search.filter,search.sort_by,search.page_current,search.page_size,option);
                 Log.w('search_data',biz_data);
              },
+             */
             //- SEARCH - END
             /*
              //- STAT - START
