@@ -66,39 +66,37 @@ describe('connect', function(){ this.timeout(25000);
                 database = biz_data;
                 console.log('DATABASE-END');
             },
-            async function(call){
-                const [biz_error,biz_data] = await Database.info(database,{});
-                Log.w('search_data',biz_data);
-             },
-
-            /*
             //- POST_ITEM - START
             async function(call){
-                let data_type = DataType.ORDER_PAYMENT;
+                let data_type = DataType.PRODUCT;
                 let id = "3e6cbb33-afa8-47d4-95c0-9df60e02b3ee";
+                let key = "mobile_product_12";
                 let user_id = "63e7b9ea-7bf8-4780-bf90-5050e501f44c";
-                let option = {post_stat:true,post_unique:false,user_id:user_id,stat_type:Type.STAT_ORDER_PAYMENT,order_payment_list_sort_by:{date_create:'-1'}};
-                let order_number = "OR-4249";
-                let order_payment = Order_Logic.get_new_order_payment(order_number,Title.ORDER_PAYMENT_METHOD_TEST,Num.get_id(99));
+                //let option = {post_stat:true,post_unique:false,user_id:user_id,stat_type:Type.STAT_ORDER_PAYMENT,order_payment_list_sort_by:{date_create:'-1'}};
+                let option = {get_join:true, field_key_list:[{primary_data_type:DataType.ORDER_ITEM,primary_field:'parent_id',item_field:'id',title:'orders',type:Type.LIST}]};
+                //let order_number = "OR-4249";
+                //let order_payment = Order_Logic.get_new_order_payment(order_number,Title.ORDER_PAYMENT_METHOD_TEST,Num.get_id(99));
                 //Log.w('order_payment',order_payment);
                 //Log.w('option',option);
                 //const [biz_error,biz_data] = await Portal.post(database,data_type,order_payment,option);
-                const [biz_error,biz_data] = await Order_Data.get(database,order_number,option);
+                const [biz_error,biz_data] = await Portal.get(database,data_type,key,option);
                 Log.w('33_post',biz_data);
                 //cart = biz_data;
                 //Log.w('33_cart',cart);
              },
             //- POST_ITEM - END
-            */
-            //- GET_ITEM - END
             //- SEARCH - START
             /*
             async function(call){
-                let search = App_Logic.get_search(DataType.REVIEW,{},{},1,0);
+                let search = App_Logic.get_search(DataType.PRODUCT,{},{view_count:-1},1,9);
                 let option = {get_join:true,field_key_list:[{primary_data_type:DataType.PRODUCT,primary_field:'id',item_field:'parent_id',title:'product',make_flat:true}],get_user:true,make_user_flat:true};
                 //const [biz_error,biz_data] = await Portal.search(database,data_type,id);
-                const [biz_error,biz_data] = await Review_Data.search(database,search.filter,search.sort_by,search.page_current,search.page_size,option);
-                Log.w('search_data',biz_data);
+                const [biz_error,biz_data] = await Product_Data.search(database,search.filter,search.sort_by,search.page_current,search.page_size,{});
+                //Log.w('search_data',biz_data);
+                for(let a = 0; a<biz_data.product_list.length;a++){
+                    console.log('title='+biz_data.product_list[a].title);
+                    console.log('view_count='+biz_data.product_list[a].view_count);
+                }
              },
              */
             //- SEARCH - END
@@ -121,13 +119,13 @@ describe('connect', function(){ this.timeout(25000);
              //- STAT - END
             */
 
-            /*
             //- GET_ITEM - START
+            /*
             async function(call){
-                let data_type = DataType.PRODUCT;
-                let id = "3e6cbb33-afa8-47d4-95c0-9df60e02b3ee";
+                let data_type = DataType.BLOG_POST;
+                let id = "deb6489d-7471-4fa9-982d-31463ace67af";
                 let user_id = "f63d6bd2-ce86-4a36-808f-40fe59069077";
-                let option = {post_stat:true,post_unique:true,user_id:user_id};
+                let option = {get_item:true,post_stat:true,post_unique:true,user_id:user_id};
                 console.log('111111111111111');
                 console.log('111111111111111');
                 const [biz_error,biz_data] = await Portal.get(database,data_type,id,option);
@@ -135,8 +133,8 @@ describe('connect', function(){ this.timeout(25000);
                 //cart = biz_data;
                 //Log.w('33_cart',cart);
              },
+             */
             //- GET_ITEM - END
-            */
 
             /*
             //- REVIEW - START

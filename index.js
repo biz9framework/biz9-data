@@ -1897,7 +1897,15 @@ class Portal {
 		   - fields / type. string / ex. field1,field2 / default. throw error
 		 *  Join
 		 	- get_join / type. bool / ex. true,false / default. false
-			  	- field_key_list / type. obj list / ex. [{primary_data_type:DataType.PRODUCT,primary_field:'id',item_field:'parent_id',title:'field_title',fields:'id,title,title_url'}] / ex. throw error
+			  	- field_key_list / type. obj list / ex. [
+					{
+						primary_data_type:DataType.PRODUCT,
+						primary_field:'id',
+						item_field:'parent_id',
+						title:'field_title',
+						fields:'id,title,title_url',
+						type:obj,list,count
+					}]
 		 * Items
 		   - get_item / bool / ex. true,false / def. true
 		 * Photos
@@ -2055,23 +2063,44 @@ class Portal {
 								title : option.field_key_list[a].title,
 								fields : option.field_key_list[a].fields ? option.field_key_list[a].fields : "",
 								make_flat : option.field_key_list[a].make_flat ? option.field_key_list[a].make_flat : false,
+								type : option.field_key_list[a].type ? option.field_key_list[a].type : Type.OBJ,
 								data : [],
 							});
  						};
-							  for (const parent_search_item of parent_search_item_list) {
+							  for(const parent_search_item of parent_search_item_list){
 								let join_option = parent_search_item.fields ? {get_field:true,fields:parent_search_item.fields} : {};
-								const [biz_error,biz_data] = await Portal.get(database,parent_search_item.primary_data_type,data[parent_search_item.item_field],join_option);
-								if(biz_error){
-									error=Log.append(error,biz_error);
-								}else{
-									if(parent_search_item.make_flat){
- 										for (const prop in biz_data) {
-											data[parent_search_item.title+"_"+prop] = biz_data[prop];
+
+								if(parent_search_item.type == Type.OBJ){
+									const [biz_error,biz_data] = await Portal.get(database,parent_search_item.primary_data_type,data[parent_search_item.item_field],join_option);
+									if(biz_error){
+										error=Log.append(error,biz_error);
+										}else{
+											if(parent_search_item.make_flat){
+ 											for (const prop in biz_data) {
+												data[parent_search_item.title+"_"+prop] = biz_data[prop];
+											}
+											}else{
+								  				data[parent_search_item.title] = biz_data;
+											}
+											Log.w('99_obj',data);
 										}
-									}else{
-								  		data[parent_search_item.title] = biz_data;
+										}else if(parent_search_item.type == Type.LIST){
+											console.log('aaaaaaaaaaaa');
+											console.log('aaaaaaaaaaaa');
+											console.log('aaaaaaaaaaaa');
+									/*
+									const [biz_error,biz_data] = await Portal.search(database,parent_search_item.primary_data_type,data[parent_search_item.item_field],join_option);
+									if(biz_error){
+										error=Log.append(error,biz_error);
+										}else{
+												console.log('aaaaaaaa');
+								  				data[parent_search_item.title] = biz_data.data_list;
+												console.log(biz_data.data_list);
+												console.log('apple');
+										}
 									}
-								}
+									*/
+										}
 							  }
 					}
 				},
