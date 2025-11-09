@@ -2094,19 +2094,18 @@ class Portal {
 									}else{
 										data[parent_search_item.title] = biz_data.data_list;
 									}
-
-									/*
+								}else if(parent_search_item.type == Type.COUNT){
+									let query = {};
+									query[parent_search_item.primary_field] = data[parent_search_item.item_field];
+									let search = App_Logic.get_search(parent_search_item.primary_data_type,query,{},1,0);
+									const [biz_error,biz_data] = await Portal.count(database,search.data_type,search.filter);
 									if(biz_error){
 										error=Log.append(error,biz_error);
-										}else{
-												console.log('aaaaaaaa');
-								  				data[parent_search_item.title] = biz_data.data_list;
-												console.log(biz_data.data_list);
-												console.log('apple');
-										}
+									}else{
+										data[parent_search_item.title] = biz_data;
 									}
-									*/
 								}
+
 							  }
 					}
 				},
