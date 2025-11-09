@@ -73,7 +73,7 @@ describe('connect', function(){ this.timeout(25000);
                 let key = "mobile_product_12";
                 let user_id = "63e7b9ea-7bf8-4780-bf90-5050e501f44c";
                 //let option = {post_stat:true,post_unique:false,user_id:user_id,stat_type:Type.STAT_ORDER_PAYMENT,order_payment_list_sort_by:{date_create:'-1'}};
-                let option = {get_join:true, field_key_list:[{primary_data_type:DataType.ORDER_ITEM,primary_field:'parent_id',item_field:'id',title:'orders',type:Type.LIST}]};
+                let option = {get_join:true,field_key_list:[{primary_data_type:DataType.ORDER_ITEM,primary_field:'parent_id',item_field:'id',title:'cool_orders',type:Type.LIST}]};
                 //let order_number = "OR-4249";
                 //let order_payment = Order_Logic.get_new_order_payment(order_number,Title.ORDER_PAYMENT_METHOD_TEST,Num.get_id(99));
                 //Log.w('order_payment',order_payment);

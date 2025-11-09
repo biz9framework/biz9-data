@@ -2084,12 +2084,18 @@ class Portal {
 											}
 											Log.w('99_obj',data);
 										}
-										}else if(parent_search_item.type == Type.LIST){
-											console.log('aaaaaaaaaaaa');
-											console.log('aaaaaaaaaaaa');
-											console.log('aaaaaaaaaaaa');
+								}else if(parent_search_item.type == Type.LIST){
+									let query = {};
+									query[parent_search_item.primary_field] = data[parent_search_item.item_field];
+									let search = App_Logic.get_search(parent_search_item.primary_data_type,query,{},1,0);
+									const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,join_option);
+									if(biz_error){
+										error=Log.append(error,biz_error);
+									}else{
+										data[parent_search_item.title] = biz_data.data_list;
+									}
+
 									/*
-									const [biz_error,biz_data] = await Portal.search(database,parent_search_item.primary_data_type,data[parent_search_item.item_field],join_option);
 									if(biz_error){
 										error=Log.append(error,biz_error);
 										}else{
@@ -2100,7 +2106,7 @@ class Portal {
 										}
 									}
 									*/
-										}
+								}
 							  }
 					}
 				},
