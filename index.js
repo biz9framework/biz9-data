@@ -2067,9 +2067,8 @@ class Portal {
 								data : [],
 							});
  						};
-							  for(const parent_search_item of parent_search_item_list){
+						for(const parent_search_item of parent_search_item_list){
 								let join_option = parent_search_item.fields ? {get_field:true,fields:parent_search_item.fields} : {};
-
 								if(parent_search_item.type == Type.OBJ){
 									const [biz_error,biz_data] = await Portal.get(database,parent_search_item.primary_data_type,data[parent_search_item.item_field],join_option);
 									if(biz_error){
@@ -2082,7 +2081,6 @@ class Portal {
 											}else{
 								  				data[parent_search_item.title] = biz_data;
 											}
-											Log.w('99_obj',data);
 										}
 								}else if(parent_search_item.type == Type.LIST){
 									let query = {};
@@ -2105,8 +2103,7 @@ class Portal {
 										data[parent_search_item.title] = biz_data;
 									}
 								}
-
-							  }
+						}
 					}
 				},
 				//post-view-stat
@@ -2140,6 +2137,322 @@ class Portal {
 			});
 		});
 	};
+	//9_portal_search
+	static search_new = (database,data_type,filter,sort_by,page_current,page_size,option) => {
+		/* Options
+		 * Distinct
+		   - get_distinct / type. bool / ex. true,false / default. false
+		   - distinct_field / type. string / ex. field1 / default. throw error
+		   - distinct_sort / type. string / ex. asc,desc / default. asc
+		 * Fields
+		   - fields / type. string / ex. field1,field2 / default. throw error
+		 * Items
+			- get_item / type. bool / ex. true,false / default. false
+		 * Photos
+			- get_image / type. bool / ex. true,false / default. false
+			- image_count / type. int / ex. 1-999 / default. 19
+			- image_sort_by / type. {} / ex. {date_create:1} / default. {}
+		 *  Count
+			- get_count / type. bool / ex. true,false / default. false
+			  - count_data_type / type. string / ex. PRODUCT / default. throw error
+			  - count_field / type. number / ex. category /  default. throw error
+			  - count_value / type. string / ex. title / default. throw error
+		 *  Search
+		 	- get_join / type. bool / ex. true,false / default. false
+			  - field_key_list / type. obj list / ex. [{primary_data_type:DataType.PRODUCT,primary_field:'id',item_field:'parent_id',title:'field_title',fields:'id,title,title_url'}] / ex. throw error
+			  - make_flat / type. bool / ex. true,false / default. false
+	 	 * User
+		 - get_user / type. bool / ex. true,false / default. false
+		   - user_fields / type. string / ex. field1,field2 / default. empty
+		   	 - make_user_flat / type. bool / ex. true,false / default. false
+		 * Return
+			- data_type
+			- item_count
+			- page_count
+			- filter
+			- item_list
+			*/
+		return new Promise((callback) => {
+			let data = {data_type:data_type,item_count:0,page_count:1,filter:{},data_list:[]};
+			let error=null;
+			option = option ? option : {get_item:false,get_image:false,get_field:false,get_count:false};
+			option.get_field = option.fields ? true : false;
+			async.series([
+				//get list
+				function(call){
+					let search = App_Logic.get_search(data_type,filter,sort_by,page_current,page_size);
+					Data.get_list(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option).then(([biz_error,item_list,item_count,page_count])=>{
+						if(biz_error){
+							error=Log.append(error,biz_error);
+						}else{
+							data.data_type=data_type;
+							data.item_count=item_count;
+							data.page_count=page_count;
+							data.search=search;
+							data.filter=filter;
+							data.data_list=item_list;
+							call();
+						}
+					}).catch(err => {
+						Log.error('DATA-SEARCH-ERROR-1',err);
+						error=Log.append(error,err);
+					});
+				},
+				//get distinct
+				function(call){
+					if(option.get_distinct && data.data_list.length>0){
+						data.data_list = data.data_list.filter((obj, index, self) =>
+							index === self.findIndex((t) => t[option.distinct_field] === obj[option.distinct_field])
+						);
+						let distinct_sort_by = option.distinct_sort ? option.distinct_sort : 'asc';
+						data.data_list = Obj.sort_list_by_field(data.data_list,'title',distinct_sort_by);
+						call();
+					}
+					else{
+						call();
+					}
+				},
+
+				//get count
+				function(call){
+					if(option.get_count && data.data_list.length>0){
+						let query = { $or: [] };
+						data.data_list.forEach(item => {
+							let query_field = {};
+							query_field[option.count_field] = { $regex:String(item[option.count_value]), $options: "i" };
+							query.$or.push(query_field);
+						});
+						let search = App_Logic.get_search(option.count_data_type,query,{},1,0);
+						Data.get_list(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size).then(([biz_error,item_list,item_count,page_count])=> {
+							if(biz_error){
+								error=Log.append(error,biz_error);
+							}else{
+								if(data.data_list.length> 0 && item_list.length>0){
+									data.data_list.forEach(item => {
+										item.item_count = 0;
+										item_list.forEach(item_count => {
+											if(item[option.count_value] == item_count[option.count_field]){
+												item.item_count = item.item_count + 1;
+											}
+										});
+									});
+								}
+							}
+							call();
+						}).catch(err => {
+							Log.error('DATA-SEARCH-ERROR-2',err);
+							error = Log.append(err,biz_error);
+							call();
+						});
+					}else{
+						call();
+					}
+				},
+				//get_join
+				function(call){
+					if(option.get_join && data.data_list.length>0){
+						let parent_search_item_list = [];
+						for(let a = 0; a < option.field_key_list.length; a++){
+							parent_search_item_list.push({
+								primary_data_type : option.field_key_list[a].primary_data_type,
+								primary_field : option.field_key_list[a].primary_field,
+								item_field : option.field_key_list[a].item_field,
+								title : option.field_key_list[a].title,
+								fields : option.field_key_list[a].fields ? option.field_key_list[a].fields : "",
+								make_flat : option.field_key_list[a].make_flat ? option.field_key_list[a].make_flat : false,
+								type : option.field_key_list[a].type ? option.field_key_list[a].type : Type.OBJ,
+								data_list : []
+							});
+ 						};
+						async.forEachOf( parent_search_item_list,async(parent_search_item,key,go)=>{
+							let query = { $or: [] };
+ 							for(const data_item of data.data_list){
+								let query_field = {};
+								query_field[parent_search_item.primary_field] = { $regex:String(data_item[parent_search_item.item_field]), $options: "i" };
+								query.$or.push(query_field);
+							};
+							let search = App_Logic.get_search(parent_search_item.primary_data_type,query,{},1,0);
+							let join_option = parent_search_item.fields ? {get_field:true,fields:parent_search_item.fields} : {};
+							Data.get_list(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,join_option).then(async([biz_error,item_list,item_count,page_count])=> {
+								if(biz_error){
+									error=Log.append(error,biz_error);
+								}else{
+									parent_search_item.data_list = item_list;
+								if(parent_search_item_list.length> 0){
+									for(const parent_search_item of parent_search_item_list){
+										/*
+										if(parent_search_item.type == Type.OBJ){
+											data_item[parent_search_item.title] = App_Logic.get_not_found(parent_search_item.primary_data_type,data_item[parent_search_item.item_field]);
+										}else if(parent_search_item.type == Type.LIST){
+											data_item[parent_search_item.title] = [];
+										}
+										*/
+										let run_this = [];
+										run_this.push(data.data_list[0]);
+										//for(const data_item of run_this){
+										for(const data_item of data.data_list){
+											let item_found = parent_search_item.data_list.find(item_find => item_find[parent_search_item.primary_field] === data_item[parent_search_item.item_field])
+											if(parent_search_item.type == Type.OBJ){
+												if(parent_search_item.make_flat){
+ 													for(const prop in item_found) {
+														data_item[parent_search_item.title+"_"+prop] = item_found[prop];
+													}
+												}else{
+								  					data_item[parent_search_item.title] = item_found;
+												}
+											}else if(parent_search_item.type == Type.LIST){
+												let query = {};
+												query[parent_search_item.primary_field] = data_item[parent_search_item.item_field];
+												let search = App_Logic.get_search(parent_search_item.primary_data_type,query,{},1,0);
+												const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,join_option);
+												data_item[parent_search_item.title] = [];
+												if(biz_error){
+													error=Log.append(error,biz_error);
+												}else{
+													for(const sub_data_item of biz_data.data_list){
+														data_item[parent_search_item.title].push(sub_data_item);
+													}
+												}
+											}else if(parent_search_item.type == Type.COUNT){
+												let query = {};
+												query[parent_search_item.primary_field] = data_item[parent_search_item.item_field];
+												let search = App_Logic.get_search(parent_search_item.primary_data_type,query,{},1,0);
+												const [biz_error,biz_data] = await Portal.count(database,search.data_type,search.filter);
+												//Log.w('my_search',biz_data);
+												data_item[parent_search_item.title] = 0;
+												if(biz_error){
+													error=Log.append(error,biz_error);
+												}else{
+													Log.w(data_item.title,biz_data);
+														data_item[parent_search_item.title] = biz_data;
+												}
+											}
+											/*-old
+											if(item_found){
+												if(parent_search_item.make_flat){
+ 													for(const prop in item_found) {
+														data_item[parent_search_item.title+"_"+prop] = item_found[prop];
+													}
+												}else{
+													data_item[parent_search_item.title] = item_found;
+												}
+											}else{
+												if(parent_search_item.make_flat){
+													data_item[parent_search_item.title+"_title"] = 'not_found';
+
+												}else{
+													data_item[parent_search_item.title] = App_Logic.get_not_found(parent_search_item.primary_data_type,data_item[parent_search_item.item_field]);
+												}
+											}
+											*/
+										}
+									}
+									//go();
+								}else{
+									//go();
+								}
+							}
+							}).catch(err => {
+								if(err){
+									Log.error('DATA-SEARCH-ERROR-4',err);
+									error = Log.append(error,err);
+								}
+							});
+               			}, err => {
+							if(err){
+									error = Log.append(error,err);
+							}
+							call();
+                			});
+					}else{
+						call();
+					}
+				},
+				function(call){
+					if(option.get_user && data.data_list.length>0){
+						let query = { $or: [] };
+						data.data_list.forEach(item => {
+							let query_field = {};
+							query_field[Type.ID] = { $regex:String(item[Type.USER_ID]), $options: "i" };
+							query.$or.push(query_field);
+						});
+						let search = App_Logic.get_search(DataType.USER,query,{},1,0);
+						let user_option = option.user_fields ? {get_field:true,fields:option.user_fields? option.user_fields:""} : {};
+						Data.get_list(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,user_option).then(([biz_error,item_list,item_count,page_count])=> {
+							if(biz_error){
+								error=Log.append(error,biz_error);
+							}else{
+								if(data.data_list.length> 0){
+									data.data_list.forEach(item => {
+										if(option.make_user_flat){
+											let user = item_list.find(item_find => item_find.id === item.user_id) ? item_list.find(item_find => item_find.id === item.user_id):App_Logic.get_not_found(DataType.USER,item.user_id);
+											for (const prop in user) {
+												item["user_"+prop] = user[prop];
+											}
+										}else{
+											item.user = item_list.find(item_find => item_find.id === item.user_id) ? item_list.find(item_find => item_find.id === item.user_id):App_Logic.get_not_found(DataType.USER,item.user_id);
+										}
+
+									});
+								}
+							}
+							call();
+						}).catch(err => {
+							Log.error('DATA-SEARCH-ERROR-5',err);
+							error = Log.append(error,err);
+							call();
+						});
+					}else{
+						call();
+					}
+				},
+			//get favorite
+				function(call){
+					if(option.get_favorite && data.data_list.length>0){
+						let query = { $or:[] };
+						data.data_list.forEach(item => {
+							let query_field = {$or:[],$and:[]};
+							query_field.$or.push({parent_id:item.id});
+							query_field.$and.push({user_id:option.user_id});
+							query.$or.push(query_field);
+						});
+						let favorite_match_search = App_Logic.get_search(DataType.FAVORITE,query,{},1,0);
+						let favorite_match_option =  {get_field:true,fields:'id,parent_id,parent_data_type'};
+						Data.get_list(database,
+							favorite_match_search.data_type,
+							favorite_match_search.filter,
+							favorite_match_search.sort_by,
+							favorite_match_search.page_current,
+							favorite_match_search.page_size,
+							favorite_match_option).then(([biz_error,item_list,item_count,page_count])=> {
+								if(biz_error){
+									error=Log.append(error,biz_error);
+								}else{
+									if(data.data_list.length> 0){
+										data.data_list.forEach(item => {
+											item.is_favorite = item_list.find(item_find => item_find.parent_id === item.id) ? true:false
+										});
+									}
+								}
+								call();
+							}).catch(err => {
+								Log.error('DATA-SEARCH-ERROR-6',err);
+								error = Log.append(error,err);
+								call();
+							});
+					}else{
+						call();
+					};
+				},
+			]).then(result => {
+				callback([error,data]);
+			}).catch(err => {
+				Log.error('DATA-SEARCH-ERROR-7',err);
+				callback([err,[]]);
+			});
+		});
+	};
+
 	//9_portal_search
 	static search = (database,data_type,filter,sort_by,page_current,page_size,option) => {
 		/* Options
@@ -2266,9 +2579,14 @@ class Portal {
 								}else{
 									parent_search_item.data_list = item_list;
 								if(parent_search_item_list.length> 0){
+
 									for(const parent_search_item of parent_search_item_list){
+
 										for(const data_item of data.data_list){
 											let item_found = parent_search_item.data_list.find(item_find => item_find[parent_search_item.primary_field] === data_item[parent_search_item.item_field])
+
+
+											/*-old
 											if(item_found){
 												if(parent_search_item.make_flat){
  													for(const prop in item_found) {
@@ -2285,8 +2603,11 @@ class Portal {
 													data_item[parent_search_item.title] = App_Logic.get_not_found(parent_search_item.primary_data_type,data_item[parent_search_item.item_field]);
 												}
 											}
+											*/
 										}
+
 									}
+
 									go();
 								}else{
 									go();
