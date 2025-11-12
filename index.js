@@ -1768,16 +1768,6 @@ class Favorite_Data {
 						}else{
 							data.stat_favorite = biz_data;
 						}
-
-						/*
-						let post_stat_list = Stat_Logic.get_new(user_id,Type.STAT_FAVORITE,[data.favorite]);
-						const [biz_error,biz_data] = await Stat_Data.post(database,post_stat_list);
-						if(biz_error){
-							error=Log.append(error,biz_error);
-						}else{
-							data.stat_favorite = biz_data;
-						}
-						*/
 					}
 				},
 			]).then(result => {
@@ -2341,7 +2331,7 @@ class Portal {
 							query.$or.push(query_field);
 						});
 						let favorite_match_search = App_Logic.get_search(DataType.FAVORITE,query,{},1,0);
-						let favorite_match_option =  {get_field:true,fields:'id,parent_id,parent_data_type'};
+						let favorite_match_option =  {get_field:false,fields:'id,user_id,parent_id,parent_data_type'};
 						const [biz_error,biz_data] = await Portal.search(database,
 							favorite_match_search.data_type,
 							favorite_match_search.filter,
@@ -2354,7 +2344,7 @@ class Portal {
 							}else{
 								if(data.data_list.length> 0){
 									data.data_list.forEach(item => {
-										item.is_favorite = data.data_list.find(item_find => item_find.parent_id === item.id) ? true:false
+										item.is_favorite = biz_data.data_list.find(item_find => item_find.parent_id === item.id && item_find.user_id == option.user_id) ? true:false
 									});
 								}
 							}
@@ -2720,14 +2710,13 @@ class Portal {
 			let data_list = [];
 			let copy_data_list = [];
 			async.series([
-				function(call){
-					Data.get(database,data_type,id).then(([biz_error,biz_data])=> {
+				async function(call){
+					const [biz_error,biz_data] = await Portal.get(database,data_type,id);
 						if(biz_error){
 							error=Log.append(error,biz_error);
+						}else{
+							top_data=biz_data;
 						}
-						top_data=biz_data;
-						call();
-					})
 				},
 				async function(call){
 					let filter = {top_id:top_data.id};
@@ -2736,7 +2725,7 @@ class Portal {
 						if(biz_error){
 							error=Log.append(error,biz_error);
 						}else{
-							data_list = biz_data;
+							data_list = biz_data.data_list;
 						}
 				},
 				function(call){
@@ -2752,18 +2741,13 @@ class Portal {
 					});
 					call();
 				},
-				function(call){
-					Data.post(database,copy_data.data_type,copy_data).then(([biz_error,biz_data])=> {
+				async function(call){
+					const [biz_error,biz_data] = await Portal.post(database,copy_data.data_type,copy_data);
 						if(biz_error){
 							error=Log.append(error,biz_error);
 						}else{
 							copy_data=biz_data;
 						}
-						call();
-					}).catch(err => {
-						error=Log.append(error,err);
-						call();
-					});
 				},
 				function(call){
 					for(const item of data_list) {
@@ -2785,17 +2769,14 @@ class Portal {
 					};
 					call();
 				},
-				function(call){
+				async function(call){
 					if(copy_data_list.length>0){
-						Data.post_list(database,copy_data_list).then(([biz_error,biz_data])=> {
+						const [biz_error,biz_data] = await Portal.post_list(database,copy_data_list);
 							if(biz_error){
 								error=Log.append(error,biz_error);
+							}else{
+								copy_data_list=biz_data;
 							}
-							copy_data_list=biz_data;
-							call();
-						})
-					}else{
-						call();
 					}
 				},
 				function(call){
@@ -2814,22 +2795,17 @@ class Portal {
 								});
 							}
 						});
-						call();
-					}else{
-						call();
 					}
+					call();
 				},
-				function(call){
+				async function(call){
 					if(copy_data_list.length>0){
-						Data.post_list(database,copy_data_list).then(([biz_error,biz_data])=> {
+						const [biz_error,biz_data] = await Portal.post_list(database,copy_data_list);
 							if(biz_error){
 								error=Log.append(error,biz_error);
+							}else{
+								copy_data_list=biz_data;
 							}
-							copy_data_list=biz_data;
-							call();
-						})
-					}else{
-						call();
 					}
 				},
 			]).then(result => {
