@@ -546,6 +546,7 @@ const delete_item_cache=(db_connect,data_type,id,option)=>{
                 }
                 for(const item of cache_string_list) {
                     if(item){
+                        console.log(get_cache_item_attr_key(data_type,id,item));
                         const [error,val] = await delete_cache_string_main(cache_connect,get_cache_item_attr_key(data_type,id,item));
                     }
                 }
@@ -553,6 +554,7 @@ const delete_item_cache=(db_connect,data_type,id,option)=>{
             function(call){
                 delete_cache_string_main(cache_connect,get_cache_item_attr_list_key(data_type,id)).then(([error,data]) => {
                     item_data.cache_del = true;
+                    item_data.cache_item_attr_list = get_cache_item_attr_list_key(data_type,id);
                     call();
                 }).catch(error => {
                     Log.error("Data-Adapter-Delete-Item-Cache-3",error);

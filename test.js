@@ -68,22 +68,40 @@ describe('connect', function(){ this.timeout(25000);
             },
             //- POST_ITEM - START
             async function(call){
-                let data_type = DataType.PRODUCT;
-                let id = "3e6cbb33-afa8-47d4-95c0-9df60e02b3ee";
+                //let id = 0;
+                let id = "90854cdc-92fb-446d-9234-8aa4c76aeae5";
+                let data_type = DataType.TEMPLATE;
+                let data_item = DataItem.get_new(data_type,0,{title:'primary',title_url:'primary'});
                 let key = "mobile_product_12";
                 let user_id = "63e7b9ea-7bf8-4780-bf90-5050e501f44c";
+                let option_ = {};
                 //let option = {post_stat:true,post_unique:false,user_id:user_id,stat_type:Type.STAT_ORDER_PAYMENT,order_payment_list_sort_by:{date_create:'-1'}};
-                let search = App_Logic.get_search(DataType.PRODUCT,{title_url:'add_on_product_11'},{title:1},1,0);
+                //let search = App_Logic.get_search(DataType.PRODUCT,{title_url:'add_on_product_11'},{title:1},1,0);
                 //let options = {get_distinct:true,distinct_field:'title',distinct_sort:'asc',get_count:true,count_data_type:DataType.PRODUCT,count_field:'category',count_value:'title',get_field:true,fields:'id,title,title_url,image_filename,cost'};
                 //let option ={};
                 //let option = {get_distinct:true,distinct_field:'title',distinct_sort:'asc',get_join:true,field_key_list:[{primary_data_type:DataType.PRODUCT,primary_field:'category',item_field:'title',title:'product_count',type:Type.COUNT}]};
-                let option = {fields: 'id,title,title_url,type,category,image_filename,cost,featured,delivery_time,hot,category,rating_avg,review_count,view_count,is_favorite',
-                    get_favorite: true,user_id: '6f9563a9-eb43-41ca-9840-f05e00d57559',get_field: true};
+                //let option = {fields: 'id,title,title_url,type,category,image_filename,cost,featured,delivery_time,hot,category,rating_avg,review_count,view_count,is_favorite',
+                    //get_favorite: true,user_id: '6f9563a9-eb43-41ca-9840-f05e00d57559',get_field: true};
+                let option = {
+                        get_field_sub_value:true,
+                        field_sub_value_list:[{
+                            type:Type.FIELD_VALUE_LIST,
+                            id:2,
+                            title:'foter row 1',
+                            field:'title,link,sub note'
+                        }
+                    ]
+                };
+                data_item['apple'] = [];
+                data_item[Field_Logic.get_field_value_title(Type.FIELD_VALUE_LIST,2,'title')] = 'my title '+Num.get_id();
+                data_item[Field_Logic.get_field_value_title(Type.FIELD_VALUE_LIST,2,'link')] = 'my link '+Num.get_id();
+                data_item[Field_Logic.get_field_value_title(Type.FIELD_VALUE_LIST,2,'sub_note')] = 'my sub_note '+Num.get_id();
+                //Log.w('data_item',data_item);
 
-                //const [biz_error,biz_data] = await Portal.post(database,data_type,order_payment,option);
-                //const [biz_error,biz_data] = await Portal.get(database,data_type,key,option);
-                const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option);
-                //Log.w('33_post',biz_data);
+                //const [biz_error,biz_data] = await Portal.post(database,data_type,data_item,{});
+                const [biz_error,biz_data] = await Portal.get(database,data_type,id,option);
+                //const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option);
+                Log.w('99_final_post',biz_data);
                 //Log.w('33_post',biz_data.data_list.length);
                 //Log.w('44_post',biz_data.data_list[0]);
                 //cart = biz_data;

@@ -9,7 +9,7 @@ const dayjs = require('dayjs');
 const {get_db_connect_main,check_db_connect_main,delete_db_connect_main,post_item_main,get_item_main,delete_item_main,get_id_list_main,delete_item_list_main,get_count_item_list_main,post_bulk_main} = require('./mongo/index.js');
 const {Scriptz}=require("biz9-scriptz");
 const {Log,Str,Num,Obj,DateTime}=require("/home/think2/www/doqbox/biz9-framework/biz9-utility/code");
-const {DataItem,DataType,Favorite_Logic,Stat_Logic,Review_Logic,Type,App_Logic,Product_Logic,Demo_Logic,Category_Logic,Cart_Logic,Order_Logic}=require("/home/think2/www/doqbox/biz9-framework/biz9-logic/code");
+const {DataItem,DataType,Favorite_Logic,Stat_Logic,Review_Logic,Type,App_Logic,Product_Logic,Demo_Logic,Category_Logic,Cart_Logic,Order_Logic,Field_Logic}=require("/home/think2/www/doqbox/biz9-framework/biz9-logic/code");
 const { get_db_connect_adapter,check_db_connect_adapter,delete_db_connect_adapter,post_item_adapter,post_item_list_adapter,post_bulk_adapter,get_item_adapter,delete_item_adapter,get_item_list_adapter,delete_item_list_adapter,get_count_item_list_adapter,delete_item_cache }  = require('./adapter.js');
 class Database {
 	static get = async (data_config,option) => {
@@ -1884,7 +1884,17 @@ class Portal {
 		/* Options
 		 * Fields
 		   - get_field / type. bool / ex. true,false / default. false
-		   - fields / type. string / ex. field1,field2 / default. throw error
+		   - fields / type. string / ex. field1,field2 / default. throw error / notez. id must by type tbl_id
+		   - delete_cache / type. bool / ex. true,false / default. false
+		   - get_field_sub_value / type. bool / ex. true,false / default. false
+		     - field_sub_value_list / return list / ex. [
+			 	{
+					type:'texr,list', / ex. TYPE.FIELD_VALUE_TEXT,TYPE.FIELD_VALUE_NOTE,TYPE.FIELD_VALUE_IMAGE,TYPE.FIELD_VALUE_LIST
+					value_id:'my_list_1',
+					title:'my_list_1',
+					field:'title,link,row_1'
+				}
+				];
 		 *  Join
 		 	- get_join / type. bool / ex. true,false / default. false
 			  	- field_key_list / type. obj list / ex. [
@@ -1893,9 +1903,8 @@ class Portal {
 						primary_field:'id',
 						item_field:'parent_id',
 						title:'field_title',
-						fields:'id,title,title_url',
 						type:obj,list,count
-					}]
+					}];
 		 * Items
 		   - get_item / bool / ex. true,false / def. true
 		 * Photos
@@ -1918,19 +1927,36 @@ class Portal {
 		   */
 		return new Promise((callback) => {
 			let error = null;
-			let data = DataItem.get_new(data_type,0,{key:key?key:Type.BLANK});
+			let data = DataItem.get_new(data_type,0,{key:key.toLowerCase()?key:Type.BLANK});
 			let stat_view = DataItem.get_new(DataType.STAT,0,{resultOK:false});
-			option = option ? option : {get_item:false,get_image:false,get_field:false,post_stat:false,user_id:0};
+			//option = option ? option : {get_item:false,get_image:false,get_field:false,post_stat:false,user_id:0};
+			option = option ? option : {};
 			option.get_field = option.fields ? true : false;
 			let parent_search_item_list = [];
 			async.series([
 				function(call){
+					console.log('111111111111');
 					if(!Str.check_is_guid(key)){
-						option.title_url = key;
+						option.title_url = key.toLowerCase();
+						key = key.toLowerCase();
 					}
 					call();
 				},
+  				//delete cache item
+        		async function(call){
+					console.log('22222222222');
+            		if(option.delete_cache && Str.check_is_guid(key)){
+                		const [biz_error,biz_data] = await Portal.delete_cache(database,data_type,key);
+                		if(biz_error){
+                    		error=Log.append(error,biz_error);
+                		}else{
+							console.log(biz_data);
+                    		//data.delete_cache_item = biz_data;
+                		}
+            		}
+        		},
 				function(call){
+					console.log('333333');
 					Data.get(database,data_type,key,option).then(([biz_error,biz_data,option])=> {
 						if(biz_error){
 							error=Log.append(error,biz_error);
@@ -2042,6 +2068,38 @@ class Portal {
 						}
 					}
 				},
+				//get_field_sub_value
+				async function(call){
+				if(option.get_field_sub_value && data.id){
+					let temp_num = 0;
+					for(const sub_value of option.field_sub_value_list){
+						let sub_value_title = sub_value.title ? Str.get_title_url(sub_value.title) : 'blank '+sub_value_id;
+						let sub_value_id = sub_value.id ? sub_value.id :Number(temp_num+1) ;
+						let sub_value_type = sub_value.type ? sub_value.type : Type.FIELD_VALUE_LIST;
+						let sub_value_field_title_list = sub_value.field ? sub_value.field.split(',') : [];
+
+						if(sub_value_type == Type.FIELD_VALUE_LIST){
+							data[sub_value_title] = [];
+							let new_item = {};
+							//for(const sub_value_title of sub_value_field_title_list){
+							for(let a = 0; a < sub_value_field_title_list.length;a++){
+								let title = Field_Logic.get_field_value_title(Type.FIELD_VALUE_LIST,sub_value_id,sub_value_field_title_list[a]);
+								let val = Field_Logic.get_field_value_value(Type.FIELD_VALUE_LIST,data,sub_value_id,sub_value_field_title_list[a]);
+								new_item[title] = val;
+							}
+							data[sub_value_title].push(new_item);
+						}
+						//Log.w('sub_value_type',sub_value_type);
+						//Log.w('sub_value_title',sub_value_title);
+						//Log.w('sub_value_field_title_list',sub_value_field_title_list);
+						Log.w('data',data);
+						Log.w('option',option);
+					}
+
+				}
+
+				},
+				/*
 				//get_join
 				async function(call){
 					if(option.get_join && data.id){
@@ -2119,6 +2177,7 @@ class Portal {
 						}
 					}
 				},
+				*/
 			]).then(result => {
 				callback([error,data]);
 			}).catch(err => {
@@ -2361,12 +2420,13 @@ class Portal {
 	//9_portal_post
 	static post = async (database,data_type,item,option) => {
 		/* option params
-		 * n/a
+		 * Fields
+		   - delete_cache / type. bool / ex. true,false / default. false
 		 */
 		return new Promise((callback) => {
 			let error = null;
 			let data = DataItem.get_new(data_type,0);
-			option = option ? option : {get_item:false,get_image:false,post_stat:false,user_id:0,stat_type:null};
+			option = option ? option : {}; //get_item:false,get_image:false,post_stat:false,user_id:0,stat_type:null,delete_cache:false
 			async.series([
 				function(call){
 					 Data.post(database,data_type,item,option).then(([biz_error,biz_data])=> {
@@ -2381,6 +2441,18 @@ class Portal {
 						call();
 					});
 				},
+				//delete cache item
+        		async function(call){
+            		if(option.delete_cache && Str.check_is_guid(item.id)){
+                		const [biz_error,biz_data] = await Portal.delete_cache(database,data_type,item.id);
+                		if(biz_error){
+                    		error=Log.append(error,biz_error);
+                		}else{
+							console.log(biz_data);
+                    		//data.delete_cache_item = biz_data;
+                		}
+            		}
+        		},
 				async function(call){
 					if(option.post_stat){
 						let post_stat = Stat_Logic.get_new(data_type,item.id,option.stat_type,option.user_id,item);
