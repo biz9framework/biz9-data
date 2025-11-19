@@ -2071,35 +2071,44 @@ class Portal {
 				//get_field_sub_value
 				async function(call){
 				if(option.get_field_sub_value && data.id){
-					let temp_num = 0;
+					let temp_num = 1;
 					for(const sub_value of option.field_sub_value_list){
-						let sub_value_title = sub_value.title ? Str.get_title_url(sub_value.title) : 'blank '+sub_value_id;
-						let sub_value_id = sub_value.id ? sub_value.id :Number(temp_num+1) ;
+						let sub_value_id = sub_value.id ? sub_value.id :Number(temp_num);
+						let sub_value_title =Field_Logic.get_field_value_title(Type.FIELD_VALUE_LIST,sub_value.id,temp_num);
 						let sub_value_type = sub_value.type ? sub_value.type : Type.FIELD_VALUE_LIST;
-						let sub_value_field_title_list = sub_value.field ? sub_value.field.split(',') : [];
-
-						if(sub_value_type == Type.FIELD_VALUE_LIST){
-							data[sub_value_title] = [];
-							let new_item = {};
-							//for(const sub_value_title of sub_value_field_title_list){
-							for(let a = 0; a < sub_value_field_title_list.length;a++){
-								let title = Field_Logic.get_field_value_title(Type.FIELD_VALUE_LIST,sub_value_id,sub_value_field_title_list[a]);
-								let val = Field_Logic.get_field_value_value(Type.FIELD_VALUE_LIST,data,sub_value_id,sub_value_field_title_list[a]);
-								new_item[title] = val;
+							if(sub_value_type == Type.FIELD_VALUE_LIST){
+								let sub_check_str = 'list_value_'+sub_value_id;
+								let sub_group_list = []; // id_title='prop_title',items=[]
+								let sub_group_full_list = [];
+								let max_num = 1;
+								for(const prop in data){
+									for(let a = 1; a < 30; a++){
+										let full_sub_check_str = sub_check_str+"_group_"+a;
+										if(prop.startsWith(full_sub_check_str)){
+											max_num = a;
+											break;
+										}
+									}
+								}
+								for(const prop in data){
+									if(prop.startsWith(sub_check_str)){
+										for(let a = 1; a < max_num+1; a++){
+											let full_sub_check_str = sub_check_str+"_group_"+a;
+											if(prop.startsWith(full_sub_check_str)){
+												if(!data[full_sub_check_str]){
+													data[full_sub_check_str] = [];
+												}
+												let new_item = {};
+												new_item[prop.replace(full_sub_check_str+"_","")] = data[prop];
+												data[full_sub_check_str].push(new_item);
+											}
+										}
+									}
+								}
 							}
-							data[sub_value_title].push(new_item);
-						}
-						//Log.w('sub_value_type',sub_value_type);
-						//Log.w('sub_value_title',sub_value_title);
-						//Log.w('sub_value_field_title_list',sub_value_field_title_list);
-						Log.w('data',data);
-						Log.w('option',option);
 					}
-
 				}
-
 				},
-				/*
 				//get_join
 				async function(call){
 					if(option.get_join && data.id){
@@ -2177,7 +2186,6 @@ class Portal {
 						}
 					}
 				},
-				*/
 			]).then(result => {
 				callback([error,data]);
 			}).catch(err => {
@@ -2421,7 +2429,7 @@ class Portal {
 	static post = async (database,data_type,item,option) => {
 		/* option params
 		 * Fields
-		   - delete_cache / type. bool / ex. true,false / default. false
+		   - delete_cache / type. bool / ex. true,false / default. false -- alreadsy done on post
 		 */
 		return new Promise((callback) => {
 			let error = null;
@@ -2442,6 +2450,7 @@ class Portal {
 					});
 				},
 				//delete cache item
+				/*remove 11.19
         		async function(call){
             		if(option.delete_cache && Str.check_is_guid(item.id)){
                 		const [biz_error,biz_data] = await Portal.delete_cache(database,data_type,item.id);
@@ -2453,6 +2462,7 @@ class Portal {
                 		}
             		}
         		},
+				*/
 				async function(call){
 					if(option.post_stat){
 						let post_stat = Stat_Logic.get_new(data_type,item.id,option.stat_type,option.user_id,item);

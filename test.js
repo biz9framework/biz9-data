@@ -69,9 +69,9 @@ describe('connect', function(){ this.timeout(25000);
             //- POST_ITEM - START
             async function(call){
                 //let id = 0;
-                let id = "90854cdc-92fb-446d-9234-8aa4c76aeae5";
+                let id = "2703e9c6-f46a-4e8d-9c14-a99f828a8004";
                 let data_type = DataType.TEMPLATE;
-                let data_item = DataItem.get_new(data_type,0,{title:'primary',title_url:'primary'});
+                let data_item = DataItem.get_new(data_type,id,{title:'primary',title_url:'primary'});
                 let key = "mobile_product_12";
                 let user_id = "63e7b9ea-7bf8-4780-bf90-5050e501f44c";
                 let option_ = {};
@@ -86,22 +86,47 @@ describe('connect', function(){ this.timeout(25000);
                         get_field_sub_value:true,
                         field_sub_value_list:[{
                             type:Type.FIELD_VALUE_LIST,
-                            id:2,
-                            title:'foter row 1',
-                            field:'title,link,sub note'
+                            id:2
+                        },{
+                            type:Type.FIELD_VALUE_LIST,
+                            id:3
                         }
+
                     ]
                 };
-                data_item['apple'] = [];
-                data_item[Field_Logic.get_field_value_title(Type.FIELD_VALUE_LIST,2,'title')] = 'my title '+Num.get_id();
-                data_item[Field_Logic.get_field_value_title(Type.FIELD_VALUE_LIST,2,'link')] = 'my link '+Num.get_id();
-                data_item[Field_Logic.get_field_value_title(Type.FIELD_VALUE_LIST,2,'sub_note')] = 'my sub_note '+Num.get_id();
+                data_item[Field_Logic.get_field_value_title(Type.FIELD_VALUE_LIST,2,1,'title')] = 'my title1 '+Num.get_id();
+                data_item[Field_Logic.get_field_value_title(Type.FIELD_VALUE_LIST,2,1,'link')] = 'my link1 '+Num.get_id();
+                data_item[Field_Logic.get_field_value_title(Type.FIELD_VALUE_LIST,2,1,'sub_note')] = 'my sub_note1 '+Num.get_id();
+                data_item[Field_Logic.get_field_value_title(Type.FIELD_VALUE_LIST,2,2,'title')] = 'my title2 '+Num.get_id();
+                data_item[Field_Logic.get_field_value_title(Type.FIELD_VALUE_LIST,2,2,'link')] = 'my link2 '+Num.get_id();
+                data_item[Field_Logic.get_field_value_title(Type.FIELD_VALUE_LIST,2,2,'sub_note')] = 'my sub_note2 '+Num.get_id();
+                data_item[Field_Logic.get_field_value_title(Type.FIELD_VALUE_LIST,2,3,'title')] = 'my title3 '+Num.get_id();
+                data_item[Field_Logic.get_field_value_title(Type.FIELD_VALUE_LIST,2,3,'link')] = 'my link3 '+Num.get_id();
+                data_item[Field_Logic.get_field_value_title(Type.FIELD_VALUE_LIST,2,3,'sub_note')] = 'my sub_note3 '+Num.get_id();
+
+                //data_item[Field_Logic.get_field_value_title(Type.FIELD_VALUE_LIST,3,'blank')] = '';
+                //data_item.what = 'who';
+                //data_item.what2 = 'who_'+Num.get_id();
                 //Log.w('data_item',data_item);
 
                 //const [biz_error,biz_data] = await Portal.post(database,data_type,data_item,{});
                 const [biz_error,biz_data] = await Portal.get(database,data_type,id,option);
                 //const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option);
                 Log.w('99_final_post',biz_data);
+                /*
+
+                let field_title = Field_Logic.get_field_value_title(Type.FIELD_VALUE_LIST,3);
+                Log.w('22_field_value_title',field_title);
+                let field_value_value = Field_Logic.get_field_value_value(Type.FIELD_VALUE_LIST,biz_data,2);
+                Log.w('33_field_value_value',field_value_value);
+                */
+
+                /*
+                 *   {edit_mode?Project_Logic.get_item_field_value_edit(template.data_type,template.id,Type.FIELD_VALUE_LIST,2,{list_value_count:2}):""}
+                    {Field_Logic.get_field_value_value(Type.FIELD_VALUE_LIST,template,2,{list_value_count:2}).map((item)
+
+                */
+
                 //Log.w('33_post',biz_data.data_list.length);
                 //Log.w('44_post',biz_data.data_list[0]);
                 //cart = biz_data;
