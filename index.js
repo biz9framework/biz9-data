@@ -1935,7 +1935,6 @@ class Portal {
 			let parent_search_item_list = [];
 			async.series([
 				function(call){
-					console.log('111111111111');
 					if(!Str.check_is_guid(key)){
 						option.title_url = key.toLowerCase();
 						key = key.toLowerCase();
@@ -1944,7 +1943,6 @@ class Portal {
 				},
   				//delete cache item
         		async function(call){
-					console.log('22222222222');
             		if(option.delete_cache && Str.check_is_guid(key)){
                 		const [biz_error,biz_data] = await Portal.delete_cache(database,data_type,key);
                 		if(biz_error){
@@ -1956,7 +1954,6 @@ class Portal {
             		}
         		},
 				function(call){
-					console.log('333333');
 					Data.get(database,data_type,key,option).then(([biz_error,biz_data,option])=> {
 						if(biz_error){
 							error=Log.append(error,biz_error);
@@ -2070,44 +2067,49 @@ class Portal {
 				},
 				//get_field_sub_value
 				async function(call){
-				if(option.get_field_sub_value && data.id){
-					let temp_num = 1;
-					for(const sub_value of option.field_sub_value_list){
-						let sub_value_id = sub_value.id ? sub_value.id :Number(temp_num);
-						let sub_value_title =Field_Logic.get_field_value_title(Type.FIELD_VALUE_LIST,sub_value.id,temp_num);
-						let sub_value_type = sub_value.type ? sub_value.type : Type.FIELD_VALUE_LIST;
-							if(sub_value_type == Type.FIELD_VALUE_LIST){
-								let sub_check_str = 'list_value_'+sub_value_id;
-								let sub_group_list = []; // id_title='prop_title',items=[]
-								let sub_group_full_list = [];
-								let max_num = 1;
-								for(const prop in data){
-									for(let a = 1; a < 30; a++){
-										let full_sub_check_str = sub_check_str+"_group_"+a;
-											if(prop.startsWith(full_sub_check_str)){
-												if(a>max_num){
-													max_num = a;
-												}
-											}
-									}
-								}
-								data[sub_check_str] = [];
-								for(let a = 1; a < max_num+1; a++){
-									let full_sub_check_str = sub_check_str+"_group_"+a;
-									let new_item = {};
-									for(const sub_prop in data){
-										if(sub_prop.startsWith(full_sub_check_str)){
-											new_item[sub_prop.replace(full_sub_check_str+"_","")] = data[sub_prop];
-										}
-									}
-									if(!Obj.check_is_empty(new_item)){
-										data[sub_check_str].push(new_item);
-									}
-								}
-								if(data[sub_check_str].length<=0){
-									delete data[sub_check_str]
+				if(option.get_field_value_list && data.id){
+		  			function escapeRegExp(string) {
+     					 return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
+    				}
+					let max_value_id = 1;
+					let max_group_id = 1;
+					let full_prop_str = "";
+					for(const prop in data){
+						full_prop_str = String(prop + "_"+full_prop_str);
+					}
+					//list_value_2_group_5
+					for(let a = 1; a < 30; a++){
+    					const regex = new RegExp(escapeRegExp("list_value_"+a), 'i');
+    					const exists = regex.test(full_prop_str);
+						if(exists){
+							max_value_id = max_value_id+1
+						}
+						for(let b = 1; b < 30; b++){
+							const regex = new RegExp(escapeRegExp("list_value_"+a+"_group_"+b), 'i');
+    						const exists = regex.test(full_prop_str);
+							if(exists){
+								max_group_id = max_group_id+1
+							}
+						}
+					}
+					for(let a = 1; a < max_value_id+1; a++){
+						let sub_check_str = 'list_value_'+a;
+						data[sub_check_str] = [];
+						for(let b = 1; b < max_group_id+1; b++){
+							let full_sub_check_str = sub_check_str+"_group_"+b;
+							let new_item = {};
+							for(const sub_prop in data){
+								if(sub_prop.startsWith(full_sub_check_str)){
+									new_item[sub_prop.replace(full_sub_check_str+"_","")] = data[sub_prop];
 								}
 							}
+							if(!Obj.check_is_empty(new_item)){
+								data[sub_check_str].push(new_item);
+							}
+						}
+						if(data[sub_check_str].length<=0){
+							delete data[sub_check_str];
+						}
 					}
 				}
 				},

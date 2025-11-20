@@ -82,18 +82,7 @@ describe('connect', function(){ this.timeout(25000);
                 //let option = {get_distinct:true,distinct_field:'title',distinct_sort:'asc',get_join:true,field_key_list:[{primary_data_type:DataType.PRODUCT,primary_field:'category',item_field:'title',title:'product_count',type:Type.COUNT}]};
                 //let option = {fields: 'id,title,title_url,type,category,image_filename,cost,featured,delivery_time,hot,category,rating_avg,review_count,view_count,is_favorite',
                     //get_favorite: true,user_id: '6f9563a9-eb43-41ca-9840-f05e00d57559',get_field: true};
-                let option = {
-                        get_field_sub_value:true,
-                        field_sub_value_list:[{
-                            type:Type.FIELD_VALUE_LIST,
-                            id:2
-                        },{
-                            type:Type.FIELD_VALUE_LIST,
-                            id:3
-                        }
-
-                    ]
-                };
+                let option = {get_field_value_list:true};
                 data_item[Field_Logic.get_field_value_title(Type.FIELD_VALUE_LIST,2,1,'title')] = 'my title1 '+Num.get_id();
                 data_item[Field_Logic.get_field_value_title(Type.FIELD_VALUE_LIST,2,1,'link')] = 'my link1 '+Num.get_id();
                 data_item[Field_Logic.get_field_value_title(Type.FIELD_VALUE_LIST,2,1,'sub_note')] = 'my sub_note1 '+Num.get_id();
