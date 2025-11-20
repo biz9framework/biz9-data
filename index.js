@@ -2084,26 +2084,28 @@ class Portal {
 								for(const prop in data){
 									for(let a = 1; a < 30; a++){
 										let full_sub_check_str = sub_check_str+"_group_"+a;
-										if(prop.startsWith(full_sub_check_str)){
-											max_num = a;
-											break;
-										}
+											if(prop.startsWith(full_sub_check_str)){
+												if(a>max_num){
+													max_num = a;
+												}
+											}
 									}
 								}
-								for(const prop in data){
-									if(prop.startsWith(sub_check_str)){
-										for(let a = 1; a < max_num+1; a++){
-											let full_sub_check_str = sub_check_str+"_group_"+a;
-											if(prop.startsWith(full_sub_check_str)){
-												if(!data[full_sub_check_str]){
-													data[full_sub_check_str] = [];
-												}
-												let new_item = {};
-												new_item[prop.replace(full_sub_check_str+"_","")] = data[prop];
-												data[full_sub_check_str].push(new_item);
-											}
+								data[sub_check_str] = [];
+								for(let a = 1; a < max_num+1; a++){
+									let full_sub_check_str = sub_check_str+"_group_"+a;
+									let new_item = {};
+									for(const sub_prop in data){
+										if(sub_prop.startsWith(full_sub_check_str)){
+											new_item[sub_prop.replace(full_sub_check_str+"_","")] = data[sub_prop];
 										}
 									}
+									if(!Obj.check_is_empty(new_item)){
+										data[sub_check_str].push(new_item);
+									}
+								}
+								if(data[sub_check_str].length<=0){
+									delete data[sub_check_str]
 								}
 							}
 					}

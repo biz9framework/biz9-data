@@ -97,12 +97,18 @@ describe('connect', function(){ this.timeout(25000);
                 data_item[Field_Logic.get_field_value_title(Type.FIELD_VALUE_LIST,2,1,'title')] = 'my title1 '+Num.get_id();
                 data_item[Field_Logic.get_field_value_title(Type.FIELD_VALUE_LIST,2,1,'link')] = 'my link1 '+Num.get_id();
                 data_item[Field_Logic.get_field_value_title(Type.FIELD_VALUE_LIST,2,1,'sub_note')] = 'my sub_note1 '+Num.get_id();
+                data_item[Field_Logic.get_field_value_title(Type.FIELD_VALUE_LIST,2,1,'cost')] = 'my cost1 '+Num.get_id();
                 data_item[Field_Logic.get_field_value_title(Type.FIELD_VALUE_LIST,2,2,'title')] = 'my title2 '+Num.get_id();
                 data_item[Field_Logic.get_field_value_title(Type.FIELD_VALUE_LIST,2,2,'link')] = 'my link2 '+Num.get_id();
                 data_item[Field_Logic.get_field_value_title(Type.FIELD_VALUE_LIST,2,2,'sub_note')] = 'my sub_note2 '+Num.get_id();
                 data_item[Field_Logic.get_field_value_title(Type.FIELD_VALUE_LIST,2,3,'title')] = 'my title3 '+Num.get_id();
                 data_item[Field_Logic.get_field_value_title(Type.FIELD_VALUE_LIST,2,3,'link')] = 'my link3 '+Num.get_id();
                 data_item[Field_Logic.get_field_value_title(Type.FIELD_VALUE_LIST,2,3,'sub_note')] = 'my sub_note3 '+Num.get_id();
+                data_item[Field_Logic.get_field_value_title(Type.FIELD_VALUE_LIST,2,4,'title')] = 'my title4 '+Num.get_id();
+                data_item[Field_Logic.get_field_value_title(Type.FIELD_VALUE_LIST,2,4,'link')] = 'my link4 '+Num.get_id();
+                data_item[Field_Logic.get_field_value_title(Type.FIELD_VALUE_LIST,2,4,'sub_note')] = 'my sub_note4 '+Num.get_id();
+                data_item[Field_Logic.get_field_value_title(Type.FIELD_VALUE_LIST,2,5,'cost')] = 'my cost5 '+Num.get_id();
+
 
                 //data_item[Field_Logic.get_field_value_title(Type.FIELD_VALUE_LIST,3,'blank')] = '';
                 //data_item.what = 'who';
