@@ -2068,25 +2068,19 @@ class Portal {
 				//get_field_sub_value
 				async function(call){
 				if(option.get_field_value_list && data.id){
-		  			function escapeRegExp(string) {
-     					 return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
-    				}
 					let max_value_id = 1;
 					let max_group_id = 1;
 					let full_prop_str = "";
 					for(const prop in data){
 						full_prop_str = String(prop + "_"+full_prop_str);
 					}
-					//list_value_2_group_5
 					for(let a = 1; a < 30; a++){
-    					const regex = new RegExp(escapeRegExp("list_value_"+a), 'i');
-    					const exists = regex.test(full_prop_str);
+    					const exists = Str.check_if_str_exist(full_prop_str,"list_value_"+a);
 						if(exists){
 							max_value_id = max_value_id+1
 						}
 						for(let b = 1; b < 30; b++){
-							const regex = new RegExp(escapeRegExp("list_value_"+a+"_group_"+b), 'i');
-    						const exists = regex.test(full_prop_str);
+							const exists = Str.check_if_str_exist(full_prop_str,"list_value_"+a+"_group_"+b);
 							if(exists){
 								max_group_id = max_group_id+1
 							}

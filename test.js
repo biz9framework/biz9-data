@@ -69,7 +69,7 @@ describe('connect', function(){ this.timeout(25000);
             //- POST_ITEM - START
             async function(call){
                 //let id = 0;
-                let id = "2703e9c6-f46a-4e8d-9c14-a99f828a8004";
+                let id = "2cc6e356-cfbb-4358-a790-bf1aba6fc77f";
                 let data_type = DataType.TEMPLATE;
                 let data_item = DataItem.get_new(data_type,id,{title:'primary',title_url:'primary'});
                 let key = "mobile_product_12";
@@ -107,7 +107,10 @@ describe('connect', function(){ this.timeout(25000);
                 //const [biz_error,biz_data] = await Portal.post(database,data_type,data_item,{});
                 const [biz_error,biz_data] = await Portal.get(database,data_type,id,option);
                 //const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option);
-                Log.w('99_final_post',biz_data);
+                //Log.w('99_final_post',biz_data);
+
+                let field_list_group = Field_Logic.get_value_list_group(biz_data,2,1);
+                Log.w('rrrrrr',field_list_group);
                 /*
 
                 let field_title = Field_Logic.get_field_value_title(Type.FIELD_VALUE_LIST,3);
