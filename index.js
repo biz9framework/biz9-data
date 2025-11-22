@@ -2427,6 +2427,7 @@ class Portal {
 	static post = async (database,data_type,item,option) => {
 		/* option params
 		 * Fields
+		   - overwrite_data / type. bool / ex. true,false / default. false -- post brand new obj.deleteing old.
 		   - delete_cache / type. bool / ex. true,false / default. false -- alreadsy done on post
 		 */
 		return new Promise((callback) => {

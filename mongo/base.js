@@ -76,7 +76,7 @@ const check_db_client_connected = (db_connect) => {
 }
 const post_item_base = (db_connect,data_type,item,option) => {
     return new Promise((callback) => {
-        option = !Obj.check_is_empty(option) ? option : {overwrite_obj:false};
+        option = !Obj.check_is_empty(option) ? option : {overwrite_data:false};
         if (Str.check_is_null(item.id)){//insert
             item.id = Str.get_guid();
             item.date_create = DateTime.get_new();
@@ -94,7 +94,7 @@ const post_item_base = (db_connect,data_type,item,option) => {
             }
         }else{
             item.date_save = DateTime.get_new();
-            if(!option.overwrite_obj){
+            if(!option.overwrite_data){
                 db_connect.collection(data_type).updateOne({id:item.id},{$set: item}).then((data) => {
                     if(data){
                         delete item['_id'];
