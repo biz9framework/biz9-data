@@ -69,7 +69,7 @@ describe('connect', function(){ this.timeout(25000);
             //- POST_ITEM - START
             async function(call){
                 //let id = 0;
-                let id = "2cc6e356-cfbb-4358-a790-bf1aba6fc77f";
+                let id = "d2ee04ac-9ba9-48ca-a8e7-8051d23cb9a3";
                 let data_type = DataType.TEMPLATE;
                 let data_item = DataItem.get_new(data_type,id,{title:'primary',title_url:'primary'});
                 let key = "mobile_product_12";
@@ -83,22 +83,13 @@ describe('connect', function(){ this.timeout(25000);
                 //let option = {fields: 'id,title,title_url,type,category,image_filename,cost,featured,delivery_time,hot,category,rating_avg,review_count,view_count,is_favorite',
                     //get_favorite: true,user_id: '6f9563a9-eb43-41ca-9840-f05e00d57559',get_field: true};
                 let option = {get_field_value_list:true};
-                data_item[Field_Logic.get_field_value_title(Type.FIELD_VALUE_LIST,2,1,'title')] = 'my title1 '+Num.get_id();
-                data_item[Field_Logic.get_field_value_title(Type.FIELD_VALUE_LIST,2,1,'link')] = 'my link1 '+Num.get_id();
-                data_item[Field_Logic.get_field_value_title(Type.FIELD_VALUE_LIST,2,1,'sub_note')] = 'my sub_note1 '+Num.get_id();
-                data_item[Field_Logic.get_field_value_title(Type.FIELD_VALUE_LIST,2,1,'cost')] = 'my cost1 '+Num.get_id();
-                data_item[Field_Logic.get_field_value_title(Type.FIELD_VALUE_LIST,2,2,'title')] = 'my title2 '+Num.get_id();
-                data_item[Field_Logic.get_field_value_title(Type.FIELD_VALUE_LIST,2,2,'link')] = 'my link2 '+Num.get_id();
-                data_item[Field_Logic.get_field_value_title(Type.FIELD_VALUE_LIST,2,2,'sub_note')] = 'my sub_note2 '+Num.get_id();
-                data_item[Field_Logic.get_field_value_title(Type.FIELD_VALUE_LIST,2,3,'title')] = 'my title3 '+Num.get_id();
-                data_item[Field_Logic.get_field_value_title(Type.FIELD_VALUE_LIST,2,3,'link')] = 'my link3 '+Num.get_id();
-                data_item[Field_Logic.get_field_value_title(Type.FIELD_VALUE_LIST,2,3,'sub_note')] = 'my sub_note3 '+Num.get_id();
-                data_item[Field_Logic.get_field_value_title(Type.FIELD_VALUE_LIST,2,4,'title')] = 'my title4 '+Num.get_id();
-                data_item[Field_Logic.get_field_value_title(Type.FIELD_VALUE_LIST,2,4,'link')] = 'my link4 '+Num.get_id();
-                data_item[Field_Logic.get_field_value_title(Type.FIELD_VALUE_LIST,2,4,'sub_note')] = 'my sub_note4 '+Num.get_id();
-                data_item[Field_Logic.get_field_value_title(Type.FIELD_VALUE_LIST,2,5,'cost')] = 'my cost5 '+Num.get_id();
-
-
+                let value_id = 4;
+                let max_group_id = 1;
+                for(let b = 1; b <= max_group_id;b++){
+                    data_item[Field_Logic.get_field_value_title(Type.FIELD_VALUE_LIST,value_id,b,'title')] = 'my title '+b+Num.get_id();
+                    data_item[Field_Logic.get_field_value_title(Type.FIELD_VALUE_LIST,value_id,b,'link')] = 'my link '+b+Num.get_id();
+                    data_item[Field_Logic.get_field_value_title(Type.FIELD_VALUE_LIST,value_id,b,'sub_note')] = 'my sub_note '+b+Num.get_id();
+                }
                 //data_item[Field_Logic.get_field_value_title(Type.FIELD_VALUE_LIST,3,'blank')] = '';
                 //data_item.what = 'who';
                 //data_item.what2 = 'who_'+Num.get_id();
@@ -107,10 +98,10 @@ describe('connect', function(){ this.timeout(25000);
                 //const [biz_error,biz_data] = await Portal.post(database,data_type,data_item,{});
                 const [biz_error,biz_data] = await Portal.get(database,data_type,id,option);
                 //const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option);
-                //Log.w('99_final_post',biz_data);
+                Log.w('99_final_post',biz_data);
 
-                let field_list_group = Field_Logic.get_value_list_group(biz_data,2,1);
-                Log.w('rrrrrr',field_list_group);
+                //let field_list_group = Field_Logic.get_value_list_group(biz_data,2,1);
+                //Log.w('rrrrrr',field_list_group);
                 /*
 
                 let field_title = Field_Logic.get_field_value_title(Type.FIELD_VALUE_LIST,3);
