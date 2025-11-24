@@ -2071,27 +2071,25 @@ class Portal {
 					let max_value_id = 1;
 					let max_group_id = 1;
 					let full_prop_str = "";
-
 					for(const prop in data){
 						full_prop_str = String(prop + " "+full_prop_str);
 					}
 					for(let a = 1; a < 30; a++){
     					const exists = Str.check_if_str_exist(full_prop_str,"list_value_"+a);
 						if(exists){
-							max_value_id = max_value_id+1
+							if(a>max_value_id){
+								max_value_id = a;
+							}
 						}
 						for(let b = 1; b < 30; b++){
 							const exists = Str.check_if_str_exist(full_prop_str,"list_value_"+a+"_group_"+b);
 							if(exists){
-								max_group_id = b;
+								if(b>max_group_id){
+									max_group_id = b;
+								}
 							}
 						}
 					}
-					//Log.w('full_prop_str',full_prop_str);
-					//Log.w('max_value_id',max_value_id);
-					//Log.w('max_group_id',max_group_id);
-					//Log.w('data',data);
-					Log.w('my_get_data_before',data);
 					for(let a = 1; a <= max_value_id+1; a++){
 						let sub_check_str = 'list_value_'+a;
 						data[sub_check_str] = [];

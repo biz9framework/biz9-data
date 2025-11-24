@@ -69,7 +69,7 @@ describe('connect', function(){ this.timeout(25000);
             //- POST_ITEM - START
             async function(call){
                 //let id = 0;
-                let id = "d2ee04ac-9ba9-48ca-a8e7-8051d23cb9a3";
+                let id = "5aefb48f-f722-46ed-b2b1-fbfb523ba727";
                 let data_type = DataType.TEMPLATE;
                 let data_item = DataItem.get_new(data_type,id,{title:'primary',title_url:'primary'});
                 let key = "mobile_product_12";
@@ -84,7 +84,7 @@ describe('connect', function(){ this.timeout(25000);
                     //get_favorite: true,user_id: '6f9563a9-eb43-41ca-9840-f05e00d57559',get_field: true};
                 let option = {get_field_value_list:true};
                 let value_id = 4;
-                let max_group_id = 1;
+                let max_group_id = 5;
                 for(let b = 1; b <= max_group_id;b++){
                     data_item[Field_Logic.get_field_value_title(Type.FIELD_VALUE_LIST,value_id,b,'title')] = 'my title '+b+Num.get_id();
                     data_item[Field_Logic.get_field_value_title(Type.FIELD_VALUE_LIST,value_id,b,'link')] = 'my link '+b+Num.get_id();
