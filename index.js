@@ -2109,14 +2109,8 @@ class Portal {
 							delete data[sub_check_str];
 						}
 					}
-					Log.w('99_full_data',data);
-					Log.w('max_value_id',max_value_id);
-					Log.w('max_group_id',max_group_id);
-
-					//Log.w('max_group_id',max_group_id);
 				}
 				},
-				/*
 				//get_join
 				async function(call){
 					if(option.get_join && data.id){
@@ -2194,9 +2188,8 @@ class Portal {
 						}
 					}
 				},
-				*/
 			]).then(result => {
-				//callback([error,data]);
+				callback([error,data]);
 			}).catch(err => {
 				Log.error("ERROR-PORTAL-GET-2",err);
 				callback([error,{}]);
