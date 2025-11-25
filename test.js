@@ -69,12 +69,12 @@ describe('connect', function(){ this.timeout(25000);
             //- POST_ITEM - START
             async function(call){
                 //let id = 0;
-                let id = "5aefb48f-f722-46ed-b2b1-fbfb523ba727";
+                let id = "7851c6ba-578b-4eaa-9ab2-078e41741a98";
                 let data_type = DataType.TEMPLATE;
                 let data_item = DataItem.get_new(data_type,id,{title:'primary',title_url:'primary'});
                 let key = "mobile_product_12";
                 let user_id = "63e7b9ea-7bf8-4780-bf90-5050e501f44c";
-                let option_ = {};
+                //let option_ = {get_field_value_value};
                 //let option = {post_stat:true,post_unique:false,user_id:user_id,stat_type:Type.STAT_ORDER_PAYMENT,order_payment_list_sort_by:{date_create:'-1'}};
                 //let search = App_Logic.get_search(DataType.PRODUCT,{title_url:'add_on_product_11'},{title:1},1,0);
                 //let options = {get_distinct:true,distinct_field:'title',distinct_sort:'asc',get_count:true,count_data_type:DataType.PRODUCT,count_field:'category',count_value:'title',get_field:true,fields:'id,title,title_url,image_filename,cost'};
@@ -82,6 +82,7 @@ describe('connect', function(){ this.timeout(25000);
                 //let option = {get_distinct:true,distinct_field:'title',distinct_sort:'asc',get_join:true,field_key_list:[{primary_data_type:DataType.PRODUCT,primary_field:'category',item_field:'title',title:'product_count',type:Type.COUNT}]};
                 //let option = {fields: 'id,title,title_url,type,category,image_filename,cost,featured,delivery_time,hot,category,rating_avg,review_count,view_count,is_favorite',
                     //get_favorite: true,user_id: '6f9563a9-eb43-41ca-9840-f05e00d57559',get_field: true};
+                console.log('11111');
                 let option = {get_field_value_list:true};
                 let value_id = 4;
                 let max_group_id = 5;
@@ -95,10 +96,16 @@ describe('connect', function(){ this.timeout(25000);
                 //data_item.what2 = 'who_'+Num.get_id();
                 //Log.w('data_item',data_item);
 
-                //const [biz_error,biz_data] = await Portal.post(database,data_type,data_item,{});
                 const [biz_error,biz_data] = await Portal.get(database,data_type,id,option);
+                //console.log('aaaaaaa');
+                //console.log(biz_data);
+                my_list = Field_Logic.get_field_value_value(Type.FIELD_VALUE_LIST,biz_data,2);
+                Log.w('my_list',my_list);
+                //let new_max_group_id = Field_Logic.get_item_max_group_id(3,biz_data);
+                //Log.w('max_group_id',new_max_group_id);
+                //const [biz_error,biz_data] = await Portal.post(database,data_type,data_item,{});
                 //const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option);
-                Log.w('99_final_post',biz_data);
+                //Log.w('99_final_post',biz_data);
 
                 //let field_list_group = Field_Logic.get_value_list_group(biz_data,2,1);
                 //Log.w('rrrrrr',field_list_group);
