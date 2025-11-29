@@ -76,7 +76,7 @@ describe('connect', function(){ this.timeout(25000);
                 let user_id = "63e7b9ea-7bf8-4780-bf90-5050e501f44c";
                 //let search = App_Logic.get_search(DataType.CATEGORY,{id:'75a5f009-54c3-4fd3-a136-fd3880023ddb'},{date_create:-1},1,3);
                 let search = App_Logic.get_search(DataType.CATEGORY,{},{date_create:-1},1,3);
-                let option = {get_join:true,field_key_list:[{primary_data_type:DataType.PRODUCT,primary_field:'category',item_field:'title',title:'my_obj',type:Type.OBJ}]};
+                let option = {get_join:true,field_key_list:[{primary_data_type:DataType.PRODUCT,primary_field:'category',item_field:'title',title:'my_obj',type:Type.COUNT}]};
 
                 console.log('1111');
                 console.log(search);
