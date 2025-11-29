@@ -75,20 +75,18 @@ describe('connect', function(){ this.timeout(25000);
                 let key = "mobile_product_12";
                 let user_id = "63e7b9ea-7bf8-4780-bf90-5050e501f44c";
                 //let search = App_Logic.get_search(DataType.CATEGORY,{id:'75a5f009-54c3-4fd3-a136-fd3880023ddb'},{date_create:-1},1,3);
-                let search = App_Logic.get_search(DataType.CATEGORY,{},{date_create:-1},1,3);
-                let option = {get_join:true,field_key_list:[{primary_data_type:DataType.PRODUCT,primary_field:'category',item_field:'title',title:'my_obj',type:Type.COUNT}]};
+                let search = App_Logic.get_search(DataType.TYPE,{},{date_create:-1},1,12);
+                let option = {get_join:true,get_distinct:true,distinct_field:'title',field_key_list:[{primary_data_type:DataType.PRODUCT,primary_field:'type',item_field:'title',title:'my_count',type:Type.COUNT}]};
+                //let option = {};
 
-                console.log('1111');
-                console.log(search);
-                console.log(option);
-                console.log('22222');
                 //const [biz_error,biz_data] = await Portal.get(database,data_type,id,option);
                 //const [biz_error,biz_data] = await Portal.post(database,data_type,data_item,{});
                 //const [biz_error,biz_data] = await Portal.search_simple(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option);
-                //const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option);
-                console.log(Type.PAGE_PRODUCT_HOME);
-                const [biz_error,biz_data] = await Page_Data.get(database,Type.PAGE_PRODUCT_HOME);
+                const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option);
+                //const [biz_error,biz_data] = await Page_Data.get(database,Type.PAGE_PRODUCT_HOME);
                 Log.w('99_final_post',biz_data);
+                Log.w('99_final_post_data',biz_data.data_list.length);
+                //Log.w('99_final_post',biz_data.data_list[0]);
 
                 //let field_list_group = Field_Logic.get_value_list_group(biz_data,2,1);
                 //Log.w('rrrrrr',field_list_group);

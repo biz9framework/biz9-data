@@ -259,9 +259,6 @@ class Page_Data {
 			option = option ? option : {};
 			async.series([
 				async function(call){
-					console.log('111111111');
-					console.log(DataType.PAGE);
-					console.log(key);
 					const [biz_error,biz_data] = await Portal.get(database,DataType.PAGE,key,option);
 					console.log('22222222');
 					if(biz_error){
@@ -2345,6 +2342,7 @@ class Portal {
 									}
 								}
 							}
+
 						}
 					}
 				},
