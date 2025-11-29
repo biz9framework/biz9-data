@@ -546,7 +546,6 @@ const delete_item_cache=(db_connect,data_type,id,option)=>{
                 }
                 for(const item of cache_string_list) {
                     if(item){
-                        console.log(get_cache_item_attr_key(data_type,id,item));
                         const [error,val] = await delete_cache_string_main(cache_connect,get_cache_item_attr_key(data_type,id,item));
                     }
                 }

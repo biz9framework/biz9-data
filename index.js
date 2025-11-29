@@ -1886,15 +1886,7 @@ class Portal {
 		   - get_field / type. bool / ex. true,false / default. false
 		   - fields / type. string / ex. field1,field2 / default. throw error / notez. id must by type tbl_id
 		   - delete_cache / type. bool / ex. true,false / default. false
-		   - get_field_sub_value / type. bool / ex. true,false / default. false
-		     - field_sub_value_list / return list / ex. [
-			 	{
-					type:'texr,list', / ex. TYPE.FIELD_VALUE_TEXT,TYPE.FIELD_VALUE_NOTE,TYPE.FIELD_VALUE_IMAGE,TYPE.FIELD_VALUE_LIST
-					value_id:'my_list_1',
-					title:'my_list_1',
-					field:'title,link,row_1'
-				}
-				];
+		   - get_field_value_list / type. bool / ex. true,false / default. false
 		 *  Join
 		 	- get_join / type. bool / ex. true,false / default. false
 			  	- field_key_list / type. obj list / ex. [
@@ -2064,7 +2056,7 @@ class Portal {
 						}
 					}
 				},
-				//get_field_sub_value
+				//get_field_value_list
 				async function(call){
 					if(option.get_field_value_list && data.id){
 						data = Field_Logic.get_item_field_value_list(data);
@@ -2111,10 +2103,13 @@ class Portal {
 										data[parent_search_item.title] = biz_data.data_list;
 									}
 								}else if(parent_search_item.type == Type.COUNT){
+									console.log('aaaaaaa');
 									let query = {};
 									query[parent_search_item.primary_field] = data[parent_search_item.item_field];
 									let search = App_Logic.get_search(parent_search_item.primary_data_type,query,{},1,0);
+									console.log('bbbbbbb');
 									const [biz_error,biz_data] = await Portal.count(database,search.data_type,search.filter);
+									console.log('ccccccc');
 									if(biz_error){
 										error=Log.append(error,biz_error);
 									}else{
@@ -2124,6 +2119,7 @@ class Portal {
 						}
 					}
 				},
+				/*
 				//post-view-stat
 				async function(call){
 					if(option.post_stat && data.id){
@@ -2147,8 +2143,9 @@ class Portal {
 						}
 					}
 				},
+				*/
 			]).then(result => {
-				callback([error,data]);
+				//callback([error,data]);
 			}).catch(err => {
 				Log.error("ERROR-PORTAL-GET-2",err);
 				callback([error,{}]);
@@ -2201,8 +2198,7 @@ class Portal {
 			let data = {data_type:data_type,item_count:0,page_count:1,filter:{},data_list:[]};
 			let error=null;
 			let parent_search_item_list = [];
-			option = option ? option : {get_item:false,get_image:false,get_field:false,get_count:false};
-			option.get_field = option.fields ? true : false;
+			option = option ? option : {};
 			async.series([
 				//get list
 				function(call){
@@ -2260,7 +2256,9 @@ class Portal {
 				},
 				//get_join
 				async function(call){
+					console.log('aaaaaaaaaaa');
 					if(option.get_join && data.data_list.length>0){
+						console.log('bbbbbbbbbbbbb');
 						for(const parent_search_item of parent_search_item_list){
 							let query = { $or: [] };
  							for(const data_item of data.data_list){
@@ -2270,11 +2268,12 @@ class Portal {
 							};
 							let search = App_Logic.get_search(parent_search_item.primary_data_type,query,{},1,0);
 							let join_option = parent_search_item.fields ? {get_field:true,fields:parent_search_item.fields} : {};
-							const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,join_option);
-								if(biz_error){
-									error=Log.append(error,biz_error);
-								}else{
-									parent_search_item.data_list = biz_data.data_list;
+
+							Data.get_list(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,join_option).then(([biz_error,item_list,item_count,page_count])=>{
+						if(biz_error){
+							error=Log.append(error,biz_error);
+						}else{
+							parent_search_item.data_list = item_list;
 									if(parent_search_item_list.length> 0){
 										for(const parent_search_item of parent_search_item_list){
 											for(const data_item of data.data_list){
@@ -2288,10 +2287,13 @@ class Portal {
 								  						data_item[parent_search_item.title] = item_found;
 													}
 												}else if(parent_search_item.type == Type.LIST){
+													/*
 													let query = {};
 													query[parent_search_item.primary_field] = data_item[parent_search_item.item_field];
 													let search = App_Logic.get_search(parent_search_item.primary_data_type,query,{},1,0);
-													const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,join_option);
+													//const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,join_option);
+													Data.get_list(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,join_option).then(([biz_error,item_list,item_count,page_count])=>{
+
 													data_item[parent_search_item.title] = [];
 													if(biz_error){
 														error=Log.append(error,biz_error);
@@ -2299,8 +2301,9 @@ class Portal {
 														for(const sub_data_item of biz_data.data_list){
 															data_item[parent_search_item.title].push(sub_data_item);
 													}
-												}
+													*/
 												}else if(parent_search_item.type == Type.COUNT){
+													/*
 													query[parent_search_item.primary_field] = data_item[parent_search_item.item_field];
 													let search = App_Logic.get_search(parent_search_item.primary_data_type,query,{},1,0);
 													const [biz_error,biz_data] = await Portal.count(database,search.data_type,search.filter);
@@ -2309,14 +2312,29 @@ class Portal {
 													}else{
 														data_item[parent_search_item.title] = biz_data;
 													}
+													*/
 												}
 										}
 									}
-								}
+									}
+
+							call();
+							//Log.w('ssssss',data.data_list);
 						}
+					}).catch(err => {
+						Log.error('DATA-SEARCH-ERROR-1',err);
+						error=Log.append(error,err);
+					});
 						}
 					}
 				},
+
+				async function(call){
+					console.log('1111111111111111111111');
+					Log.w('aaaaaaaa',data);
+					console.log('222222222222222222');
+				},
+				/*
 				//get_user
 				async function(call){
 					if(option.get_user && data.data_list.length>0){
@@ -2378,8 +2396,10 @@ class Portal {
 							}
 					}
 				},
+				*/
 			]).then(result => {
-				callback([error,data]);
+				//Log.w('99_full',data);
+				//callback([error,data]);
 			}).catch(err => {
 				Log.error('DATA-SEARCH-ERROR-7',err);
 				callback([err,[]]);
@@ -2391,7 +2411,7 @@ class Portal {
 		/* option params
 		 * Fields
 		   - overwrite_data / type. bool / ex. true,false / default. false -- post brand new obj.deleteing old.
-		   - delete_cache / type. bool / ex. true,false / default. false -- alreadsy done on post
+		   - get_update_data / type. bool / ex. true,false / default. false -- get update item aka recently saved item.
 		 */
 		return new Promise((callback) => {
 			let error = null;
@@ -2411,24 +2431,20 @@ class Portal {
 						call();
 					});
 				},
-				//delete cache item
-				/*remove 11.19
-        		async function(call){
-            		if(option.delete_cache && Str.check_is_guid(item.id)){
-                		const [biz_error,biz_data] = await Portal.delete_cache(database,data_type,item.id);
-                		if(biz_error){
-                    		error=Log.append(error,biz_error);
-                		}else{
-							console.log(biz_data);
-                    		//data.delete_cache_item = biz_data;
-                		}
-            		}
-        		},
-				*/
+				//get_item
+				async function(call){
+					if(option.get_update_data && data.id){
+						const [biz_error,biz_data] = await Portal.get(database,data_type,item.id,option);
+						if(biz_error){
+							error=Log.append(error,biz_error);
+						}else{
+							data = biz_data;
+						}
+					}
+				},
 				async function(call){
 					if(option.post_stat){
 						let post_stat = Stat_Logic.get_new(data_type,item.id,option.stat_type,option.user_id,item);
-						Log.w('post_stat',post_stat);
 						const [biz_error,biz_data] = await Stat_Data.post(database,post_stat,option);
 						if(biz_error){
 							error=Log.append(error,biz_error);
