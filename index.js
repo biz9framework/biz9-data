@@ -2319,6 +2319,7 @@ class Portal {
 													}else{
 								  						data_item[parent_search_item.title] = item_found;
 													}
+													/*
 												}else if(parent_search_item.type == Type.LIST){
 													let query = {};
 													query[parent_search_item.primary_field] = data_item[parent_search_item.item_field];
@@ -2341,6 +2342,8 @@ class Portal {
 													}else{
 														data_item[parent_search_item.title] = biz_data;
 													}
+												}
+												*/
 												}
 								}
 										}
