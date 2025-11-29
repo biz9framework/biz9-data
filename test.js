@@ -85,7 +85,9 @@ describe('connect', function(){ this.timeout(25000);
                 //const [biz_error,biz_data] = await Portal.get(database,data_type,id,option);
                 //const [biz_error,biz_data] = await Portal.post(database,data_type,data_item,{});
                 //const [biz_error,biz_data] = await Portal.search_simple(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option);
-                const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option);
+                //const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option);
+                console.log(Type.PAGE_PRODUCT_HOME);
+                const [biz_error,biz_data] = await Page_Data.get(database,Type.PAGE_PRODUCT_HOME);
                 Log.w('99_final_post',biz_data);
 
                 //let field_list_group = Field_Logic.get_value_list_group(biz_data,2,1);
