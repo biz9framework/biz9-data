@@ -260,7 +260,6 @@ class Page_Data {
 			async.series([
 				async function(call){
 					const [biz_error,biz_data] = await Portal.get(database,DataType.PAGE,key,option);
-					console.log('22222222');
 					if(biz_error){
 						error=Log.append(error,biz_error);
 					}else{
@@ -1296,7 +1295,7 @@ class Review_Data {
 				async function(call){
 					let query = {parent_id:parent_id,parent_data_type:parent_data_type};
 					let search = App_Logic.get_search(DataType.REVIEW,query,sort_by,page_current,page_size);
-					let option = {get_join:true,field_key_list:[{primary_data_type:parent_data_type,primary_field:'id',item_field:'product',title:'parent_item'}],get_user:true};
+					let option = {get_join:true,field_key_list:[{foreign_data_type:parent_data_type,foreign_field:'id',item_field:'product',title:'parent_item'}],get_user:true};
 					const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option);
 					if(biz_error){
 						error=Log.append(error,biz_error);
@@ -1892,8 +1891,8 @@ class Portal {
 			- get_join / type. bool / ex. true,false / default. false
 				- field_key_list / type. obj list / ex. [
 					{
-						primary_data_type:DataType.PRODUCT,
-						primary_field:'id',
+						foreign_data_type:DataType.PRODUCT,
+						foreign_field:'id',
 						item_field:'parent_id',
 						title:'field_title',
 						type:obj,list,count
@@ -2068,8 +2067,8 @@ class Portal {
 					if(option.get_join && data.id){
 						for(let a = 0; a < option.field_key_list.length; a++){
 							parent_search_item_list.push({
-								primary_data_type : option.field_key_list[a].primary_data_type,
-								primary_field : option.field_key_list[a].primary_field,
+								foreign_data_type : option.field_key_list[a].foreign_data_type,
+								foreign_field : option.field_key_list[a].foreign_field,
 								item_field : option.field_key_list[a].item_field,
 								title : option.field_key_list[a].title,
 								fields : option.field_key_list[a].fields ? option.field_key_list[a].fields : "",
@@ -2081,7 +2080,7 @@ class Portal {
 						for(const parent_search_item of parent_search_item_list){
 							let join_option = parent_search_item.fields ? {get_field:true,fields:parent_search_item.fields} : {};
 							if(parent_search_item.type == Type.OBJ){
-								const [biz_error,biz_data] = await Portal.get(database,parent_search_item.primary_data_type,data[parent_search_item.item_field],join_option);
+								const [biz_error,biz_data] = await Portal.get(database,parent_search_item.foreign_data_type,data[parent_search_item.item_field],join_option);
 								if(biz_error){
 									error=Log.append(error,biz_error);
 								}else{
@@ -2095,8 +2094,8 @@ class Portal {
 								}
 							}else if(parent_search_item.type == Type.LIST){
 								let query = {};
-								query[parent_search_item.primary_field] = data[parent_search_item.item_field];
-								let search = App_Logic.get_search(parent_search_item.primary_data_type,query,{},1,0);
+								query[parent_search_item.foreign_field] = data[parent_search_item.item_field];
+								let search = App_Logic.get_search(parent_search_item.foreign_data_type,query,{},1,0);
 								const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,join_option);
 								if(biz_error){
 									error=Log.append(error,biz_error);
@@ -2105,8 +2104,8 @@ class Portal {
 								}
 							}else if(parent_search_item.type == Type.COUNT){
 								let query = {};
-								query[parent_search_item.primary_field] = data[parent_search_item.item_field];
-								let search = App_Logic.get_search(parent_search_item.primary_data_type,query,{},1,0);
+								query[parent_search_item.foreign_field] = data[parent_search_item.item_field];
+								let search = App_Logic.get_search(parent_search_item.foreign_data_type,query,{},1,0);
 								const [biz_error,biz_data] = await Portal.count(database,search.data_type,search.filter);
 								if(biz_error){
 									error=Log.append(error,biz_error);
@@ -2208,8 +2207,8 @@ class Portal {
 			- get_join / type. bool / ex. true,false / default. false
 				- field_key_list / type. obj list / ex. [
 					{
-						primary_data_type:DataType.PRODUCT,
-						primary_field:'id',
+						foreign_data_type:DataType.PRODUCT,
+						foreign_field:'id',
 						item_field:'parent_id',
 						title:'field_title',
 						fields:'id,title,title_url',
@@ -2243,7 +2242,6 @@ class Portal {
 							data.item_count=item_count;
 							data.page_count=page_count;
 							data.search=search;
-							data.filter=filter;
 							data.data_list=item_list;
 							call();
 						}
@@ -2271,8 +2269,8 @@ class Portal {
 					if(option.get_join && data.data_list.length>0){
 						for(let a = 0; a < option.field_key_list.length; a++){
 							parent_search_item_list.push({
-								primary_data_type : option.field_key_list[a].primary_data_type,
-								primary_field : option.field_key_list[a].primary_field,
+								foreign_data_type : option.field_key_list[a].foreign_data_type,
+								foreign_field : option.field_key_list[a].foreign_field,
 								item_field : option.field_key_list[a].item_field,
 								title : option.field_key_list[a].title,
 								fields : option.field_key_list[a].fields ? option.field_key_list[a].fields : "",
@@ -2293,10 +2291,10 @@ class Portal {
 							let query = { $or: [] };
 							for(const data_item of data.data_list){
 								let query_field = {};
-								query_field[parent_search_item.primary_field] = { $regex:String(data_item[parent_search_item.item_field]), $options: "i" };
+								query_field[parent_search_item.foreign_field] = { $regex:String(data_item[parent_search_item.item_field]), $options: "i" };
 								query.$or.push(query_field);
 							};
-							let search = App_Logic.get_search(parent_search_item.primary_data_type,query,{},1,0);
+							let search = App_Logic.get_search(parent_search_item.foreign_data_type,query,{},1,0);
 							let join_option = parent_search_item.fields ? {get_field:true,fields:parent_search_item.fields} : {};
 							const [biz_error,biz_data] = await Portal.search_simple(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,join_option);
 							if(biz_error){
@@ -2306,7 +2304,7 @@ class Portal {
 								if(parent_search_item_list.length> 0){
 									for(const parent_search_item of parent_search_item_list){
 										for(const data_item of data.data_list){
-											let item_found = parent_search_item.data_list.find(item_find => item_find[parent_search_item.primary_field] === data_item[parent_search_item.item_field])
+											let item_found = parent_search_item.data_list.find(item_find => item_find[parent_search_item.foreign_field] === data_item[parent_search_item.item_field])
 											if(parent_search_item.type == Type.OBJ){
 												if(parent_search_item.make_flat){
 													for(const prop in item_found) {
@@ -2317,8 +2315,8 @@ class Portal {
 												}
 											}else if(parent_search_item.type == Type.LIST){
 												let query = {};
-												query[parent_search_item.primary_field] = data_item[parent_search_item.item_field];
-												let search = App_Logic.get_search(parent_search_item.primary_data_type,query,{},1,0);
+												query[parent_search_item.foreign_field] = data_item[parent_search_item.item_field];
+												let search = App_Logic.get_search(parent_search_item.foreign_data_type,query,{},1,0);
 												const [biz_error,biz_data] = await Portal.search_simple(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,join_option);
 												data_item[parent_search_item.title] = [];
 												if(biz_error){
@@ -2329,8 +2327,8 @@ class Portal {
 													}
 												}
 											}else if(parent_search_item.type == Type.COUNT){
-												query[parent_search_item.primary_field] = data_item[parent_search_item.item_field];
-												let search = App_Logic.get_search(parent_search_item.primary_data_type,query,{},1,0);
+												query[parent_search_item.foreign_field] = data_item[parent_search_item.item_field];
+												let search = App_Logic.get_search(parent_search_item.foreign_data_type,query,{},1,0);
 												const [biz_error,biz_data] = await Portal.count(database,search.data_type,search.filter);
 												if(biz_error){
 													error=Log.append(error,biz_error);
