@@ -1248,7 +1248,6 @@ class Review_Data {
 						}
 					}
 				},
-
 			]).then(result => {
 				callback([error,data.review]);
 			}).catch(err => {
@@ -1919,7 +1918,7 @@ class Portal {
 			 */
 		return new Promise((callback) => {
 			let error = null;
-			let data = DataItem.get_new(data_type,0,{key:key.toLowerCase()?key:Type.BLANK});
+			let data = DataItem.get_new(data_type,0,{key:key?key:Type.BLANK});
 			let stat_view = DataItem.get_new(DataType.STAT,0,{resultOK:false});
 			//option = option ? option : {get_item:false,get_image:false,get_field:false,post_stat:false,user_id:0};
 			option = option ? option : {};
@@ -1927,7 +1926,7 @@ class Portal {
 			let parent_search_item_list = [];
 			async.series([
 				function(call){
-					if(!Str.check_is_guid(key)){
+					if(!Str.check_is_guid(key) && !Number.isInteger(key) && key){
 						option.title_url = key.toLowerCase();
 						key = key.toLowerCase();
 					}
