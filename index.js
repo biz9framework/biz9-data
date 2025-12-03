@@ -1369,6 +1369,9 @@ class Review_Data {
 class User_Data {
 	static get_device = async (device) => {
 		return new Promise((callback) => {
+			if(!device){
+				device = {};
+			}
 			let dev = {};
 			dev.platform_name = !Str.check_is_null(device.name) ? device.name : Type.N_A;
 			dev.platform_version = !Str.check_is_null(device.version) ? device.version : Type.N_A;
@@ -1616,7 +1619,6 @@ class User_Data {
 			 * - post_ip_address / type. bool / ex.true,false / default. false
 			 * - post_device / type. bool / ex.true,false / default. false
 			 */
-
 		return new Promise((callback) => {
 			let error = null;
 			let data = {
