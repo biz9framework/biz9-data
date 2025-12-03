@@ -6,7 +6,7 @@ Description: BiZ9 Framework: Logic-JS
 */
 const moment = require('moment');
 const { get_new_item_main,get_data_config_main,get_cloud_url_main,get_biz_item_main,get_cloud_filter_obj_main,get_new_full_item_main } = require('./main');
-const { Log,Str,DateTime,Num,Obj } = require('/home/think2/www/doqbox/biz9-framework/biz9-utility/code');
+const { Log,Str,DateTime,Num,Obj } = require('biz9-utility');
 class Message {
 	static SUCCESS="Success";
 	static CONFIRM="Are You Sure?";
