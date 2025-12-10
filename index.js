@@ -2439,6 +2439,17 @@ class Portal {
 						call();
 					});
 				},
+				//delete cache item
+				async function(call){
+					if(option.overwrite_data){
+						const [biz_error,biz_data] = await Portal.delete_cache(database,data_type,item.id);
+						if(biz_error){
+							error=Log.append(error,biz_error);
+						}else{
+							//data.delete_cache_item = biz_data;
+						}
+					}
+				},
 				//get_item
 				async function(call){
 					if(option.get_update_data && data.id){
