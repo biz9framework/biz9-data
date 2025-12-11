@@ -27,7 +27,7 @@ const DATA_TYPE = DataType.BLOG_POST;
 const OPTION = {};
 //const FILTER = {test_group_id:59367};
 const FILTER = {data_type:DATA_TYPE};
-const APP_ID = 'test-stage';
+const APP_ID = 'test-stage-dec8';
 //const APP_ID = 'app_id_98230';
 const SQL = {};
 /* --- TEST CONFIG END --- */
@@ -69,14 +69,14 @@ describe('connect', function(){ this.timeout(25000);
             //- POST_ITEM - START
             async function(call){
                 //let id = 0;
-                let id = "7851c6ba-578b-4eaa-9ab2-078e41741a98";
-                let data_type = DataType.TEMPLATE;
+                let id = "1";
+                let data_type = DataType.PRODUCT;
                 let data_item = DataItem.get_new(data_type,id,{title:'primary',title_url:'primary'});
                 let key = "mobile_product_12";
                 let user_id = "63e7b9ea-7bf8-4780-bf90-5050e501f44c";
                 //let search = App_Logic.get_search(DataType.CATEGORY,{id:'75a5f009-54c3-4fd3-a136-fd3880023ddb'},{date_create:-1},1,3);
                 let search = App_Logic.get_search(DataType.TYPE,{},{date_create:-1},1,12);
-                let option = {get_join:true,get_distinct:true,distinct_field:'title',field_key_list:[{primary_data_type:DataType.PRODUCT,primary_field:'type',item_field:'title',title:'my_count',type:Type.COUNT}]};
+                //let option = {get_join:true,get_distinct:true,distinct_field:'title',field_key_list:[{primary_data_type:DataType.PRODUCT,primary_field:'type',item_field:'title',title:'my_count',type:Type.COUNT}]};
                 //let option = {};
 
                 //const [biz_error,biz_data] = await Portal.get(database,data_type,id,option);
@@ -84,7 +84,8 @@ describe('connect', function(){ this.timeout(25000);
                 //const [biz_error,biz_data] = await Portal.search_simple(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option);
                 //const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option);
                 //const [biz_error,biz_data] = await Page_Data.get(database,Type.PAGE_PRODUCT_HOME);
-                const [biz_error,biz_data] = await Faq_Data.get(database,'primary');
+                //const [biz_error,biz_data] = await Faq_Data.get(database,'primary');
+                const [biz_error,biz_data] = await Review_Data.get(database,data_type,id,{date_create:-1},1,0,{});
                 Log.w('99_final_post',biz_data);
                 //Log.w('99_final_post',biz_data.data_list[0]);
 

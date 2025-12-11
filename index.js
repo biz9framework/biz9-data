@@ -1292,10 +1292,15 @@ class Review_Data {
 			async.series([
 				//review_list
 				async function(call){
-					let query = {parent_id:parent_id,parent_data_type:parent_data_type};
+					let query = {parent_id:'1',parent_data_type:parent_data_type};
+					//let query = {};
 					let search = App_Logic.get_search(DataType.REVIEW,query,sort_by,page_current,page_size);
 					let option = {get_join:true,field_key_list:[{foreign_data_type:parent_data_type,foreign_field:'id',item_field:'product',title:'parent_item'}],get_user:true};
 					const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option);
+					Log.w('search',search);
+					Log.w('option',option);
+					Log.w('biz_data',biz_data);
+					/*
 					if(biz_error){
 						error=Log.append(error,biz_error);
 					}else{
@@ -1306,9 +1311,10 @@ class Review_Data {
 						data.filter=biz_data.filter;
 						data.review_list=biz_data.data_list;
 					}
+					*/
 				},
 			]).then(result => {
-				callback([error,data]);
+				//callback([error,data]);
 			}).catch(err => {
 				Log.error("Review-Data-List",err);
 				callback([err,[]]);
