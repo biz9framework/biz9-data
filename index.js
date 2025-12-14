@@ -1891,14 +1891,15 @@ class Portal {
 		   - get_field_value_list / type. bool / ex. true,false / default. false
 		 *  Join
 			- get_join / type. bool / ex. true,false / default. false
-				- field_key_list / type. obj list / ex. [
+			-- field_key_list / type. obj list / ex. [
 					{
 						foreign_data_type:DataType.PRODUCT,
 						foreign_field:'id',
-						item_field:'parent_id',
+						parent_field:'parent_id',
 						title:'field_title',
-						type:obj,list,count
+						type:list,count
 					}];
+			-- make_flat / type. bool / true,false list / ex. true
 		 * Items
 		   - get_item / bool / ex. true,false / def. true
 		 * Photos
@@ -1914,6 +1915,7 @@ class Portal {
 		   - get_favorite / bool / ex. true,false / def. true
 	 	 * Group
 		   - get_group / bool / ex. true,false / def. true
+		   --
 		 * Stat
 		   - post_stat / bool / ex. true,false / def. true
 		   - user_id / id / ex. 123 / def. error
@@ -2073,32 +2075,19 @@ class Portal {
 							parent_search_item_list.push({
 								foreign_data_type : option.field_key_list[a].foreign_data_type,
 								foreign_field : option.field_key_list[a].foreign_field,
-								item_field : option.field_key_list[a].item_field,
+								parent_field : option.field_key_list[a].parent_field,
 								title : option.field_key_list[a].title,
 								fields : option.field_key_list[a].fields ? option.field_key_list[a].fields : "",
 								make_flat : option.field_key_list[a].make_flat ? option.field_key_list[a].make_flat : false,
-								type : option.field_key_list[a].type ? option.field_key_list[a].type : Type.OBJ,
+								type : option.field_key_list[a].type ? option.field_key_list[a].type : Type.LIST,
 								data : [],
 							});
 						};
 						for(const parent_search_item of parent_search_item_list){
 							let join_option = parent_search_item.fields ? {get_field:true,fields:parent_search_item.fields} : {};
-							if(parent_search_item.type == Type.OBJ){
-								const [biz_error,biz_data] = await Portal.get(database,parent_search_item.foreign_data_type,data[parent_search_item.item_field],join_option);
-								if(biz_error){
-									error=Log.append(error,biz_error);
-								}else{
-									if(parent_search_item.make_flat){
-										for (const prop in biz_data) {
-											data[parent_search_item.title+"_"+prop] = biz_data[prop];
-										}
-									}else{
-										data[parent_search_item.title] = biz_data;
-									}
-								}
-							}else if(parent_search_item.type == Type.LIST){
+							if(parent_search_item.type == Type.LIST){
 								let query = {};
-								query[parent_search_item.foreign_field] = data[parent_search_item.item_field];
+								query[parent_search_item.foreign_field] = data[parent_search_item.parent_field];
 								let search = App_Logic.get_search(parent_search_item.foreign_data_type,query,{},1,0);
 								const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,join_option);
 								if(biz_error){
@@ -2108,7 +2097,7 @@ class Portal {
 								}
 							}else if(parent_search_item.type == Type.COUNT){
 								let query = {};
-								query[parent_search_item.foreign_field] = data[parent_search_item.item_field];
+								query[parent_search_item.foreign_field] = data[parent_search_item.parent_field];
 								let search = App_Logic.get_search(parent_search_item.foreign_data_type,query,{},1,0);
 								const [biz_error,biz_data] = await Portal.count(database,search.data_type,search.filter);
 								if(biz_error){
@@ -2123,15 +2112,14 @@ class Portal {
 				//get_group -- group_list
 				async function(call){
 					if(option.get_group && data.id){
-						let group_option = {get_join:true,field_key_list:[{foreign_data_type:DataType.ITEM,foreign_field:'parent_id',item_field:data.id,title:'items_cool',type:Type.LIST}]};
-						//let group_option = {};
+						let group_option = {get_join:true,field_key_list:[{foreign_data_type:DataType.ITEM,foreign_field:'parent_id',parent_field:'id',title:'items',type:Type.LIST}]};
 						let group_search = App_Logic.get_search(DataType.GROUP,{parent_id:data.id},{},1,0);
 						const [biz_error,biz_data] = await Portal.search(database,group_search.data_type,group_search.filter,group_search.sort_by,group_search.page_current,group_search.page_size,group_option);
-						Log.w('group_search',group_search);
-						Log.w('33_biz_data',biz_data);
+						Log.w('44_group_option',group_option);
+						Log.w('55_group_search',group_search);
+						Log.w('66_biz_data',biz_data);
 					}
 				},
-
 				//post-view-stat
 				async function(call){
 					if(option.post_stat && data.id){
@@ -2156,7 +2144,7 @@ class Portal {
 					}
 				},
 			]).then(result => {
-				//callback([error,data]);
+				callback([error,data]);
 			}).catch(err => {
 				Log.error("ERROR-PORTAL-GET-2",err);
 				callback([error,{}]);
@@ -2302,9 +2290,9 @@ class Portal {
 											type : option.field_key_list[a].type ? option.field_key_list[a].type : Type.OBJ,
 											data_list : []
 										});
-										Log.w('22_parent_search_item_list',parent_search_item_list);
 									};
 							};
+						Log.w('77_parent_search_item_list',parent_search_item_list);
 							call();
 					}else{
 						call();

@@ -27,7 +27,7 @@ const DATA_TYPE = DataType.BLOG_POST;
 const OPTION = {};
 //const FILTER = {test_group_id:59367};
 const FILTER = {data_type:DATA_TYPE};
-const APP_ID = 'test-stage-dec13';
+const APP_ID = 'test-stage-dec14';
 //const APP_ID = 'app_id_98230';
 const SQL = {};
 /* --- TEST CONFIG END --- */
@@ -70,6 +70,7 @@ describe('connect', function(){ this.timeout(25000);
             //- POST_ITEM - START
             async function(call){
                 //let id = 0;
+                /*
                 let id = "1";
                 let data_type = DataType.PRODUCT;
                 let data_item = DataItem.get_new(data_type,id,{title:'primary',title_url:'primary'});
@@ -77,6 +78,23 @@ describe('connect', function(){ this.timeout(25000);
                 let user_id = "63e7b9ea-7bf8-4780-bf90-5050e501f44c";
                 //let search = App_Logic.get_search(DataType.CATEGORY,{id:'75a5f009-54c3-4fd3-a136-fd3880023ddb'},{date_create:-1},1,3);
                 let search = App_Logic.get_search(DataType.TYPE,{},{date_create:-1},1,12);
+                */
+
+                //let parent_item = DataItem.get_new(DataType.PRODUCT,0,{my_parent_title:'my parent_'+Num.get_id()});
+                //let parent_item = DataItem.get_new(DataType.PRODUCT,'fbbaa1ee-df67-44a0-8437-e243185b47c8');
+                //let group = DataItem.get_new(DataType.GROUP,0,{parent_id:parent_item.id,parent_data_type:parent_item.data_type});
+                let option = {get_join:true,field_key_list:[{foreign_data_type:DataType.ITEM,foreign_field:'parent_id',parent_field:'id',title:'items_cool',type:Type.LIST}]};
+                let group = DataItem.get_new(DataType.GROUP,'ec0facb0-2a11-4786-a5c8-fdb763ce50d3');
+                //let item = DataItem.get_new(DataType.ITEM,0,{parent_id:group.id,parent_data_type:group.data_type});
+                //Log.w('item',item);
+                const [error,biz_data] = await Portal.get(database,group.data_type,group.id,option);
+                //const [error,biz_data] = await Portal.get(database,parent_item.data_type,parent_item.id);
+                //const [error,biz_data] = await Portal.get(database,group.data_type,group.id);
+                //const [error,biz_data] = await Portal.post(database,item.data_type,item);
+                //parent_item = data;
+                Log.w('biz_data',biz_data);
+                //Log.w('group',group);
+
                 //let option = {get_join:true,get_distinct:true,distinct_field:'title',field_key_list:[{primary_data_type:DataType.PRODUCT,primary_field:'type',item_field:'title',title:'my_count',type:Type.COUNT}]};
                 //let option = {};
 
@@ -451,11 +469,14 @@ describe('post_data', function(){ this.timeout(25000);
                 console.log('TEST-CONNECT-END');
             },
             async function(call){
-                //let parent_item = DataItem.get_new(DataType.PRODUCT,'4294d558-384b-47c9-ade0-63f2c54a2939',{my_parent_title:Num.get_id()});
-                let parent_item = DataItem.get_new(DataType.PRODUCT,'4294d558-384b-47c9-ade0-63f2c54a2939');
-                let group = DataItem.get_new(DataType.GROUP,'7d92ea90-c1a7-49c9-80e4-8064d06546b1',{parent_id:parent_item.id,parent_data_type:parent_item.data_type});
-                let item = DataItem.get_new(DataType.ITEM,0,{parent_id:group.id,parent_data_type:group.data_type});
-                const [error,biz_data] = await Portal.post(database,item.data_type,item);
+                //let parent_item = DataItem.get_new(DataType.PRODUCT,0,{my_parent_title:'my parent_'+Num.get_id()});
+                //let parent_item = DataItem.get_new(DataType.PRODUCT,'fbbaa1ee-df67-44a0-8437-e243185b47c8');
+                //let group = DataItem.get_new(DataType.GROUP,0,{parent_id:parent_item.id,parent_data_type:parent_item.data_type});
+                let group = DataItem.get_new(DataType.GROUP,'ec0facb0-2a11-4786-a5c8-fdb763ce50d3');
+                //const [error,biz_data] = await Portal.get(database,parent_item.data_type,parent_item.id);
+                //const [error,biz_data] = await Portal.get(database,parent_item.data_type,parent_item.id);
+                const [error,biz_data] = await Portal.get(database,group.data_type,group.id);
+                //const [error,biz_data] = await Portal.post(database,parent_item.data_type,parent_item);
                 //parent_item = data;
                 Log.w('biz_data',biz_data);
                 //Log.w('group',group);
@@ -595,7 +616,7 @@ describe('post_data', function(){ this.timeout(25000);
 
 
         //- FAVORITE - START
-        /*
+       /*
                 let parent_data_type = DataType.PRODUCT;
                 let parent_id = "604f0e31-816e-47f4-a411-0c507b859460";
                 let user_id = "80009d4a-1df4-421a-9105-d9450ebc5e01";
@@ -1158,10 +1179,10 @@ describe('get_data', function(){ this.timeout(25000);
                 let parent_item = DataItem.get_new(DataType.PRODUCT,"4294d558-384b-47c9-ade0-63f2c54a2939");
                 let group = DataItem.get_new(DataType.GROUP,'4294d558-384b-47c9-ade0-63f2c54a2939',{parent_id:parent_item.id,parent_data_type:parent_item.data_type});
                 let item = DataItem.get_new(DataType.ITEM,0,{parent_id:group.id,parent_data_type:group.data_type});
-                //let option = {get_group:true};
-	            let option = {get_join:true,field_key_list:[{foreign_data_type:DataType.ITEM,foreign_field:'parent_id',parent_field:'id',title:'items_cool',type:Type.LIST}]};
+                let option = {get_group:true};
+	            //let option = {get_join:true,field_key_list:[{foreign_data_type:DataType.ITEM,foreign_field:'parent_id',parent_field:'id',title:'items_cool',type:Type.LIST}]};
                 //let key = "d86ec25e-4b15-4c4a-8ef9-ce82c9067571";
-                let search  = App_Logic.get_search(DataType.GROUP,{id:'7d92ea90-c1a7-49c9-80e4-8064d06546b1'},{},1,0);
+                //let search  = App_Logic.get_search(DataType.GROUP,{id:'7d92ea90-c1a7-49c9-80e4-8064d06546b1'},{},1,0);
                 //let option = {get_search:true,search_data_type:DataType.CATEGORY,search_field:'category',item_search_value:'title'};
                 //const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,{});
                 //
@@ -1169,7 +1190,7 @@ describe('get_data', function(){ this.timeout(25000);
                 //let option = {get_count:true,item_data_type:DataType.PRODUCT,item_field:'category',item_value:'title'};
                 //Log.w('search',search);
                 //Log.w('parent_item',parent_item);
-                //const [biz_error,biz_data] = await Portal.get(database,parent_item.data_type,parent_item.id,option);
+                const [biz_error,biz_data] = await Portal.get(database,parent_item.data_type,parent_item.id,option);
                 //////const [biz_error,biz_data] = await Content_Data.get(database,key,{get_item:true});
                 //const [biz_error,biz_data] = await Faq_Data.get(database,'primary');
                 //const [biz_error,biz_data] = await Blog_Post_Data.get(database,key,{get_item:true});
@@ -1179,11 +1200,11 @@ describe('get_data', function(){ this.timeout(25000);
                 //const [biz_error,biz_data] = await Order_Data.get(database,key);
                 //const [biz_error,biz_data] = await Cart_Data.get(database,key);
                 //const [biz_error,biz_data] = await Cart_Data.search(database,DataType.PRODUCT,search.filter,search.sort_by,search.parent_current,search.page_size);
-                const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option);
+                //const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option);
                 //Log.w('99_option',option);
                 //Log.w('99_search',search);
                 Log.w('99_biz_data',biz_data);
-                Log.w('99_biz_data',biz_data.data_list[0]);
+                //Log.w('99_biz_data',biz_data.data_list[0]);
                 console.log('TEST-GET-SUCCESS');
                 console.log('TEST-GET-END');
             },
