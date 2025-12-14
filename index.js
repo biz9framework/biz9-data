@@ -2372,8 +2372,7 @@ class Portal {
 				},
 				//get_group
 				function(call){
-					Log.w('aaa_cool',data.data_list);
-					//call();
+					call();
 
 					/*
 					if(option.get_group && option.data_list.length>0){

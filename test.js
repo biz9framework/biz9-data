@@ -1159,7 +1159,7 @@ describe('get_data', function(){ this.timeout(25000);
                 let group = DataItem.get_new(DataType.GROUP,'4294d558-384b-47c9-ade0-63f2c54a2939',{parent_id:parent_item.id,parent_data_type:parent_item.data_type});
                 let item = DataItem.get_new(DataType.ITEM,0,{parent_id:group.id,parent_data_type:group.data_type});
                 //let option = {get_group:true};
-	            let option = {get_join:true,field_key_list:[{foreign_data_type:DataType.ITEM,foreign_field:'parent_id',parent_field:'id',title:'items_cool',type:Type.COUNT}]};
+	            let option = {get_join:true,field_key_list:[{foreign_data_type:DataType.ITEM,foreign_field:'parent_id',parent_field:'id',title:'items_cool',type:Type.LIST}]};
                 //let key = "d86ec25e-4b15-4c4a-8ef9-ce82c9067571";
                 let search  = App_Logic.get_search(DataType.GROUP,{id:'7d92ea90-c1a7-49c9-80e4-8064d06546b1'},{},1,0);
                 //let option = {get_search:true,search_data_type:DataType.CATEGORY,search_field:'category',item_search_value:'title'};
