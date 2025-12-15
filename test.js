@@ -27,7 +27,7 @@ const DATA_TYPE = DataType.BLOG_POST;
 const OPTION = {};
 //const FILTER = {test_group_id:59367};
 const FILTER = {data_type:DATA_TYPE};
-const APP_ID = 'test-stage-dec14';
+const APP_ID = 'test-stage-dec14b';
 //const APP_ID = 'app_id_98230';
 const SQL = {};
 /* --- TEST CONFIG END --- */
@@ -47,9 +47,9 @@ const DATA_CONFIG ={
 /* --- DATA CONFIG END --- */
 Log.w('Test_Data_Config',DATA_CONFIG);
 
+//9_connect - 9_test_connect
 /* --- BiZ9_CORE_CONFIG-END --- */
 describe('connect', function(){ this.timeout(25000);
-
     it("_connect", function(done){
         let error=null;
         let database = {};
@@ -77,22 +77,27 @@ describe('connect', function(){ this.timeout(25000);
                 let key = "mobile_product_12";
                 let user_id = "63e7b9ea-7bf8-4780-bf90-5050e501f44c";
                 //let search = App_Logic.get_search(DataType.CATEGORY,{id:'75a5f009-54c3-4fd3-a136-fd3880023ddb'},{date_create:-1},1,3);
-                let search = App_Logic.get_search(DataType.TYPE,{},{date_create:-1},1,12);
                 */
 
                 //let parent_item = DataItem.get_new(DataType.PRODUCT,0,{my_parent_title:'my parent_'+Num.get_id()});
-                //let parent_item = DataItem.get_new(DataType.PRODUCT,'fbbaa1ee-df67-44a0-8437-e243185b47c8');
+                let parent_item = DataItem.get_new(DataType.PRODUCT,'81b4d214-7f41-4d23-b5b2-2ef6e5695955');
                 //let group = DataItem.get_new(DataType.GROUP,0,{parent_id:parent_item.id,parent_data_type:parent_item.data_type});
-                let option = {get_join:true,field_key_list:[{foreign_data_type:DataType.ITEM,foreign_field:'parent_id',parent_field:'id',title:'items_cool',type:Type.LIST}]};
-                let group = DataItem.get_new(DataType.GROUP,'ec0facb0-2a11-4786-a5c8-fdb763ce50d3');
-                //let item = DataItem.get_new(DataType.ITEM,0,{parent_id:group.id,parent_data_type:group.data_type});
-                //Log.w('item',item);
-                const [error,biz_data] = await Portal.get(database,group.data_type,group.id,option);
+                let group = DataItem.get_new(DataType.GROUP,'389d3298-d3ae-43bb-9361-155953517f02');
+                let option = {get_join:true,field_key_list:[{foreign_data_type:DataType.ITEM,foreign_field:'parent_id',parent_field:'id',title:'items_bean',type:Type.LIST}]};
+                let item = DataItem.get_new(DataType.ITEM,0,{parent_id:group.id,parent_data_type:group.data_type});
+                let search = App_Logic.get_search(DataType.GROUP,{},{date_create:-1},1,12);
+                //const [error,biz_data] = await Portal.get(database,group.data_type,group.id,option);
                 //const [error,biz_data] = await Portal.get(database,parent_item.data_type,parent_item.id);
                 //const [error,biz_data] = await Portal.get(database,group.data_type,group.id);
+                //const [error,biz_data] = await Portal.post(database,parent_item.data_type,parent_item);
                 //const [error,biz_data] = await Portal.post(database,item.data_type,item);
+                //const [error,biz_data] = await Portal.post(database,group.data_type,group);
+                //const [error,biz_data] = await Portal.post_list(database,group_list);
+                const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option);
+
                 //parent_item = data;
-                Log.w('biz_data',biz_data);
+                //Log.w('99_biz_data',biz_data);
+                //Log.w('99_biz_data_post',biz_data.data_list[0]);
                 //Log.w('group',group);
 
                 //let option = {get_join:true,get_distinct:true,distinct_field:'title',field_key_list:[{primary_data_type:DataType.PRODUCT,primary_field:'type',item_field:'title',title:'my_count',type:Type.COUNT}]};
@@ -1176,7 +1181,7 @@ describe('get_data', function(){ this.timeout(25000);
                 console.log('TEST-GET-START');
                 let data_type = DataType.PRODUCT;
                 //let key = "CA-51129";
-                let parent_item = DataItem.get_new(DataType.PRODUCT,"4294d558-384b-47c9-ade0-63f2c54a2939");
+                let parent_tem = DataItem.get_new(DataType.PRODUCT,"4294d558-384b-47c9-ade0-63f2c54a2939");
                 let group = DataItem.get_new(DataType.GROUP,'4294d558-384b-47c9-ade0-63f2c54a2939',{parent_id:parent_item.id,parent_data_type:parent_item.data_type});
                 let item = DataItem.get_new(DataType.ITEM,0,{parent_id:group.id,parent_data_type:group.data_type});
                 let option = {get_group:true};
@@ -1190,7 +1195,7 @@ describe('get_data', function(){ this.timeout(25000);
                 //let option = {get_count:true,item_data_type:DataType.PRODUCT,item_field:'category',item_value:'title'};
                 //Log.w('search',search);
                 //Log.w('parent_item',parent_item);
-                const [biz_error,biz_data] = await Portal.get(database,parent_item.data_type,parent_item.id,option);
+                //const [biz_error,biz_data] = await Portal.get(database,parent_item.data_type,parent_item.id,option);
                 //////const [biz_error,biz_data] = await Content_Data.get(database,key,{get_item:true});
                 //const [biz_error,biz_data] = await Faq_Data.get(database,'primary');
                 //const [biz_error,biz_data] = await Blog_Post_Data.get(database,key,{get_item:true});
