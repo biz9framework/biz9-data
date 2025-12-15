@@ -98,6 +98,8 @@ describe('connect', function(){ this.timeout(25000);
 
                 //parent_item = data;
                 //Log.w('99_biz_data',biz_data);
+                //Log.w('99_biz_data_groups_0',biz_data.data_list[0]);
+                //Log.w('99_biz_data_groups_1',biz_data.data_list[1]);
                 //Log.w('99_biz_data_post',biz_data.data_list[0]);
                 //Log.w('group',group);
 
