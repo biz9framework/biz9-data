@@ -2113,7 +2113,20 @@ class Portal {
 				async function(call){
 					if(option.get_group && data.id){
 						let group_option = {get_join:true,field_key_list:[{foreign_data_type:DataType.ITEM,foreign_field:'parent_id',parent_field:'id',title:'items',type:Type.LIST}]};
-						let group_search = App_Logic.get_search(DataType.GROUP,{parent_id:data.id},{},1,0);
+						let query = {};
+						if(!option.group){
+							query = {parent_id:data.id}
+						}else{
+							let group_title_list = option.group ? option.group.split(','):[];
+							query = { $or: [] };
+							for(let a = 0; a < group_title_list.length; a++){
+								let query_field = {};
+								query_field['title'] = { $regex:String(group_title_list[a]), $options: "i" };
+								query.$or.push(query_field);
+							}
+
+						}
+						let group_search = App_Logic.get_search(DataType.GROUP,query,{},1,0);
 						const [biz_error,biz_data] = await Portal.search(database,group_search.data_type,group_search.filter,group_search.sort_by,group_search.page_current,group_search.page_size,group_option);
 					}
 				},
@@ -2349,18 +2362,7 @@ class Portal {
 				//get_group
 				function(call){
 					if(option.get_group && data.data_list.length>0){
-									for(let a = 0; a < data.data_list.length; a++){
-										parent_search_item_list.push({
-											foreign_data_type : DataType.GROUP,
-											foreign_field : 'parent_id',
-											parent_value : data.data_list[a]['id'],
-											parent_field : 'id',
-											title : null,
-											type :  Type.LIST,
-											data_list : []
-										});
-									};
-							call();
+						call();
 					}else{
 						call();
 					}
@@ -2368,15 +2370,35 @@ class Portal {
 				//get_group_list
 				async function(call){
 					if(option.get_group && data.data_list.length>0){
+						let group_title_list = option.group ? option.group.split(','):[];
 						let query = { $or: [] };
-						for(const parent_search_item of parent_search_item_list){
-							let query_field = {};
-							query_field[parent_search_item.foreign_field] = { $regex:String(parent_search_item.parent_value), $options: "i" };
-							query.$or.push(query_field);
-							let search = App_Logic.get_search(DataType.GROUP,query,{},1,0);
-							const [biz_error,biz_data] = await Portal.search_simple(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,{});
-							group_list = biz_data.data_list;
+						if(group_title_list.length<=0){
+							for(let a = 0; a < data.data_list.length; a++){
+									parent_search_item_list.push({
+									foreign_data_type : DataType.GROUP,
+									foreign_field : 'parent_id',
+									parent_value : data.data_list[a]['id'],
+									parent_field : 'id',
+									title : null,
+									type :  Type.LIST,
+									data_list : []
+								});
+							};
+							for(const parent_search_item of parent_search_item_list){
+								let query_field = {};
+								query_field[parent_search_item.foreign_field] = { $regex:String(parent_search_item.parent_value), $options: "i" };
+								query.$or.push(query_field);
+							}
+						}else{
+							for(let a = 0; a < group_title_list.length; a++){
+								let query_field = {};
+								query_field['title'] = { $regex:String(group_title_list[a]), $options: "i" };
+								query.$or.push(query_field);
+							}
 						}
+						let search = App_Logic.get_search(DataType.GROUP,query,{},1,0);
+						const [biz_error,biz_data] = await Portal.search_simple(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,{});
+						group_list = biz_data.data_list;
 					}
 				},
 				//get_group_item_list
@@ -2817,9 +2839,6 @@ class Portal {
 			let data = {};
 			async.series([
 				function(call){
-					Log.w('55_portal_count',data_type);
-					Log.w('55_portal_filter',filter);
-					Log.w('55_portal_filter_or',filter.$or);
 					Data.count_list(database,data_type,filter).then(([biz_error,biz_data])=> {
 						if(biz_error){
 							error=Log.append(error,biz_error);
