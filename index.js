@@ -2147,6 +2147,7 @@ class Portal {
 			});
 		});
 	};
+	//9_portal_search_simple
 	static search_simple = async (database,data_type,filter,sort_by,page_current,page_size,option) => {
 		/* option params
 		 * n/a
@@ -2364,7 +2365,7 @@ class Portal {
 						call();
 					}
 				},
-				//get_group_item_list
+				//get_group_list
 				async function(call){
 					if(option.get_group && data.data_list.length>0){
 						let query = { $or: [] };
@@ -2372,11 +2373,32 @@ class Portal {
 							let query_field = {};
 							query_field[parent_search_item.foreign_field] = { $regex:String(parent_search_item.parent_value), $options: "i" };
 							query.$or.push(query_field);
-							let search = App_Logic.get_search(parent_search_item.foreign_data_type,query,{},1,0);
-							let group_option = {get_join:true,field_key_list:[{foreign_data_type:DataType.ITEM,foreign_field:'parent_id',parent_field:'id',title:'items',type:Type.LIST}]};
-							const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,group_option);
-							//Log.w('aaaaa',biz_data);
+							let search = App_Logic.get_search(DataType.GROUP,query,{},1,0);
+							const [biz_error,biz_data] = await Portal.search_simple(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,{});
 							group_list = biz_data.data_list;
+						}
+					}
+				},
+				//get_group_item_list
+				async function(call){
+					if(option.get_group && group_list.length>0){
+						let item_list = [];
+						let query = { $or: [] };
+						for(let a = 0; a < group_list.length; a++){
+							let query_field = {};
+							query_field['parent_id'] = { $regex:String(group_list[a].id), $options: "i" };
+							query.$or.push(query_field);
+						}
+						let search = App_Logic.get_search(DataType.ITEM,query,{},1,0);
+						let group_option = {};
+						const [biz_error,biz_data] = await Portal.search_simple(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,group_option);
+						for(let a = 0; a < group_list.length; a++){
+							group_list[a].items = [];
+							for(let b = 0; b < biz_data.data_list.length; b++){
+								if(biz_data.data_list[b].parent_id == group_list[a].id){
+									group_list[a].items.push(biz_data.data_list[b]);
+								}
+							}
 						}
 					}
 				},
@@ -2384,20 +2406,14 @@ class Portal {
 				async function(call){
 					if(option.get_group && data.data_list.length>0){
 						for(var a = 0; a < data.data_list.length; a++){
+							data.data_list[a].groups = [];
 							for(var b = 0; b < group_list.length; b++){
-								data.data_list[a].groups = [];
 								if(data.data_list[a].id ==  group_list[b].parent_id){
-									Log.w('rrr_items',group_list[b].items);
-									for(var c = 0; c < group_list[b].length; c++){
-									}
-
 									data.data_list[a].groups.push(group_list[b]);
 								}
 							}
 						}
 					}
-					Log.w('bbbbbbb',data.data_list[0]);
-					Log.w('cccccc',data.data_list[1]);
 				},
 				//get_user
 				async function(call){
