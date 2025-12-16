@@ -2112,6 +2112,7 @@ class Portal {
 				//get_group -- group_list
 				async function(call){
 					if(option.get_group && data.id){
+						data.groups = [];
 						let group_option = {get_join:true,field_key_list:[{foreign_data_type:DataType.ITEM,foreign_field:'parent_id',parent_field:'id',title:'items',type:Type.LIST}]};
 						let query = {};
 						if(!option.group){
@@ -2128,6 +2129,7 @@ class Portal {
 						}
 						let group_search = App_Logic.get_search(DataType.GROUP,query,{},1,0);
 						const [biz_error,biz_data] = await Portal.search(database,group_search.data_type,group_search.filter,group_search.sort_by,group_search.page_current,group_search.page_size,group_option);
+						data.groups = biz_data.data_list;
 					}
 				},
 				//post-view-stat
