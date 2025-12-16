@@ -2302,6 +2302,13 @@ class Portal {
 							query_field[Type.PARENT_ID] = { $regex:String(parent_search_item.parent_value), $options: "i" };
 							query.$or.push(query_field);
 						};
+						let search = App_Logic.get_search(parent_search_item.foreign_data_type,query,{},1,0);
+						const [biz_error,biz_data] = await Portal.count(database,search.data_type,search.filter);
+						if(biz_error){
+							error=Log.append(error,biz_error);
+						}else{
+							data_item[parent_search_item.title] = biz_data;
+						}
 					}
 				},
 				//get_join
