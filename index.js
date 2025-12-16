@@ -1915,6 +1915,7 @@ class Portal {
 		   - get_favorite / bool / ex. true,false / def. true
 	 	 * Group
 		   - get_group / bool / ex. true,false / def. true
+		   -- get_group_image / bool / ex. true,false / def. true
 		   --
 		 * Stat
 		   - post_stat / bool / ex. true,false / def. true
@@ -1939,7 +1940,7 @@ class Portal {
 					}
 					call();
 				},
-				//delete cache item
+				//delete_cache_item
 				async function(call){
 					if(option.delete_cache && Str.check_is_guid(key)){
 						const [biz_error,biz_data] = await Portal.delete_cache(database,data_type,key);
@@ -1950,6 +1951,7 @@ class Portal {
 						}
 					}
 				},
+				//get_item_by_id
 				function(call){
 					Data.get(database,data_type,key,option).then(([biz_error,biz_data,option])=> {
 						if(biz_error){
@@ -1968,6 +1970,7 @@ class Portal {
 						call();
 					});
 				},
+				//get_item_by_list
 				async function(call){
 					function get_sort(data){
 						let sort_order = {};
@@ -2013,6 +2016,7 @@ class Portal {
 						}
 					}
 				},
+				//get_item_image
 				async function(call){
 					if(!Str.check_is_null(data.id) && option.get_image){
 						data.images = [];
@@ -2032,7 +2036,7 @@ class Portal {
 						}
 					}
 				},
-			//get_user
+				//get_item_user
 				async function(call){
 					if(option.get_user && data.id){
 						const [biz_error,biz_data] = await Portal.get(database,DataType.USER,data.user_id);
@@ -2049,6 +2053,7 @@ class Portal {
 						}
 					}
 				},
+				//get_item_favorite
 				async function(call){
 					if(option.get_favorite && data.id){
 						data.is_favorite = false;
@@ -2062,7 +2067,7 @@ class Portal {
 						}
 					}
 				},
-				//get_field_value_list
+				//get_item_field_value_list
 				async function(call){
 					if(option.get_field_value_list && data.id){
 						data = Field_Logic.get_item_field_value_list(data);
@@ -2113,7 +2118,7 @@ class Portal {
 				async function(call){
 					if(option.get_group && data.id){
 						data.groups = [];
-						let group_option = {get_join:true,field_key_list:[{foreign_data_type:DataType.ITEM,foreign_field:'parent_id',parent_field:'id',title:'items',type:Type.LIST}]};
+						let group_option = {get_join:true,field_key_list:[{foreign_data_type:DataType.ITEM,foreign_field:Type.PARENT_ID,parent_field:Type.ID,title:'items',type:Type.LIST,get_image:option.get_group_image? option.get_group_image:false}]};
 						let query = {};
 						if(!option.group){
 							query = {parent_id:data.id}
@@ -2122,7 +2127,7 @@ class Portal {
 							query = { $or: [] };
 							for(let a = 0; a < group_title_list.length; a++){
 								let query_field = {};
-								query_field['title'] = { $regex:String(group_title_list[a]), $options: "i" };
+								query_field[Type.TITLE] = { $regex:String(group_title_list[a]), $options: "i" };
 								query.$or.push(query_field);
 							}
 
@@ -2227,7 +2232,8 @@ class Portal {
 						parent_field:'parent_id',
 						title:'field_title',
 						fields:'id,title,title_url',
-						type:obj,list,count
+						type:obj,list,count,
+						get_image:false
 					}]
 		 * User
 		 - get_user / type. bool / ex. true,false / default. false
@@ -2279,12 +2285,23 @@ class Portal {
 						data.data_list = data.data_list.filter((obj, index, self) =>
 							index === self.findIndex((t) => t[option.distinct_field] === obj[option.distinct_field])
 						);
-						let distinct_sort_by = option.distinct_sort ? option.distinct_sort : 'asc';
-						data.data_list = Obj.sort_list_by_field(data.data_list,'title',distinct_sort_by);
+						let distinct_sort_by = option.distinct_sort ? option.distinct_sort : Type.ASC;
+						data.data_list = Obj.sort_list_by_field(data.data_list,Type.TITLE,distinct_sort_by);
 						call();
 					}
 					else{
 						call();
+					}
+				},
+				//get_image
+				function(call){
+					if(option.get_join && data.data_list.length>0){
+						let query = { $or: [] };
+						for(const data_item of data.data_list){
+							let query_field = {};
+							query_field[Type.PARENT_ID] = { $regex:String(parent_search_item.parent_value), $options: "i" };
+							query.$or.push(query_field);
+						};
 					}
 				},
 				//get_join
@@ -2301,6 +2318,7 @@ class Portal {
 											fields : option.field_key_list[a].fields ? option.field_key_list[a].fields : "",
 											make_flat : option.field_key_list[a].make_flat ? option.field_key_list[a].make_flat : false,
 											type : option.field_key_list[a].type ? option.field_key_list[a].type : Type.OBJ,
+											get_image : option.field_key_list[a].get_image ? option.field_key_list[a].get_image : false,
 											data_list : []
 										});
 									};
@@ -2322,6 +2340,7 @@ class Portal {
 							};
 							let search = App_Logic.get_search(parent_search_item.foreign_data_type,query,{},1,0);
 							let join_option = parent_search_item.fields ? {get_field:true,fields:parent_search_item.fields} : {};
+							join_option.get_image = parent_search_item.get_image;
 							const [biz_error,biz_data] = await Portal.search_simple(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,join_option);
 							if(biz_error){
 								error=Log.append(error,biz_error);
@@ -2378,9 +2397,9 @@ class Portal {
 							for(let a = 0; a < data.data_list.length; a++){
 									parent_search_item_list.push({
 									foreign_data_type : DataType.GROUP,
-									foreign_field : 'parent_id',
-									parent_value : data.data_list[a]['id'],
-									parent_field : 'id',
+									foreign_field : Type.PARENT_ID,
+									parent_value : data.data_list[a][Type.ID],
+									parent_field : Type.ID,
 									title : null,
 									type :  Type.LIST,
 									data_list : []
