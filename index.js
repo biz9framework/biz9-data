@@ -2118,9 +2118,7 @@ class Portal {
 				async function(call){
 					if(option.get_group && data.id){
 						data.groups = [];
-						/* -- get group items deprecate start */
-						let group_option = {get_join:true,field_key_list:[{foreign_data_type:DataType.ITEM,foreign_field:Type.PARENT_ID,parent_field:Type.ID,title:'items',type:Type.LIST,get_image:option.get_group_image? option.get_group_image:false}]};
-						/* -- get group items deprecate end */
+						let group_option = {};
 						let query = {};
 						if(!option.group){
 							query = {parent_id:data.id}
@@ -2458,7 +2456,7 @@ class Portal {
 						group_list = biz_data.data_list;
 					}
 				},
-				//get_group_item_list
+				//get_group_item_list -- deprecate - start
 				async function(call){
 					if(option.get_group && group_list.length>0){
 						let item_list = [];
@@ -2481,6 +2479,7 @@ class Portal {
 						}
 					}
 				},
+				//get_group_item_list -- deprecete - end
 				//get_group_item_bind
 				async function(call){
 					if(option.get_group && data.data_list.length>0){
