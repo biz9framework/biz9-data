@@ -27,7 +27,7 @@ const DATA_TYPE = DataType.BLOG_POST;
 const OPTION = {};
 //const FILTER = {test_group_id:59367};
 const FILTER = {data_type:DATA_TYPE};
-const APP_ID = 'test-stage-dec14b';
+const APP_ID = 'test-stage-dec16';
 //const APP_ID = 'app_id_98230';
 const SQL = {};
 /* --- TEST CONFIG END --- */
@@ -80,7 +80,7 @@ describe('connect', function(){ this.timeout(25000);
                 */
 
                 //let parent_item = DataItem.get_new(DataType.PRODUCT,0,{my_parent_title:'my parent_'+Num.get_id()});
-                let parent_item = DataItem.get_new(DataType.PRODUCT,'50b19789-f5b2-4dda-a31a-a2bd4ea0c2c9');
+                let parent_item = DataItem.get_new(DataType.PRODUCT,'23abe3ed-c7b4-4f08-a2a6-ecc00c968c74');
                 //let group = DataItem.get_new(DataType.GROUP,0,{parent_id:parent_item.id,parent_data_type:parent_item.data_type});
                 //let new_item_title = 'group '+Num.get_id();
                 //let group = DataItem.get_new(DataType.GROUP,'7ae58728-23f8-45ce-a0f7-c1a14bb42d2e',{title:new_item_title,title_url:Str.get_title_url(new_item_title)});;
