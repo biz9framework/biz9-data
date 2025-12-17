@@ -2118,7 +2118,9 @@ class Portal {
 				async function(call){
 					if(option.get_group && data.id){
 						data.groups = [];
+						/* -- get group items deprecate start */
 						let group_option = {get_join:true,field_key_list:[{foreign_data_type:DataType.ITEM,foreign_field:Type.PARENT_ID,parent_field:Type.ID,title:'items',type:Type.LIST,get_image:option.get_group_image? option.get_group_image:false}]};
+						/* -- get group items deprecate end */
 						let query = {};
 						if(!option.group){
 							query = {parent_id:data.id}
@@ -2134,7 +2136,9 @@ class Portal {
 						}
 						let group_search = App_Logic.get_search(DataType.GROUP,query,{},1,0);
 						const [biz_error,biz_data] = await Portal.search(database,group_search.data_type,group_search.filter,group_search.sort_by,group_search.page_current,group_search.page_size,group_option);
-						data.groups = biz_data.data_list;
+						if(biz_data.data_list){
+							data.groups = biz_data.data_list;
+						}
 					}
 				},
 				//post-view-stat
@@ -2174,7 +2178,8 @@ class Portal {
 		 */
 		return new Promise((callback) => {
 			let error = null;
-			let data = {};
+			let data = {data_type:data_type,item_count:0,page_count:1,filter:{},data_list:[]};
+			option = option ? option : {};
 			async.series([
 				function(call){
 					let search = App_Logic.get_search(data_type,filter,sort_by,page_current,page_size);
@@ -2323,7 +2328,7 @@ class Portal {
 							query_field[Type.PARENT_ID] = { $regex:String(data_item.id), $options: "i" };
 							query.$or.push(query_field);
 						};
-						let search = App_Logic.get_search(DataTyp.IMAGE,query,{},1,0);
+						let search = App_Logic.get_search(DataType.IMAGE,query,{},1,0);
 						const [biz_error,biz_data] = await Portal.search_simple(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size);
 						for(let a = 0; a < data.data_list.length; a++){
 							data.data_list[a].images = [];
