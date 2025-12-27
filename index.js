@@ -9,7 +9,7 @@ const dayjs = require('dayjs');
 const {get_db_connect_main,check_db_connect_main,delete_db_connect_main,post_item_main,get_item_main,delete_item_main,get_id_list_main,delete_item_list_main,get_count_item_list_main,post_bulk_main} = require('./mongo/index.js');
 const {Scriptz}=require("biz9-scriptz");
 const {Log,Str,Num,Obj,DateTime}=require("biz9-utility");
-const {DataItem,DataType,Favorite_Logic,Stat_Logic,Review_Logic,Type,App_Logic,Product_Logic,Demo_Logic,Category_Logic,Cart_Logic,Order_Logic,Field_Logic}=require("/home/think2/www/doqbox/biz9-framework/biz9-logic/code");
+const {DataItem,DataType,Favorite_Logic,Stat_Logic,Review_Logic,Type,App_Logic,Product_Logic,Demo_Logic,Category_Logic,Cart_Logic,Order_Logic,Field_Logic,Item_Logic}=require("/home/think2/www/doqbox/biz9-framework/biz9-logic/code");
 const { get_db_connect_adapter,check_db_connect_adapter,delete_db_connect_adapter,post_item_adapter,post_item_list_adapter,post_bulk_adapter,get_item_adapter,delete_item_adapter,get_item_list_adapter,delete_item_list_adapter,get_count_item_list_adapter,delete_item_cache }  = require('./adapter.js');
 class Database {
 	static get = async (data_config,option) => {
@@ -473,13 +473,13 @@ class Order_Data {
 				async function(call){
 					for(const key in order) {
 						if(Str.check_is_null(data.order[key])
-							&& key != Type.ID && key != Type.DATA_TYPE
-							&& key != Type.PARENT_ITEM && key != Type.USER
-							&& key != Type.CART_ITEM_LIST && key != Type.CART_SUB_ITEM_LIST
-							&& key != Type.ORDER_ITEM_LIST && key != Type.ORDER_SUB_ITEM_LIST
-							&& key != Type.SOURCE && key != Type.SOURCE_ID
-							&& key != Type.STAT_ITEM_LIST && key != Type.STAT_SUB_ITEM_LIST
-							&& key != Type.DATE_CREATE && key != Type.DATE_SAVE){
+							&& key != Type.FIELD_ID && key != Type.DATA_TYPE
+							&& key != Type.TITLE_PARENT_ITEM && key != Type.TITLE_USER
+							&& key != Type.TITLE_CART_ITEM_LIST && key != Type.TITLE_CART_SUB_ITEM_LIST
+							&& key != Type.TITLE_ORDER_ITEM_LIST && key != Type.TITLE_ORDER_SUB_ITEM_LIST
+							&& key != Type.FIELD_SOURCE && key != Type.FIELD_SOURCE_ID
+							&& key != Type.TITLE_STAT_ITEM_LIST && key != Type.TITLE_STAT_SUB_ITEM_LIST
+							&& key != Type.FIELD_DATE_CREATE && key != Type.FIELD_DATE_SAVE){
 							data.order[key] = order[key];
 						}
 					}
@@ -498,13 +498,13 @@ class Order_Data {
 							for(const key in order_item){
 								order_item.temp_row_id = Num.get_id();
 								if(!Str.check_is_null(order_item[key])
-									&& key != Type.ID && key != Type.DATA_TYPE
-									&& key != Type.PARENT_ITEM && key != Type.USER
-									&& key != Type.CART_ITEM_LIST && key != Type.CART_SUB_ITEM_LIST
-									&& key != Type.ORDER_ITEM_LIST && key != Type.ORDER_SUB_ITEM_LIST
-									&& key != Type.SOURCE && key != Type.SOURCE_ID
-									&& key != Type.STAT_ITEM_LIST && key != Type.STAT_SUB_ITEM_LIST
-									&& key != Type.DATE_CREATE && key != Type.DATE_SAVE){
+									&& key != Type.FIELD_ID && key != Type.FIELD_DATA_TYPE
+									&& key != Type.TITLE_PARENT_ITEM && key != Type.USER
+									&& key != Type.TITLE_CART_ITEM_LIST && key != Type.TITLE_CART_SUB_ITEM_LIST
+									&& key != Type.TITLE_ORDER_ITEM_LIST && key != Type.TITLE_ORDER_SUB_ITEM_LIST
+									&& key != Type.FIELD_SOURCE && key != Type.FIELD_SOURCE_ID
+									&& key != Type.TITLE_STAT_ITEM_LIST && key != Type.TITLE_STAT_SUB_ITEM_LIST
+									&& key != Type.FIELD_DATE_CREATE && key != Type.FIELD_DATE_SAVE){
 									post_order_item[key] = order_item[key];
 								}
 							}
@@ -528,12 +528,12 @@ class Order_Data {
 								for(const key in order_sub_item){
 									order_sub_item.temp_row_id = Num.get_id();
 									if(!Str.check_is_null(order_sub_item[key])
-										&& key != Type.ID && key != Type.DATA_TYPE
-										&& key != Type.PARENT_ITEM && key != Type.USER
-										&& key != Type.ORDER_ITEM_LIST && key != Type.ORDER_SUB_ITEM_LIST
-										&& key != Type.SOURCE && key != Type.SOURCE_ID
-										&& key != Type.STAT_ITEM_LIST && key != Type.STAT_SUB_ITEM_LIST
-										&& key != Type.DATE_CREATE && key != Type.DATE_SAVE){
+										&& key != Type.FIELD_ID && key != Type.FIELD_DATA_TYPE
+										&& key != Type.TITLE_PARENT_ITEM && key != Type.USER
+										&& key != Type.TITLE_ORDER_ITEM_LIST && key != Type.TITLE_ORDER_SUB_ITEM_LIST
+										&& key != Type.FIELD_SOURCE && key != Type.FIELD_SOURCE_ID
+										&& key != Type.TITLE_STAT_ITEM_LIST && key != Type.TITLE_STAT_SUB_ITEM_LIST
+										&& key != Type.FIELD_DATE_CREATE && key != Type.FIELD_DATE_SAVE){
 										post_order_sub_item[key] = order_sub_item[key];
 									}
 								}
@@ -685,7 +685,7 @@ class Order_Data {
 					if(!Str.check_is_null(data.order.id)){
 						data.order.order_item_list.forEach(order_item => {
 							let query_field = {};
-							query_field[Type.ID] = { $regex:String(order_item.parent_id), $options: "i" };
+							query_field[Type.FIELD_ID] = { $regex:String(order_item.parent_id), $options: "i" };
 							order_parent_item_list_query.$or.push(query_field);
 						});
 						let search = App_Logic.get_search(data.order.parent_data_type,order_parent_item_list_query,{},1,0);
@@ -836,13 +836,13 @@ class Cart_Data {
 				async function(call){
 					for(const key in cart) {
 						if(Str.check_is_null(data.cart[key])
-							&& key != Type.ID && key != Type.DATA_TYPE
+							&& key != Type.FIELD_ID && key != Type.FIELD_DATA_TYPE
 							&& key != Type.PARENT_ITEM && key != Type.USER
 							&& key != Type.CART_ITEM_LIST && key != Type.CART_SUB_ITEM_LIST
 							&& key != Type.ORDER_ITEM_LIST && key != Type.ORDER_SUB_ITEM_LIST
-							&& key != Type.SOURCE && key != Type.SOURCE_ID
-							&& key != Type.STAT_ITEM_LIST && key != Type.STAT_SUB_ITEM_LIST
-							&& key != Type.DATE_CREATE && key != Type.DATE_SAVE){
+							&& key != Type.FIELD_SOURCE && key != Type.FIELD_SOURCE_ID
+							&& key != Type.TITLE_STAT_ITEM_LIST && key != Type.TITLE_STAT_SUB_ITEM_LIST
+							&& key != Type.FIELD_DATE_CREATE && key != Type.FIELD_DATE_SAVE){
 							data.cart[key] = cart[key];
 						}
 					}
@@ -861,13 +861,13 @@ class Cart_Data {
 							for(const key in cart_item){
 								cart_item.temp_row_id = Num.get_id();
 								if(!Str.check_is_null(cart_item[key])
-									&& key != Type.ID && key != Type.DATA_TYPE
+									&& key != Type.FIELD_ID && key != Type.FIELD_DATA_TYPE
 									&& key != Type.PARENT_ITEM && key != Type.USER
 									&& key != Type.CART_ITEM_LIST && key != Type.CART_SUB_ITEM_LIST
 									&& key != Type.ORDER_ITEM_LIST && key != Type.ORDER_SUB_ITEM_LIST
-									&& key != Type.SOURCE && key != Type.SOURCE_ID
-									&& key != Type.STAT_ITEM_LIST && key != Type.STAT_SUB_ITEM_LIST
-									&& key != Type.DATE_CREATE && key != Type.DATE_SAVE){
+									&& key != Type.FIELD_SOURCE && key != Type.FIELD_SOURCE_ID
+									&& key != Type.TITLE_STAT_ITEM_LIST && key != Type.TITLE_STAT_SUB_ITEM_LIST
+									&& key != Type.FIELD_DATE_CREATE && key != Type.FIELD_DATE_SAVE){
 									post_cart_item[key] = cart_item[key];
 								}
 							}
@@ -891,13 +891,13 @@ class Cart_Data {
 								for(const key in cart_sub_item){
 									cart_sub_item.temp_row_id = Num.get_id();
 									if(!Str.check_is_null(cart_sub_item[key])
-										&& key != Type.ID && key != Type.DATA_TYPE
+										&& key != Type.FIELD_ID && key != Type.FIELD_DATA_TYPE
 										&& key != Type.PARENT_ITEM && key != Type.USER
 										&& key != Type.CART_ITEM_LIST && key != Type.CART_SUB_ITEM_LIST
 										&& key != Type.ORDER_ITEM_LIST && key != Type.ORDER_SUB_ITEM_LIST
-										&& key != Type.SOURCE && key != Type.SOURCE_ID
-										&& key != Type.STAT_ITEM_LIST && key != Type.STAT_SUB_ITEM_LIST
-										&& key != Type.DATE_CREATE && key != Type.DATE_SAVE){
+										&& key != Type.FIELD_SOURCE && key != Type.FIELD_SOURCE_ID
+										&& key != Type.TITLE_STAT_ITEM_LIST && key != Type.TITLE_STAT_SUB_ITEM_LIST
+										&& key != Type.FIELD_DATE_CREATE && key != Type.FILED_DATE_SAVE){
 										post_cart_sub_item[key] = cart_sub_item[key];
 									}
 								}
@@ -1020,7 +1020,7 @@ class Cart_Data {
 					if(!Str.check_is_null(data.cart.id)){
 						data.cart.cart_item_list.forEach(cart_item => {
 							let query_field = {};
-							query_field[Type.ID] = { $regex:String(cart_item.parent_id), $options: "i" };
+							query_field[Type.FIELD_ID] = { $regex:String(cart_item.parent_id), $options: "i" };
 							cart_parent_item_list_query.$or.push(query_field);
 						});
 						let search = App_Logic.get_search(data.cart.parent_data_type,cart_parent_item_list_query,{},1,0);
@@ -1052,7 +1052,7 @@ class Cart_Data {
 					if(!Str.check_is_null(data.cart.id)){
 						cart_sub_item_list.forEach(cart_sub_item => {
 							let query_field = {};
-							query_field[Type.ID] = { $regex:String(cart_sub_item.parent_id), $options: "i" };
+							query_field[Type.FIELD_ID] = { $regex:String(cart_sub_item.parent_id), $options: "i" };
 							cart_sub_item_list_query.$or.push(query_field);
 						});
 						let search = App_Logic.get_search(DataType.PRODUCT,cart_sub_item_list_query,{},1,0);
@@ -1374,11 +1374,11 @@ class User_Data {
 				device = {};
 			}
 			let dev = {};
-			dev.platform_name = !Str.check_is_null(device.name) ? device.name : Type.N_A;
-			dev.platform_version = !Str.check_is_null(device.version) ? device.version : Type.N_A;
-			dev.platform_layout = !Str.check_is_null(device.layout) ? device.layout : Type.N_A;
-			dev.platform_os = !Str.check_is_null(device.os) ? device.os : Type.N_A;
-			dev.platform_description = !Str.check_is_null(device.description) ? device.description : Type.N_A;
+			dev.platform_name = !Str.check_is_null(device.name) ? device.name : Type.TITLE_N_A;
+			dev.platform_version = !Str.check_is_null(device.version) ? device.version : Type.TITLE_N_A;
+			dev.platform_layout = !Str.check_is_null(device.layout) ? device.layout : Type.TITLE_N_A;
+			dev.platform_os = !Str.check_is_null(device.os) ? device.os : Type.TITLE_N_A;
+			dev.platform_description = !Str.check_is_null(device.description) ? device.description : Type.TITLE_N_A;
 			callback(dev);
 		});
 	}
@@ -1390,7 +1390,7 @@ class User_Data {
 				callback([error,null]);
 			}
 			else{
-				let ip_info ={country_name:Type.N_A,region_name:Type.N_A,district:Type.N_A,city_name:Type.N_A,latitude:Type.N_A,longitude:Type.N_A,zip_code:Type.N_A,isp:Type.N_A,ip_address:Type.N_A};
+				let ip_info ={country_name:Type.TITLE_N_A,region_name:Type.TITLE_N_A,district:Type.TITLE_N_A,city_name:Type.TITLE_N_A,latitude:Type.TITLE_N_A,longitude:Type.TITLE_N_A,zip_code:Type.TITLE_N_A,isp:Type.TITLE_N_A,ip_address:Type.TITLE_N_A};
 				var https = require('https');
 				let url = 'https://api.ip2location.io/?key=' + geo_key + '&ip=' + ip_address + '&format=json';
 				let response = '';
@@ -1409,16 +1409,16 @@ class User_Data {
 								let geo_data = JSON.parse(response);
 								ip_info =
 									{
-										country_name: ! Str.check_is_null(geo_data.country_name) ? geo_data.country_name : Type.N_A,
-										region_name: ! Str.check_is_null(geo_data.region_name) ?geo_data.region_name: Type.N_A,
-										is_proxy: ! Str.check_is_null(geo_data.is_proxy) ?geo_data.is_proxy : Type.N_A,
-										district: ! Str.check_is_null(geo_data.district) ?geo_data.district : Type.N_A,
-										city_name: ! Str.check_is_null(geo_data.city_name) ?geo_data.city_name : Type.N_A,
-										latitude: ! Str.check_is_null(geo_data.latitude) ?geo_data.latitude : Type.N_A,
-										longitude: ! Str.check_is_null(geo_data.longitude) ?geo_data.longitude : Type.N_A,
-										zip_code: ! Str.check_is_null(geo_data.zip_code) ?geo_data.zip_code : Type.N_A,
-										isp: ! Str.check_is_null(geo_data.as) ?geo_data.as : Type.N_A,
-										ip_address: ! Str.check_is_null(geo_data.ip) ? geo_data.ip : Type.N_A,
+										country_name: ! Str.check_is_null(geo_data.country_name) ? geo_data.country_name : Type.TITLE_N_A,
+										region_name: ! Str.check_is_null(geo_data.region_name) ?geo_data.region_name: Type.TITLE_N_A,
+										is_proxy: ! Str.check_is_null(geo_data.is_proxy) ?geo_data.is_proxy : Type.TITLE_N_A,
+										district: ! Str.check_is_null(geo_data.district) ?geo_data.district : Type.TITLE_N_A,
+										city_name: ! Str.check_is_null(geo_data.city_name) ?geo_data.city_name : Type.TITLE_N_A,
+										latitude: ! Str.check_is_null(geo_data.latitude) ?geo_data.latitude : Type.TITLE_N_A,
+										longitude: ! Str.check_is_null(geo_data.longitude) ?geo_data.longitude : Type.TITLE_N_A,
+										zip_code: ! Str.check_is_null(geo_data.zip_code) ?geo_data.zip_code : Type.TITLE_N_A,
+										isp: ! Str.check_is_null(geo_data.as) ?geo_data.as : Type.TITLE_N_A,
+										ip_address: ! Str.check_is_null(geo_data.ip) ? geo_data.ip : Type.TITLE_N_A,
 									};
 								callback([error,ip_info]);
 							}
@@ -1900,8 +1900,6 @@ class Portal {
 						type:list,count
 					}];
 			-- make_flat / type. bool / true,false list / ex. true
-		 * Items
-		   - get_item / bool / ex. true,false / def. true
 		 * Photos
 		   - get_image / bool / ex. true,false / def. true
 		   - image_count / int / ex. 1-999 / def. 19
@@ -1926,12 +1924,11 @@ class Portal {
 			 */
 		return new Promise((callback) => {
 			let error = null;
-			let data = DataItem.get_new(data_type,0,{key:key?key:Type.BLANK});
+			let data = DataItem.get_new(data_type,0,{key:key?key:Type.TITLE_BLANK});
 			let stat_view = DataItem.get_new(DataType.STAT,0,{resultOK:false});
-			//option = option ? option : {get_item:false,get_image:false,get_field:false,post_stat:false,user_id:0};
+			//option = option ? option : {get_image:false,get_field:false,post_stat:false,user_id:0};
 			option = option ? option : {};
 			option.get_field = option.fields ? true : false;
-			let parent_search_item_list = [];
 			async.series([
 				function(call){
 					if(!Str.check_is_guid(key) && !Number.isInteger(key) && key){
@@ -1969,52 +1966,6 @@ class Portal {
 						error = Log.append(error,err);
 						call();
 					});
-				},
-				//get_item_by_list
-				async function(call){
-					function get_sort(data){
-						let sort_order = {};
-						switch(data.setting_sort_type)
-						{
-							case 'title':
-								sort_order = data.setting_sort_order == Type.DESC ? {title:1} :  {title:-1};
-								break;
-							case 'order':
-								sort_order = data.setting_sort_order == Type.ASC ? {setting_order:1} : {setting_order:-1};
-								break;
-							case 'date':
-								sort_order = data.setting_sort_order == Type.DESC ? {date_create:1} : {date_create:-1};
-								break;
-							default:
-								sort_order = data.setting_sort_order == Type.DESC ? {title:-1} :  {title:1};
-								break;
-						}
-						return sort_order;
-					}
-					let filter = {};
-					if(!Str.check_is_null(data.id) && option.get_item || option.get_section){
-						data.images = [];
-						data.items = [];
-						if(Str.check_is_null(data.top_id)){
-							filter={top_id:data.id};
-						}else{
-							filter={top_id:data.top_id};
-						}
-						let search = App_Logic.get_search(DataType.ITEM,filter,get_sort(data),1,0);
-						const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option);
-						if(biz_error){
-							error=Log.append(error,biz_error);
-						}else{
-							biz_data.data_list.forEach(item => {
-								if(item.parent_id == data.id){
-									let item_title_url = Str.get_title_url(item.title);
-									data[item_title_url] = new Object();
-									data[item_title_url] = item;
-									data.items.push(item);
-								}
-							});
-						}
-					}
 				},
 				//get_item_image
 				async function(call){
@@ -2084,13 +2035,13 @@ class Portal {
 								title : item.title,
 								fields : item.fields ? item.fields : "",
 								make_flat : item.make_flat ? item.make_flat : false,
-								type : item.type ? item.type : Type.LIST,
+								type : item.type ? item.type : Type.TITLE_LIST,
 								data : [],
 							});
 						});
 						for(const parent_search_item of parent_search_item_list){
 							let join_option = parent_search_item.fields ? {get_field:true,fields:parent_search_item.fields} : {};
-							if(parent_search_item.type == Type.LIST){
+							if(parent_search_item.type == Type.TITLE_LIST){
 								let query = {};
 								query[parent_search_item.foreign_field] = data[parent_search_item.parent_field];
 								let search = App_Logic.get_search(parent_search_item.foreign_data_type,query,{},1,0);
@@ -2100,7 +2051,7 @@ class Portal {
 								}else{
 									data[parent_search_item.title] = biz_data.data_list;
 								}
-							}else if(parent_search_item.type == Type.COUNT){
+							}else if(parent_search_item.type == Type.TITLE_COUNT){
 								let query = {};
 								query[parent_search_item.foreign_field] = data[parent_search_item.parent_field];
 								let search = App_Logic.get_search(parent_search_item.foreign_data_type,query,{},1,0);
@@ -2127,15 +2078,18 @@ class Portal {
 							query = { $or: [] };
 							group_title_list.foreach(item => {
 								let query_field = {};
-								query_field[Type.TITLE] = { $regex:String(item), $options: "i" };
+								query_field[Type.FIELD_TITLE] = { $regex:String(item), $options: "i" };
 								query.$or.push(query_field);
 							});
 
 						}
 						let group_search = App_Logic.get_search(DataType.GROUP,query,{},1,0);
 						const [biz_error,biz_data] = await Portal.search(database,group_search.data_type,group_search.filter,group_search.sort_by,group_search.page_current,group_search.page_size,group_option);
-						if(biz_data.data_list){
+						if(biz_data.data_list.length> 0){
 							data.groups = biz_data.data_list;
+							for(const group of biz_data.data_list){
+								data[Str.get_title_url(group.title)] = group;
+							}
 						}
 					}
 				},
@@ -2204,7 +2158,7 @@ class Portal {
 						let query = { $or: [] };
 						for(const data_item of data.data_list){
 							let query_field = {};
-							query_field[Type.PARENT_ID] = { $regex:String(data_item.id), $options: "i" };
+							query_field[Type.FIELD_PARENT_ID] = { $regex:String(data_item.id), $options: "i" };
 							query.$or.push(query_field);
 						};
 						let search = App_Logic.get_search(DataTyp.IMAGE,query,{},1,0);
@@ -2236,8 +2190,6 @@ class Portal {
 		   - distinct_sort / type. string / ex. asc,desc / default. asc
 		 * Fields
 		   - fields / type. string / ex. field1,field2 / default. throw error
-		 * Items
-			- get_item / type. bool / ex. true,false / default. false
 		 * Photos
 			- get_image / type. bool / ex. true,false / default. false
 			- image_count / type. int / ex. 1-999 / default. 19
@@ -2309,8 +2261,8 @@ class Portal {
 						data.data_list = data.data_list.filter((obj, index, self) =>
 							index === self.findIndex((t) => t[option.distinct_field] === obj[option.distinct_field])
 						);
-						let distinct_sort_by = option.distinct_sort ? option.distinct_sort : Type.ASC;
-						data.data_list = Obj.sort_list_by_field(data.data_list,Type.TITLE,distinct_sort_by);
+						let distinct_sort_by = option.distinct_sort ? option.distinct_sort : Type.TITLE_SORT_BY_ASC;
+						data.data_list = Obj.sort_list_by_field(data.data_list,Type.FIELD_TITLE,distinct_sort_by);
 						call();
 					}
 					else{
@@ -2323,13 +2275,14 @@ class Portal {
 						let query = { $or: [] };
 						for(const data_item of data.data_list){
 							let query_field = {};
-							query_field[Type.PARENT_ID] = { $regex:String(data_item.id), $options: "i" };
+							query_field[Type.FIELD_PARENT_ID] = { $regex:String(data_item.id), $options: "i" };
 							query.$or.push(query_field);
 						};
 						let search = App_Logic.get_search(DataType.IMAGE,query,{},1,0);
 						const [biz_error,biz_data] = await Portal.search_simple(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size);
+
 						data.data_list.forEach(data_a =>{
-							data.data_list[a].images = [];
+							data_a.images = [];
 							data.data_list.forEach(data_b =>{
 								if(data_b.parent_id == data_a.id){
 									data_a.images.push(data_b);
@@ -2351,7 +2304,7 @@ class Portal {
 											title : option_item.title,
 											fields : option_item.fields ? option_item.fields : "",
 											make_flat : option_item.make_flat ? option_item.make_flat : false,
-											type : option_item.type ? option_item.type : Type.OBJ,
+											type : option_item.type ? option_item.type : Type.TITLE_OBJ,
 											get_image : option_item.get_image ? option_item.get_image : false,
 											data_list : []
 										});
@@ -2383,7 +2336,7 @@ class Portal {
 								if(parent_search_item_list.length> 0){
 									for(const parent_search_item of parent_search_item_list){
 										for(const data_item of data.data_list){
-											if(parent_search_item.type == Type.LIST){
+											if(parent_search_item.type == Type.TITLE_LIST){
 												let query = {};
 												query[parent_search_item.foreign_field] = data_item[parent_search_item.parent_field];
 												let search = App_Logic.get_search(parent_search_item.foreign_data_type,query,{},1,0);
@@ -2396,7 +2349,7 @@ class Portal {
 														data_item[parent_search_item.title].push(sub_data_item);
 													}
 												}
-											}else if(parent_search_item.type == Type.COUNT){
+											}else if(parent_search_item.type == Type.TITLE_COUNT){
 												let query = {};
 												query[parent_search_item.foreign_field] = data_item[parent_search_item.parent_field];
 												let search = App_Logic.get_search(parent_search_item.foreign_data_type,query,{},1,0);
@@ -2431,11 +2384,11 @@ class Portal {
 							data.data_list.forEach(item =>{
 									parent_search_item_list.push({
 									foreign_data_type : DataType.GROUP,
-									foreign_field : Type.PARENT_ID,
-									parent_value : item[Type.ID],
-									parent_field : Type.ID,
+									foreign_field : Type.FIELD_PARENT_ID,
+									parent_value : item[Type.FIELD_ID],
+									parent_field : Type.FIELD_ID,
 									title : null,
-									type :  Type.LIST,
+									type :  Type.TITLE_LIST,
 									data_list : []
 								});
 							});
@@ -2474,7 +2427,7 @@ class Portal {
 						let query = { $or: [] };
 						data.data_list.forEach(item => {
 							let query_field = {};
-							query_field[Type.ID] = { $regex:String(item[Type.USER_ID]), $options: "i" };
+							query_field[Type.FIELD_ID] = { $regex:String(item[Type.FIELD_USER_ID]), $options: "i" };
 							query.$or.push(query_field);
 						});
 						let search = App_Logic.get_search(DataType.USER,query,{},1,0);
@@ -2710,7 +2663,7 @@ class Portal {
 					});
 				},
 				function(call){
-					if(option.delete_item == false){
+					if(option.delete_item){
 						let data_type = DataType.ITEM;
 						let filter = {parent_id:id};
 						data.delete_data_list_resultOK = false;
@@ -2730,7 +2683,7 @@ class Portal {
 					}
 				},
 				function(call){
-					if(option.delete_group == false){
+					if(option.delete_group){
 						let data_type = DataType.GROUP;
 						let filter = {parent_id:id};
 						data.delete_data_list_resultOK = false;
@@ -2750,7 +2703,7 @@ class Portal {
 					}
 				},
 				function(call){
-					if(option.delete_image == false){
+					if(option.delete_image){
 						let data_type = DataType.IMAGE;
 						let filter = {parent_id:id};
 						data.delete_image_resultOK = false;
@@ -2911,14 +2864,14 @@ class Portal {
 		});
 	};
 	//9_portal_copy
-	static copy = async (database,data_type,id) => {
+	static copy = async (database,data_type,id,option) => {
 		/*
 		 * params
 		 * - title_tbd
 		 *   - description. / type / ex.
 		 * options
-		 * - title_tbd
-		 *   - description. / type / ex.
+		 * - copy_group
+		 *   - description. / type / ex. true/false
 		 * return
 		 * - title_tbd
 		 *   - description. / type / ex.
@@ -2929,8 +2882,7 @@ class Portal {
 			let data = DataItem.get_new(data_type,id);
 			let top_data = DataItem.get_new(data_type,0);
 			let copy_data = DataItem.get_new(data_type,0);
-			let data_list = [];
-			let copy_data_list = [];
+			option = option ? option : {copy_group:true};
 			async.series([
 				async function(call){
 					const [biz_error,biz_data] = await Portal.get(database,data_type,id);
@@ -2941,28 +2893,25 @@ class Portal {
 					}
 				},
 				async function(call){
-					let filter = {top_id:top_data.id};
-					let search = App_Logic.get_search(DataType.ITEM,filter,{},1,0);
-					const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size);
+					copy_data = Item_Logic.copy(data_type,top_data);
+					copy_data[Type.FIELD_TITLE] = 'Copy '+top_data[Type.FIELD_TITLE];
+					copy_data[Type.FIELD_TITLE_URL] = 'copy_'+top_data[Type.FIELD_TITLE_URL];
+					copy_data[Type.FIELD_SOURCE_ID] = top_data.id;
+					copy_data[Type.FIELD_SOURCE_DATA_TYPE] = top_data.data_type;
+					/*
+					const [biz_error,biz_data] = await Portal.post(database,copy_data.data_type,copy_data);
 					if(biz_error){
 						error=Log.append(error,biz_error);
 					}else{
-						data_list = biz_data.data_list;
+						copy_data=biz_data;
+						Log.w('copy_data',biz_data);
 					}
+					*/
+					Log.w('my_copy',copy_data);
+
+
 				},
-				function(call){
-					copy_data[Type.TITLE] = 'Copy '+top_data[Type.TITLE];
-					copy_data[Type.TITLE_URL] = 'copy_'+top_data[Type.TITLE_URL];
-					copy_data[Type.SOURCE_ID] = top_data.id;
-					copy_data[Type.SOURCE_DATA_TYPE] = top_data.data_type;
-					const keys = Object.keys(top_data);
-					keys.forEach(key => {
-						if(key!=Type.ID&&key!=Type.SOURCE&&key!=Type.TITLE&&key!=Type.TITLE_URL){
-							copy_data[key]=top_data[key];
-						}
-					});
-					call();
-				},
+				/*
 				async function(call){
 					const [biz_error,biz_data] = await Portal.post(database,copy_data.data_type,copy_data);
 					if(biz_error){
@@ -2971,70 +2920,30 @@ class Portal {
 						copy_data=biz_data;
 					}
 				},
-				function(call){
-					for(const item of data_list) {
-						let copy_sub_data=DataItem.get_new(copy_data.data_type,0,{top_id:copy_data.id,top_data_type:copy_data.data_type});
-						copy_sub_data[Type.SOURCE_ID] = item[Type.ID];
-						copy_sub_data[Type.SOURCE_DATA_TYPE] = item[Type.DATA_TYPE];
-
-						copy_sub_data[Type.SOURCE_PARENT_ID] = item[Type.PARENT_ID];
-						copy_sub_data[Type.SOURCE_PARENT_DATA_TYPE] = item[Type.PARENT_DATA_TYPE];
-
-						copy_sub_data[Type.SOURCE_TOP_ID] = item[Type.TOP_ID];
-						copy_sub_data[Type.SOURCE_TOP_DATA_TYPE] = item[Type.TOP_DATA_TYPE];
-						for(key in item){
-							if( key != Type.ID && key != Type.SOURCE && key != Type.PARENT_ID && key != Type.PARENT_DATA_TYPE  && key != Type.TOP_ID && key != Type.TOP_DATA_TYPE ){
-								copy_sub_data[key] = item[key];
-							}
-						}
-						copy_data_list.push(copy_sub_data);
-					};
-					call();
-				},
+				//group
 				async function(call){
-					if(copy_data_list.length>0){
-						const [biz_error,biz_data] = await Portal.post_list(database,copy_data_list);
+					if(option.copy_group){
+						var group_list = [];
+						let search = App_Logic.get_search(DataType.GROUP,{parent_id:id},{},1,0);
+						const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size);
 						if(biz_error){
 							error=Log.append(error,biz_error);
 						}else{
-							copy_data_list=biz_data;
-						}
-					}
-				},
-				function(call){
-					if(copy_data_list.length>0){
-						copy_data_list.forEach(item => {
-							if(item[Type.SOURCE_PARENT_ID] == top_data[Type.ID]){
-								item[Type.PARENT_ID] = copy_data[Type.ID];
-								item[Type.PARENT_DATA_TYPE]  = copy_data[Type.DataType];
-							}else{
-								copy_data_list.forEach(item_sub => {
-									if(item[Type.SOURCE_PARENT_ID] == item_sub[Type.SOURCE_ID]){
-										item[Type.PARENT_ID] = item_sub[Type.ID];
-										item[Type.PARENT_DATA_TYPE] = item_sub[Type.DATA_TYPE];
-									}
+							group_list = biz_data.data_list;
+							for(const group of group_list){
 
-								});
 							}
-						});
-					}
-					call();
-				},
-				async function(call){
-					if(copy_data_list.length>0){
-						const [biz_error,biz_data] = await Portal.post_list(database,copy_data_list);
-						if(biz_error){
-							error=Log.append(error,biz_error);
-						}else{
-							copy_data_list=biz_data;
 						}
 					}
 				},
+				*/
 			]).then(result => {
+				/*
 				if(copy_data.id){
 					data = copy_data;
 				}
-				callback([error,data]);
+				*/
+				//callback([error,data]);
 			}).catch(err => {
 				Log.error("Copy",err);
 				callback([err,{}]);
