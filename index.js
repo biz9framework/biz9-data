@@ -100,7 +100,7 @@ class Blog_Post_Data {
 		return new Promise((callback) => {
 			let blog_post = DataItem.get_new(DataType.BLOG_POST,0);
 			let error = null;
-			option = option ? option : {get_item:false,get_image:false};
+			option = option ? option : {get_image:false};
 			async.series([
 				async function(call){
 					const [biz_error,biz_data] = await Portal.get(database,DataType.BLOG_POST,key,option);
@@ -122,9 +122,9 @@ class Blog_Post_Data {
 	//9_blog_post_search
 	static search = (database,filter,sort_by,page_current,page_size,option) => {
 		return new Promise((callback) => {
-			let data = {item_count:0,page_count:1,filter:{},data_type:DataType.BLOG_POST,blog_post_list:[]};
+			let data = {item_count:0,page_count:1,filter:{},data_type:DataType.BLOG_POST,blog_posts:[]};
 			let error = null;
-			option = option ? option : {get_item:false,get_image:false};
+			option = option ? option : {get_image:false};
 			async.series([
 				async function(call){
 					const [biz_error,biz_data] = await Portal.search(database,DataType.BLOG_POST,filter,sort_by,page_current,page_size,option);
@@ -135,7 +135,7 @@ class Blog_Post_Data {
 						data.data_type = DataType.BLOG_POST;
 						data.page_count = biz_data.page_count;
 						data.filter = biz_data.filter;
-						data.blog_post_list = biz_data.data_list;
+						data.blog_posts = biz_data.items;
 					}
 				},
 			]).then(result => {
@@ -152,7 +152,7 @@ class Category_Data { //9_category_get
 		return new Promise((callback) => {
 			let category = DataItem.get_new(DataType.CATEGORY,0);
 			let error = null;
-			option = option ? option : {get_item:false,get_image:false};
+			option = option ? option : {get_image:false};
 			async.series([
 				async function(call){
 					const [biz_error,biz_data] = await Portal.get(database,DataType.CATEGORY,key,option);
@@ -173,9 +173,9 @@ class Category_Data { //9_category_get
 	//9_category_search
 	static search = (database,filter,sort_by,page_current,page_size,option) => {
 		return new Promise((callback) => {
-			let data = {item_count:0,page_count:1,filter:{},data_type:DataType.CATEGORY,category_list:[]};
+			let data = {item_count:0,page_count:1,filter:{},data_type:DataType.CATEGORY,categorys:[]};
 			let error = null;
-			option = option ? option : {get_item:false,get_image:false};
+			option = option ? option : {get_image:false};
 			async.series([
 				async function(call){
 					const [biz_error,biz_data] = await Portal.search(database,DataType.CATEGORY,filter,sort_by,page_current,page_size,option);
@@ -186,7 +186,7 @@ class Category_Data { //9_category_get
 						data.data_type = DataType.CATEGORY;
 						data.page_count = biz_data.page_count;
 						data.filter = biz_data.filter;
-						data.category_list = biz_data.data_list;
+						data.categorys = biz_data.items;
 					}
 				},
 			]).then(result => {
@@ -204,7 +204,7 @@ class Content_Data {
 		return new Promise((callback) => {
 			let content = DataItem.get_new(DataType.CONTENT,0);
 			let error = null;
-			option = option ? option : {get_item:false,get_image:false};
+			option = option ? option : {get_image:false};
 			async.series([
 				async function(call){
 					const [biz_error,biz_data] = await Portal.get(database,DataType.CONTENT,key,option);
@@ -225,9 +225,9 @@ class Content_Data {
 	//9_content_search
 	static search = (database,filter,sort_by,page_current,page_size,option) => {
 		return new Promise((callback) => {
-			let data = {item_count:0,page_count:1,filter:{},data_type:DataType.CONTENT,content_list:[]};
+			let data = {item_count:0,page_count:1,filter:{},data_type:DataType.CONTENT,contents:[]};
 			let error = null;
-			option = option ? option : {get_item:false,get_image:false};
+			option = option ? option : {get_image:false};
 			async.series([
 				async function(call){
 					const [biz_error,biz_data] = await Portal.search(database,DataType.CONTENT,filter,sort_by,page_current,page_size,option);
@@ -238,7 +238,7 @@ class Content_Data {
 						data.data_type = DataType.CONTENT;
 						data.page_count = biz_data.page_count;
 						data.filter = biz_data.filter;
-						data.content_list = biz_data.data_list;
+						data.contents = biz_data.items;
 					}
 				},
 			]).then(result => {
@@ -277,9 +277,9 @@ class Page_Data {
 	//9_page_data_search
 	static search = (database,filter,sort_by,page_current,page_size,option) => {
 		return new Promise((callback) => {
-			let data = {item_count:0,page_count:1,filter:{},data_type:DataType.PAGE,page_list:[]};
+			let data = {item_count:0,page_count:1,filter:{},data_type:DataType.PAGE,pages:[]};
 			let error = null;
-			option = option ? option : {get_item:false,get_image:false};
+			option = option ? option : {get_image:false};
 			async.series([
 				async function(call){
 					const [biz_error,biz_data] = await Portal.search(database,DataType.PAGE,filter,sort_by,page_current,page_size,option);
@@ -290,7 +290,7 @@ class Page_Data {
 						data.data_type =DataType.PAGE;
 						data.page_count = biz_data.page_count;
 						data.filter = biz_data.filter;
-						data.page_list = biz_data.data_list;
+						data.pages = biz_data.items;
 					}
 				},
 			]).then(result => {
@@ -308,7 +308,7 @@ class Template_Data {
 		return new Promise((callback) => {
 			let template = DataItem.get_new(DataType.TEMPLATE,0);
 			let error = null;
-			option = option ? option : {get_item:false,get_image:false};
+			option = option ? option : {get_image:false};
 			async.series([
 				async function(call){
 					const [biz_error,biz_data] = await Portal.get(database,DataType.TEMPLATE,key,option);
@@ -329,9 +329,9 @@ class Template_Data {
 	//9_template_data_search
 	static search = (database,filter,sort_by,page_current,page_size,option) => {
 		return new Promise((callback) => {
-			let data = {item_count:0,page_count:1,filter:{},data_type:DataType.TEMPLATE,template_list:[]};
+			let data = {item_count:0,page_count:1,filter:{},data_type:DataType.TEMPLATE,templates:[]};
 			let error = null;
-			option = option ? option : {get_item:false,get_image:false};
+			option = option ? option : {get_image:false};
 			async.series([
 				async function(call){
 					const [biz_error,biz_data] = await Portal.search(database,DataType.TEMPLATE,filter,sort_by,page_current,page_size,option);
@@ -342,7 +342,7 @@ class Template_Data {
 						data.data_type = DataType.TEMPLATE;
 						data.page_count = biz_data.page_count;
 						data.filter = biz_data.filter;
-						data.template_list = biz_data.data_list;
+						data.templates = biz_data.items;
 					}
 				},
 			]).then(result => {
@@ -360,7 +360,7 @@ class Gallery_Data {
 		return new Promise((callback) => {
 			let gallery = DataItem.get_new(DataType.GALLERY,0);
 			let error = null;
-			option = option ? option : {get_item:false,get_image:false};
+			option = option ? option : {get_image:false};
 			async.series([
 				async function(call){
 					const [biz_error,biz_data] = await Portal.get(database,DataType.GALLERY,key,option);
@@ -379,9 +379,9 @@ class Gallery_Data {
 	//9_gallery_data_search
 	static search = (database,filter,sort_by,page_current,page_size,option) => {
 		return new Promise((callback) => {
-			let data = {gallery_count:0,page_count:1,filter:{},data_type:DataType.GALLERY,gallery_list:[]};
+			let data = {gallery_count:0,page_count:1,filter:{},data_type:DataType.GALLERY,gallerys:[]};
 			let error = null;
-			option = option ? option : {get_item:false,get_image:false};
+			option = option ? option : {get_image:false};
 			async.series([
 				async function(call){
 					const [biz_error,biz_data] = await Portal.search(database,DataType.GALLERY,filter,sort_by,page_current,page_size,option);
@@ -393,7 +393,7 @@ class Gallery_Data {
 						data.page_count = biz_data.page_count;
 						data.filter = biz_data.filter;
 						data.data_type = biz_data.data_type;
-						data.gallery_list = biz_data.data_list;
+						data.gallerys = biz_data.items;
 					}
 				},
 			]).then(result => {
@@ -412,7 +412,7 @@ class Event_Data {
 		return new Promise((callback) => {
 			let event = DataItem.get_new(DataType.EVENT,0);
 			let error = null;
-			option = option ? option : {get_item:false,get_image:false};
+			option = option ? option : {get_image:false};
 			async.series([
 				async function(call){
 					const [biz_error,biz_data] = await Portal.get(database,DataType.EVENT,key,option);
@@ -431,9 +431,9 @@ class Event_Data {
 	//9_event_data_search
 	static search = (database,filter,sort_by,page_current,page_size,option) => {
 		return new Promise((callback) => {
-			let data = {event_count:0,page_count:1,filter:{},data_type:DataType.EVENT,event_list:[]};
+			let data = {event_count:0,page_count:1,filter:{},data_type:DataType.EVENT,events:[]};
 			let error = null;
-			option = option ? option : {get_item:false,get_image:false};
+			option = option ? option : {get_image:false};
 			async.series([
 				async function(call){
 					const [biz_error,biz_data] = await Portal.search(database,DataType.EVENT,filter,sort_by,page_current,page_size,option);
@@ -445,7 +445,7 @@ class Event_Data {
 						data.page_count = biz_data.page_count;
 						data.filter = biz_data.filter;
 						data.data_type = biz_data.data_type;
-						data.event_list = biz_data.data_list;
+						data.events = biz_data.items;
 					}
 				},
 			]).then(result => {
@@ -459,7 +459,7 @@ class Event_Data {
 }
 class Order_Data {
 	//9_order_post
-	static post = async (database,order,order_payment_list,option) => {
+	static post = async (database,order,order_payments,option) => {
 		return new Promise((callback) => {
 			let data = {order:DataItem.get_new(DataType.ORDER,0, {
 				order_number:0,
@@ -467,7 +467,7 @@ class Order_Data {
 				user_id:0,
 				cart_number:0,
 				grand_total:0,
-			}),order_item_list:[],order_sub_item_list:[]};
+			}),order_items:[],order_sub_items:[]};
 			async.series([
 				//post - order
 				async function(call){
@@ -492,8 +492,8 @@ class Order_Data {
 				},
 				//post - order items
 				async function(call){
-					if(order.order_item_list.length>0){
-						for(const order_item of order.order_item_list){
+					if(order.order_items.length>0){
+						for(const order_item of order.order_items){
 							let post_order_item = DataItem.get_new(DataType.ORDER_ITEM,0);
 							for(const key in order_item){
 								order_item.temp_row_id = Num.get_id();
@@ -509,21 +509,21 @@ class Order_Data {
 								}
 							}
 							post_order_item.temp_row_id = order_item.temp_row_id;
-							data.order_item_list.push(post_order_item);
+							data.order_items.push(post_order_item);
 						}
-						const [biz_error,biz_data] = await Portal.post_list(database,data.order_item_list);
+						const [biz_error,biz_data] = await Portal.post_items(database,data.order_items);
 						if(biz_error){
 							error=Log.append(error,biz_error);
 						}else{
-							data.order_item_list = biz_data;
+							data.order_items = biz_data;
 						}
 					}
 				},
 				//post - order sub items
 				async function(call){
-					if(order.order_item_list.length>0){
-						for(const order_item of order.order_item_list){
-							for(const order_sub_item of order_item.order_sub_item_list){
+					if(order.order_items.length>0){
+						for(const order_item of order.order_items){
+							for(const order_sub_item of order_item.order_sub_items){
 								let post_order_sub_item = DataItem.get_new(DataType.ORDER_SUB_ITEM,0);
 								for(const key in order_sub_item){
 									order_sub_item.temp_row_id = Num.get_id();
@@ -537,26 +537,26 @@ class Order_Data {
 										post_order_sub_item[key] = order_sub_item[key];
 									}
 								}
-								post_order_sub_item.order_item_id =data.order_item_list.find(item_find => item_find.temp_row_id === order_item.temp_row_id).id,
-									data.order_sub_item_list.push(post_order_sub_item);
+								post_order_sub_item.order_item_id =data.order_items.find(item_find => item_find.temp_row_id === order_item.temp_row_id).id,
+									data.order_sub_items.push(post_order_sub_item);
 							}
 						}
-						const [biz_error,biz_data] = await Portal.post_list(database,data.order_sub_item_list);
+						const [biz_error,biz_data] = await Portal.post_items(database,data.order_sub_items);
 						if(biz_error){
 							error=Log.append(error,biz_error);
 						}else{
-							data.order_sub_item_list = biz_data;
+							data.order_sub_items = biz_data;
 						}
 					}
 				},
-				//post - order_payment_list
+				//post - order_payments
 				async function(call){
-					if(order_payment_list.length>0){
-						const [biz_error,biz_data] = await Portal.post_list(database,order_payment_list);
+					if(order_payments.length>0){
+						const [biz_error,biz_data] = await Portal.post_items(database,order_payments);
 						if(biz_error){
 							error=Log.append(error,biz_error);
 						}else{
-							data.order_payment_list = biz_data;
+							data.order_payments = biz_data;
 						}
 					}
 				},
@@ -574,53 +574,53 @@ class Order_Data {
 						}
 					}
 				},
-				//post stat order_item_list
+				//post stat order_items
 				async function(call){
 					if(data.order.id && option.post_stat){
-						data.stat_order_item_list = [];
-						for(const order_item of order.order_item_list){
+						data.stat_order_items = [];
+						for(const order_item of order.order_items){
 							let post_order_item_stat = Stat_Logic.get_new(DataType.ORDER_ITEM,order_item.id,Type.STAT_ORDER_ITEM,order.user_id,order_item);
 							let option = {post_unique:false};
 							const [biz_error,biz_data] = await Stat_Data.post(database,post_order_item_stat,option);
 							if(biz_error){
 								error=Log.append(error,biz_error);
 							}else{
-								data.stat_order_item_list.push(biz_data);
+								data.stat_order_items.push(biz_data);
 							}
 						}
 					}
 				},
-				//post stat order_sub_item_list
+				//post stat order_sub_items
 				async function(call){
 					if(data.order.id && option.post_stat){
-						data.stat_order_sub_item_list = [];
-						for(const order_item of order.order_item_list){
-							for(const order_sub_item of order_item.order_sub_item_list){
+						data.stat_order_sub_items = [];
+						for(const order_item of order.order_items){
+							for(const order_sub_item of order_item.order_sub_items){
 								let post_order_sub_item_stat = Stat_Logic.get_new(DataType.ORDER_SUB_ITEM,order_sub_item.id,Type.STAT_ORDER_SUB_ITEM,order.user_id,order_sub_item);
 								let option = {post_unique:false};
 								const [biz_error,biz_data] = await Stat_Data.post(database,post_order_sub_item_stat,option);
 								if(biz_error){
 									error=Log.append(error,biz_error);
 								}else{
-									data.stat_order_sub_item_list.push(biz_data);
+									data.stat_order_sub_items.push(biz_data);
 								}
 							}
 						}
-						data.stat_order_sub_item_list = data.stat_order_sub_item_list
+						data.stat_order_sub_items = data.stat_order_sub_items
 					}
 				},
-				//post stat order_payment_list
+				//post stat order_payments
 				async function(call){
 					if(data.order.id && option.post_stat){
-						data.stat_order_payment_list = [];
-						for(const order_payment of order_payment_list){
+						data.stat_order_payments  = [];
+						for(const order_payment of order_payments){
 							let post_order_payment_stat = Stat_Logic.get_new(DataType.ORDER_PAYMENT,order_payment.id,Type.STAT_ORDER_PAYMENT,order.user_id,order_payment);
 							let option = {post_unique:false};
 							const [biz_error,biz_data] = await Stat_Data.post(database,post_order_payment_stat,option);
 							if(biz_error){
 								error=Log.append(error,biz_error);
 							}else{
-								data.stat_order_payment_list.push(biz_data);
+								data.stat_order_payments.push(biz_data);
 							}
 						}
 					}
@@ -646,11 +646,11 @@ class Order_Data {
 	//9_order_get
 	static get = (database,order_number,option) => {
 		return new Promise((callback) => {
-			let data = {order:DataItem.get_new(DataType.ORDER,0,{order_number:order_number,grand_total:0,order_item_list:[],user:DataItem.get_new(DataType.USER,0)})};
-			let order_parent_item_list_query = { $or: [] };
-			let order_sub_item_list_query = { $or: [] };
+			let data = {order:DataItem.get_new(DataType.ORDER,0,{order_number:order_number,grand_total:0,order_items:[],user:DataItem.get_new(DataType.USER,0)})};
+			let order_parent_item_query = { $or: [] };
+			let order_sub_item_query = { $or: [] };
 			let error = null;
-			let order_sub_item_list = [];
+			let order_sub_items = [];
 			option = option ? option : {get_payment:true};
 			async.series([
 				//get_order
@@ -667,7 +667,7 @@ class Order_Data {
 					const [biz_error,biz_data] = await Portal.get(database,DataType.USER,data.order.user_id);
 					data.order.user=biz_data;
 				},
-				//get_order_item_list
+				//get_order_items
 				async function(call){
 					if(!Str.check_is_null(data.order.id)){
 						let filter = { order_number:order_number };
@@ -676,30 +676,30 @@ class Order_Data {
 						if(biz_error){
 							error=Log.append(error,biz_error);
 						}else{
-							data.order.order_item_list = biz_data.data_list;
+							data.order.order_items = biz_data.items;
 						}
 					}
 				},
-				//get_order_item_list - parent_item_list
+				//get_order_items - parent_items
 				async function(call){
 					if(!Str.check_is_null(data.order.id)){
-						data.order.order_item_list.forEach(order_item => {
+						data.order.order_items.forEach(order_item => {
 							let query_field = {};
 							query_field[Type.FIELD_ID] = { $regex:String(order_item.parent_id), $options: "i" };
-							order_parent_item_list_query.$or.push(query_field);
+							order_parent_item_query.$or.push(query_field);
 						});
-						let search = App_Logic.get_search(data.order.parent_data_type,order_parent_item_list_query,{},1,0);
+						let search = App_Logic.get_search(data.order.parent_data_type,order_parent_item_query,{},1,0);
 						const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size);
 						if(biz_error){
 							error=Log.append(error,biz_error);
 						}else{
-							data.order.order_item_list.forEach(order_item => {
-								order_item.parent_item = biz_data.data_list.find(item_find => item_find.id === order_item.parent_id) ? biz_data.data_list.find(item_find => item_find.id === order_item.parent_id):App_Logic.get_not_found(order_item.parent_data_type,order_item.parent_id);
+							data.order.order_items.forEach(order_item => {
+								order_item.parent_item = biz_data.items.find(item_find => item_find.id === order_item.parent_id) ? biz_data.items.find(item_find => item_find.id === order_item.parent_id):App_Logic.get_not_found(order_item.parent_data_type,order_item.parent_id);
 							});
 						}
 					}
 				},
-				//get_order_sub_item_list
+				//get_order_sub_items
 				async function(call){
 					if(!Str.check_is_null(data.order.id)){
 						let filter = { order_number: { $regex:String(order_number), $options: "i" } };
@@ -708,48 +708,48 @@ class Order_Data {
 						if(biz_error){
 							error=Log.append(error,biz_error);
 						}else{
-							order_sub_item_list = biz_data.data_list;
+							order_sub_items = biz_data.items;
 						}
 					}
 				},
-				//get_order_sub_item_list - parent_sub_item_list
+				//get_order_sub_items - parent_sub_items
 				async function(call){
 					if(!Str.check_is_null(data.order.id)){
-						order_sub_item_list.forEach(order_sub_item => {
+						order_sub_items.forEach(order_sub_item => {
 							let query_field = {};
 							query_field['id'] = { $regex:String(order_sub_item.parent_id), $options: "i" };
-							order_sub_item_list_query.$or.push(query_field);
+							order_sub_item_query.$or.push(query_field);
 						});
-						let search = App_Logic.get_search(DataType.PRODUCT,order_sub_item_list_query,{},1,0);
+						let search = App_Logic.get_search(DataType.PRODUCT,order_sub_item_query,{},1,0);
 						const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size);
 						if(biz_error){
 							error=Log.append(error,biz_error);
 						}else{
-							order_sub_item_list.forEach(order_sub_item => {
-								order_sub_item.parent_item = biz_data.data_list.find(item_find => item_find.id === order_sub_item.parent_id) ? biz_data.data_list.find(item_find => item_find.id === order_sub_item.parent_id):App_Logic.get_not_found(order_sub_item.parent_data_type,order_sub_item.parent_id);
+							order_sub_items.forEach(order_sub_item => {
+								order_sub_item.parent_item = biz_data.items.find(item_find => item_find.id === order_sub_item.parent_id) ? biz_data.items.find(item_find => item_find.id === order_sub_item.parent_id):App_Logic.get_not_found(order_sub_item.parent_data_type,order_sub_item.parent_id);
 							});
 						}
 					}
 				},
-				// order_item_list - order_sub_item_list - bind
+				// order_items - order_sub_items - bind
 				async function(call){
-					data.order.order_item_list.forEach(order_item => {
-						order_item.order_sub_item_list = [];
-						let item_filter_list = order_sub_item_list.filter(item_find=>item_find.order_item_id===order_item.id);
-						order_item.order_sub_item_list = [...item_filter_list, ...order_item.order_sub_item_list];
+					data.order.order_items.forEach(order_item => {
+						order_item.order_sub_items = [];
+						let item_filter = order_sub_items.filter(item_find=>item_find.order_item_id===order_item.id);
+						order_item.order_sub_items = [...item_filter, ...order_item.order_sub_items];
 					});
 				},
-				//get_order_payment_list
+				//get_order_payments
 				async function(call){
 					if(!Str.check_is_null(data.order.id)){
 						let filter = { order_number:order_number };
-						let sort_order = option.order_payment_list_sort_by ? option.order_payment_list_sort_by : {date_create:-1};
+						let sort_order = option.order_payment_sort_by ? option.order_payment_sort_by : {date_create:-1};
 						let search = App_Logic.get_search(DataType.ORDER_PAYMENT,filter,sort_order,1,0);
 						const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,{});
 						if(biz_error){
 							error=Log.append(error,biz_error);
 						}else{
-							data.order.order_payment_list = biz_data.data_list;
+							data.order.order_payments = biz_data.items;
 						}
 					}
 				},
@@ -829,8 +829,8 @@ class Cart_Data {
 			let error = null;
 			option = option ? option : {post_stat:false};
 			data.cart = DataItem.get_new(DataType.CART,cart.id,{cart_number:cart.cart_number,parent_data_type:cart.parent_data_type,user_id:cart.user_id,grand_total: 0});
-			data.cart_item_list = [];
-			data.cart_sub_item_list = [];
+			data.cart_items = [];
+			data.cart_sub_items = [];
 			async.series([
 				//post - cart
 				async function(call){
@@ -855,8 +855,8 @@ class Cart_Data {
 				},
 				//post - cart items
 				async function(call){
-					if(cart.cart_item_list.length>0){
-						for(const cart_item of cart.cart_item_list){
+					if(cart.cart_items.length>0){
+						for(const cart_item of cart.cart_items){
 							let post_cart_item = DataItem.get_new(DataType.CART_ITEM,0);
 							for(const key in cart_item){
 								cart_item.temp_row_id = Num.get_id();
@@ -872,21 +872,21 @@ class Cart_Data {
 								}
 							}
 							post_cart_item.temp_row_id = cart_item.temp_row_id;
-							data.cart_item_list.push(post_cart_item);
+							data.cart_items.push(post_cart_item);
 						}
-						const [biz_error,biz_data] = await Portal.post_list(database,data.cart_item_list);
+						const [biz_error,biz_data] = await Portal.post_items(database,data.cart_items);
 						if(biz_error){
 							error=Log.append(error,biz_error);
 						}else{
-							data.cart_item_list = biz_data;
+							data.cart_items = biz_data;
 						}
 					}
 				},
 				//post - cart sub items
 				async function(call){
-					if(cart.cart_item_list.length>0){
-						for(const cart_item of cart.cart_item_list){
-							for(const cart_sub_item of cart_item.cart_sub_item_list){
+					if(cart.cart_items.length>0){
+						for(const cart_item of cart.cart_items){
+							for(const cart_sub_item of cart_item.cart_sub_items){
 								let post_cart_sub_item = DataItem.get_new(DataType.CART_SUB_ITEM,0);
 								for(const key in cart_sub_item){
 									cart_sub_item.temp_row_id = Num.get_id();
@@ -901,15 +901,15 @@ class Cart_Data {
 										post_cart_sub_item[key] = cart_sub_item[key];
 									}
 								}
-								post_cart_sub_item.cart_item_id =data.cart_item_list.find(item_find => item_find.temp_row_id === cart_item.temp_row_id).id,
-									data.cart_sub_item_list.push(post_cart_sub_item);
+								post_cart_sub_item.cart_item_id =data.cart_items.find(item_find => item_find.temp_row_id === cart_item.temp_row_id).id,
+									data.cart_sub_items.push(post_cart_sub_item);
 							}
 						}
-						const [biz_error,biz_data] = await Portal.post_list(database,data.cart_sub_item_list);
+						const [biz_error,biz_data] = await Portal.post_items(database,data.cart_sub_items);
 						if(biz_error){
 							error=Log.append(error,biz_error);
 						}else{
-							data.cart_sub_item_list = biz_data;
+							data.cart_sub_items = biz_data;
 						}
 					}
 				},
@@ -928,35 +928,35 @@ class Cart_Data {
 						}
 					}
 				},
-				//post stat cart_item_list
+				//post stat cart_items
 				async function(call){
 					if(data.cart.id && option.post_stat){
-						data.stat_cart_item_list = [];
-						for(const cart_item of cart.cart_item_list){
+						data.stat_cart_items = [];
+						for(const cart_item of cart.cart_items){
 							let post_cart_item_stat = Stat_Logic.get_new(DataType.CART_ITEM,cart_item.id,Type.STAT_CART_ITEM,cart.user_id,cart_item);
 							let option = {post_unique:false};
 							const [biz_error,biz_data] = await Stat_Data.post(database,post_cart_item_stat,option);
 							if(biz_error){
 								error=Log.append(error,biz_error);
 							}else{
-								data.stat_cart_item_list.push(biz_data);
+								data.stat_cart_items.push(biz_data);
 							}
 						}
 					}
 				},
-				//post stat cart_sub_item_list
+				//post stat cart_sub_items
 				async function(call){
 					if(data.cart.id && option.post_stat){
-						data.stat_cart_sub_item_list = [];
-						for(const cart_item of cart.cart_item_list){
-							for(const cart_sub_item of cart_item.cart_sub_item_list){
+						data.stat_cart_sub_items = [];
+						for(const cart_item of cart.cart_items){
+							for(const cart_sub_item of cart_item.cart_sub_items){
 								let post_cart_sub_item_stat = Stat_Logic.get_new(DataType.CART_SUB_ITEM,cart_sub_item.id,Type.STAT_CART_SUB_ITEM,cart.user_id,cart_sub_item);
 								let option = {post_unique:false};
 								const [biz_error,biz_data] = await Stat_Data.post(database,post_cart_sub_item_stat,option);
 								if(biz_error){
 									error=Log.append(error,biz_error);
 								}else{
-									data.stat_cart_sub_item_list.push(biz_data);
+									data.stat_cart_sub_items.push(biz_data);
 								}
 							}
 						}
@@ -982,11 +982,11 @@ class Cart_Data {
 	//9_cart_get
 	static get = (database,cart_number) => {
 		return new Promise((callback) => {
-			let data = {cart:DataItem.get_new(DataType.CART,0,{cart_number:cart_number,cart_item_list:[],user:DataItem.get_new(DataType.USER,0)})};
-			let cart_parent_item_list_query = { $or: [] };
-			let cart_sub_item_list_query = { $or: [] };
+			let data = {cart:DataItem.get_new(DataType.CART,0,{cart_number:cart_number,cart_items:[],user:DataItem.get_new(DataType.USER,0)})};
+			let cart_parent_item_query = { $or: [] };
+			let cart_sub_item_query = { $or: [] };
 			let error = null;
-			let cart_sub_item_list = [];
+			let cart_sub_items = [];
 			async.series([
 				//get_cart
 				async function(call){
@@ -1002,7 +1002,7 @@ class Cart_Data {
 					const [biz_error,biz_data] = await Portal.get(database,DataType.USER,data.cart.user_id);
 					data.cart.user=biz_data;
 				},
-				//get_cart_item_list
+				//get_cart_items
 				async function(call){
 					if(!Str.check_is_null(data.cart.id)){
 						let filter = { cart_number:cart_number };
@@ -1011,30 +1011,30 @@ class Cart_Data {
 						if(biz_error){
 							error=Log.append(error,biz_error);
 						}else{
-							data.cart.cart_item_list = biz_data.data_list;
+							data.cart.cart_items = biz_data.items;
 						}
 					}
 				},
-				//get_cart_item_list - parent_item_list
+				//get_cart_items - parent_items
 				async function(call){
 					if(!Str.check_is_null(data.cart.id)){
-						data.cart.cart_item_list.forEach(cart_item => {
+						data.cart.cart_items.forEach(cart_item => {
 							let query_field = {};
 							query_field[Type.FIELD_ID] = { $regex:String(cart_item.parent_id), $options: "i" };
-							cart_parent_item_list_query.$or.push(query_field);
+							cart_parent_item_query.$or.push(query_field);
 						});
-						let search = App_Logic.get_search(data.cart.parent_data_type,cart_parent_item_list_query,{},1,0);
+						let search = App_Logic.get_search(data.cart.parent_data_type,cart_parent_item_query,{},1,0);
 						const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size);
 						if(biz_error){
 							error=Log.append(error,biz_error);
 						}else{
-							data.cart.cart_item_list.forEach(cart_item => {
-								cart_item.parent_item = biz_data.data_list.find(item_find => item_find.id === cart_item.parent_id) ? biz_data.data_list.find(item_find => item_find.id === cart_item.parent_id):App_Logic.get_not_found(cart_item.parent_data_type,cart_item.parent_id);
+							data.cart.cart_items.forEach(cart_item => {
+								cart_item.parent_item = biz_data.items.find(item_find => item_find.id === cart_item.parent_id) ? biz_data.items.find(item_find => item_find.id === cart_item.parent_id):App_Logic.get_not_found(cart_item.parent_data_type,cart_item.parent_id);
 							});
 						}
 					}
 				},
-				//get_cart_sub_item_list
+				//get_cart_sub_items
 				async function(call){
 					if(!Str.check_is_null(data.cart.id)){
 						let filter = { cart_number: cart_number };
@@ -1043,35 +1043,35 @@ class Cart_Data {
 						if(biz_error){
 							error=Log.append(error,biz_error);
 						}else{
-							cart_sub_item_list = biz_data.data_list;
+							cart_sub_items = biz_data.items;
 						}
 					}
 				},
-				//get_cart_sub_item_list - parent_sub_item_list
+				//get_cart_sub_items - parent_sub_items
 				async function(call){
 					if(!Str.check_is_null(data.cart.id)){
-						cart_sub_item_list.forEach(cart_sub_item => {
+						cart_sub_items.forEach(cart_sub_item => {
 							let query_field = {};
 							query_field[Type.FIELD_ID] = { $regex:String(cart_sub_item.parent_id), $options: "i" };
-							cart_sub_item_list_query.$or.push(query_field);
+							cart_sub_item_query.$or.push(query_field);
 						});
-						let search = App_Logic.get_search(DataType.PRODUCT,cart_sub_item_list_query,{},1,0);
+						let search = App_Logic.get_search(DataType.PRODUCT,cart_sub_item_query,{},1,0);
 						const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size);
 						if(biz_error){
 							error=Log.append(error,biz_error);
 						}else{
-							cart_sub_item_list.forEach(cart_sub_item => {
-								cart_sub_item.parent_item = biz_data.data_list.find(item_find => item_find.id === cart_sub_item.parent_id) ? biz_data.data_list.find(item_find => item_find.id === cart_sub_item.parent_id):App_Logic.get_not_found(cart_sub_item.parent_data_type,cart_sub_item.parent_id);
+							cart_sub_items.forEach(cart_sub_item => {
+								cart_sub_item.parent_item = biz_data.items.find(item_find => item_find.id === cart_sub_item.parent_id) ? biz_data.items.find(item_find => item_find.id === cart_sub_item.parent_id):App_Logic.get_not_found(cart_sub_item.parent_data_type,cart_sub_item.parent_id);
 							});
 						}
 					}
 				},
-				// cart_item_list - cart_sub_item_list - bind
+				// cart_items - cart_sub_items - bind
 				async function(call){
-					data.cart.cart_item_list.forEach(cart_item => {
-						cart_item.cart_sub_item_list = [];
-						let item_filter_list = cart_sub_item_list.filter(item_find=>item_find.cart_item_id===cart_item.id);
-						cart_item.cart_sub_item_list = [...item_filter_list, ...cart_item.cart_sub_item_list];
+					data.cart.cart_items.forEach(cart_item => {
+						cart_item.cart_sub_items = [];
+						let item_filter = cart_sub_items.filter(item_find=>item_find.cart_item_id===cart_item.id);
+						cart_item.cart_sub_items = [...item_filter, ...cart_item.cart_sub_items];
 					});
 				},
 				async function(call){
@@ -1087,7 +1087,6 @@ class Cart_Data {
 		});
 	};
 	//9_cart_delete
-	//
 	static delete = async (database,id) => {
 		return new Promise((callback) => {
 			let data = {};
@@ -1144,7 +1143,7 @@ class Product_Data {
 		return new Promise((callback) => {
 			let product = DataItem.get_new(DataType.PRODUCT,0);
 			let error = null;
-			option = option ? option : {get_item:false,get_image:false};
+			option = option ? option : {get_image:false};
 			async.series([
 				async function(call){
 					const [biz_error,biz_data] = await Portal.get(database,DataType.PRODUCT,key,option);
@@ -1165,9 +1164,9 @@ class Product_Data {
 	//9_product_search
 	static search = (database,filter,sort_by,page_current,page_size,option) => {
 		return new Promise((callback) => {
-			let data = {item_count:0,page_count:1,filter:{},data_type:DataType.PRODUCT,data_list:[]};
+			let data = {item_count:0,page_count:1,filter:{},data_type:DataType.PRODUCT,products:[]};
 			let error = null;
-			option = option ? option : {get_item:false,get_image:false};
+			option = option ? option : {get_image:false};
 			async.series([
 				async function(call){
 					const [biz_error,biz_data] = await Portal.search(database,DataType.PRODUCT,filter,sort_by,page_current,page_size,option);
@@ -1178,7 +1177,7 @@ class Product_Data {
 						data.data_type = DataType.PRODUCT;
 						data.page_count = biz_data.page_count;
 						data.filter = biz_data.filter;
-						data.product_list = biz_data.data_list;
+						data.products = biz_data.items;
 					}
 				},
 			]).then(result => {
@@ -1259,9 +1258,9 @@ class Review_Data {
 	//9_review_search
 	static search = (database,filter,sort_by,page_current,page_size,option) => {
 		return new Promise((callback) => {
-			let data = {item_count:0,page_count:1,filter:{},data_type:DataType.REVIEW,data_list:[]};
+			let data = {item_count:0,page_count:1,filter:{},data_type:DataType.REVIEW,reviews:[]};
 			let error = null;
-			option = option ? option : {get_item:false,get_image:false};
+			option = option ? option : {get_image:false};
 			async.series([
 				async function(call){
 					const [biz_error,biz_data] = await Portal.search(database,DataType.REVIEW,filter,sort_by,page_current,page_size,option);
@@ -1272,7 +1271,7 @@ class Review_Data {
 						data.data_type = DataType.REVIEW;
 						data.page_count = biz_data.page_count;
 						data.filter = biz_data.filter;
-						data.review_list = biz_data.data_list;
+						data.reviews = biz_data.items;
 					}
 				},
 			]).then(result => {
@@ -1290,12 +1289,12 @@ class Review_Data {
 			let error = null;
 			let data = {};
 			async.series([
-				//review_list
+				//reviews
 				async function(call){
 					let query = {parent_id:'1',parent_data_type:parent_data_type};
 					//let query = {};
 					let search = App_Logic.get_search(DataType.REVIEW,query,sort_by,page_current,page_size);
-					let option = {get_join:true,field_key_list:[{foreign_data_type:parent_data_type,foreign_field:'id',item_field:'product',title:'parent_item'}],get_user:true};
+					let option = {get_join:true,field_keys:[{foreign_data_type:parent_data_type,foreign_field:'id',item_field:'product',title:'parent_item'}],get_user:true};
 					const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option);
 					if(biz_error){
 						error=Log.append(error,biz_error);
@@ -1305,7 +1304,7 @@ class Review_Data {
 						data.item_count=biz_data.item_count;
 						data.page_count=biz_data.page_count;
 						data.filter=biz_data.filter;
-						data.review_list=biz_data.data_list;
+						data.reviews=biz_data.items;
 					}
 				},
 			]).then(result => {
@@ -1453,10 +1452,10 @@ class User_Data {
 					if(biz_error){
 						biz_error=Log.append(error,biz_error);
 					}else{
-						if(Str.check_is_null(data.user.id) && biz_data.data_list.length<=0){
+						if(Str.check_is_null(data.user.id) && biz_data.items.length<=0){
 							data.email_resultOK = true;
-						}else if(biz_data.data_list.length>0){
-							if(data.user.id == biz_data.data_list[0].id){
+						}else if(biz_data.items.length>0){
+							if(data.user.id == biz_data.items[0].id){
 								data.email_resultOK = true;
 							}
 						}else{
@@ -1471,10 +1470,10 @@ class User_Data {
 					if(biz_error){
 						biz_error=Log.append(error,biz_error);
 					}else{
-						if(Str.check_is_null(data.user.id) && biz_data.data_list.length<=0){
+						if(Str.check_is_null(data.user.id) && biz_data.items.length<=0){
 							data.title_resultOK = true;
-						}else if(biz_data.data_list.length>0){
-							if(data.user.id == biz_data.data_list[0].id){
+						}else if(biz_data.items.length>0){
+							if(data.user.id == biz_data.items[0].id){
 								data.title_resultOK = true;
 							}
 						}else{
@@ -1639,8 +1638,8 @@ class User_Data {
 					if(biz_error){
 						error=Log.append(error,biz_error);
 					}else{
-						if(biz_data.data_list.length>0){
-							data.user = biz_data.data_list[0];
+						if(biz_data.items.length>0){
+							data.user = biz_data.items[0];
 							data.user_resultOK = true;
 						}
 					}
@@ -1808,46 +1807,46 @@ class Favorite_Data {
 
 }
 class Portal {
-	//9_portal_demo / required / type_logic.type_list
-	static demo_post = (database,data_type,type_list) => {
+	//9_portal_demo / required / type_logic.types
+	static demo_post = (database,data_type,types) => {
 		return new Promise((callback) => {
 			let data = {resultOK:false};
 			let error = null;
 			async.series([
-				//type_list
+				//types
 				async function(call){
-					let post_type_list = [];
-					for(const item of type_list) {
-						post_type_list.push(Demo_Logic.get_new_type(item.title));
+					let post_types = [];
+					for(const item of types) {
+						post_types.push(Demo_Logic.get_new_type(item.title));
 					};
-					const [biz_error,biz_data] = await Portal.post_bulk(database,DataType.TYPE,post_type_list);
+					const [biz_error,biz_data] = await Portal.post_bulk(database,DataType.TYPE,post_types);
 					if(biz_error){
 						error=Log.append(error,biz_error);
 					}else{
 					}
 				},
-				//category_list
+				//categorys
 				async function(call){
-					let post_category_list = [];
-					for(const item of type_list) {
+					let post_categorys = [];
+					for(const item of types) {
 						for(const cat_item of item.categorys) {
-							post_category_list.push(Category_Logic.get_new(cat_item.title,cat_item.type,cat_item.category));
+							post_categorys.push(Category_Logic.get_new(cat_item.title,cat_item.type,cat_item.category));
 						};
 					};
-					if(post_category_list.length>0){
-						const [biz_error,biz_data] = await Portal.post_bulk(database,DataType.CATEGORY,post_category_list);
+					if(post_categorys.length>0){
+						const [biz_error,biz_data] = await Portal.post_bulk(database,DataType.CATEGORY,post_categorys);
 						if(biz_error){
 							error=Log.append(error,biz_error);
 						}else{
-							data.category_list = biz_data;
+							data.categorys = biz_data;
 							data.resultOK = true;
 						}
 					}
 				},
-				//item_list
+				//items
 				async function(call){
-					let post_item_list = [];
-					for(const item of type_list) {
+					let post_items = [];
+					for(const item of types) {
 						if(!item.categorys){
 							item.categorys=[];
 						}
@@ -1856,16 +1855,16 @@ class Portal {
 								cat_item.items = [];
 							}
 							for(const item of cat_item.items) {
-								post_item_list.push(item);
+								post_items.push(item);
 							};
 						};
 					};
-					if(post_item_list.length>0){
-						const [biz_error,biz_data] = await Portal.post_bulk(database,data_type,post_item_list);
+					if(post_items.length>0){
+						const [biz_error,biz_data] = await Portal.post_bulk(database,data_type,post_items);
 						if(biz_error){
 							error=Log.append(error,biz_error);
 						}else{
-							data.item_list = biz_data;
+							data.items = biz_data;
 							data.resultOK = true;
 						}
 					}
@@ -1888,10 +1887,10 @@ class Portal {
 		   - get_field / type. bool / ex. true,false / default. false
 		   - fields / type. string / ex. field1,field2 / default. throw error / notez. id must by type tbl_id
 		   - delete_cache / type. bool / ex. true,false / default. false
-		   - get_field_value_list / type. bool / ex. true,false / default. false
+		   - get_field_value / type. bool / ex. true,false / default. false
 		 *  Join
 			- get_join / type. bool / ex. true,false / default. false
-			-- field_key_list / type. obj list / ex. [
+			-- field_keys / type. obj list / ex. [
 					{
 						foreign_data_type:DataType.PRODUCT,
 						foreign_field:'id',
@@ -1982,8 +1981,8 @@ class Portal {
 						let page_current = 1;
 						let page_size = option.image_count;
 						const [biz_error,biz_data] = await Portal.search(database,DataType.IMAGE,filter,sort_by,page_current,page_size,option);
-						if(biz_data.data_list.length > 0){
-							data.images = biz_data.data_list;
+						if(biz_data.items.length > 0){
+							data.images = biz_data.items;
 						}
 					}
 				},
@@ -2018,17 +2017,17 @@ class Portal {
 						}
 					}
 				},
-				//get_item_field_value_list
+				//get_item_field_values
 				async function(call){
-					if(option.get_field_value_list && data.id){
-						data = Field_Logic.get_item_field_value_list(data);
+					if(option.get_field_value && data.id){
+						data = Field_Logic.get_item_field_values(data);
 					}
 				},
 				//get_join
 				async function(call){
 					if(option.get_join && data.id){
 						option.foreEach(item => {
-							parent_search_item_list.push({
+							parent_search_items.push({
 								foreign_data_type : item.foreign_data_type,
 								foreign_field : item.foreign_field,
 								parent_field : item.parent_field,
@@ -2039,7 +2038,7 @@ class Portal {
 								data : [],
 							});
 						});
-						for(const parent_search_item of parent_search_item_list){
+						for(const parent_search_item of parent_search_items){
 							let join_option = parent_search_item.fields ? {get_field:true,fields:parent_search_item.fields} : {};
 							if(parent_search_item.type == Type.TITLE_LIST){
 								let query = {};
@@ -2049,7 +2048,7 @@ class Portal {
 								if(biz_error){
 									error=Log.append(error,biz_error);
 								}else{
-									data[parent_search_item.title] = biz_data.data_list;
+									data[parent_search_item.title] = biz_data.items;
 								}
 							}else if(parent_search_item.type == Type.TITLE_COUNT){
 								let query = {};
@@ -2065,7 +2064,7 @@ class Portal {
 						}
 					}
 				},
-				//get_group -- group_list
+				//get_group -- groups
 				async function(call){
 					if(option.get_group && data.id){
 						data.groups = [];
@@ -2074,9 +2073,9 @@ class Portal {
 						if(!option.group){
 							query = {parent_id:data.id}
 						}else{
-							let group_title_list = option.group ? option.group.split(','):[];
+							let group_titles = option.group ? option.group.split(','):[];
 							query = { $or: [] };
-							group_title_list.foreach(item => {
+							group_titles.foreach(item => {
 								let query_field = {};
 								query_field[Type.FIELD_TITLE] = { $regex:String(item), $options: "i" };
 								query.$or.push(query_field);
@@ -2085,9 +2084,9 @@ class Portal {
 						}
 						let group_search = App_Logic.get_search(DataType.GROUP,query,{},1,0);
 						const [biz_error,biz_data] = await Portal.search(database,group_search.data_type,group_search.filter,group_search.sort_by,group_search.page_current,group_search.page_size,group_option);
-						if(biz_data.data_list.length> 0){
-							data.groups = biz_data.data_list;
-							for(const group of biz_data.data_list){
+						if(biz_data.items.length> 0){
+							data.groups = biz_data.items;
+							for(const group of biz_data.items){
 								data[Str.get_title_url(group.title)] = group;
 							}
 						}
@@ -2130,12 +2129,12 @@ class Portal {
 		 */
 		return new Promise((callback) => {
 			let error = null;
-			let data = {data_type:data_type,item_count:0,page_count:1,filter:{},data_list:[]};
+			let data = {data_type:data_type,item_count:0,page_count:1,filter:{},items:[]};
 			option = option ? option : {};
 			async.series([
 				function(call){
 					let search = App_Logic.get_search(data_type,filter,sort_by,page_current,page_size);
-					Data.get_list(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option).then(([biz_error,item_list,item_count,page_count])=>{
+					Data.get_items(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option).then(([biz_error,items,item_count,page_count])=>{
 						if(biz_error){
 							error=Log.append(error,biz_error);
 						}else{
@@ -2144,7 +2143,7 @@ class Portal {
 							data.page_count=page_count;
 							data.search=search;
 							data.filter=filter;
-							data.data_list=item_list;
+							data.items=items;
 							call();
 						}
 					}).catch(err => {
@@ -2154,18 +2153,18 @@ class Portal {
 				},
 				//get_image
 				async function(call){
-					if(option.get_join && data.data_list.length>0){
+					if(option.get_join && data.items.length>0){
 						let query = { $or: [] };
-						for(const data_item of data.data_list){
+						for(const data_item of data.items){
 							let query_field = {};
 							query_field[Type.FIELD_PARENT_ID] = { $regex:String(data_item.id), $options: "i" };
 							query.$or.push(query_field);
 						};
 						let search = App_Logic.get_search(DataTyp.IMAGE,query,{},1,0);
 						const [biz_error,biz_data] = await Portal.search_simple(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size);
-						data.data_list.forEach(data_a =>{
+						data.items.forEach(data_a =>{
 							data_a.images = [];
-							data.data_list.forEach(data_b =>{
+							data.items.forEach(data_b =>{
 								if(data_b.parent_id == data_a.id){
 									data_a.images.push(data_b);
 								}
@@ -2201,7 +2200,7 @@ class Portal {
 			  - count_value / type. string / ex. title / default. throw error
 		 *  Join
 			- get_join / type. bool / ex. true,false / default. false
-				- field_key_list / type. obj list / ex. [
+				- field_keys / type. obj list / ex. [
 					{
 						foreign_data_type:DataType.PRODUCT,
 						foreign_field:'id',
@@ -2227,19 +2226,19 @@ class Portal {
 			- item_count
 			- page_count
 			- filter
-			- item_list
+			- items
 			*/
 		return new Promise((callback) => {
-			let data = {data_type:data_type,item_count:0,page_count:1,filter:{},data_list:[]};
+			let data = {data_type:data_type,item_count:0,page_count:1,filter:{},items:[]};
 			let error=null;
-			let parent_search_item_list = [];
-			let group_list = [];
+			let parent_search_items = [];
+			let groups = [];
 			option = option ? option : {};
 			async.series([
-				//get list
+				//get items
 				function(call){
 					let search = App_Logic.get_search(data_type,filter,sort_by,page_current,page_size);
-					Data.get_list(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option).then(([biz_error,item_list,item_count,page_count])=>{
+					Data.get_items(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option).then(([biz_error,items,item_count,page_count])=>{
 						if(biz_error){
 							error=Log.append(error,biz_error);
 						}else{
@@ -2247,7 +2246,7 @@ class Portal {
 							data.item_count=item_count;
 							data.page_count=page_count;
 							data.search=search;
-							data.data_list=item_list;
+							data.items=items;
 							call();
 						}
 					}).catch(err => {
@@ -2257,12 +2256,12 @@ class Portal {
 				},
 				//get distinct
 				function(call){
-					if(option.get_distinct && data.data_list.length>0){
-						data.data_list = data.data_list.filter((obj, index, self) =>
+					if(option.get_distinct && data.items.length>0){
+						data.items = data.items.filter((obj, index, self) =>
 							index === self.findIndex((t) => t[option.distinct_field] === obj[option.distinct_field])
 						);
 						let distinct_sort_by = option.distinct_sort ? option.distinct_sort : Type.TITLE_SORT_BY_ASC;
-						data.data_list = Obj.sort_list_by_field(data.data_list,Type.FIELD_TITLE,distinct_sort_by);
+						data.items = Obj.sort_list_by_field(data.items,Type.FIELD_TITLE,distinct_sort_by);
 						call();
 					}
 					else{
@@ -2271,9 +2270,9 @@ class Portal {
 				},
 				//get_image
 				async function(call){
-					if(option.get_join && data.data_list.length>0){
+					if(option.get_join && data.items.length>0){
 						let query = { $or: [] };
-						for(const data_item of data.data_list){
+						for(const data_item of data.items){
 							let query_field = {};
 							query_field[Type.FIELD_PARENT_ID] = { $regex:String(data_item.id), $options: "i" };
 							query.$or.push(query_field);
@@ -2281,9 +2280,9 @@ class Portal {
 						let search = App_Logic.get_search(DataType.IMAGE,query,{},1,0);
 						const [biz_error,biz_data] = await Portal.search_simple(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size);
 
-						data.data_list.forEach(data_a =>{
+						data.items.forEach(data_a =>{
 							data_a.images = [];
-							data.data_list.forEach(data_b =>{
+							data.items.forEach(data_b =>{
 								if(data_b.parent_id == data_a.id){
 									data_a.images.push(data_b);
 								}
@@ -2293,10 +2292,10 @@ class Portal {
 				},
 				//get_join
 				function(call){
-					if(option.get_join && data.data_list.length>0){
-							option.field_key_list.forEach(option_item =>{
-									data.data_list.forEach(data_item =>{
-										parent_search_item_list.push({
+					if(option.get_join && data.items.length>0){
+							option.field_keys.forEach(option_item =>{
+									data.items.forEach(data_item =>{
+										parent_search_items.push({
 											foreign_data_type : option_item.foreign_data_type,
 											foreign_field : option_item.foreign_field,
 											parent_value : data_item[option_item.parent_field],
@@ -2306,7 +2305,7 @@ class Portal {
 											make_flat : option_item.make_flat ? option_item.make_flat : false,
 											type : option_item.type ? option_item.type : Type.TITLE_OBJ,
 											get_image : option_item.get_image ? option_item.get_image : false,
-											data_list : []
+											items : []
 										});
 									});
 							});
@@ -2317,10 +2316,10 @@ class Portal {
 				},
 				//get_join
 				async function(call){
-					if(option.get_join && data.data_list.length>0){
-						for(const parent_search_item of parent_search_item_list){
+					if(option.get_join && data.items.length>0){
+						for(const parent_search_item of parent_search_items){
 							let query = { $or: [] };
-							for(const data_item of data.data_list){
+							for(const data_item of data.items){
 								let query_field = {};
 								query_field[parent_search_item.foreign_field] = { $regex:String(parent_search_item.parent_value), $options: "i" };
 								query.$or.push(query_field);
@@ -2332,10 +2331,10 @@ class Portal {
 							if(biz_error){
 								error=Log.append(error,biz_error);
 							}else{
-								parent_search_item.data_list = biz_data.data_list;
-								if(parent_search_item_list.length> 0){
-									for(const parent_search_item of parent_search_item_list){
-										for(const data_item of data.data_list){
+								parent_search_item.items = biz_data.items;
+								if(parent_search_items.length> 0){
+									for(const parent_search_item of parent_search_items){
+										for(const data_item of data.items){
 											if(parent_search_item.type == Type.TITLE_LIST){
 												let query = {};
 												query[parent_search_item.foreign_field] = data_item[parent_search_item.parent_field];
@@ -2345,7 +2344,7 @@ class Portal {
 												if(biz_error){
 													error=Log.append(error,biz_error);
 												}else{
-													for(const sub_data_item of biz_data.data_list){
+													for(const sub_data_item of biz_data.items){
 														data_item[parent_search_item.title].push(sub_data_item);
 													}
 												}
@@ -2369,36 +2368,36 @@ class Portal {
 				},
 				//get_group
 				function(call){
-					if(option.get_group && data.data_list.length>0){
+					if(option.get_group && data.items.length>0){
 						call();
 					}else{
 						call();
 					}
 				},
-				//get_group_list
+				//get_groups
 				async function(call){
-					if(option.get_group && data.data_list.length>0){
-						let group_title_list = option.group ? option.group.split(','):[];
+					if(option.get_group && data.items.length>0){
+						let group_titles = option.group ? option.group.split(','):[];
 						let query = { $or: [] };
-						if(group_title_list.length<=0){
-							data.data_list.forEach(item =>{
-									parent_search_item_list.push({
+						if(group_titles.length<=0){
+							data.items.forEach(item =>{
+									parent_search_items.push({
 									foreign_data_type : DataType.GROUP,
 									foreign_field : Type.FIELD_PARENT_ID,
 									parent_value : item[Type.FIELD_ID],
 									parent_field : Type.FIELD_ID,
 									title : null,
 									type :  Type.TITLE_LIST,
-									data_list : []
+									items : []
 								});
 							});
-							for(const parent_search_item of parent_search_item_list){
+							for(const parent_search_item of parent_search_items){
 								let query_field = {};
 								query_field[parent_search_item.foreign_field] = { $regex:String(parent_search_item.parent_value), $options: "i" };
 								query.$or.push(query_field);
 							}
 						}else{
-							group_title_list.forEach(item =>{
+							group_titles.forEach(item =>{
 								let query_field = {};
 								query_field['title'] = { $regex:String(item), $options: "i" };
 								query.$or.push(query_field);
@@ -2406,14 +2405,14 @@ class Portal {
 						}
 						let search = App_Logic.get_search(DataType.GROUP,query,{},1,0);
 						const [biz_error,biz_data] = await Portal.search_simple(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,{});
-						group_list = biz_data.data_list;
+						groups = biz_data.items;
 					}
 				},
 				//get_group_bind
 				async function(call){
-					if(option.get_group && data.data_list.length>0){
-						data.data_list.forEach(data_item =>{
-							group_list.forEach(group =>{
+					if(option.get_group && data.items.length>0){
+						data.items.forEach(data_item =>{
+							groups.forEach(group =>{
 								if(data_item.id ==  group.parent_id){
 									data_item.groups.push(group);
 								}
@@ -2423,9 +2422,9 @@ class Portal {
 				},
 				//get_user
 				async function(call){
-					if(option.get_user && data.data_list.length>0){
+					if(option.get_user && data.items.length>0){
 						let query = { $or: [] };
-						data.data_list.forEach(item => {
+						data.items.forEach(item => {
 							let query_field = {};
 							query_field[Type.FIELD_ID] = { $regex:String(item[Type.FIELD_USER_ID]), $options: "i" };
 							query.$or.push(query_field);
@@ -2436,15 +2435,15 @@ class Portal {
 						if(biz_error){
 							error=Log.append(error,biz_error);
 						}else{
-							if(data.data_list.length> 0){
-								data.data_list.forEach(item => {
+							if(data.items.length> 0){
+								data.items.forEach(item => {
 									if(option.make_user_flat){
-										let user = biz_data.data_list.find(item_find => item_find.id === item.user_id) ? biz_data.data_list.find(item_find => item_find.id === item.user_id):App_Logic.get_not_found(DataType.USER,item.user_id);
+										let user = biz_data.items.find(item_find => item_find.id === item.user_id) ? biz_data.items.find(item_find => item_find.id === item.user_id):App_Logic.get_not_found(DataType.USER,item.user_id);
 										for (const prop in user) {
 											item["user_"+prop] = user[prop];
 										}
 									}else{
-										item.user = biz_data.data_list.find(item_find => item_find.id === item.user_id) ? biz_data.data_list.find(item_find => item_find.id === item.user_id):App_Logic.get_not_found(DataType.USER,item.user_id);
+										item.user = biz_data.items.find(item_find => item_find.id === item.user_id) ? biz_data.items.find(item_find => item_find.id === item.user_id):App_Logic.get_not_found(DataType.USER,item.user_id);
 									}
 
 								});
@@ -2454,9 +2453,9 @@ class Portal {
 				},
 				//get favorite
 				async function(call){
-					if(option.get_favorite && data.data_list.length>0){
+					if(option.get_favorite && data.items.length>0){
 						let query = { $or:[] };
-						data.data_list.forEach(item => {
+						data.items.forEach(item => {
 							let query_field = {$or:[],$and:[]};
 							query_field.$or.push({parent_id:item.id});
 							query_field.$and.push({user_id:option.user_id});
@@ -2474,9 +2473,9 @@ class Portal {
 						if(biz_error){
 							error=Log.append(error,biz_error);
 						}else{
-							if(data.data_list.length> 0){
-								data.data_list.forEach(item => {
-									item.is_favorite = biz_data.data_list.find(item_find => item_find.parent_id === item.id && item_find.user_id == option.user_id) ? true:false
+							if(data.items.length> 0){
+								data.items.forEach(item => {
+									item.is_favorite = biz_data.items.find(item_find => item_find.parent_id === item.id && item_find.user_id == option.user_id) ? true:false
 								});
 							}
 						}
@@ -2526,7 +2525,7 @@ class Portal {
 						}
 					}
 				},
-				//get_item
+				//get_save_data
 				async function(call){
 					if(option.get_update_data && data.id){
 						const [biz_error,biz_data] = await Portal.get(database,data_type,item.id,option);
@@ -2558,7 +2557,7 @@ class Portal {
 		});
 	};
 	//9_portal_post_bulk
-	static post_bulk = async (database,data_type,data_list) => {
+	static post_bulk = async (database,data_type,items) => {
 		/* option params
 		 * n/a
 		 */
@@ -2567,7 +2566,7 @@ class Portal {
 			let data = DataItem.get_new(data_type,0);
 			async.series([
 				function(call){
-					Data.post_bulk(database,data_type,data_list).then(([biz_error,biz_data])=> {
+					Data.post_bulk(database,data_type,items).then(([biz_error,biz_data])=> {
 						if(biz_error){
 							error=Log.append(error,biz_error);
 						}else{
@@ -2605,7 +2604,7 @@ class Portal {
 		return new Promise((callback) => {
 			let error = null;
 			let data = {};
-			option = option ? option : {get_item:false,get_image:false};
+			option = option ? option : {get_image:false};
 			async.series([
 				function(call){
 					Data.delete_cache(database,data_type,id).then(([biz_error,biz_data])=> {
@@ -2646,7 +2645,7 @@ class Portal {
 		return new Promise((callback) => {
 			let error = null;
 			let data = {};
-			option = option ? option : {delete_resultOK:false,get_item:false,get_image:false,delete_item:true,delete_item_filter:{},delete_image:true,delete_group:true,delete_image_filter:{}};
+			option = option ? option : {delete_resultOK:false,get_image:false,delete_item:true,delete_item_filter:{},delete_image:true,delete_group:true,delete_image_filter:{}};
 			async.series([
 				function(call){
 					Data.delete(database,data_type,id).then(([biz_error,biz_data])=> {
@@ -2666,12 +2665,12 @@ class Portal {
 					if(option.delete_item){
 						let data_type = DataType.ITEM;
 						let filter = {parent_id:id};
-						data.delete_data_list_resultOK = false;
-						Data.delete_list(database,data_type,filter).then(([biz_error,biz_data])=> {
+						data.delete_items_resultOK = false;
+						Data.delete_items(database,data_type,filter).then(([biz_error,biz_data])=> {
 							if(biz_error){
 								error=Log.append(error,biz_error);
 							}else{
-								data.delete_data_list_resultOK = true;
+								data.delete_items_resultOK = true;
 							}
 							call();
 						}).catch(err => {
@@ -2686,12 +2685,12 @@ class Portal {
 					if(option.delete_group){
 						let data_type = DataType.GROUP;
 						let filter = {parent_id:id};
-						data.delete_data_list_resultOK = false;
-						Data.delete_list(database,data_type,filter).then(([biz_error,biz_data])=> {
+						data.delete_items_resultOK = false;
+						Data.delete_items(database,data_type,filter).then(([biz_error,biz_data])=> {
 							if(biz_error){
 								error=Log.append(error,biz_error);
 							}else{
-								data.delete_data_list_resultOK = true;
+								data.delete_items_resultOK = true;
 							}
 							call();
 						}).catch(err => {
@@ -2707,7 +2706,7 @@ class Portal {
 						let data_type = DataType.IMAGE;
 						let filter = {parent_id:id};
 						data.delete_image_resultOK = false;
-						Data.delete_list(database,data_type,filter).then(([biz_error,biz_data])=> {
+						Data.delete_items(database,data_type,filter).then(([biz_error,biz_data])=> {
 							if(biz_error){
 								error=Log.append(error,biz_error);
 							}else{
@@ -2730,21 +2729,21 @@ class Portal {
 			});
 		});
 	};
-	//9_portal_post_list - 9_post_list
-	static post_list = async (database,post_list) => {
+	//9_portal_post_items - 9_post_items
+	static post_items = async (database,dat_items) => {
 		/* option params
 		 * n/a
 		 */
 		return new Promise((callback) => {
 			let error = null;
-			let data_list = [];
+			let items = [];
 			async.series([
 				function(call){
-					Data.post_list(database,post_list).then(([biz_error,biz_data])=> {
+					Data.post_items(database,items).then(([biz_error,biz_data])=> {
 						if(biz_error){
 							error=Log.append(error,biz_error);
 						}else{
-							data_list = biz_data;
+							items = biz_data;
 						}
 						call();
 					}).catch(err => {
@@ -2753,7 +2752,7 @@ class Portal {
 					});
 				},
 			]).then(result => {
-				callback([error,data_list]);
+				callback([error,items]);
 			}).catch(err => {
 				Log.error("Post-List-Data",err);
 				callback([err,{}]);
@@ -2767,12 +2766,12 @@ class Portal {
 		 */
 		return new Promise((callback) => {
 			let error = null;
-			let data = {delete_resultOK:false,delete_data_list_resultOK:false,delete_image_resultOK:false};
-			option = option ? option : {delete_resultOK:false,get_item:false,get_image:false,delete_item:false,delete_item_filter:{},delete_image_resultOK:false,delete_image_filter:{}};
+			let data = {delete_resultOK:false,delete_items_resultOK:false,delete_image_resultOK:false};
+			option = option ? option : {delete_resultOK:false,get_image:false,delete_item:false,delete_item_filter:{},delete_image_resultOK:false,delete_image_filter:{}};
 			async.series([
-				//delete_item_list
+				//delete_items
 				function(call){
-					Data.delete_list(database,data_type,filter).then(([biz_error,biz_data])=> {
+					Data.delete_items(database,data_type,filter).then(([biz_error,biz_data])=> {
 						if(biz_error){
 							error=Log.append(error,biz_error);
 						}else{
@@ -2789,12 +2788,12 @@ class Portal {
 					if(option.delete_item){
 						let data_type = DataType.ITEM;
 						let filter = option.delete_item_query;
-						data.delete_data_list_resultOK = false;
-						Data.delete_list(database,data_type,filter).then(([biz_error,biz_data])=> {
+						data.delete_items_resultOK = false;
+						Data.delete_items(database,data_type,filter).then(([biz_error,biz_data])=> {
 							if(biz_error){
 								error=Log.append(error,biz_error);
 							}else{
-								data.delete_data_list_resultOK = true;
+								data.delete_items_resultOK = true;
 							}
 							call();
 						}).catch(err => {
@@ -2810,7 +2809,7 @@ class Portal {
 						let data_type = DataType.IMAGE;
 						let filter = option.delete_image_query;
 						data.delete_image_resultOK = false;
-						Data.delete_list(database,data_type,filter).then(([biz_error,biz_data])=> {
+						Data.delete_items(database,data_type,filter).then(([biz_error,biz_data])=> {
 							if(biz_error){
 								error=Log.append(error,biz_error);
 							}else{
@@ -2843,7 +2842,7 @@ class Portal {
 			let data = {};
 			async.series([
 				function(call){
-					Data.count_list(database,data_type,filter).then(([biz_error,biz_data])=> {
+					Data.count_items(database,data_type,filter).then(([biz_error,biz_data])=> {
 						if(biz_error){
 							error=Log.append(error,biz_error);
 						}else{
@@ -2885,34 +2884,20 @@ class Portal {
 			option = option ? option : {copy_group:true};
 			async.series([
 				async function(call){
-					const [biz_error,biz_data] = await Portal.get(database,data_type,id);
+					const [biz_error,biz_data] = await Portal.get(database,data_type,id,option);
 					if(biz_error){
 						error=Log.append(error,biz_error);
 					}else{
 						top_data=biz_data;
 					}
 				},
+				//top_item
 				async function(call){
 					copy_data = Item_Logic.copy(data_type,top_data);
 					copy_data[Type.FIELD_TITLE] = 'Copy '+top_data[Type.FIELD_TITLE];
 					copy_data[Type.FIELD_TITLE_URL] = 'copy_'+top_data[Type.FIELD_TITLE_URL];
 					copy_data[Type.FIELD_SOURCE_ID] = top_data.id;
 					copy_data[Type.FIELD_SOURCE_DATA_TYPE] = top_data.data_type;
-					/*
-					const [biz_error,biz_data] = await Portal.post(database,copy_data.data_type,copy_data);
-					if(biz_error){
-						error=Log.append(error,biz_error);
-					}else{
-						copy_data=biz_data;
-						Log.w('copy_data',biz_data);
-					}
-					*/
-					Log.w('my_copy',copy_data);
-
-
-				},
-				/*
-				async function(call){
 					const [biz_error,biz_data] = await Portal.post(database,copy_data.data_type,copy_data);
 					if(biz_error){
 						error=Log.append(error,biz_error);
@@ -2920,30 +2905,31 @@ class Portal {
 						copy_data=biz_data;
 					}
 				},
-				//group
 				async function(call){
-					if(option.copy_group){
-						var group_list = [];
-						let search = App_Logic.get_search(DataType.GROUP,{parent_id:id},{},1,0);
-						const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size);
-						if(biz_error){
-							error=Log.append(error,biz_error);
-						}else{
-							group_list = biz_data.data_list;
-							for(const group of group_list){
-
+					if(top_data.groups.length > 0){
+						copy_data.groups = [];
+						let post_groups = [];
+						for(const group of top_data.groups){
+							let copy_group = Item_Logic.copy(DataType.GROUP,group);
+							copy_group[Type.FIELD_TITLE] = 'Copy '+group[Type.FIELD_TITLE];
+							copy_group[Type.FIELD_TITLE_URL] = 'copy_'+group[Type.FIELD_TITLE_URL];
+							copy_group[Type.FIELD_SOURCE_ID] = group.id;
+							copy_group[Type.FIELD_SOURCE_DATA_TYPE] = group.data_type;
+							post_groups.push(copy_group);
+						}
+						const [biz_error,biz_data] = await Portal.post_items(database,post_groups);
+							if(biz_error){
+								error=Log.append(error,biz_error);
+							}else{
+								copy_data.groups=biz_data;
 							}
 						}
-					}
 				},
-				*/
 			]).then(result => {
-				/*
 				if(copy_data.id){
 					data = copy_data;
 				}
-				*/
-				//callback([error,data]);
+				callback([error,data]);
 			}).catch(err => {
 				Log.error("Copy",err);
 				callback([err,{}]);
@@ -2956,7 +2942,7 @@ class Faq_Data{
 	static get = (database,key,option) => {
 		return new Promise((callback) => {
 			let data = {faq:DataItem.get_new(DataType.FAQ,0)};
-			let question_list = [];
+			let questions = [];
 			let error = null;
 			option = option ? option : {question_count:19};
 			async.series([
@@ -2973,14 +2959,14 @@ class Faq_Data{
 								let ans = data.faq[Str.get_title_url(data.faq["field_"+a])];
 								new_item['question'] = data.faq["field_"+a];
 								new_item['answer'] = ans;
-								question_list.push(new_item);
+								questions.push(new_item);
 							}
 						});
 					}
 				},
 			],
 				function(error, result){
-					callback([error,question_list]);
+					callback([error,questions]);
 				});
 		});
 	}
@@ -3081,7 +3067,7 @@ class Stat_Data {
 						data.data_type = DataType.BLOG_POST;
 						data.page_count = biz_data.page_count;
 						data.filter = biz_data.filter;
-						data.stat_list = biz_data.data_list;
+						data.stats = biz_data.items;
 					}
 					call();
 				},
@@ -3117,20 +3103,20 @@ class Data {
 	static delete_cache = async (db_connect,data_type,id) => {
 		return [error,data] = await delete_item_cache(db_connect,data_type,id);
 	};
-	static post_list = async (db_connect,data_list) => {
-		return [error,data] = await post_item_list_adapter(db_connect,data_list);
+	static post_items = async (db_connect,items) => {
+		return [error,data] = await post_item_list_adapter(db_connect,items);
+	;
+	static post_bulk = async (db_connect,data_type,items) => {
+		return [error,data] = await post_bulk_adapter(db_connect,data_type,items);
 	};
-	static post_bulk = async (db_connect,data_type,data_list) => {
-		return [error,data] = await post_bulk_adapter(db_connect,data_type,data_list);
-	};
-	static get_list = async (db_connect,data_type,filter,sort_by,page_current,page_size,option) => {
+	static get_items = async (db_connect,data_type,filter,sort_by,page_current,page_size,option) => {
 		const [error,data,item_count,page_count] = await get_item_list_adapter(db_connect,data_type,filter,sort_by,page_current,page_size,option);
 		return [error,data,item_count,page_count];
 	};
-	static delete_list = async (db_connect,data_type,filter) => {
-		return [error,data_list] = await delete_item_list_adapter(db_connect,data_type,filter);
+	static delete_items = async (db_connect,data_type,filter) => {
+		return [error,items] = await delete_item_list_adapter(db_connect,data_type,filter);
 	};
-	static count_list = async (db_connect,data_type,filter) => {
+	static count_items = async (db_connect,data_type,filter) => {
 		return [error,data] = await get_count_item_list_adapter(db_connect,data_type,filter);
 	};
 }
@@ -3140,7 +3126,7 @@ class Service_Data {
 		return new Promise((callback) => {
 			let service = DataItem.get_new(DataType.SERVICE,0);
 			let error = null;
-			option = option ? option : {get_item:false,get_image:false};
+			option = option ? option : {get_image:false};
 			async.series([
 				async function(call){
 					const [biz_error,biz_data] = await Portal.get(database,DataType.SERVICE,key,option);
@@ -3161,9 +3147,9 @@ class Service_Data {
 	//9_service_search
 	static search = (database,filter,sort_by,page_current,page_size,option) => {
 		return new Promise((callback) => {
-			let data = {item_count:0,page_count:1,filter:{},data_type:DataType.SERVICE,data_list:[]};
+			let data = {item_count:0,page_count:1,filter:{},data_type:DataType.SERVICE,services:[]};
 			let error = null;
-			option = option ? option : {get_item:false,get_image:false};
+			option = option ? option : {get_image:false};
 			async.series([
 				async function(call){
 					const [biz_error,biz_data] = await Portal.search(database,DataType.SERVICE,filter,sort_by,page_current,page_size,option);
@@ -3174,7 +3160,7 @@ class Service_Data {
 						data.data_type = DataType.SERVICE;
 						data.page_count = biz_data.page_count;
 						data.filter = biz_data.filter;
-						data.service_list = biz_data.data_list;
+						data.services = biz_data.items;
 					}
 				},
 			]).then(result => {
