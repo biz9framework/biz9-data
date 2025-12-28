@@ -97,11 +97,11 @@ describe('connect', function(){ this.timeout(25000);
                 let option = {get_group:true};
                 //let option = {get_image:true};
                 //---
-                //let search = App_Logic.get_search(DataType.IMAGE,{parent_id:group.id},{date_create:-1},1,12);
+                let search = App_Logic.get_search(DataType.PRODUCT,{},{date_create:-1},1,12);
                 //---
-                //const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option);
+                const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option);
                 //---
-                const [error,biz_data] = await Portal.copy(database,parent_item.data_type,parent_item.id,option);
+                //const [error,biz_data] = await Portal.copy(database,parent_item.data_type,parent_item.id,option);
                 //---
                 //const [error,biz_data] = await Portal.get(database,parent_item.data_type,parent_item.id,option);
                 //const [error,biz_data] = await Portal.get(database,group.data_type,group.id,option);

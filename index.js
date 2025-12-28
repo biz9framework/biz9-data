@@ -3105,7 +3105,7 @@ class Data {
 	};
 	static post_items = async (db_connect,items) => {
 		return [error,data] = await post_item_list_adapter(db_connect,items);
-	;
+	};
 	static post_bulk = async (db_connect,data_type,items) => {
 		return [error,data] = await post_bulk_adapter(db_connect,data_type,items);
 	};
