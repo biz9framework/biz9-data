@@ -475,10 +475,10 @@ class Order_Data {
 						if(Str.check_is_null(data.order[key])
 							&& key != Type.FIELD_ID && key != Type.DATA_TYPE
 							&& key != Type.TITLE_PARENT_ITEM && key != Type.TITLE_USER
-							&& key != Type.TITLE_CART_ITEM_LIST && key != Type.TITLE_CART_SUB_ITEM_LIST
-							&& key != Type.TITLE_ORDER_ITEM_LIST && key != Type.TITLE_ORDER_SUB_ITEM_LIST
+							&& key != Type.TITLE_CART_ITEMS && key != Type.TITLE_CART_SUB_ITEMS
+							&& key != Type.TITLE_ORDER_ITEMS && key != Type.TITLE_ORDER_SUB_ITEMS
 							&& key != Type.FIELD_SOURCE && key != Type.FIELD_SOURCE_ID
-							&& key != Type.TITLE_STAT_ITEM_LIST && key != Type.TITLE_STAT_SUB_ITEM_LIST
+							&& key != Type.TITLE_STAT_ITEMS && key != Type.TITLE_STAT_SUB_ITEMS
 							&& key != Type.FIELD_DATE_CREATE && key != Type.FIELD_DATE_SAVE){
 							data.order[key] = order[key];
 						}
@@ -500,10 +500,10 @@ class Order_Data {
 								if(!Str.check_is_null(order_item[key])
 									&& key != Type.FIELD_ID && key != Type.FIELD_DATA_TYPE
 									&& key != Type.TITLE_PARENT_ITEM && key != Type.USER
-									&& key != Type.TITLE_CART_ITEM_LIST && key != Type.TITLE_CART_SUB_ITEM_LIST
-									&& key != Type.TITLE_ORDER_ITEM_LIST && key != Type.TITLE_ORDER_SUB_ITEM_LIST
+									&& key != Type.TITLE_CART_ITEMS && key != Type.TITLE_CART_SUB_ITEMS
+									&& key != Type.TITLE_ORDER_ITEMS && key != Type.TITLE_ORDER_SUB_ITEMS
 									&& key != Type.FIELD_SOURCE && key != Type.FIELD_SOURCE_ID
-									&& key != Type.TITLE_STAT_ITEM_LIST && key != Type.TITLE_STAT_SUB_ITEM_LIST
+									&& key != Type.TITLE_STAT_ITEMS && key != Type.TITLE_STAT_SUB_ITEMS
 									&& key != Type.FIELD_DATE_CREATE && key != Type.FIELD_DATE_SAVE){
 									post_order_item[key] = order_item[key];
 								}
@@ -530,9 +530,9 @@ class Order_Data {
 									if(!Str.check_is_null(order_sub_item[key])
 										&& key != Type.FIELD_ID && key != Type.FIELD_DATA_TYPE
 										&& key != Type.TITLE_PARENT_ITEM && key != Type.USER
-										&& key != Type.TITLE_ORDER_ITEM_LIST && key != Type.TITLE_ORDER_SUB_ITEM_LIST
+										&& key != Type.TITLE_ORDER_ITEMS && key != Type.TITLE_ORDER_SUB_ITEMS
 										&& key != Type.FIELD_SOURCE && key != Type.FIELD_SOURCE_ID
-										&& key != Type.TITLE_STAT_ITEM_LIST && key != Type.TITLE_STAT_SUB_ITEM_LIST
+										&& key != Type.TITLE_STAT_ITEMS && key != Type.TITLE_STAT_SUB_ITEMS
 										&& key != Type.FIELD_DATE_CREATE && key != Type.FIELD_DATE_SAVE){
 										post_order_sub_item[key] = order_sub_item[key];
 									}
@@ -838,10 +838,10 @@ class Cart_Data {
 						if(Str.check_is_null(data.cart[key])
 							&& key != Type.FIELD_ID && key != Type.FIELD_DATA_TYPE
 							&& key != Type.PARENT_ITEM && key != Type.USER
-							&& key != Type.CART_ITEM_LIST && key != Type.CART_SUB_ITEM_LIST
-							&& key != Type.ORDER_ITEM_LIST && key != Type.ORDER_SUB_ITEM_LIST
+							&& key != Type.CART_ITEMS && key != Type.CART_SUB_ITEMS
+							&& key != Type.ORDER_ITEMS && key != Type.ORDER_SUB_ITEMS
 							&& key != Type.FIELD_SOURCE && key != Type.FIELD_SOURCE_ID
-							&& key != Type.TITLE_STAT_ITEM_LIST && key != Type.TITLE_STAT_SUB_ITEM_LIST
+							&& key != Type.TITLE_STAT_ITEMS && key != Type.TITLE_STAT_SUB_ITEMS
 							&& key != Type.FIELD_DATE_CREATE && key != Type.FIELD_DATE_SAVE){
 							data.cart[key] = cart[key];
 						}
@@ -863,10 +863,10 @@ class Cart_Data {
 								if(!Str.check_is_null(cart_item[key])
 									&& key != Type.FIELD_ID && key != Type.FIELD_DATA_TYPE
 									&& key != Type.PARENT_ITEM && key != Type.USER
-									&& key != Type.CART_ITEM_LIST && key != Type.CART_SUB_ITEM_LIST
-									&& key != Type.ORDER_ITEM_LIST && key != Type.ORDER_SUB_ITEM_LIST
+									&& key != Type.CART_ITEMS && key != Type.CART_SUB_ITEMS
+									&& key != Type.ORDER_ITEMS && key != Type.ORDER_SUB_ITEMS
 									&& key != Type.FIELD_SOURCE && key != Type.FIELD_SOURCE_ID
-									&& key != Type.TITLE_STAT_ITEM_LIST && key != Type.TITLE_STAT_SUB_ITEM_LIST
+									&& key != Type.TITLE_STAT_ITEMS && key != Type.TITLE_STAT_SUB_ITEMS
 									&& key != Type.FIELD_DATE_CREATE && key != Type.FIELD_DATE_SAVE){
 									post_cart_item[key] = cart_item[key];
 								}
@@ -893,10 +893,10 @@ class Cart_Data {
 									if(!Str.check_is_null(cart_sub_item[key])
 										&& key != Type.FIELD_ID && key != Type.FIELD_DATA_TYPE
 										&& key != Type.PARENT_ITEM && key != Type.USER
-										&& key != Type.CART_ITEM_LIST && key != Type.CART_SUB_ITEM_LIST
-										&& key != Type.ORDER_ITEM_LIST && key != Type.ORDER_SUB_ITEM_LIST
+										&& key != Type.CART_ITEMS && key != Type.CART_SUB_ITEMS
+										&& key != Type.ORDER_ITEMS && key != Type.ORDER_SUB_ITEMS
 										&& key != Type.FIELD_SOURCE && key != Type.FIELD_SOURCE_ID
-										&& key != Type.TITLE_STAT_ITEM_LIST && key != Type.TITLE_STAT_SUB_ITEM_LIST
+										&& key != Type.TITLE_STAT_ITEMS && key != Type.TITLE_STAT_SUB_ITEMS
 										&& key != Type.FIELD_DATE_CREATE && key != Type.FILED_DATE_SAVE){
 										post_cart_sub_item[key] = cart_sub_item[key];
 									}
@@ -1890,15 +1890,15 @@ class Portal {
 		   - get_field_value / type. bool / ex. true,false / default. false
 		 *  Join
 			- get_join / type. bool / ex. true,false / default. false
-			-- field_keys / type. obj list / ex. [
+			-- field_keys / type. obj items / ex. [
 					{
 						foreign_data_type:DataType.PRODUCT,
 						foreign_field:'id',
 						parent_field:'parent_id',
 						title:'field_title',
-						type:list,count
+						type:items,count
 					}];
-			-- make_flat / type. bool / true,false list / ex. true
+			-- make_flat / type. bool / true,false items / ex. true
 		 * Photos
 		   - get_image / bool / ex. true,false / def. true
 		   - image_count / int / ex. 1-999 / def. 19
@@ -2034,13 +2034,13 @@ class Portal {
 								title : item.title,
 								fields : item.fields ? item.fields : "",
 								make_flat : item.make_flat ? item.make_flat : false,
-								type : item.type ? item.type : Type.TITLE_LIST,
+								type : item.type ? item.type : Type.ITEMS,
 								data : [],
 							});
 						});
 						for(const parent_search_item of parent_search_items){
 							let join_option = parent_search_item.fields ? {get_field:true,fields:parent_search_item.fields} : {};
-							if(parent_search_item.type == Type.TITLE_LIST){
+							if(parent_search_item.type == Type.TITLE_ITEMS){
 								let query = {};
 								query[parent_search_item.foreign_field] = data[parent_search_item.parent_field];
 								let search = App_Logic.get_search(parent_search_item.foreign_data_type,query,{},1,0);
@@ -2200,14 +2200,14 @@ class Portal {
 			  - count_value / type. string / ex. title / default. throw error
 		 *  Join
 			- get_join / type. bool / ex. true,false / default. false
-				- field_keys / type. obj list / ex. [
+				- field_keys / type. obj items / ex. [
 					{
 						foreign_data_type:DataType.PRODUCT,
 						foreign_field:'id',
 						parent_field:'parent_id',
 						title:'field_title',
 						fields:'id,title,title_url',
-						type:obj,list,count,
+						type:obj,items,count,
 						get_image:false
 					}]
 		 * User
@@ -2216,7 +2216,7 @@ class Portal {
 			 - make_user_flat / type. bool / ex. true,false / default. false
 	 	 *  Group
 			- get_group / type. bool / ex. true,false / default. false
-				- group / type. obj list / ex. [
+				- group / type. obj items / ex. [
 					{
 						title:'group_title',
 					}]
@@ -2335,7 +2335,7 @@ class Portal {
 								if(parent_search_items.length> 0){
 									for(const parent_search_item of parent_search_items){
 										for(const data_item of data.items){
-											if(parent_search_item.type == Type.TITLE_LIST){
+											if(parent_search_item.type == Type.TITLE_ITEMS){
 												let query = {};
 												query[parent_search_item.foreign_field] = data_item[parent_search_item.parent_field];
 												let search = App_Logic.get_search(parent_search_item.foreign_data_type,query,{},1,0);
@@ -2387,7 +2387,7 @@ class Portal {
 									parent_value : item[Type.FIELD_ID],
 									parent_field : Type.FIELD_ID,
 									title : null,
-									type :  Type.TITLE_LIST,
+									type :  Type.TITLE_ITEMS,
 									items : []
 								});
 							});
