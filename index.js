@@ -2737,7 +2737,7 @@ class Portal {
 		});
 	};
 	//9_portal_post_items - 9_post_items
-	static post_items = async (database,dat_items) => {
+	static post_items = async (database,data_items) => {
 		/* option params
 		 * n/a
 		 */
@@ -2746,7 +2746,7 @@ class Portal {
 			let items = [];
 			async.series([
 				function(call){
-					Data.post_items(database,items).then(([biz_error,biz_data])=> {
+					Data.post_items(database,data_items).then(([biz_error,biz_data])=> {
 						if(biz_error){
 							error=Log.append(error,biz_error);
 						}else{

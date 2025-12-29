@@ -80,7 +80,9 @@ describe('connect', function(){ this.timeout(25000);
                 */
 
                 //let parent_item = DataItem.get_new(DataType.PRODUCT,0,{my_parent_title:'my parent_'+Num.get_id()});
-                let parent_item = DataItem.get_new(DataType.CATEGORY,'7ef07602-0c33-4552-a7f7-6971ac8ad791');
+                let parent_item = DataItem.get_new(DataType.CATEGORY,0);
+                let parent_item_1 = DataItem.get_new(DataType.CATEGORY,0);
+                let parent_item_2 = DataItem.get_new(DataType.CATEGORY,0);
                 parent_item.field_1  = 'cool_1';
                 parent_item.field_2  = 'cool_2';
                 //let group = DataItem.get_new(DataType.GROUP,0,{parent_id:parent_item.id,parent_data_type:parent_item.data_type});
@@ -101,7 +103,7 @@ describe('connect', function(){ this.timeout(25000);
                 //---
                 //const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option);
                 //---
-                const [error,biz_data] = await Portal.copy(database,parent_item.data_type,parent_item.id,option);
+                //const [error,biz_data] = await Portal.copy(database,parent_item.data_type,parent_item.id,option);
                 //---
                 //const [error,biz_data] = await Portal.get(database,parent_item.data_type,parent_item.id,option);
                 //const [error,biz_data] = await Portal.get(database,group.data_type,group.id,option);
@@ -112,7 +114,7 @@ describe('connect', function(){ this.timeout(25000);
                 //const [error,biz_data] = await Portal.post(database,image.data_type,image);
                 //const [error,biz_data] = await Portal.post(database,group.data_type,group);
                 //---
-                //const [error,biz_data] = await Portal.post_list(database,group_list);
+                const [error,biz_data] = await Portal.post_items(database,[parent_item,parent_item_1,parent_item_2]);
 
                 //---
                 Log.w('99_biz_data',biz_data);
