@@ -2082,10 +2082,16 @@ class Portal {
 							});
 
 						}
+						console.log('aaaaaaaaaaa');
 						let group_search = App_Logic.get_search(DataType.GROUP,query,{},1,0);
+						console.log('bbbbbbbbbbbbbb');
 						const [biz_error,biz_data] = await Portal.search(database,group_search.data_type,group_search.filter,group_search.sort_by,group_search.page_current,group_search.page_size,group_option);
+						console.log('cccccccccc');
 						if(biz_data.items.length> 0){
+							console.log('dddddddd');
 							data.groups = biz_data.items;
+							console.log('eeeeeeeee');
+							console.log(data);
 							for(const group of biz_data.items){
 								data[Str.get_title_url(group.title)] = group;
 							}
@@ -2095,6 +2101,7 @@ class Portal {
 				//post-view-stat
 				async function(call){
 					if(option.post_stat && data.id){
+						let post_stat_view = Stat_Logic.get_new(data.data_type,data.id,Type.STAT_VIEW,option.user_id,data);
 						const [biz_error,biz_data] = await Stat_Data.post(database,post_stat_view,option);
 						if(biz_error){
 							error=Log.append(error,biz_error);
@@ -2882,6 +2889,7 @@ class Portal {
 			let top_data = DataItem.get_new(data_type,0);
 			let copy_data = DataItem.get_new(data_type,0);
 			option = option ? option : {copy_group:true};
+			option.get_group =  option.copy_group  ? option.copy_group : true;
 			async.series([
 				async function(call){
 					const [biz_error,biz_data] = await Portal.get(database,data_type,id,option);
@@ -2893,6 +2901,7 @@ class Portal {
 				},
 				//top_item
 				async function(call){
+					if(top_data.id){
 					copy_data = Item_Logic.copy(data_type,top_data);
 					copy_data[Type.FIELD_TITLE] = 'Copy '+top_data[Type.FIELD_TITLE];
 					copy_data[Type.FIELD_TITLE_URL] = 'copy_'+top_data[Type.FIELD_TITLE_URL];
@@ -2904,9 +2913,12 @@ class Portal {
 					}else{
 						copy_data=biz_data;
 					}
+					}else{
+						copy_data = App_Logic.get_not_found(data_type,id);
+					}
 				},
 				async function(call){
-					if(top_data.groups.length > 0){
+					if(top_data.id && top_data.groups.length > 0){
 						copy_data.groups = [];
 						let post_groups = [];
 						for(const group of top_data.groups){
@@ -2926,9 +2938,7 @@ class Portal {
 						}
 				},
 			]).then(result => {
-				if(copy_data.id){
 					data = copy_data;
-				}
 				callback([error,data]);
 			}).catch(err => {
 				Log.error("Copy",err);

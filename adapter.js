@@ -7,7 +7,7 @@ Description: BiZ9 Framework: Data - Mongo - Adapter
 const async = require('async');
 const {get_db_connect_main,check_db_connect_main,delete_db_connect_main,post_item_main,post_bulk_main,get_item_main,delete_item_main,get_id_list_main,delete_item_list_main,get_count_item_list_main} = require('./mongo/index.js');
 const {get_cache_connect_main,delete_cache_connect_main,get_cache_string_main,delete_cache_string_main,post_cache_string_main} = require('./redis/index.js');
-const {DataItem}=require("biz9-logic");
+const {DataItem,Type}=require("biz9-logic");
 const {Log,Str,Num,Obj}=require("biz9-utility");
 const DB_TITLE='DB';
 const CACHE_TITLE='CACHE';
@@ -253,7 +253,11 @@ const get_item_adapter = (db_connect,data_type,key,option) => {
                         if(data.length>0){
                             item_data = data[0];
                         }else{
-                            item_data.source = NOT_FOUND_TITLE;
+                            item_data[Type.FIELD_ID] = 0;
+                            item_data[Type.FIELD_SOURCE_KEY] = key;
+                            item_data[Type.FIELD_SOURCE] = DB_TITLE;
+                            item_data[Type.FIELD_TITLE] = NOT_FOUND_TITLE;
+                            item_data[Type.FIELD_TITLE_URL] = Str.get_title_url(NOT_FOUND_TITLE);
                             item_data.filter = option.filter;
                         }
                         call();
@@ -274,7 +278,11 @@ const get_item_adapter = (db_connect,data_type,key,option) => {
                         if(data.length>0){
                             item_data = data[0];
                         }else{
-                            item_data.source = NOT_FOUND_TITLE;
+                            item_data[Type.FIELD_ID] = 0;
+                            item_data[Type.FIELD_SOURCE_KEY] = key;
+                            item_data[Type.FIELD_SOURCE] = DB_TITLE;
+                            item_data[Type.FIELD_TITLE] = NOT_FOUND_TITLE;
+                            item_data[Type.FIELD_TITLE_URL] = Str.get_title_url(NOT_FOUND_TITLE);
                         }
                         call();
                     }).catch(error => {
@@ -287,8 +295,12 @@ const get_item_adapter = (db_connect,data_type,key,option) => {
                         if(data){
                             item_data = data;
                         }else{
-                            item_data.source = NOT_FOUND_TITLE;
-                        }
+                            item_data[Type.FIELD_ID] = 0;
+                            item_data[Type.FIELD_SOURCE_KEY] = key;
+                            item_data[Type.FIELD_SOURCE] = DB_TITLE;
+                            item_data[Type.FIELD_TITLE] = NOT_FOUND_TITLE;
+                            item_data[Type.FIELD_TITLE_URL] = Str.get_title_url(NOT_FOUND_TITLE);
+                       }
                         call();
                     }).catch(error => {
                         Log.error("Adapter-Get-Item-Adapter-3",error);
@@ -456,7 +468,11 @@ const get_item_cache_db = (cache_connect,db_connect,data_type,id,option) => {
                             }
 
                         }else{
-                            item_data.source = NOT_FOUND_TITLE;
+                            item_data[Type.FIELD_ID] = 0;
+                            item_data[Type.FIELD_SOURCE_KEY] = id;
+                            item_data[Type.FIELD_SOURCE] = DB_TITLE;
+                            item_data[Type.FIELD_TITLE] = NOT_FOUND_TITLE;
+                            item_data[Type.FIELD_TITLE_URL] = Str.get_title_url(NOT_FOUND_TITLE);
                             call();
                         }
                     }).catch(error => {

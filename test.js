@@ -27,7 +27,7 @@ const DATA_TYPE = DataType.BLOG_POST;
 const OPTION = {};
 //const FILTER = {test_group_id:59367};
 const FILTER = {data_type:DATA_TYPE};
-const APP_ID = 'test-stage-dec26';
+const APP_ID = 'test-stage-dec28';
 //const APP_ID = 'app_id_98230';
 const SQL = {};
 /* --- TEST CONFIG END --- */
@@ -80,7 +80,7 @@ describe('connect', function(){ this.timeout(25000);
                 */
 
                 //let parent_item = DataItem.get_new(DataType.PRODUCT,0,{my_parent_title:'my parent_'+Num.get_id()});
-                let parent_item = DataItem.get_new(DataType.PRODUCT,'8de162f1-4507-4111-8d5a-3c7d633af8c1');
+                let parent_item = DataItem.get_new(DataType.CATEGORY,'7ef07602-0c33-4552-a7f7-6971ac8ad791');
                 parent_item.field_1  = 'cool_1';
                 parent_item.field_2  = 'cool_2';
                 //let group = DataItem.get_new(DataType.GROUP,0,{parent_id:parent_item.id,parent_data_type:parent_item.data_type});
@@ -94,14 +94,14 @@ describe('connect', function(){ this.timeout(25000);
                 //let option = {get_join:true,field_key_list:[{foreign_data_type:DataType.ITEM,foreign_field:'parent_id',parent_field:'id',title:'items_bean',type:Type.LIST}]};
                 //let option = {get_group:true,group:'group 16420,group 81381'};
                 //let option = {get_group:true,group:'group 81381'};
-                let option = {get_group:true};
+                //let option = {get_group:true};
                 //let option = {get_image:true};
                 //---
-                let search = App_Logic.get_search(DataType.PRODUCT,{},{date_create:-1},1,12);
+                //let search = App_Logic.get_search(DataType.PRODUCT,{},{date_create:-1},1,12);
                 //---
-                const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option);
+                //const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option);
                 //---
-                //const [error,biz_data] = await Portal.copy(database,parent_item.data_type,parent_item.id,option);
+                const [error,biz_data] = await Portal.copy(database,parent_item.data_type,parent_item.id,option);
                 //---
                 //const [error,biz_data] = await Portal.get(database,parent_item.data_type,parent_item.id,option);
                 //const [error,biz_data] = await Portal.get(database,group.data_type,group.id,option);
