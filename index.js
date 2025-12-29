@@ -2651,10 +2651,13 @@ class Portal {
 		 */
 		return new Promise((callback) => {
 			let error = null;
-			let data = {};
-			option = option ? option : {delete_resultOK:false,get_image:false,delete_item:true,delete_item_filter:{},delete_image:true,delete_group:true,delete_image_filter:{}};
+			let data = {delete_resultOK:false};
+			option = option ? option : {};
 			async.series([
 				function(call){
+					console.log('111111111111');
+					call();
+					/*
 					Data.delete(database,data_type,id).then(([biz_error,biz_data])=> {
 						if(biz_error){
 							error=Log.append(error,biz_error);
@@ -2667,69 +2670,43 @@ class Portal {
 						error = Log.append(error,err);
 						call();
 					});
+					*/
 				},
+				async function(call){
+						let filter = {id:id};
+						data.delete_search_resultOK = false;
+						const [biz_error,biz_data] = await Portal.delete_search(database,data_type,filter);
+						if(biz_error){
+							error=Log.append(error,biz_error);
+						}else{
+							data[parent_search_item.title] = biz_data.items;
+						}
+				},
+
 				function(call){
-					if(option.delete_item){
-						let data_type = DataType.ITEM;
 						let filter = {parent_id:id};
-						data.delete_items_resultOK = false;
+						data.delete_group_resultOK = false;
+					Log.w('3_filter',filter);
+					Log.w('3_data.del_gro',data);
 						Data.delete_items(database,data_type,filter).then(([biz_error,biz_data])=> {
+							//Log.w('filter',filter);
+							//Log.w('biz_data',biz_data);
+							/*
 							if(biz_error){
 								error=Log.append(error,biz_error);
 							}else{
-								data.delete_items_resultOK = true;
+								data.delete_group_resultOK = true;
 							}
-							call();
+							*/
+							//console.log('dddddddddd');
+							//call();
 						}).catch(err => {
 							error = Log.append(error,err);
 							call();
 						});
-					}else{
-						call();
-					}
 				},
-				function(call){
-					if(option.delete_group){
-						let data_type = DataType.GROUP;
-						let filter = {parent_id:id};
-						data.delete_items_resultOK = false;
-						Data.delete_items(database,data_type,filter).then(([biz_error,biz_data])=> {
-							if(biz_error){
-								error=Log.append(error,biz_error);
-							}else{
-								data.delete_items_resultOK = true;
-							}
-							call();
-						}).catch(err => {
-							error = Log.append(error,err);
-							call();
-						});
-					}else{
-						call();
-					}
-				},
-				function(call){
-					if(option.delete_image){
-						let data_type = DataType.IMAGE;
-						let filter = {parent_id:id};
-						data.delete_image_resultOK = false;
-						Data.delete_items(database,data_type,filter).then(([biz_error,biz_data])=> {
-							if(biz_error){
-								error=Log.append(error,biz_error);
-							}else{
-								data.delete_image_resultOK = true;
-							}
-							call();
-						}).catch(err => {
-							error = Log.append(error,err);
-							call();
-						});
-					}else{
-						call();
-					}
-				},
-			]).then(result => {
-				callback([error,data]);
+				]).then(result => {
+				//callback([error,data]);
 			}).catch(err => {
 				Log.error("Delete-Item",err);
 				callback([err,{}]);
@@ -2774,8 +2751,48 @@ class Portal {
 		return new Promise((callback) => {
 			let error = null;
 			let data = {delete_resultOK:false,delete_items_resultOK:false,delete_image_resultOK:false};
-			option = option ? option : {delete_resultOK:false,get_image:false,delete_item:false,delete_item_filter:{},delete_image_resultOK:false,delete_image_filter:{}};
+			option = option ? option : {delete_resultOK:false,delete_image_resultOK:false,delete_group_resultOK:false};
 			async.series([
+				//get_parent_ids
+				function(call){
+					console.log('here_111111111_here');
+					let search = App_Logic.get_search(data_type,filter,{},1,0);
+					let parent_option = {get_field:'title_url'};
+					console.log('2222222');
+					Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,parent_option).then(([biz_error,biz_data])=> {
+						Log.w('cool_44',biz_data);
+						/*
+						if(biz_error){
+							error=Log.append(error,biz_error);
+						}else{
+							data = biz_data;
+							data.delete_resultOK = true;
+						}
+						*/
+						//call();
+					}).catch(err => {
+						error = Log.append(error,err);
+						call();
+					});
+				},
+
+				/*
+				//delete_items
+				function(call){
+					Data.delete_items(database,data_type,filter).then(([biz_error,biz_data])=> {
+						if(biz_error){
+							error=Log.append(error,biz_error);
+						}else{
+							data = biz_data;
+							data.delete_resultOK = true;
+						}
+						call();
+					}).catch(err => {
+						error = Log.append(error,err);
+						call();
+					});
+				},
+
 				//delete_items
 				function(call){
 					Data.delete_items(database,data_type,filter).then(([biz_error,biz_data])=> {
@@ -2831,8 +2848,9 @@ class Portal {
 						call();
 					}
 				},
+				*/
 			]).then(result => {
-				callback([error,data]);
+				//callback([error,data]);
 			}).catch(err => {
 				Log.error("Delete-List-Data",err);
 				callback([err,[]]);

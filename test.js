@@ -27,7 +27,7 @@ const DATA_TYPE = DataType.BLOG_POST;
 const OPTION = {};
 //const FILTER = {test_group_id:59367};
 const FILTER = {data_type:DATA_TYPE};
-const APP_ID = 'test-stage-dec28';
+const APP_ID = 'test-stage-dec29';
 //const APP_ID = 'app_id_98230';
 const SQL = {};
 /* --- TEST CONFIG END --- */
@@ -80,9 +80,10 @@ describe('connect', function(){ this.timeout(25000);
                 */
 
                 //let parent_item = DataItem.get_new(DataType.PRODUCT,0,{my_parent_title:'my parent_'+Num.get_id()});
-                let parent_item = DataItem.get_new(DataType.CATEGORY,0);
-                let parent_item_1 = DataItem.get_new(DataType.CATEGORY,0);
-                let parent_item_2 = DataItem.get_new(DataType.CATEGORY,0);
+                let parent_item = DataItem.get_new(DataType.PRODUCT,'a8d2dff4-3029-411a-9da0-cbd14f47cfe0');
+                //let parent_item = DataItem.get_new(DataType.CATEGORY,0);
+                //let parent_item_1 = DataItem.get_new(DataType.CATEGORY,0);
+                //let parent_item_2 = DataItem.get_new(DataType.CATEGORY,0);
                 parent_item.field_1  = 'cool_1';
                 parent_item.field_2  = 'cool_2';
                 //let group = DataItem.get_new(DataType.GROUP,0,{parent_id:parent_item.id,parent_data_type:parent_item.data_type});
@@ -96,8 +97,9 @@ describe('connect', function(){ this.timeout(25000);
                 //let option = {get_join:true,field_key_list:[{foreign_data_type:DataType.ITEM,foreign_field:'parent_id',parent_field:'id',title:'items_bean',type:Type.LIST}]};
                 //let option = {get_group:true,group:'group 16420,group 81381'};
                 //let option = {get_group:true,group:'group 81381'};
-                //let option = {get_group:true};
+                let option = {};
                 //let option = {get_image:true};
+                 //let option = {};
                 //---
                 //let search = App_Logic.get_search(DataType.PRODUCT,{},{date_create:-1},1,12);
                 //---
@@ -105,7 +107,7 @@ describe('connect', function(){ this.timeout(25000);
                 //---
                 //const [error,biz_data] = await Portal.copy(database,parent_item.data_type,parent_item.id,option);
                 //---
-                //const [error,biz_data] = await Portal.get(database,parent_item.data_type,parent_item.id,option);
+                const [error,biz_data] = await Portal.get(database,parent_item.data_type,parent_item.id,option);
                 //const [error,biz_data] = await Portal.get(database,group.data_type,group.id,option);
                 //const [error,biz_data] = await Portal.get(database,group.data_type,group.id);
                 //---
@@ -114,7 +116,9 @@ describe('connect', function(){ this.timeout(25000);
                 //const [error,biz_data] = await Portal.post(database,image.data_type,image);
                 //const [error,biz_data] = await Portal.post(database,group.data_type,group);
                 //---
-                const [error,biz_data] = await Portal.post_items(database,[parent_item,parent_item_1,parent_item_2]);
+                //const [error,biz_data] = await Portal.post_items(database,[parent_item,parent_item_1,parent_item_2]);
+                //---
+                //const [error,biz_data] = await Portal.delete(database,parent_item.data_type,parent_item.id,option);
 
                 //---
                 Log.w('99_biz_data',biz_data);
