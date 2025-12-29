@@ -97,9 +97,9 @@ describe('connect', function(){ this.timeout(25000);
                 //let option = {get_join:true,field_key_list:[{foreign_data_type:DataType.ITEM,foreign_field:'parent_id',parent_field:'id',title:'items_bean',type:Type.LIST}]};
                 //let option = {get_group:true,group:'group 16420,group 81381'};
                 //let option = {get_group:true,group:'group 81381'};
-                let option = {};
+                //let option = {};
                 //let option = {get_image:true};
-                 //let option = {};
+                let option = {fields:{id:1,title:1}};
                 //---
                 //let search = App_Logic.get_search(DataType.PRODUCT,{},{date_create:-1},1,12);
                 //---
@@ -121,7 +121,7 @@ describe('connect', function(){ this.timeout(25000);
                 //const [error,biz_data] = await Portal.delete(database,parent_item.data_type,parent_item.id,option);
 
                 //---
-                Log.w('99_biz_data',biz_data);
+                //Log.w('99_biz_data',biz_data);
                 //Log.w('99_biz_data_groups',biz_data.data_list[0].groups);
                 //Log.w('99_biz_data_post',biz_data.data_list[0]);
                 //Log.w('group',group);

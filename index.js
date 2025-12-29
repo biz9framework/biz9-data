@@ -1930,6 +1930,7 @@ class Portal {
 			option.get_field = option.fields ? true : false;
 			async.series([
 				function(call){
+					console.log('1111111');
 					if(!Str.check_is_guid(key) && !Number.isInteger(key) && key){
 						option.title_url = key.toLowerCase();
 						key = key.toLowerCase();
@@ -1938,6 +1939,7 @@ class Portal {
 				},
 				//delete_cache_item
 				async function(call){
+					console.log('2222222');
 					if(option.delete_cache && Str.check_is_guid(key)){
 						const [biz_error,biz_data] = await Portal.delete_cache(database,data_type,key);
 						if(biz_error){
@@ -1949,7 +1951,10 @@ class Portal {
 				},
 				//get_item_by_id
 				function(call){
+					console.log('3333333');
+					Log.w('portal_get_option',option);
 					Data.get(database,data_type,key,option).then(([biz_error,biz_data,option])=> {
+						Log.w('portal_get_biz_data',biz_data);
 						if(biz_error){
 							error=Log.append(error,biz_error);
 						}else{
@@ -1966,6 +1971,7 @@ class Portal {
 						call();
 					});
 				},
+				/*
 				//get_item_image
 				async function(call){
 					if(!Str.check_is_null(data.id) && option.get_image){
@@ -2121,8 +2127,9 @@ class Portal {
 						}
 					}
 				},
+				*/
 			]).then(result => {
-				callback([error,data]);
+				//callback([error,data]);
 			}).catch(err => {
 				Log.error("ERROR-PORTAL-GET-2",err);
 				callback([error,{}]);
@@ -2758,9 +2765,8 @@ class Portal {
 					console.log('here_111111111_here');
 					let search = App_Logic.get_search(data_type,filter,{},1,0);
 					let parent_option = {get_field:'title_url'};
-					console.log('2222222');
 					Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,parent_option).then(([biz_error,biz_data])=> {
-						Log.w('cool_44',biz_data);
+						Log.w('portal_search_biz_data',biz_data);
 						/*
 						if(biz_error){
 							error=Log.append(error,biz_error);

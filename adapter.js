@@ -386,6 +386,7 @@ const get_item_cache_db = (cache_connect,db_connect,data_type,id,option) => {
         let cache_key_list = null;
         let item_data = DataItem.get_new(data_type,id);
         let cache_string_list = [];
+        let field_list = [];
         option = option ? option : {get_field:false,fields:""};
         async.series([
             function(call) {
@@ -397,6 +398,22 @@ const get_item_cache_db = (cache_connect,db_connect,data_type,id,option) => {
                     callback([error,null]);
                 });
             },
+            //fields
+            async function(call) {
+                if(option.fields){
+                    console.log('adapter_option_start');
+                    for(const field in option.fields) {
+                            field_list.push(field);
+                    }
+                }
+            },
+            async function(call) {
+                if(field_list.length>0){
+
+                }
+            },
+
+            /*
             async function(call) {
                 if(!option.get_field){
                     if(cache_key_list!=null){
@@ -484,8 +501,9 @@ const get_item_cache_db = (cache_connect,db_connect,data_type,id,option) => {
             function(call) {
                 call();
             },
+            */
         ]).then(result => {
-            callback([error,item_data]);
+            //callback([error,item_data]);
         }).catch(error => {
             Log.error("Data-Adapter-Get-Item-Cache-DB",error);
             callback([error,null]);
