@@ -99,7 +99,7 @@ describe('connect', function(){ this.timeout(25000);
                 //let option = {get_group:true,group:'group 81381'};
                 //let option = {};
                 //let option = {get_image:true};
-                //let option = {fields:{id:0,title_url:0}};
+                let option = {fields:{id:1,field_1:0}};
                 //let option = {fields:{title_url:0,field_1:0}};
                 //---
                 let search = App_Logic.get_search(DataType.PRODUCT,{},{date_create:-1},1,12);
