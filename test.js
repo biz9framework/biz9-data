@@ -27,7 +27,7 @@ const DATA_TYPE = DataType.BLOG_POST;
 const OPTION = {};
 //const FILTER = {test_group_id:59367};
 const FILTER = {data_type:DATA_TYPE};
-const APP_ID = 'test-stage-dec29';
+const APP_ID = 'test-stage-dec30';
 //const APP_ID = 'app_id_98230';
 const SQL = {};
 /* --- TEST CONFIG END --- */
@@ -79,15 +79,17 @@ describe('connect', function(){ this.timeout(25000);
                 //let search = App_Logic.get_search(DataType.CATEGORY,{id:'75a5f009-54c3-4fd3-a136-fd3880023ddb'},{date_create:-1},1,3);
                 */
 
+                //-->
                 //let parent_item = DataItem.get_new(DataType.PRODUCT,0,{my_parent_title:'my parent_'+Num.get_id()});
-                let parent_item = DataItem.get_new(DataType.PRODUCT,'7440eb61-74f7-41bd-a62c-e48f71288247');
+                let parent_item = DataItem.get_new(DataType.PRODUCT,'b83acd14-da97-47cd-810f-22163eba5343');
                 //let parent_item = DataItem.get_new(DataType.CATEGORY,0);
                 //let parent_item_1 = DataItem.get_new(DataType.CATEGORY,0);
                 //let parent_item_2 = DataItem.get_new(DataType.CATEGORY,0);
                 parent_item.field_1  = 'cool_1';
                 parent_item.field_2  = 'cool_2';
-                //let group = DataItem.get_new(DataType.GROUP,0,{parent_id:parent_item.id,parent_data_type:parent_item.data_type});
-                //let new_item_title = 'group '+Num.get_id();
+                //-->
+                let new_item_title = 'group '+Num.get_id();
+                let group = DataItem.get_new(DataType.GROUP,0,{parent_id:parent_item.id,parent_data_type:parent_item.data_type,title:new_item_title,title_url:Str.get_title_url(new_item_title)});
                 //let group = DataItem.get_new(DataType.GROUP,'7ae58728-23f8-45ce-a0f7-c1a14bb42d2e',{title:new_item_title,title_url:Str.get_title_url(new_item_title)});;
                 //let item = DataItem.get_new(DataType.ITEM,0,{parent_id:group.id,parent_data_type:group.data_type});
                 //let image = DataItem.get_new(DataType.IMAGE,0,{parent_id:group.id,parent_data_type:group.data_type});
@@ -97,14 +99,14 @@ describe('connect', function(){ this.timeout(25000);
                 //let option = {get_join:true,field_key_list:[{foreign_data_type:DataType.ITEM,foreign_field:'parent_id',parent_field:'id',title:'items_bean',type:Type.LIST}]};
                 //let option = {get_group:true,group:'group 16420,group 81381'};
                 //let option = {get_group:true,group:'group 81381'};
-                //let option = {};
+                let option = {};
                 //let option = {get_image:true};
-                let option = {fields:{id:1,field_1:0}};
+                //let option = {fields:{id:1,title:1,title_url:0}};
                 //let option = {fields:{title_url:0,field_1:0}};
                 //---
-                let search = App_Logic.get_search(DataType.PRODUCT,{},{date_create:-1},1,12);
+                //let search = App_Logic.get_search(DataType.PRODUCT,{},{date_create:-1},1,12);
                 //---
-                const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option);
+                //const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option);
                 //---
                 //const [biz_error,biz_data] = await Portal.count(database,search.data_type,search.filter);
                 //---
@@ -117,7 +119,7 @@ describe('connect', function(){ this.timeout(25000);
                 //const [error,biz_data] = await Portal.post(database,parent_item.data_type,parent_item);
                 //const [error,biz_data] = await Portal.post(database,item.data_type,item);
                 //const [error,biz_data] = await Portal.post(database,image.data_type,image);
-                //const [error,biz_data] = await Portal.post(database,group.data_type,group);
+                const [error,biz_data] = await Portal.post(database,group.data_type,group);
                 //---
                 //const [error,biz_data] = await Portal.post_items(database,[parent_item,parent_item_1,parent_item_2]);
                 //---

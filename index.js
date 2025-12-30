@@ -1884,33 +1884,31 @@ class Portal {
 	static get = async(database,data_type,key,option) => {
 		/* Options
 		 * Fields
-		   - field / type. string / ex. field1,field2 / default. throw error / notez. id must by type tbl_id
-		   - overwrite_data / type. bool / ex. true,false / default. false
+		   - field / type. obj / ex. {field_show_1:1,field_hide_2:0} / default. throw error
+		 * Group
+		   - group / type. obj / ex.{} all, {group_show_1:1,group_hide_2:0} / default. throw error
 		 *  Join
-			- get_join / type. bool / ex. true,false / default. false
-			-- field_keys / type. obj items / ex. [
+			-- join_keys / type. obj items / ex. [
 					{
 						foreign_data_type:DataType.PRODUCT,
 						foreign_field:'id',
 						parent_field:'parent_id',
 						title:'field_title',
-						type:items,count
+						make_flat:{true,false},
+						type:Type.Type.TITLE_ITEMS,Type.TITLE_COUNT
 					}];
-			-- make_flat / type. bool / true,false items / ex. true
 		 * Photos
-		   - get_image / bool / ex. true,false / def. true
-		   - image_count / int / ex. 1-999 / def. 19
-		   - image_sort_by / query obj / ex. {date_create:1}
-		 * Favorite
-		   - get_favorite / bool / ex. true,false / def. true
-		   - user_id / bool / ex. true,false / def. true
-		   - favorite_parent_id / id / ex. 123 / def. error
-		   - favorite_parent_data_type / DataType / ex. DataType.PRODUCT / def. error
-		 * Favorite
-		   - get_favorite / bool / ex. true,false / def. true
-	 	 * Group
-		   - get_group / bool / ex. true,false / def. true
-		   -- get_group_image / bool / ex. true,false / def. true
+			-- photo_keys / type. obj items / ex. [
+					{
+						count:0 infinite, num 0 default
+					}];
+			 * Favorite
+		   -- favorite_keys / type obj items / ex. [
+		   		{
+					user_id:'123',
+					parent_id:DataType.PARENT_ID,
+					parent_data_type:DataType.PARENT_DATATYPE
+				}
 		   --
 		 * Stat
 		   - post_stat / bool / ex. true,false / def. true
