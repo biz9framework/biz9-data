@@ -80,7 +80,7 @@ describe('connect', function(){ this.timeout(25000);
                 */
 
                 //let parent_item = DataItem.get_new(DataType.PRODUCT,0,{my_parent_title:'my parent_'+Num.get_id()});
-                let parent_item = DataItem.get_new(DataType.PRODUCT,'a8d2dff4-3029-411a-9da0-cbd14f47cfe0');
+                let parent_item = DataItem.get_new(DataType.PRODUCT,'7440eb61-74f7-41bd-a62c-e48f71288247');
                 //let parent_item = DataItem.get_new(DataType.CATEGORY,0);
                 //let parent_item_1 = DataItem.get_new(DataType.CATEGORY,0);
                 //let parent_item_2 = DataItem.get_new(DataType.CATEGORY,0);
@@ -99,16 +99,18 @@ describe('connect', function(){ this.timeout(25000);
                 //let option = {get_group:true,group:'group 81381'};
                 //let option = {};
                 //let option = {get_image:true};
-                let option = {fields:{id:0,title_url:0}};
+                //let option = {fields:{id:0,title_url:0}};
                 //let option = {fields:{title_url:0,field_1:0}};
                 //---
-                //let search = App_Logic.get_search(DataType.PRODUCT,{},{date_create:-1},1,12);
+                let search = App_Logic.get_search(DataType.PRODUCT,{},{date_create:-1},1,12);
                 //---
-                //const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option);
+                const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option);
+                //---
+                //const [biz_error,biz_data] = await Portal.count(database,search.data_type,search.filter);
                 //---
                 //const [error,biz_data] = await Portal.copy(database,parent_item.data_type,parent_item.id,option);
                 //---
-                const [error,biz_data] = await Portal.get(database,parent_item.data_type,parent_item.id,option);
+                //const [error,biz_data] = await Portal.get(database,parent_item.data_type,parent_item.id,option);
                 //const [error,biz_data] = await Portal.get(database,group.data_type,group.id,option);
                 //const [error,biz_data] = await Portal.get(database,group.data_type,group.id);
                 //---

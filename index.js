@@ -1938,36 +1938,12 @@ class Portal {
 				async function(call){
 					if(option.delete_cache && Str.check_is_guid(key)){
 						const [biz_error,biz_data] = await Portal.delete_cache(database,data_type,key);
-						if(biz_error){
-							error=Log.append(error,biz_error);
-						}else{
-							//data.delete_cache_item = biz_data;
-						}
 					}
 				},
 				//get_item_by_id
 				async function(call){
  					const [biz_error,biz_data] = await Data.get(database,data_type,key,option);
 					data = biz_data;
-					Log.w('rrrrrrr',data);
-					/*
-					Data.get(database,data_type,key,option).then(([biz_error,biz_data,option])=> {
-						if(biz_error){
-							error=Log.append(error,biz_error);
-						}else{
-							if(!Str.check_is_null(biz_data.id)){
-								data = biz_data;
-							}else{
-								data = data_type != DataType.USER ? App_Logic.get_not_found(data_type,key) : App_Logic.get_not_found(DataType.USER,key);
-							}
-						}
-						call();
-					}).catch(err => {
-						Log.error("ERROR-PORTAL-GET-1",err);
-						error = Log.append(error,err);
-						call();
-					});
-					*/
 				},
 				//get_item_image
 				async function(call){
@@ -2876,6 +2852,7 @@ class Portal {
 					});
 				},
 			]).then(result => {
+				console.log('aaa');
 				callback([error,data]);
 			}).catch(err => {
 				Log.error("Count-List-Data",err);
