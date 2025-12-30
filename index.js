@@ -1946,9 +1946,12 @@ class Portal {
 					}
 				},
 				//get_item_by_id
-				function(call){
+				async function(call){
+ 					const [biz_error,biz_data] = await Data.get(database,data_type,key,option);
+					data = biz_data;
+					Log.w('rrrrrrr',data);
+					/*
 					Data.get(database,data_type,key,option).then(([biz_error,biz_data,option])=> {
-						Log.w('ffff',data);
 						if(biz_error){
 							error=Log.append(error,biz_error);
 						}else{
@@ -1964,6 +1967,7 @@ class Portal {
 						error = Log.append(error,err);
 						call();
 					});
+					*/
 				},
 				//get_item_image
 				async function(call){

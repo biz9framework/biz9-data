@@ -235,16 +235,11 @@ const get_item_adapter = (db_connect,data_type,key,option) => {
         let cache_connect = {};
         item_data = DataItem.get_new(data_type,0,{key:key});
         async.series([
-            function(call) {
-                get_cache_connect_main(db_connect.data_config).then(([error,data]) => {
-                    cache_connect = data;
-                    call();
-                }).catch(error => {
-                    Log.error("Adapter-Get-Item-Adapter",error);
-                    callback([error,null]);
-                });
+            async function(call) {
+                const [error,data] = await get_cache_connect_main(db_connect.data_config);
+                cache_connect = data;
             },
-            function(call) {
+            async function(call) {
                 if(option.filter){
                     let sort_by={};
                     let page_current=1;
@@ -291,14 +286,8 @@ const get_item_adapter = (db_connect,data_type,key,option) => {
                     });
 
                 }else{
-                    get_item_cache_db(cache_connect,db_connect,item_data.data_type,item_data.key,option).then(([error,data]) => {
-                        Log.w('dddddd',data);
-                        item_data = data;
-                        call();
-                    }).catch(error => {
-                        Log.error("Adapter-Get-Item-Adapter-3",error);
-                        callback([error,null]);
-                    });
+                    const [error,data] = await get_item_cache_db(cache_connect,db_connect,item_data.data_type,item_data.key,option);
+                    item_data = data;
                 }
             },
             /*
