@@ -122,7 +122,7 @@ describe('connect', function(){ this.timeout(25000);
                 //const [error,biz_data] = await Portal.delete(database,parent_item.data_type,parent_item.id,option);
 
                 //---
-                //Log.w('99_biz_data',biz_data);
+                Log.w('99_biz_data',biz_data);
                 //Log.w('99_biz_data_groups',biz_data.data_list[0].groups);
                 //Log.w('99_biz_data_post',biz_data.data_list[0]);
                 //Log.w('group',group);

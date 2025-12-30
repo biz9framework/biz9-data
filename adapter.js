@@ -309,12 +309,14 @@ const get_item_adapter = (db_connect,data_type,key,option) => {
                 }
             },
             function(call) {
+                /*
                 delete_cache_connect_main(cache_connect).then(([error,data]) => {
                     call();
                 }).catch(error => {
                     Log.error("Adapter-Get-Item-Adapter-4",error);
                     callback([error,null]);
                 });
+                */
             }
         ]).then(result => {
             callback([error,item_data]);
@@ -343,6 +345,7 @@ const post_cache_item = (cache_connect,data_type,id,item_data) => {
                     await post_cache_string_main(cache_connect,get_cache_item_attr_key(data_type,id,item.title),item.value);
                 }
             },
+            /*
             function(call) {
                 post_cache_string_main(cache_connect,get_cache_item_attr_list_key(data_type,id),cache_string_str).then(([error,data]) => {
                     call();
@@ -351,8 +354,9 @@ const post_cache_item = (cache_connect,data_type,id,item_data) => {
                     callback([error,null]);
                 });
             },
+            */
         ]).then(result => {
-            callback([error,item_data]);
+            //callback([error,item_data]);
         }).catch(error => {
             Log.error("Data-Adapter-Set-Cache-Item-2",error);
             callback([error,null]);
@@ -408,12 +412,12 @@ const get_item_cache_db = (cache_connect,db_connect,data_type,id,option) => {
 	                const [error,data] = await get_item_main(db_connect,data_type,id);
                     if(data){
                         item_data = data;
-                        post_cache_item(cache_connect,data_type,id,data).then(([error,data2]) => {
-                            }).catch(error => {
-                                Log.error("Data-Adapter-Get-Item-Cache-DB-2",error);
-                                callback([error,null]);
-                            });
-                        item_data[Type.FIELD_SOURCE] = DB_TITLE;
+                    post_cache_item(cache_connect,data_type,id,data).then(([error,data2]) => {
+                        }).catch(error => {
+                            Log.error("Data-Adapter-Get-Item-Cache-DB-2",error);
+                            callback([error,null]);
+                    });
+                       item_data[Type.FIELD_SOURCE] = DB_TITLE;
                     }else{
                         item_data[Type.FIELD_SOURCE] = get_blank_item(item_data);
                     }
@@ -431,6 +435,10 @@ const get_item_cache_db = (cache_connect,db_connect,data_type,id,option) => {
                     }
                     item_data[Type.FIELD_SOURCE] = CACHE_TITLE;
                 }
+            },
+            async function(call) {
+                if(cache_key_list.length==0 && item_data.id){
+                                   }
             },
             async function(call) {
                 if(option.fields){

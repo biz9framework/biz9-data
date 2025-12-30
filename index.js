@@ -1947,7 +1947,9 @@ class Portal {
 				},
 				//get_item_by_id
 				function(call){
+					console.log('aaaaaaaaaa');
 					Data.get(database,data_type,key,option).then(([biz_error,biz_data,option])=> {
+						/*
 						if(biz_error){
 							error=Log.append(error,biz_error);
 						}else{
@@ -1958,12 +1960,14 @@ class Portal {
 							}
 						}
 						call();
+						*/
 					}).catch(err => {
 						Log.error("ERROR-PORTAL-GET-1",err);
 						error = Log.append(error,err);
 						call();
 					});
 				},
+				/*
 				//get_item_image
 				async function(call){
 					if(!Str.check_is_null(data.id) && option.get_image){
@@ -2113,8 +2117,9 @@ class Portal {
 						}
 					}
 				},
+				*/
 			]).then(result => {
-				callback([error,data]);
+				//callback([error,data]);
 			}).catch(err => {
 				Log.error("ERROR-PORTAL-GET-2",err);
 				callback([error,{}]);
