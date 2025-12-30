@@ -1884,10 +1884,8 @@ class Portal {
 	static get = async(database,data_type,key,option) => {
 		/* Options
 		 * Fields
-		   - get_field / type. bool / ex. true,false / default. false
-		   - fields / type. string / ex. field1,field2 / default. throw error / notez. id must by type tbl_id
-		   - delete_cache / type. bool / ex. true,false / default. false
-		   - get_field_value / type. bool / ex. true,false / default. false
+		   - field / type. string / ex. field1,field2 / default. throw error / notez. id must by type tbl_id
+		   - overwrite_data / type. bool / ex. true,false / default. false
 		 *  Join
 			- get_join / type. bool / ex. true,false / default. false
 			-- field_keys / type. obj items / ex. [
@@ -1930,7 +1928,6 @@ class Portal {
 			option.get_field = option.fields ? true : false;
 			async.series([
 				function(call){
-					console.log('1111111');
 					if(!Str.check_is_guid(key) && !Number.isInteger(key) && key){
 						option.title_url = key.toLowerCase();
 						key = key.toLowerCase();
@@ -1939,7 +1936,6 @@ class Portal {
 				},
 				//delete_cache_item
 				async function(call){
-					console.log('2222222');
 					if(option.delete_cache && Str.check_is_guid(key)){
 						const [biz_error,biz_data] = await Portal.delete_cache(database,data_type,key);
 						if(biz_error){
@@ -1951,10 +1947,7 @@ class Portal {
 				},
 				//get_item_by_id
 				function(call){
-					console.log('3333333');
-					Log.w('portal_get_option',option);
 					Data.get(database,data_type,key,option).then(([biz_error,biz_data,option])=> {
-						Log.w('portal_get_biz_data',biz_data);
 						if(biz_error){
 							error=Log.append(error,biz_error);
 						}else{
@@ -1971,7 +1964,6 @@ class Portal {
 						call();
 					});
 				},
-				/*
 				//get_item_image
 				async function(call){
 					if(!Str.check_is_null(data.id) && option.get_image){
@@ -2088,16 +2080,10 @@ class Portal {
 							});
 
 						}
-						console.log('aaaaaaaaaaa');
 						let group_search = App_Logic.get_search(DataType.GROUP,query,{},1,0);
-						console.log('bbbbbbbbbbbbbb');
 						const [biz_error,biz_data] = await Portal.search(database,group_search.data_type,group_search.filter,group_search.sort_by,group_search.page_current,group_search.page_size,group_option);
-						console.log('cccccccccc');
 						if(biz_data.items.length> 0){
-							console.log('dddddddd');
 							data.groups = biz_data.items;
-							console.log('eeeeeeeee');
-							console.log(data);
 							for(const group of biz_data.items){
 								data[Str.get_title_url(group.title)] = group;
 							}
@@ -2127,9 +2113,8 @@ class Portal {
 						}
 					}
 				},
-				*/
 			]).then(result => {
-				//callback([error,data]);
+				callback([error,data]);
 			}).catch(err => {
 				Log.error("ERROR-PORTAL-GET-2",err);
 				callback([error,{}]);

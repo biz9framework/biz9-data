@@ -300,7 +300,7 @@ const get_item_adapter = (db_connect,data_type,key,option) => {
                             item_data[Type.FIELD_SOURCE] = DB_TITLE;
                             item_data[Type.FIELD_TITLE] = NOT_FOUND_TITLE;
                             item_data[Type.FIELD_TITLE_URL] = Str.get_title_url(NOT_FOUND_TITLE);
-                       }
+                        }
                         call();
                     }).catch(error => {
                         Log.error("Adapter-Get-Item-Adapter-3",error);
@@ -382,128 +382,92 @@ const delete_item_adapter = (db_connect,data_type,id,option) => {
 }
 const get_item_cache_db = (cache_connect,db_connect,data_type,id,option) => {
     return new Promise((callback) => {
-        let cache_found = false;
-        let cache_key_list = null;
-        let item_data = DataItem.get_new(data_type,id);
-        let cache_string_list = [];
+        let cache_key_list = [];
+        let item_data = DataItem.get_new(data_type,id,{source:NOT_FOUND_TITLE});
         let field_list = [];
-        option = option ? option : {get_field:false,fields:""};
+        let hide_field_list = [];
+        option = option ? option : {};
+        function get_blank_item(item){
+            item[Type.FIELD_ID] = 0;
+            item[Type.FIELD_SOURCE_KEY] = id;
+            item[Type.FIELD_SOURCE] = DB_TITLE;
+            item[Type.FIELD_TITLE] = NOT_FOUND_TITLE;
+            item[Type.FIELD_TITLE_URL] = Str.get_title_url(NOT_FOUND_TITLE);
+        }
         async.series([
-            function(call) {
-                get_cache_string_main(cache_connect,get_cache_item_attr_list_key(data_type,id)).then(([error,data]) => {
-                    cache_key_list=data;
-                    call();
-                }).catch(error => {
-                    Log.error("Data-Adapter-Get-Item-Cache-DB",error);
-                    callback([error,null]);
-                });
+            //cache_field_list
+            async function(call) {
+                const [error,data] = await get_cache_string_main(cache_connect,get_cache_item_attr_list_key(data_type,id));
+                    if(data){
+                        cache_key_list=data.split(',');
+                    }
             },
-            //fields
+            async function(call) {
+                if(cache_key_list.length==0){
+                    //db
+	                const [error,data] = await get_item_main(db_connect,data_type,id);
+                    if(data){
+                        item_data = data;
+                        post_cache_item(cache_connect,data_type,id,data).then(([error,data2]) => {
+                            }).catch(error => {
+                                Log.error("Data-Adapter-Get-Item-Cache-DB-2",error);
+                                callback([error,null]);
+                            });
+                        item_data[Type.FIELD_SOURCE] = DB_TITLE;
+                    }else{
+                        item_data[Type.FIELD_SOURCE] = get_blank_item(item_data);
+                    }
+                }else{
+                    //cache
+                     for(const item of cache_key_list) {
+                        if(item){
+                            const [error,val] = await get_cache_string_main(cache_connect,get_cache_item_attr_key(data_type,id,item));
+                            if(val){
+                                item_data[item] = val;
+                            }else{
+                                item_data[item] = null;
+                            }
+                        }
+                    }
+                    item_data[Type.FIELD_SOURCE] = CACHE_TITLE;
+                }
+            },
             async function(call) {
                 if(option.fields){
-                    console.log('adapter_option_start');
                     for(const field in option.fields) {
-                            field_list.push(field);
+                        let new_item = {};
+                        new_item[field] = option.fields[field];
+                        if(new_item[field]){
+                            field_list.push({field:field,value:new_item[field]});
+                        }else{
+                            hide_field_list.push({field:field,value:new_item[field]});
+                        }
                     }
                 }
             },
             async function(call) {
                 if(field_list.length>0){
-
-                }
-            },
-
-            /*
-            async function(call) {
-                if(!option.get_field){
-                    if(cache_key_list!=null){
-                        cache_found = true;
-                        cache_string_list =cache_key_list.split(',');
-                    }
-                    for(const item of cache_string_list) {
-                        if(item){
-                            const [error,val] = await get_cache_string_main(cache_connect,get_cache_item_attr_key(data_type,id,item));
-                            if(val){
-                                item_data[item] = val;
-                            }else{
-                                item_data[item] = null;
-                            }
-                        }
-                    }
-                }else{
-                    if(cache_key_list!=null){
-                        if(!option.fields){
-                            option.fields = "";
-                        }
-                        cache_found = true;
-                        cache_string_list =option.fields.split(',');
-                    }
-                    for(const item of cache_string_list) {
-                        if(item){
-                            const [error,val] = await get_cache_string_main(cache_connect,get_cache_item_attr_key(data_type,id,item));
-                            if(val){
-                                item_data[item] = val;
-                            }else{
-                                item_data[item] = null;
-                            }
-                        }
-                    }
-                }
-            },
-            function(call){
-                if(cache_found){
-                    item_data.source=CACHE_TITLE;
-                    call();
-                }
-                else{
-                    get_item_main(db_connect,data_type,id).then(([error,data]) => {
-                        if(data){
-                            if(!option.get_field){
-                                item_data = data;
-                                item_data.source = DB_TITLE;
-                                post_cache_item(cache_connect,data_type,id,data).then(([error,data2]) => {
-                                    call();
-                                }).catch(error => {
-                                    Log.error("Data-Adapter-Get-Item-Cache-DB-2",error);
-                                    callback([error,null]);
-                                });
-                            }else{
-                                for(const item of option.fields.split(',')) {
-                                    if(item){
-                                        item_data[item] = data[item];
-                                    }else{
-                                        item_data[item] = null;
-                                    }
-                                }
-                                post_cache_item(cache_connect,data_type,id,data).then(([error,data2]) => {
-                                    call();
-                                }).catch(error => {
-                                    Log.error("Data-Adapter-Get-Item-Cache-DB-2",error);
-                                    callback([error,null]);
-                                });
-
-                            }
-
+                    let field_data = {};
+                    for(const item of field_list) {
+                        if(item_data[item.field]){
+                            field_data[item.field] = item_data[item.field]
                         }else{
-                            item_data[Type.FIELD_ID] = 0;
-                            item_data[Type.FIELD_SOURCE_KEY] = id;
-                            item_data[Type.FIELD_SOURCE] = DB_TITLE;
-                            item_data[Type.FIELD_TITLE] = NOT_FOUND_TITLE;
-                            item_data[Type.FIELD_TITLE_URL] = Str.get_title_url(NOT_FOUND_TITLE);
-                            call();
+                            field_data[item.field] = '';
                         }
-                    }).catch(error => {
-                        Log.error("Data-Adapter-Get-Item-Cache-DB-3",error);
-                        callback([error,null]);
-                    });
+                    }
+                    item_data = field_data;
                 }
             },
-            function(call) {
-                call();
+            async function(call) {
+                if(hide_field_list.length>0){
+                    let field_data = {};
+                    for(const item of hide_field_list) {
+                        delete item_data[item.field];
+                    }
+                }
             },
-            */
         ]).then(result => {
-            //callback([error,item_data]);
+            callback([error,item_data]);
         }).catch(error => {
             Log.error("Data-Adapter-Get-Item-Cache-DB",error);
             callback([error,null]);
