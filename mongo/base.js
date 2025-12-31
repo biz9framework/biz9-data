@@ -6,6 +6,7 @@
  */
 const async = require('async');
 const {Num,Log,Str,Obj,DateTime} = require("biz9-utility");
+const {Type} = require("biz9-logic");
 const {MongoClient} = require("mongodb");
 let client_db = {};
 const get_db_connect_base = (data_config,option) => {
@@ -78,9 +79,9 @@ const post_item_base = (db_connect,data_type,item,option) => {
     return new Promise((callback) => {
         option = !Obj.check_is_empty(option) ? option : {overwrite_data:false};
         if (Str.check_is_null(item.id)){//insert
-            item.id = Str.get_guid();
-            item.date_create = DateTime.get_new();
-            item.date_save = DateTime.get_new();
+            item[Type.FIELD_ID] = Str.get_guid();
+            item[Type.FIELD_DATE_CREATE] = DateTime.get_new();
+            item[Type.FIELD_DATE_SAVE] = DateTime.get_new();
             if(check_db_connect_base(db_connect)){
                 db_connect.collection(data_type).insertOne(item).then((data) => {
                     if(data){

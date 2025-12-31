@@ -1918,13 +1918,12 @@ class Portal {
 					}];
 		   --
 		 * Stat
-		   - post_stat / bool / ex. true,false / def. true
-		   - user_id / id / ex. 123 / def. error
  		 *  Stat
-			-- stat_key / type. obj items / ex. [
+			-- stat / type. obj items / ex. [
 					{
 						user_id:123,
-						stat_type:Type.STAT_VIEW
+						type:Type.STAT_VIEW,
+						unique:true/false
 					};
 		 */
 		return new Promise((callback) => {
@@ -2106,26 +2105,15 @@ class Portal {
 						}
 					}
 				},
-				//post-view-stat
+				//post-stat
 				async function(call){
-					if(option.post_stat && data.id){
-						let post_stat_view = Stat_Logic.get_new(data.data_type,data.id,Type.STAT_VIEW,option.user_id,data);
-						const [biz_error,biz_data] = await Stat_Data.post(database,post_stat_view,option);
+					if(option.stat && data.id){
+						let post_stat = Stat_Logic.get_new(data.data_type,data.id,option.stat.type?option.stat.type:Type.STAT_VIEW,option.stat.user_id?option.stat.user_id:0,data);
+						const [biz_error,biz_data] = await Stat_Data.post(database,post_stat,option);
 						if(biz_error){
 							error=Log.append(error,biz_error);
 						}else{
 							stat_view = biz_data;
-						}
-					}
-				},
-				//item-update-view-count
-				async function(call){
-					if(option.post_stat && data.id && stat_view.resultOK){
-						data.view_count = parseInt(data.view_count) + 1  ? data.view_count : 1;
-						let item_update = DataItem.get_new(data.data_type,data.id,{view_count:data.view_count ? parseInt(data.view_count) + 1 : 1});
-						const [biz_error,biz_data] = await Portal.post(database,data.data_type,item_update);
-						if(biz_error){
-							error=Log.append(biz_error,error);
 						}
 					}
 				},
@@ -2521,7 +2509,7 @@ class Portal {
 		return new Promise((callback) => {
 			let error = null;
 			let data = DataItem.get_new(data_type,0);
-			option = option ? option : {}; //get_item:false,get_image:false,post_stat:false,user_id:0,stat_type:null,delete_cache:false
+			option = option ? option : {}; //get_item:false,get_image:false,post_stat:false,user_id:0,delete_cache:false
 			async.series([
 				function(call){
 					Data.post(database,data_type,item,option).then(([biz_error,biz_data])=> {
@@ -3020,9 +3008,9 @@ class Stat_Data {
 		return new Promise((callback) => {
 			let data = {};
 			let error = null;
-			option = option ? option : {post_unique:false};
+			option = option ? option : {unique:false};
 			let resultOK = true;
-			data.stat = DataItem.get_new(DataType.STAT,stat.id,{parent_data_type:stat.parent_data_type,user_id:stat.user_id});
+			data.stat = DataItem.get_new(DataType.STAT,stat.id,{parent_data_type:stat.parent_data_type,user_id:stat.user_id,type:stat.type});
 			async.series([
 				async function(call){
 					for(const key in stat) {
@@ -3033,7 +3021,7 @@ class Stat_Data {
 				},
 				//get - stat
 				async function(call){
-					if(option.post_unique){
+					if(option.stat.unique){
 						const todayEnd = dayjs();
 						const todayStart = todayEnd.subtract(1, 'day')
 						let query_field = {$and:[]};
@@ -3063,6 +3051,33 @@ class Stat_Data {
 					}
 					data.stat.resultOK = resultOK;
 				},
+				//get_item_by_id
+				async function(call){
+					if(resultOK){
+						let field = {};
+						field[stat.type] = 1;
+						field[Type.FIELD_ID] = 1;
+						field[Type.FIELD_TITLE] = 1;
+						field[Type.FIELD_DATA_TYPE] = 1;
+						let data_option = {field};
+ 						const [biz_error,biz_data] = await Data.get(database,data.stat.parent_data_type,stat.parent_id,data_option);
+						data = biz_data;
+					}
+				},
+				//update_item_by_id
+				async function(call){
+					if(resultOK){
+						if(data[stat.type]){
+							data[stat.type] = parseInt(data[stat.type]) + 1
+						}else{
+							data[stat.type] = 1;
+						}
+						const [biz_error,biz_data] = await Portal.post(database,data.data_type,data);
+						if(biz_error){
+							error=Log.append(biz_error,error);
+						}
+					}
+				}
 			]).then(result => {
 				callback([error,data.stat]);
 			}).catch(err => {

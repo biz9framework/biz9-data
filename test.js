@@ -86,23 +86,65 @@ describe('connect', function(){ this.timeout(25000);
                 //parent_item.field_1  = 'cool_1';
                 //parent_item.field_2  = 'cool_2';
                 //-->
-                let new_item_title = 'image '+Num.get_id();
+                let new_item_title = 'user '+Num.get_id();
+                //-->
+                //let user = DataItem.get_new(DataType.USER,0,{title:new_item_title,title_url:Str.get_title_url(new_item_title)});
+                let user = DataItem.get_new(DataType.USER,'cf495d5e-20ca-401f-af43-9e06d064ca7a');
+                //-->
                 //-->
                 //let group = DataItem.get_new(DataType.GROUP,0,{parent_id:parent_item.id,parent_data_type:parent_item.data_type,title:new_item_title,title_url:Str.get_title_url(new_item_title)});
                 //-->
                 //let item = DataItem.get_new(DataType.ITEM,0,{parent_id:parent_item.id,parent_data_type:parent_item.data_type,title:new_item_title,title_url:Str.get_title_url(new_item_title)});
-                let item = DataItem.get_new(DataType.ITEM,'0cc868ef-76f6-42d7-a842-b5114e2ff075');
+                //let item = DataItem.get_new(DataType.ITEM,'0cc868ef-76f6-42d7-a842-b5114e2ff075');
                 //item.field_1  = 'cool_1';
                 //item.field_2  = 'cool_2';
                 //-->
                 //let image = DataItem.get_new(DataType.IMAGE,0,{parent_id:parent_item.id,parent_data_type:parent_item.data_type,title:new_item_title,title_url:Str.get_title_url(new_item_title)});
-                let image = DataItem.get_new(DataType.IMAGE,0,{parent_id:item.id,parent_data_type:item.data_type, title:new_item_title,title_url:Str.get_title_url(new_item_title)});
+                //let image = DataItem.get_new(DataType.IMAGE,0,{parent_id:item.id,parent_data_type:item.data_type, title:new_item_title,title_url:Str.get_title_url(new_item_title)});
                 //image.field_1  = 'cool_1';
                 //image.field_2  = 'cool_2';
-                //---
+                //-->
+                //let favorite = Favorite_Logic.get_new(parent_item.data_type,parent_item.id,user.id);
+                //image.field_1  = 'cool_1';
+                //image.field_2  = 'cool_2';
+                //-->
                 //let option = {};
-                let option = {foreigns:[{foreign_data_type:DataType.ITEM,foreign_field:'parent_id',parent_field:'id',title:'items_bean',flat:true,type:Type.TITLE_ITEMS,field:{id:1,title:1,title_url:0},image:{count:2}}]};
-                //let option = {joins:[{search:App_Logic.get_search(DataType.ITEM,{},{},1,0),title:'cool_bean',type:Type.TITLE_ITEMS,image:{count:2}}]};
+                /*
+                let option = {foreigns:[
+                    {
+                        foreign_data_type:DataType.ITEM,
+                        foreign_field:'parent_id',
+                        parent_field:'id',
+                        title:'items_bean',
+                        type:Type.TITLE_ITEMS,
+                        field:{id:1,title:1,title_url:0},
+                        image:{count:2}
+                    }
+
+                ]};
+                */
+                /*
+                let option =
+                    {joins:[
+                        {
+                            search:App_Logic.get_search(DataType.ITEM,{},{},1,0),
+                            title:'cool_bean',
+                            type:Type.TITLE_ITEMS,
+                            image:{count:2}
+                        },
+                        {
+                            search:App_Logic.get_search(DataType.USER,{id:user.id},{},1,0),
+                            title:'user',
+                            type:Type.TITLE_ITEMS,
+                        },
+                        {
+                            search:App_Logic.get_search(DataType.FAVORITE,{user_id:user.id},{},1,0),
+                            title:'favorite',
+                            type:Type.TITLE_COUNT,
+                        },
+
+                    ]};
+                    */
                 //let option = {foreigns:[{foreign_data_type:DataType.ITEM,foreign_field:'parent_id',parent_field:'id',title:'items_bean',type:Type.TITLE_ITEMS,field:{title:0}}]};
                 //let option = {group:{group_33258:1}};
                 //let option = {group:{group_38669:1}};
@@ -112,6 +154,7 @@ describe('connect', function(){ this.timeout(25000);
                 //let option = {image:{count:0,sort_by:{date_create:Type.TITLE_SORT_BY_ASC}}};
                 //let option = {field:{id:1,title:1,title_url:1}};
                 //let option = {field:{title_url:0}};
+                let option = {stat:{user_id:user.id,type:Type.STAT_VIEW,unique:false}};
                 //---
                 //let search = App_Logic.get_search(DataType.PRODUCT,{},{date_create:-1},1,12);
                 //---
@@ -126,6 +169,7 @@ describe('connect', function(){ this.timeout(25000);
                 //const [error,biz_data] = await Portal.get(database,group.data_type,group.id);
                 //---
                 //const [error,biz_data] = await Portal.post(database,parent_item.data_type,parent_item);
+                //const [error,biz_data] = await Portal.post(database,user.data_type,user);
                 //const [error,biz_data] = await Portal.post(database,item.data_type,item);
                 //const [error,biz_data] = await Portal.post(database,image.data_type,image);
                 //const [error,biz_data] = await Portal.post(database,group.data_type,group);
@@ -136,14 +180,13 @@ describe('connect', function(){ this.timeout(25000);
 
                 //---
                 Log.w('99_biz_data',biz_data);
-                Log.w('99_biz_data_images',biz_data.items_bean[0].images.length);
+                //Log.w('99_biz_data_images',biz_data.items_bean[0].images.length);
                 //Log.w('99_biz_data_len',biz_data.groups.length);
                 //Log.w('99_biz_data_groups',biz_data.data_list[0].groups);
                 //Log.w('99_biz_data_post',biz_data.data_list[0]);
                 //Log.w('group',group);
 
                 //let option = {get_join:true,get_distinct:true,distinct_field:'title',field_key_list:[{primary_data_type:DataType.PRODUCT,primary_field:'type',item_field:'title',title:'my_count',type:Type.COUNT}]};
-                //let option = {};
 
                 //const [biz_error,biz_data] = await Portal.get(database,data_type,id,option);
                 //const [biz_error,biz_data] = await Portal.post(database,data_type,data_item,{});
