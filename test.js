@@ -145,14 +145,14 @@ describe('connect', function(){ this.timeout(25000);
 
                     ]};
                     */
-                let option = {group:{group_33258:0},foreigns:[
+                let option = {group:{group_140:0},foreigns:[
                     {
                         foreign_data_type:DataType.ITEM,
                         foreign_field:'parent_id',
                         parent_field:'id',
                         title:'items_bean',
                         type:Type.TITLE_COUNT,
-                        field:{title:0}
+                        field:{}
                     }
                 ]};
                 //let option = {group:{group_33258:1}};
@@ -189,8 +189,8 @@ describe('connect', function(){ this.timeout(25000);
                 //const [error,biz_data] = await Portal.delete(database,parent_item.data_type,parent_item.id,option);
 
                 //---
-                Log.w('99_biz_data',biz_data);
-                Log.w('99_biz_data_parents',biz_data.items[0]);
+                //Log.w('99_biz_data',biz_data);
+                //Log.w('99_biz_data_parents',biz_data.items[0]);
                 //Log.w('99_biz_data_images',biz_data.items_bean[0].images.length);
                 //Log.w('99_biz_data_len',biz_data.groups.length);
                 //Log.w('99_biz_data_groups',biz_data.data_list[0].groups);

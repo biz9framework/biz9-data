@@ -2328,7 +2328,7 @@ class Portal {
 									parent_field : foreign_item.parent_field,
 									title : foreign_item.title ? foreign_item.title : foreign_item.foreign_data_type,
 									field : foreign_item.field ? foreign_item.field : {},
-									type :  foreign_item.type ?  foreign_item.type : Type.TITLE_LIST,
+									type : foreign_item.type ?  foreign_item.type : Type.TITLE_LIST,
 									image : foreign_item.image ? foreign_item.image : {},
 									items : []
 								});
@@ -2383,11 +2383,11 @@ class Portal {
 							}
 						}
 				},
+				//group
 				async function(call){
 					if(option.group && data.items.length>0){
-						let groups = [];
 						let group_option = {};
-						let group_query = {};
+						let group_query = { $or: [] };
 						let group_list = [];
 						let group_show_list = [];
 						let hide_group_list = [];
@@ -2401,38 +2401,30 @@ class Portal {
                             	hide_group_list.push({field:field,value:new_item[field]});
                         	}
                     	}
-						if(group_list.length <= 0){
-							let group_query = { $or: [] };
-							for(const data_item of data.items) {
-								group_search_items.push({
-									foreign_data_type : DataType.GROUP,
-										foreign_field : Type.FIELD_PARENT_ID,
-										parent_value : data_item[Type.FIELD_ID],
-										parent_field : Type.FIELD_ID,
-										title : null,
-										type :  Type.TITLE_ITEMS,
-										items : []
-								});
-							}
-							for(const group_search_item of group_search_items){
+						if(group_list.length > 0){
+							for(const group of group_list){
 								let query_field = {};
-								query_field[group_search_item.foreign_field] = { $regex:String(group_search_item.parent_value), $options: "i" };
+								query_field[Type.FIELD_TITLE_URL] = { $regex:String(group.field), $options: "i" };
 								group_query.$or.push(query_field);
 							}
-							let search = App_Logic.get_search(DataType.GROUP,group_query,{},1,0);
-							const [biz_error,biz_data] = await Portal.search_simple(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,{});
-							groups = biz_data.items;
-							//hehre
+						}else{
 							for(const data_item of data.items){
-								data_item.groups = [];
-								if(hide_group_list.length>0){
-									for(const group of biz_data.items){
-										if(data_item.id ==  group.parent_id){
-											data_item.groups.push(group);
+								let query_field = {};
+								query_field[Type.FIELD_PARENT_ID] = { $regex:String(data_item.id), $options: "i" };
+								group_query.$or.push(query_field);
+							}
+						}
+						let search = App_Logic.get_search(DataType.GROUP,group_query,{},1,0);
+						const [biz_error,biz_data] = await Portal.search_simple(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,{});
+						for(let a = 0; a < data.items.length; a++){
+							data.items[a].groups = [];
+							for(let b = 0; b < biz_data.items.length; b++){
+								let match_hide_group = hide_group_list.find(item=>item.field == biz_data.items[b].title_url);
+									if(!match_hide_group){
+										if(biz_data.items[b].parent_id == data.items[a].id){
+											data.items[a].groups.push(biz_data.items[b]);
 										}
 									}
-								}
-
 							}
 						}
 					}
@@ -2946,7 +2938,6 @@ class Portal {
 					});
 				},
 			]).then(result => {
-				console.log('aaa');
 				callback([error,data]);
 			}).catch(err => {
 				Log.error("Count-List-Data",err);
