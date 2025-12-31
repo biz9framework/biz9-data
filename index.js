@@ -1889,7 +1889,7 @@ class Portal {
 		   - field / type. obj / ex. {field_show_1:1,field_hide_2:0} / default. throw error
 		 * Group
 		   - group / type. obj / ex.{} all, {group_show_1:1,group_hide_2:0} / default. throw error
-		 *  Foreign_Match
+		 *  Foreign
 			-- foreigns / type. obj items / ex. [
 					{
 						foreign_data_type:DataType.PRODUCT,
@@ -2183,7 +2183,9 @@ class Portal {
 	};
 	//9_portal_search
 	static search = (database,data_type,filter,sort_by,page_current,page_size,option) => {
-		/* Options
+		/* OPTIONS - START
+		 * Fields
+		   - field / type. obj / ex. {field_show_1:1,field_hide_2:0} / default. throw error
 		 * Image
 			-- image / type. obj / ex. [
 					{
@@ -2209,52 +2211,13 @@ class Portal {
 						type:Type.Type.TITLE_ITEMS,Type.TITLE_COUNT,
 						image:count:0,sort_by:Type.TITLE_SORT_BY_ASC
 					}];
-		 * --old_belo
-		 * Distinct
-		   - get_distinct / type. bool / ex. true,false / default. false
-		   - distinct_field / type. string / ex. field1 / default. throw error
-		   - distinct_sort / type. string / ex. asc,desc / default. asc
-		 * Fields
-		   - field / type. string / ex. field1,field2 / default. throw error
-		 * Photos
-			- get_image / type. bool / ex. true,false / default. false
-			- image_count / type. int / ex. 1-999 / default. 19
-			- image_sort_by / type. {} / ex. {date_create:1} / default. {}
-		 *  Count
-			- get_count / type. bool / ex. true,false / default. false
-			  - count_data_type / type. string / ex. PRODUCT / default. throw error
-			  - count_field / type. number / ex. category /  default. throw error
-			  - count_value / type. string / ex. title / default. throw error
-		 *  Join
-			- get_join / type. bool / ex. true,false / default. false
-				- field_keys / type. obj items / ex. [
-					{
-						foreign_data_type:DataType.PRODUCT,
-						foreign_field:'id',
-						parent_field:'parent_id',
-						title:'field_title',
-						field:'id,title,title_url',
-						type:obj,items,count,
-						get_image:false
-					}]
-		 * User
-		 - get_user / type. bool / ex. true,false / default. false
-		   - user_field / type. string / ex. field1,field2 / default. empty
-			 - make_user_flat / type. bool / ex. true,false / default. false
-	 	 *  Group
-			- get_group / type. bool / ex. true,false / default. false
-				- group / type. obj items / ex. [
-					{
-						title:'group_title',
-					}]
-
 		 * Return
 			- data_type
 			- item_count
 			- page_count
 			- filter
 			- items
-			*/
+		 /* OPTIONS - END*/
 		return new Promise((callback) => {
 			let data = {data_type:data_type,item_count:0,page_count:1,filter:{},items:[]};
 			let error=null;
@@ -2429,124 +2392,6 @@ class Portal {
 						}
 					}
 				},
-
-				/*
-				//get_group
-				function(call){
-					if(option.get_group && data.items.length>0){
-						call();
-					}else{
-						call();
-					}
-				},
-				//get_groups
-				async function(call){
-					if(option.get_group && data.items.length>0){
-						let group_titles = option.group ? option.group.split(','):[];
-						let query = { $or: [] };
-						if(group_titles.length<=0){
-							data.items.forEach(item =>{
-									parent_search_items.push({
-									foreign_data_type : DataType.GROUP,
-									foreign_field : Type.FIELD_PARENT_ID,
-									parent_value : item[Type.FIELD_ID],
-									parent_field : Type.FIELD_ID,
-									title : null,
-									type :  Type.TITLE_ITEMS,
-									items : []
-								});
-							});
-							for(const parent_search_item of parent_search_items){
-								let query_field = {};
-								query_field[parent_search_item.foreign_field] = { $regex:String(parent_search_item.parent_value), $options: "i" };
-								query.$or.push(query_field);
-							}
-						}else{
-							group_titles.forEach(item =>{
-								let query_field = {};
-								query_field['title'] = { $regex:String(item), $options: "i" };
-								query.$or.push(query_field);
-							});
-						}
-						let search = App_Logic.get_search(DataType.GROUP,query,{},1,0);
-						const [biz_error,biz_data] = await Portal.search_simple(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,{});
-						groups = biz_data.items;
-					}
-				},
-				//get_group_bind
-				async function(call){
-					if(option.get_group && data.items.length>0){
-						data.items.forEach(data_item =>{
-							groups.forEach(group =>{
-								if(data_item.id ==  group.parent_id){
-									data_item.groups.push(group);
-								}
-							});
-						});
-					}
-				},
-				//get_user
-				async function(call){
-					if(option.get_user && data.items.length>0){
-						let query = { $or: [] };
-						data.items.forEach(item => {
-							let query_field = {};
-							query_field[Type.FIELD_ID] = { $regex:String(item[Type.FIELD_USER_ID]), $options: "i" };
-							query.$or.push(query_field);
-						});
-						let search = App_Logic.get_search(DataType.USER,query,{},1,0);
-						let user_option = option.user_field ? {t_field:true,field:option.user_field? option.user_field:""} : {};
-						const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,user_option);
-						if(biz_error){
-							error=Log.append(error,biz_error);
-						}else{
-							if(data.items.length> 0){
-								data.items.forEach(item => {
-									if(option.make_user_flat){
-										let user = biz_data.items.find(item_find => item_find.id === item.user_id) ? biz_data.items.find(item_find => item_find.id === item.user_id):App_Logic.get_not_found(DataType.USER,item.user_id);
-										for (const prop in user) {
-											item["user_"+prop] = user[prop];
-										}
-									}else{
-										item.user = biz_data.items.find(item_find => item_find.id === item.user_id) ? biz_data.items.find(item_find => item_find.id === item.user_id):App_Logic.get_not_found(DataType.USER,item.user_id);
-									}
-
-								});
-							}
-						}
-					}
-				},
-				//get favorite
-				async function(call){
-					if(option.get_favorite && data.items.length>0){
-						let query = { $or:[] };
-						data.items.forEach(item => {
-							let query_field = {$or:[],$and:[]};
-							query_field.$or.push({parent_id:item.id});
-							query_field.$and.push({user_id:option.user_id});
-							query.$or.push(query_field);
-						});
-						let favorite_match_search = App_Logic.get_search(DataType.FAVORITE,query,{},1,0);
-						let favorite_match_option =  {};
-						const [biz_error,biz_data] = await Portal.search(database,
-							favorite_match_search.data_type,
-							favorite_match_search.filter,
-							favorite_match_search.sort_by,
-							favorite_match_search.page_current,
-							favorite_match_search.page_size,
-							favorite_match_option);
-						if(biz_error){
-							error=Log.append(error,biz_error);
-						}else{
-							if(data.items.length> 0){
-								data.items.forEach(item => {
-									item.is_favorite = biz_data.items.find(item_find => item_find.parent_id === item.id && item_find.user_id == option.user_id) ? true:false
-								});
-							}
-						}
-					}
-				},
-				*/
 			]).then(result => {
 				callback([error,data]);
 			}).catch(err => {
