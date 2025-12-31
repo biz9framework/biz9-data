@@ -1944,12 +1944,12 @@ class Portal {
 						const [biz_error,biz_data] = await Portal.delete_cache(database,data_type,key);
 					}
 				},
-				//get_item_by_id
+				//item_by_id
 				async function(call){
  					const [biz_error,biz_data] = await Data.get(database,data_type,key,option);
 					data = biz_data;
 				},
-				//get_image
+				//image
 				async function(call){
 					if(!Str.check_is_null(data.id) && option.image){
 						data.images = [];
@@ -1963,13 +1963,13 @@ class Portal {
 							}
 					}
 				},
-				//get_item_field_values
+				//field_values
 				async function(call){
 					if(option.get_field_value && data.id){
 						data = Field_Logic.get_item_field_values(data);
 					}
 				},
-				//get_foreign
+				//foreign
 				async function(call){
 					if(option.foreigns && data.id){
 						let search_items = [];
@@ -2011,7 +2011,7 @@ class Portal {
 						}
 					}
 				},
-				//get_join
+				//join
 				async function(call){
 					if(option.joins && data.id){
 						let search_items = [];
@@ -2048,7 +2048,7 @@ class Portal {
 						}
 					}
 				},
-				//get_group -- groups
+				//group
 				async function(call){
 					//- group / type. obj / ex.{} all, {group_show_1:1,group_hide_2:0} / default. throw error
 					if(option.group && data.id){
@@ -2190,6 +2190,8 @@ class Portal {
 						count:0 infinite, num 0 default
 						sort_by:Type.TITLE_SORT_BY_ASC,Type.TITLE_SORT_BY_DESC / ASC default
 					}];
+	 	* Group
+		   - group / type. obj / ex.{} all, {group_show_1:1,group_hide_2:0} / default. throw error
  		* Distinct
 			-- distinct / type. obj / ex. [
 					{
@@ -2256,8 +2258,6 @@ class Portal {
 		return new Promise((callback) => {
 			let data = {data_type:data_type,item_count:0,page_count:1,filter:{},items:[]};
 			let error=null;
-			let foreign_search_items = [];
-			let groups = [];
 			option = option ? option : {};
 			async.series([
 				//items
@@ -2317,8 +2317,8 @@ class Portal {
 				},
 				//foreign
 				async function(call){
-					console.log('start');
 					if(option.foreigns && data.items.length>0){
+						let foreign_search_items = [];
 						for(const foreign_item of option.foreigns){
 							for(const data_item of data.items){
 								foreign_search_items.push({
@@ -2334,7 +2334,6 @@ class Portal {
 								});
 							}
 						}
-						Log.w('aaaaaa',foreign_search_items);
 						for(const search_item of foreign_search_items){
 							let query = { $or: [] };
 							for(const data_item of data.items){
@@ -2384,6 +2383,61 @@ class Portal {
 							}
 						}
 				},
+				async function(call){
+					if(option.group && data.items.length>0){
+						let groups = [];
+						let group_option = {};
+						let group_query = {};
+						let group_list = [];
+						let group_show_list = [];
+						let hide_group_list = [];
+						let group_search_items = [];
+						for(const field in option.group) {
+                        	let new_item = {};
+                        	new_item[field] = option.group[field];
+                        	if(new_item[field]){
+                            	group_list.push({field:field,value:new_item[field]});
+                        	}else{
+                            	hide_group_list.push({field:field,value:new_item[field]});
+                        	}
+                    	}
+						if(group_list.length <= 0){
+							let group_query = { $or: [] };
+							for(const data_item of data.items) {
+								group_search_items.push({
+									foreign_data_type : DataType.GROUP,
+										foreign_field : Type.FIELD_PARENT_ID,
+										parent_value : data_item[Type.FIELD_ID],
+										parent_field : Type.FIELD_ID,
+										title : null,
+										type :  Type.TITLE_ITEMS,
+										items : []
+								});
+							}
+							for(const group_search_item of group_search_items){
+								let query_field = {};
+								query_field[group_search_item.foreign_field] = { $regex:String(group_search_item.parent_value), $options: "i" };
+								group_query.$or.push(query_field);
+							}
+							let search = App_Logic.get_search(DataType.GROUP,group_query,{},1,0);
+							const [biz_error,biz_data] = await Portal.search_simple(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,{});
+							groups = biz_data.items;
+							//hehre
+							for(const data_item of data.items){
+								data_item.groups = [];
+								if(hide_group_list.length>0){
+									for(const group of biz_data.items){
+										if(data_item.id ==  group.parent_id){
+											data_item.groups.push(group);
+										}
+									}
+								}
+
+							}
+						}
+					}
+				},
+
 				/*
 				//get_group
 				function(call){

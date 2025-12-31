@@ -145,7 +145,7 @@ describe('connect', function(){ this.timeout(25000);
 
                     ]};
                     */
-                let option = {foreigns:[
+                let option = {group:{group_33258:0},foreigns:[
                     {
                         foreign_data_type:DataType.ITEM,
                         foreign_field:'parent_id',
@@ -165,7 +165,8 @@ describe('connect', function(){ this.timeout(25000);
                 //let option = {field:{title_url:0}};
                 //let option = {stat:{user_id:user.id,type:Type.STAT_VIEW,unique:false}};
                 //---
-                let search = App_Logic.get_search(DataType.PRODUCT,{},{date_create:-1},1,12);
+                //let search = App_Logic.get_search(DataType.PRODUCT,{},{date_create:-1},1,12);
+                let search = App_Logic.get_search(DataType.PRODUCT,{id:'b83acd14-da97-47cd-810f-22163eba5343'},{date_create:-1},1,12);
                 //---
                 const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option);
                 //---
@@ -189,7 +190,7 @@ describe('connect', function(){ this.timeout(25000);
 
                 //---
                 Log.w('99_biz_data',biz_data);
-                Log.w('99_biz_data_items',biz_data.items[0]);
+                Log.w('99_biz_data_parents',biz_data.items[0]);
                 //Log.w('99_biz_data_images',biz_data.items_bean[0].images.length);
                 //Log.w('99_biz_data_len',biz_data.groups.length);
                 //Log.w('99_biz_data_groups',biz_data.data_list[0].groups);
