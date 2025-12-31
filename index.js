@@ -2382,30 +2382,17 @@ class Portal {
 							query_field[Type.FIELD_PARENT_ID] = { $regex:String(data_item.id), $options: "i" };
 							query.$or.push(query_field);
 						};
-						let search = App_Logic.get_search(DataType.IMAGE,query,{},1,option.image_key.count?option.image_key.count:0);
-						Log.w('imnae_seaRCH',search);
+						let search = App_Logic.get_search(DataType.IMAGE,query,option.image_key.sort_by?option.image_key.sort_by:{},1,option.image_key.count?option.image_key.count:0);
 						const [biz_error,biz_data] = await Portal.search_simple(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size);
 						for(const parent of data.items){
 							parent.images = [];
 							for(const image of biz_data.items){
 								if(parent.id == image.parent_id)
 								{
-									console.log('here');
+									parent.images.push(image);
 								}
 							}
-
-
 						}
-						/*
-						data.items.forEach(data_a =>{
-							data_a.images = [];
-							data.items.forEach(data_b =>{
-								if(data_b.parent_id == data_a.id){
-									data_a.images.push(data_b);
-								}
-							});
-						});
-						*/
 					}
 				},
 				//get_join
