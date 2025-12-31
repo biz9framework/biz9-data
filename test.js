@@ -145,7 +145,16 @@ describe('connect', function(){ this.timeout(25000);
 
                     ]};
                     */
-                //let option = {foreigns:[{foreign_data_type:DataType.ITEM,foreign_field:'parent_id',parent_field:'id',title:'items_bean',type:Type.TITLE_ITEMS,field:{title:0}}]};
+                let option = {foreigns:[
+                    {
+                        foreign_data_type:DataType.ITEM,
+                        foreign_field:'parent_id',
+                        parent_field:'id',
+                        title:'items_bean',
+                        type:Type.TITLE_COUNT,
+                        field:{title:0}
+                    }
+                ]};
                 //let option = {group:{group_33258:1}};
                 //let option = {group:{group_38669:1}};
                 //let option = {group:{}};
@@ -154,17 +163,17 @@ describe('connect', function(){ this.timeout(25000);
                 //let option = {image:{count:0,sort_by:{date_create:Type.TITLE_SORT_BY_ASC}}};
                 //let option = {field:{id:1,title:1,title_url:1}};
                 //let option = {field:{title_url:0}};
-                let option = {stat:{user_id:user.id,type:Type.STAT_VIEW,unique:false}};
+                //let option = {stat:{user_id:user.id,type:Type.STAT_VIEW,unique:false}};
                 //---
-                //let search = App_Logic.get_search(DataType.PRODUCT,{},{date_create:-1},1,12);
+                let search = App_Logic.get_search(DataType.PRODUCT,{},{date_create:-1},1,12);
                 //---
-                //const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option);
+                const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option);
                 //---
                 //const [biz_error,biz_data] = await Portal.count(database,search.data_type,search.filter);
                 //---
                 //const [error,biz_data] = await Portal.copy(database,parent_item.data_type,parent_item.id,option);
                 //---
-                const [error,biz_data] = await Portal.get(database,parent_item.data_type,parent_item.id,option);
+                //const [error,biz_data] = await Portal.get(database,parent_item.data_type,parent_item.id,option);
                 //const [error,biz_data] = await Portal.get(database,group.data_type,group.id,option);
                 //const [error,biz_data] = await Portal.get(database,group.data_type,group.id);
                 //---
@@ -180,6 +189,7 @@ describe('connect', function(){ this.timeout(25000);
 
                 //---
                 Log.w('99_biz_data',biz_data);
+                Log.w('99_biz_data_items',biz_data.items[0]);
                 //Log.w('99_biz_data_images',biz_data.items_bean[0].images.length);
                 //Log.w('99_biz_data_len',biz_data.groups.length);
                 //Log.w('99_biz_data_groups',biz_data.data_list[0].groups);
