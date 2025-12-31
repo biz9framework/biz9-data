@@ -97,9 +97,11 @@ describe('connect', function(){ this.timeout(25000);
                 //---
                 //let option = {};
                 //let option = {get_join:true,field_key_list:[{foreign_data_type:DataType.ITEM,foreign_field:'parent_id',parent_field:'id',title:'items_bean',type:Type.LIST}]};
-                //let option = {get_group:true,group:'group 16420,group 81381'};
+                //let option = {group:{group_33258:1}};
+                //let option = {group:{group_38669:1}};
+                let option = {group:{}};
                 //let option = {get_group:true,group:'group 81381'};
-                let option = {};
+                //let option = {};
                 //let option = {get_image:true};
                 //let option = {fields:{id:1,title:1,title_url:0}};
                 //let option = {fields:{title_url:0,field_1:0}};
@@ -112,14 +114,14 @@ describe('connect', function(){ this.timeout(25000);
                 //---
                 //const [error,biz_data] = await Portal.copy(database,parent_item.data_type,parent_item.id,option);
                 //---
-                //const [error,biz_data] = await Portal.get(database,parent_item.data_type,parent_item.id,option);
+                const [error,biz_data] = await Portal.get(database,parent_item.data_type,parent_item.id,option);
                 //const [error,biz_data] = await Portal.get(database,group.data_type,group.id,option);
                 //const [error,biz_data] = await Portal.get(database,group.data_type,group.id);
                 //---
                 //const [error,biz_data] = await Portal.post(database,parent_item.data_type,parent_item);
                 //const [error,biz_data] = await Portal.post(database,item.data_type,item);
                 //const [error,biz_data] = await Portal.post(database,image.data_type,image);
-                const [error,biz_data] = await Portal.post(database,group.data_type,group);
+                //const [error,biz_data] = await Portal.post(database,group.data_type,group);
                 //---
                 //const [error,biz_data] = await Portal.post_items(database,[parent_item,parent_item_1,parent_item_2]);
                 //---
@@ -127,6 +129,7 @@ describe('connect', function(){ this.timeout(25000);
 
                 //---
                 Log.w('99_biz_data',biz_data);
+                Log.w('99_biz_data_len',biz_data.groups.length);
                 //Log.w('99_biz_data_groups',biz_data.data_list[0].groups);
                 //Log.w('99_biz_data_post',biz_data.data_list[0]);
                 //Log.w('group',group);
