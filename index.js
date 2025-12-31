@@ -2017,10 +2017,12 @@ class Portal {
 									title : item.title ? item.title : item.foreign_data_type,
 									field : item.field ? item.field : {},
 									type : item.type ? item.type : Type.TITLE_ITEMS,
+									image_key : item.image_key ? item.image_key : {}
 								});
 						}
 						for(const search_item of search_items){
-							let foreign_option = search_item.field ? {field:search_item.field} : {};
+							let foreign_option = {field:search_item.field,image_key:search_item.image_key };
+							Log.w('foreign_option',foreign_option);
 							if(search_item.type == Type.TITLE_ITEMS){
 								let query = {};
 								query[search_item.foreign_field] = data[search_item.parent_field];
@@ -2279,6 +2281,13 @@ class Portal {
 	//9_portal_search
 	static search = (database,data_type,filter,sort_by,page_current,page_size,option) => {
 		/* Options
+		 * Image
+			-- image_key / type. obj item / ex. [
+					{
+						count:0 infinite, num 0 default
+						sort_by:Type.TITLE_SORT_BY_ASC,Type.TITLE_SORT_BY_DESC / ASC default
+					}];
+		 * --old_belo
 		 * Distinct
 		   - get_distinct / type. bool / ex. true,false / default. false
 		   - distinct_field / type. string / ex. field1 / default. throw error
@@ -2366,16 +2375,28 @@ class Portal {
 				},
 				//get_image
 				async function(call){
-					if(option.get_join && data.items.length>0){
+					if(option.image_key && data.items.length>0){
 						let query = { $or: [] };
 						for(const data_item of data.items){
 							let query_field = {};
 							query_field[Type.FIELD_PARENT_ID] = { $regex:String(data_item.id), $options: "i" };
 							query.$or.push(query_field);
 						};
-						let search = App_Logic.get_search(DataType.IMAGE,query,{},1,0);
+						let search = App_Logic.get_search(DataType.IMAGE,query,{},1,option.image_key.count?option.image_key.count:0);
+						Log.w('imnae_seaRCH',search);
 						const [biz_error,biz_data] = await Portal.search_simple(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size);
+						for(const parent of data.items){
+							parent.images = [];
+							for(const image of biz_data.items){
+								if(parent.id == image.parent_id)
+								{
+									console.log('here');
+								}
+							}
 
+
+						}
+						/*
 						data.items.forEach(data_a =>{
 							data_a.images = [];
 							data.items.forEach(data_b =>{
@@ -2384,6 +2405,7 @@ class Portal {
 								}
 							});
 						});
+						*/
 					}
 				},
 				//get_join

@@ -87,17 +87,21 @@ describe('connect', function(){ this.timeout(25000);
                 //parent_item.field_2  = 'cool_2';
                 //-->
                 let new_item_title = 'image '+Num.get_id();
+                //-->
                 //let group = DataItem.get_new(DataType.GROUP,0,{parent_id:parent_item.id,parent_data_type:parent_item.data_type,title:new_item_title,title_url:Str.get_title_url(new_item_title)});
+                //-->
                 //let item = DataItem.get_new(DataType.ITEM,0,{parent_id:parent_item.id,parent_data_type:parent_item.data_type,title:new_item_title,title_url:Str.get_title_url(new_item_title)});
+                let item = DataItem.get_new(DataType.ITEM,'0cc868ef-76f6-42d7-a842-b5114e2ff075');
                 //item.field_1  = 'cool_1';
                 //item.field_2  = 'cool_2';
+                //-->
                 //let image = DataItem.get_new(DataType.IMAGE,0,{parent_id:parent_item.id,parent_data_type:parent_item.data_type,title:new_item_title,title_url:Str.get_title_url(new_item_title)});
+                let image = DataItem.get_new(DataType.IMAGE,0,{parent_id:item.id,parent_data_type:item.data_type, title:new_item_title,title_url:Str.get_title_url(new_item_title)});
                 //image.field_1  = 'cool_1';
                 //image.field_2  = 'cool_2';
-                //let image = DataItem.get_new(DataType.IMAGE,0,{parent_id:parent_item.id,parent_data_type:parent_item.data_type});
                 //---
                 //let option = {};
-                let option = {foreign_keys:[{foreign_data_type:DataType.ITEM,foreign_field:'parent_id',parent_field:'id',title:'items_bean',flat:true,type:Type.TITLE_COUNT,field:{title:1,title_url:0},item_key:{count:0}}]};
+                let option = {foreign_keys:[{foreign_data_type:DataType.ITEM,foreign_field:'parent_id',parent_field:'id',title:'items_bean',flat:true,type:Type.TITLE_ITEMS,field:{id:1,title:1,title_url:0},item_key:{count:0}}]};
                 //let option = {join_keys:[{search:App_Logic.get_search(DataType.ITEM,{},{},1,0),title:'cool_bean',type:Type.TITLE_COUNT}]};
                 //let option = {foreign_keys:[{foreign_data_type:DataType.ITEM,foreign_field:'parent_id',parent_field:'id',title:'items_bean',type:Type.TITLE_ITEMS,field:{title:0}}]};
                 //let option = {group:{group_33258:1}};
