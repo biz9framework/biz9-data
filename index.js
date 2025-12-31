@@ -1883,6 +1883,8 @@ class Portal {
 	//9_portal_get
 	static get = async(database,data_type,key,option) => {
 		/* Options
+		 * Cache
+		   - cache_delete / type. bool / ex. true/false / default. false
 		 * Fields
 		   - field / type. obj / ex. {field_show_1:1,field_hide_2:0} / default. throw error
 		 * Group
@@ -1895,7 +1897,8 @@ class Portal {
 						parent_field:'parent_id',
 						title:'field_title',
 						field:{field_show_1:1,field_hide_2:0},
-						type:Type.Type.TITLE_ITEMS,Type.TITLE_COUNT
+						type:Type.Type.TITLE_ITEMS,Type.TITLE_COUNT,
+						image_key:count:0,sort_by:Type.TITLE_SORT_BY_ASC
 					}];
 		*  Join
 			-- join_keys / type. obj items / ex. [
@@ -1906,10 +1909,11 @@ class Portal {
 						flat:{true,false},
 						type:Type.Type.TITLE_ITEMS,Type.TITLE_COUNT
 					}];
-		 * Photos
-			-- photo_keys / type. obj items / ex. [
+		 * Image
+			-- image_key / type. obj item / ex. [
 					{
 						count:0 infinite, num 0 default
+						sort_by:Type.TITLE_SORT_BY_ASC,Type.TITLE_SORT_BY_DESC / ASC default
 					}];
 			 * Favorite
 		   -- favorite_keys / type obj items / ex. [
@@ -1941,7 +1945,7 @@ class Portal {
 				},
 				//delete_cache_item
 				async function(call){
-					if(option.delete_cache && Str.check_is_guid(key)){
+					if(option.cache_delete && Str.check_is_guid(key)){
 						const [biz_error,biz_data] = await Portal.delete_cache(database,data_type,key);
 					}
 				},
@@ -1950,24 +1954,18 @@ class Portal {
  					const [biz_error,biz_data] = await Data.get(database,data_type,key,option);
 					data = biz_data;
 				},
-				//get_item_image
+				//get_image
 				async function(call){
-					if(!Str.check_is_null(data.id) && option.get_image){
+					if(!Str.check_is_null(data.id) && option.image_key){
 						data.images = [];
-						if(option.image_count == null){
-							option.image_count = 19;
-						}
-						if(option.image_sort_by == null){
-							option.image_sort_by = {date_create:1};
-						}
-						let filter = {parent_id:data.id};
-						let sort_by = option.image_sort_by;
-						let page_current = 1;
-						let page_size = option.image_count;
-						const [biz_error,biz_data] = await Portal.search(database,DataType.IMAGE,filter,sort_by,page_current,page_size,option);
-						if(biz_data.items.length > 0){
-							data.images = biz_data.items;
-						}
+						let query = {parent_id:data.id};
+						let search = App_Logic.get_search(DataType.IMAGE,query,option.image_key.sort_by?option.image_key.sort_by:{},1,option.image_key.count?option.image_key.count:0);
+						const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size);
+							if(biz_error){
+								error=Log.append(error,biz_error);
+							}else{
+								data[Type.TITLE_IMAGES] = biz_data.items;
+							}
 					}
 				},
 				//get_item_user
