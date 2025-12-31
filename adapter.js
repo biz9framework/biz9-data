@@ -335,10 +335,10 @@ const get_item_cache_db = (cache_connect,db_connect,data_type,id,option) => {
                 }
             },
             async function(call) {
-                if(option.fields){
-                    for(const field in option.fields) {
+                if(option.field){
+                    for(const field in option.field) {
                         let new_item = {};
-                        new_item[field] = option.fields[field];
+                        new_item[field] = option.field[field];
                         if(new_item[field]){
                             field_list.push({field:field,value:new_item[field]});
                         }else{

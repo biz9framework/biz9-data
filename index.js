@@ -1209,7 +1209,7 @@ class Review_Data {
 				},
 				//get_parent_item
 				async function(call){
-					let option = {get_field:true,fields:'id,rating_count,review_count,rating_avg,title,title_url'};
+					let option = {};
 					const [biz_error,biz_data] = await Portal.get(database,parent_data_type,parent_id,option);
 					if(biz_error){
 						error=Log.append(error,biz_error);
@@ -1894,6 +1894,7 @@ class Portal {
 						foreign_field:'id',
 						parent_field:'parent_id',
 						title:'field_title',
+						field:{field_show_1:1,field_hide_2:0},
 						make_flat:{true,false},
 						type:Type.Type.TITLE_ITEMS,Type.TITLE_COUNT
 					}];
@@ -1923,16 +1924,14 @@ class Portal {
 		   - post_stat / bool / ex. true,false / def. true
 		   - user_id / id / ex. 123 / def. error
 		 * get_user / type. bool / ex. true,false / default. false
-		   - user_fields / type. string / ex. field1,field2 / default. empty
+		   - user_field / type. string / ex. field1,field2 / default. empty
 			 - make_user_flat / type. bool / ex. true,false / default. false
 			 */
 		return new Promise((callback) => {
 			let error = null;
 			let data = DataItem.get_new(data_type,0,{key:key?key:Type.TITLE_BLANK});
 			let stat_view = DataItem.get_new(DataType.STAT,0,{resultOK:false});
-			//option = option ? option : {get_image:false,get_field:false,post_stat:false,user_id:0};
 			option = option ? option : {};
-			option.get_field = option.fields ? true : false;
 			async.series([
 				function(call){
 					if(!Str.check_is_guid(key) && !Number.isInteger(key) && key){
@@ -2009,6 +2008,89 @@ class Portal {
 						data = Field_Logic.get_item_field_values(data);
 					}
 				},
+				//get_foreign
+				async function(call){
+					if(option.foreign_keys && data.id){
+						let parent_search_items = [];
+						for(const item of option.foreign_keys){
+								parent_search_items.push({
+									foreign_data_type : item.foreign_data_type,
+									foreign_field : item.foreign_field,
+									parent_field : item.parent_field,
+									title : item.title ? item.title : item.foreign_data_type,
+									field : item.field ? item.field : {},
+									make_flat : item.make_flat ? item.make_flat : false,
+									type : item.type ? item.type : Type.TITLE_ITEMS,
+									data : []
+								});
+						}
+						for(const parent_search_item of parent_search_items){
+							let foreign_option = parent_search_item.field ? {field:parent_search_item.field} : {};
+							if(parent_search_item.type == Type.TITLE_ITEMS){
+								let query = {};
+								query[parent_search_item.foreign_field] = data[parent_search_item.parent_field];
+								let search = App_Logic.get_search(parent_search_item.foreign_data_type,query,{},1,0);
+								const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,foreign_option);
+								if(biz_error){
+									error=Log.append(error,biz_error);
+								}else{
+									data[parent_search_item.title] = biz_data.items;
+								}
+							}
+							else if(parent_search_item.type == Type.TITLE_COUNT){
+								let query = {};
+								query[parent_search_item.foreign_field] = data[parent_search_item.parent_field];
+								let search = App_Logic.get_search(parent_search_item.foreign_data_type,query,{},1,0);
+								const [biz_error,biz_data] = await Portal.count(database,search.data_type,search.filter);
+								if(biz_error){
+									error=Log.append(error,biz_error);
+								}else{
+									data[parent_search_item.title] = biz_data;
+								}
+							}
+						}
+						/*
+						option.foreEach(item => {
+							parent_search_items.push({
+								foreign_data_type : item.foreign_data_type,
+								foreign_field : item.foreign_field,
+								parent_field : item.parent_field,
+								title : item.title,
+								field : item.field ? item.field : {},
+								make_flat : item.make_flat ? item.make_flat : false,
+								type : item.type ? item.type : Type.ITEMS,
+								data : [],
+							});
+						});
+						for(const parent_search_item of parent_search_items){
+							let join_option = parent_search_item.field ? {} : {};
+							if(parent_search_item.type == Type.TITLE_ITEMS){
+								let query = {};
+								query[parent_search_item.foreign_field] = data[parent_search_item.parent_field];
+								let search = App_Logic.get_search(parent_search_item.foreign_data_type,query,{},1,0);
+								const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,join_option);
+								if(biz_error){
+									error=Log.append(error,biz_error);
+								}else{
+									data[parent_search_item.title] = biz_data.items;
+								}
+							}else if(parent_search_item.type == Type.TITLE_COUNT){
+								let query = {};
+								query[parent_search_item.foreign_field] = data[parent_search_item.parent_field];
+								let search = App_Logic.get_search(parent_search_item.foreign_data_type,query,{},1,0);
+								const [biz_error,biz_data] = await Portal.count(database,search.data_type,search.filter);
+								if(biz_error){
+									error=Log.append(error,biz_error);
+								}else{
+									data[parent_search_item.title] = biz_data;
+								}
+							}
+						}
+						*/
+					}
+				},
+
+
 				//get_join
 				async function(call){
 					if(option.get_join && data.id){
@@ -2018,14 +2100,14 @@ class Portal {
 								foreign_field : item.foreign_field,
 								parent_field : item.parent_field,
 								title : item.title,
-								fields : item.fields ? item.fields : "",
+								field : item.field ? item.field : "",
 								make_flat : item.make_flat ? item.make_flat : false,
 								type : item.type ? item.type : Type.ITEMS,
 								data : [],
 							});
 						});
 						for(const parent_search_item of parent_search_items){
-							let join_option = parent_search_item.fields ? {get_field:true,fields:parent_search_item.fields} : {};
+							let join_option = parent_search_item.field ? {} : {};
 							if(parent_search_item.type == Type.TITLE_ITEMS){
 								let query = {};
 								query[parent_search_item.foreign_field] = data[parent_search_item.parent_field];
@@ -2050,6 +2132,7 @@ class Portal {
 						}
 					}
 				},
+
 				//get_group -- groups
 				async function(call){
 					//- group / type. obj / ex.{} all, {group_show_1:1,group_hide_2:0} / default. throw error
@@ -2105,30 +2188,6 @@ class Portal {
 							}
 						}
 					}
-
-					/*
-						if(!option.group){
-							query = {parent_id:data.id}
-						}else{
-							let group_titles = option.group ? option.group.split(','):[];
-							query = { $or: [] };
-							group_titles.foreach(item => {
-								let query_field = {};
-								query_field[Type.FIELD_TITLE] = { $regex:String(item), $options: "i" };
-								query.$or.push(query_field);
-							});
-
-						}
-						let group_search = App_Logic.get_search(DataType.GROUP,query,{},1,0);
-						const [biz_error,biz_data] = await Portal.search(database,group_search.data_type,group_search.filter,group_search.sort_by,group_search.page_current,group_search.page_size,group_option);
-						if(biz_data.items.length> 0){
-							data.groups = biz_data.items;
-							for(const group of biz_data.items){
-								data[Str.get_title_url(group.title)] = group;
-							}
-						}
-
-					*/
 				},
 				/*
 				//post-view-stat
@@ -2229,7 +2288,7 @@ class Portal {
 		   - distinct_field / type. string / ex. field1 / default. throw error
 		   - distinct_sort / type. string / ex. asc,desc / default. asc
 		 * Fields
-		   - fields / type. string / ex. field1,field2 / default. throw error
+		   - field / type. string / ex. field1,field2 / default. throw error
 		 * Photos
 			- get_image / type. bool / ex. true,false / default. false
 			- image_count / type. int / ex. 1-999 / default. 19
@@ -2247,13 +2306,13 @@ class Portal {
 						foreign_field:'id',
 						parent_field:'parent_id',
 						title:'field_title',
-						fields:'id,title,title_url',
+						field:'id,title,title_url',
 						type:obj,items,count,
 						get_image:false
 					}]
 		 * User
 		 - get_user / type. bool / ex. true,false / default. false
-		   - user_fields / type. string / ex. field1,field2 / default. empty
+		   - user_field / type. string / ex. field1,field2 / default. empty
 			 - make_user_flat / type. bool / ex. true,false / default. false
 	 	 *  Group
 			- get_group / type. bool / ex. true,false / default. false
@@ -2342,7 +2401,7 @@ class Portal {
 											parent_value : data_item[option_item.parent_field],
 											parent_field : option_item.parent_field,
 											title : option_item.title,
-											fields : option_item.fields ? option_item.fields : "",
+											field : option_item.field ? option_item.field : "",
 											make_flat : option_item.make_flat ? option_item.make_flat : false,
 											type : option_item.type ? option_item.type : Type.TITLE_OBJ,
 											get_image : option_item.get_image ? option_item.get_image : false,
@@ -2366,7 +2425,7 @@ class Portal {
 								query.$or.push(query_field);
 							};
 							let search = App_Logic.get_search(parent_search_item.foreign_data_type,query,{},1,0);
-							let join_option = parent_search_item.fields ? {get_field:true,fields:parent_search_item.fields} : {};
+							let join_option = parent_search_item.field ? {} : {};
 							join_option.get_image = parent_search_item.get_image;
 							const [biz_error,biz_data] = await Portal.search_simple(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,join_option);
 							if(biz_error){
@@ -2471,7 +2530,7 @@ class Portal {
 							query.$or.push(query_field);
 						});
 						let search = App_Logic.get_search(DataType.USER,query,{},1,0);
-						let user_option = option.user_fields ? {get_field:true,fields:option.user_fields? option.user_fields:""} : {};
+						let user_option = option.user_field ? {t_field:true,field:option.user_field? option.user_field:""} : {};
 						const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,user_option);
 						if(biz_error){
 							error=Log.append(error,biz_error);
@@ -2503,7 +2562,7 @@ class Portal {
 							query.$or.push(query_field);
 						});
 						let favorite_match_search = App_Logic.get_search(DataType.FAVORITE,query,{},1,0);
-						let favorite_match_option =  {get_field:false,fields:'id,user_id,parent_id,parent_data_type'};
+						let favorite_match_option =  {};
 						const [biz_error,biz_data] = await Portal.search(database,
 							favorite_match_search.data_type,
 							favorite_match_search.filter,
@@ -2791,7 +2850,7 @@ class Portal {
 				function(call){
 					console.log('here_111111111_here');
 					let search = App_Logic.get_search(data_type,filter,{},1,0);
-					let parent_option = {get_field:'title_url'};
+					let parent_option = {};
 					Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,parent_option).then(([biz_error,biz_data])=> {
 						Log.w('portal_search_biz_data',biz_data);
 						/*
