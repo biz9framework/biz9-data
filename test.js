@@ -101,15 +101,15 @@ describe('connect', function(){ this.timeout(25000);
                 //image.field_2  = 'cool_2';
                 //---
                 //let option = {};
-                let option = {foreign_keys:[{foreign_data_type:DataType.ITEM,foreign_field:'parent_id',parent_field:'id',title:'items_bean',flat:true,type:Type.TITLE_ITEMS,field:{id:1,title:1,title_url:0},item_key:{count:0}}]};
-                //let option = {join_keys:[{search:App_Logic.get_search(DataType.ITEM,{},{},1,0),title:'cool_bean',type:Type.TITLE_COUNT}]};
-                //let option = {foreign_keys:[{foreign_data_type:DataType.ITEM,foreign_field:'parent_id',parent_field:'id',title:'items_bean',type:Type.TITLE_ITEMS,field:{title:0}}]};
+                let option = {foreigns:[{foreign_data_type:DataType.ITEM,foreign_field:'parent_id',parent_field:'id',title:'items_bean',flat:true,type:Type.TITLE_ITEMS,field:{id:1,title:1,title_url:0},image:{count:2}}]};
+                //let option = {joins:[{search:App_Logic.get_search(DataType.ITEM,{},{},1,0),title:'cool_bean',type:Type.TITLE_ITEMS,image:{count:2}}]};
+                //let option = {foreigns:[{foreign_data_type:DataType.ITEM,foreign_field:'parent_id',parent_field:'id',title:'items_bean',type:Type.TITLE_ITEMS,field:{title:0}}]};
                 //let option = {group:{group_33258:1}};
                 //let option = {group:{group_38669:1}};
                 //let option = {group:{}};
                 //let option = {get_group:true,group:'group 81381'};
                 //let option = {};
-                //let option = {image_key:{count:0,sort_by:{date_create:Type.TITLE_SORT_BY_ASC}}};
+                //let option = {image:{count:0,sort_by:{date_create:Type.TITLE_SORT_BY_ASC}}};
                 //let option = {field:{id:1,title:1,title_url:1}};
                 //let option = {field:{title_url:0}};
                 //---
@@ -136,7 +136,7 @@ describe('connect', function(){ this.timeout(25000);
 
                 //---
                 Log.w('99_biz_data',biz_data);
-                Log.w('99_biz_data_images',biz_data.images.length);
+                Log.w('99_biz_data_images',biz_data.items_bean[0].images.length);
                 //Log.w('99_biz_data_len',biz_data.groups.length);
                 //Log.w('99_biz_data_groups',biz_data.data_list[0].groups);
                 //Log.w('99_biz_data_post',biz_data.data_list[0]);
