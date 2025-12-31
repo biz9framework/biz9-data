@@ -1895,7 +1895,6 @@ class Portal {
 						parent_field:'parent_id',
 						title:'field_title',
 						field:{field_show_1:1,field_hide_2:0},
-						make_flat:{true,false},
 						type:Type.Type.TITLE_ITEMS,Type.TITLE_COUNT
 					}];
 		*  Join
@@ -1904,7 +1903,7 @@ class Portal {
 						search:search_obj,
 						photo_key:{count:0},
 						title:'field_title',
-						make_flat:{true,false},
+						flat:{true,false},
 						type:Type.Type.TITLE_ITEMS,Type.TITLE_COUNT
 					}];
 		 * Photos
@@ -2011,87 +2010,85 @@ class Portal {
 				//get_foreign
 				async function(call){
 					if(option.foreign_keys && data.id){
-						let parent_search_items = [];
+						let search_items = [];
 						for(const item of option.foreign_keys){
-								parent_search_items.push({
+								search_items.push({
 									foreign_data_type : item.foreign_data_type,
 									foreign_field : item.foreign_field,
 									parent_field : item.parent_field,
 									title : item.title ? item.title : item.foreign_data_type,
 									field : item.field ? item.field : {},
-									make_flat : item.make_flat ? item.make_flat : false,
 									type : item.type ? item.type : Type.TITLE_ITEMS,
-									data : []
 								});
 						}
-						for(const parent_search_item of parent_search_items){
-							let foreign_option = parent_search_item.field ? {field:parent_search_item.field} : {};
-							if(parent_search_item.type == Type.TITLE_ITEMS){
+						for(const search_item of search_items){
+							let foreign_option = search_item.field ? {field:search_item.field} : {};
+							if(search_item.type == Type.TITLE_ITEMS){
 								let query = {};
-								query[parent_search_item.foreign_field] = data[parent_search_item.parent_field];
-								let search = App_Logic.get_search(parent_search_item.foreign_data_type,query,{},1,0);
+								query[search_item.foreign_field] = data[search_item.parent_field];
+								let search = App_Logic.get_search(search_item.foreign_data_type,query,{},1,0);
 								const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,foreign_option);
 								if(biz_error){
 									error=Log.append(error,biz_error);
 								}else{
-									data[parent_search_item.title] = biz_data.items;
+									data[search_item.title] = biz_data.items;
 								}
 							}
-							else if(parent_search_item.type == Type.TITLE_COUNT){
+							else if(search_item.type == Type.TITLE_COUNT){
 								let query = {};
-								query[parent_search_item.foreign_field] = data[parent_search_item.parent_field];
-								let search = App_Logic.get_search(parent_search_item.foreign_data_type,query,{},1,0);
+								query[search_item.foreign_field] = data[search_item.parent_field];
+								let search = App_Logic.get_search(search_item.foreign_data_type,query,{},1,0);
 								const [biz_error,biz_data] = await Portal.count(database,search.data_type,search.filter);
 								if(biz_error){
 									error=Log.append(error,biz_error);
 								}else{
-									data[parent_search_item.title] = biz_data;
+									data[search_item.title] = biz_data;
 								}
 							}
 						}
-						/*
-						option.foreEach(item => {
-							parent_search_items.push({
-								foreign_data_type : item.foreign_data_type,
-								foreign_field : item.foreign_field,
-								parent_field : item.parent_field,
-								title : item.title,
-								field : item.field ? item.field : {},
-								make_flat : item.make_flat ? item.make_flat : false,
-								type : item.type ? item.type : Type.ITEMS,
-								data : [],
-							});
-						});
-						for(const parent_search_item of parent_search_items){
-							let join_option = parent_search_item.field ? {} : {};
-							if(parent_search_item.type == Type.TITLE_ITEMS){
-								let query = {};
-								query[parent_search_item.foreign_field] = data[parent_search_item.parent_field];
-								let search = App_Logic.get_search(parent_search_item.foreign_data_type,query,{},1,0);
+					}
+				},
+				//get_join
+				async function(call){
+					if(option.join_keys && data.id){
+						let search_items = [];
+						for(const item of option.join_keys){
+								search_items.push({
+									search : item.search,
+									photo_key : item.photo_key ? item.photo_key : {count:0},
+									field : item.field ? item.field : {},
+									title : item.title ? item.title : item.search.data_type,
+									make_flat : item.make_flat ? item.make_flat : false,
+									type : item.type ? item.type : Type.TITLE_ITEMS,
+								});
+						}
+						for(const search_item of search_items){
+							let join_option = search_item.field ? {field:search_item.field} : {};
+							if(search_item.type == Type.TITLE_ITEMS){
+								let search = search_item.search;
 								const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,join_option);
 								if(biz_error){
 									error=Log.append(error,biz_error);
 								}else{
-									data[parent_search_item.title] = biz_data.items;
+									data[search_item.title] = biz_data.items;
 								}
-							}else if(parent_search_item.type == Type.TITLE_COUNT){
-								let query = {};
-								query[parent_search_item.foreign_field] = data[parent_search_item.parent_field];
-								let search = App_Logic.get_search(parent_search_item.foreign_data_type,query,{},1,0);
+							}
+							else if(search_item.type == Type.TITLE_COUNT){
+								let search = search_item.search;
 								const [biz_error,biz_data] = await Portal.count(database,search.data_type,search.filter);
 								if(biz_error){
 									error=Log.append(error,biz_error);
 								}else{
-									data[parent_search_item.title] = biz_data;
+									data[search_item.title] = biz_data;
 								}
 							}
 						}
-						*/
 					}
 				},
 
 
 				//get_join
+				/*
 				async function(call){
 					if(option.get_join && data.id){
 						option.foreEach(item => {
@@ -2132,6 +2129,7 @@ class Portal {
 						}
 					}
 				},
+				*/
 
 				//get_group -- groups
 				async function(call){

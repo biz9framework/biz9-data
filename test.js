@@ -95,7 +95,10 @@ describe('connect', function(){ this.timeout(25000);
                 //let image = DataItem.get_new(DataType.IMAGE,0,{parent_id:parent_item.id,parent_data_type:parent_item.data_type});
                 //---
                 //let option = {};
-                let option = {foreign_keys:[{foreign_data_type:DataType.ITEM,foreign_field:'parent_id',parent_field:'id',title:'items_bean',type:Type.TITLE_COUNT,field:{title:1,title_url:0}}]};
+                //let option = {foreign_keys:[{foreign_data_type:DataType.ITEM,foreign_field:'parent_id',parent_field:'id',title:'items_bean',flat:true,type:Type.TITLE_COUNT,field:{title:1,title_url:0}}]};
+                console.log('ddddddd');
+                let option = {join_keys:[{search:App_Logic.get_search(DataType.ITEM,{},{},1,0),title:'cool_bean',type:Type.TITLE_COUNT}]};
+                Log.w('11_optin',option);
                 //let option = {foreign_keys:[{foreign_data_type:DataType.ITEM,foreign_field:'parent_id',parent_field:'id',title:'items_bean',type:Type.TITLE_ITEMS,field:{title:0}}]};
                 //let option = {group:{group_33258:1}};
                 //let option = {group:{group_38669:1}};
