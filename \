@@ -2103,49 +2103,7 @@ class Portal {
 						}
 					}
 				},
-			//item
-				async function(call){
-					if(option.items){
-						let search_items = [];
-						for(const item of option.items){
-								search_items.push({
-									type : item.type ? item.type : Type.TITLE_ITEMS,
-									search : item.search ? item.search : App_Logic.get_search(Type.DATA_BLANK,{},{},1,0),
-									field : item.field ? item.field : {},
-									image : item.image ? item.image : {count:0},
-									title : item.title ? item.title : item.search.data_type,
-								});
-						}
-						for(const search_item of search_items){
-							let item_option = search_item.field ? {} : {};
-							item_option.image = search_item.image;
-							if(search_item.type == Type.TITLE_ITEMS){
-								const [biz_error,biz_data] = await Portal.search_simple(database,search_item.search.data_type,search_item.search.filter,search_item.search.sort_by,search_item.search.page_current,search_item.search.page_size,item_option);
-							if(biz_error){
-									error=Log.append(error,biz_error);
-							}else{
-									let title = Str.get_title_url(search_item.title);
-									data[title+'_data_type'] = biz_data.data_type;
-									data[title+'_item_count'] = biz_data.item_count;
-									data[title+'_page_count'] = biz_data.page_count;
-									data[title+'_search'] = biz_data.search;
-									data[title+'_filter'] = biz_data.filter;
-									data[title] = biz_data.items;
-								}
-							}
-							else if(search_item.type == Type.TITLE_COUNT){
-								const [biz_error,biz_data] = await Portal.count(database,search_item.search.data_type,search_item.search.filter);
-							if(biz_error){
-									error=Log.append(error,biz_error);
-							}else{
-									let title = Str.get_title_url(search_item.title);
-									data[title] = biz_data;
-								}
-							}
-						}
-					}
-				},
-			//post-stat
+				//post-stat
 				async function(call){
 					if(option.stat && data.id){
 						let post_stat = Stat_Logic.get_new(data.data_type,data.id,option.stat.type?option.stat.type:Type.STAT_VIEW,option.stat.user_id?option.stat.user_id:0,data);
@@ -2157,7 +2115,6 @@ class Portal {
 						}
 					}
 				},
-
 			]).then(result => {
 				callback([error,data]);
 			}).catch(err => {
@@ -2489,7 +2446,8 @@ class Portal {
 					}
 				},
 			]).then(result => {
-				callback([error,data]);
+				Log.w('data',data);
+				//callback([error,data]);
 			}).catch(err => {
 				Log.error('DATA-SEARCH-ERROR-7',err);
 				callback([err,[]]);
