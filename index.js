@@ -1904,7 +1904,7 @@ class Portal {
 			-- joins / type. obj items / ex. [
 					{
 						search:search_obj,
-						photo:{count:0},
+						image:{count:0},
 						title:'field_title',
 						type:Type.Type.TITLE_ITEMS,Type.TITLE_COUNT
 						image:count:0,sort_by:Type.TITLE_SORT_BY_ASC
@@ -2018,7 +2018,7 @@ class Portal {
 						for(const item of option.joins){
 								search_items.push({
 									search : item.search,
-									photo : item.photo ? item.photo : {count:0},
+									image : item.image ? item.image : {count:0},
 									field : item.field ? item.field : {},
 									title : item.title ? item.title : item.search.data_type,
 									type : item.type ? item.type : Type.TITLE_ITEMS,

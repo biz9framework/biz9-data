@@ -27,7 +27,7 @@ const DATA_TYPE = Type.DATA_BLOG_POST;
 const OPTION = {};
 //const FILTER = {test_group_id:59367};
 const FILTER = {data_type:DATA_TYPE};
-const APP_ID = 'test-stage-dec30';
+const APP_ID = 'test-stage-dec31';
 //const APP_ID = 'app_id_98230';
 const SQL = {};
 /* --- TEST CONFIG END --- */
@@ -78,18 +78,17 @@ describe('connect', function(){ this.timeout(25000);
                 let user_id = "63e7b9ea-7bf8-4780-bf90-5050e501f44c";
                 //let search = App_Logic.get_search(Type.DATA_CATEGORY,{id:'75a5f009-54c3-4fd3-a136-fd3880023ddb'},{date_create:-1},1,3);
                 */
+                //-->
+                let new_item_title = 'category '+Num.get_id();
 
                 //-->
-                //let parent_item = DataItem.get_new(Type.DATA_PRODUCT,0,{my_parent_title:'my parent_'+Num.get_id()});
-                let parent_item = DataItem.get_new(Type.DATA_PRODUCT,'b83acd14-da97-47cd-810f-22163eba5343');
+                let parent_item = DataItem.get_new(Type.DATA_CATEGORY,0,{title:new_item_title,title_url:Str.get_title_url(new_item_title),field_1:'field_1',field_2:'field_2'});
+
+                //let parent_item = DataItem.get_new(Type.DATA_PRODUCT,'b83acd14-da97-47cd-810f-22163eba5343');
                 //let parent_item = DataItem.get_new(Type.DATA_CATEGORY,0);
-                //parent_item.field_1  = 'cool_1';
-                //parent_item.field_2  = 'cool_2';
-                //-->
-                let new_item_title = 'user '+Num.get_id();
-                //-->
+               //-->
                 //let user = DataItem.get_new(Type.DATA_USER,0,{title:new_item_title,title_url:Str.get_title_url(new_item_title)});
-                let user = DataItem.get_new(Type.DATA_USER,'cf495d5e-20ca-401f-af43-9e06d064ca7a');
+                //let user = DataItem.get_new(Type.DATA_USER,'cf495d5e-20ca-401f-af43-9e06d064ca7a');
                 //-->
                 //-->
                 //let group = DataItem.get_new(Type.DATA_GROUP,0,{parent_id:parent_item.id,parent_data_type:parent_item.data_type,title:new_item_title,title_url:Str.get_title_url(new_item_title)});
@@ -132,19 +131,9 @@ describe('connect', function(){ this.timeout(25000);
                             type:Type.TITLE_ITEMS,
                             image:{count:2}
                         },
-                        {
-                            search:App_Logic.get_search(Type.DATA_USER,{id:user.id},{},1,0),
-                            title:'user',
-                            type:Type.TITLE_ITEMS,
-                        },
-                        {
-                            search:App_Logic.get_search(Type.DATA_FAVORITE,{user_id:user.id},{},1,0),
-                            title:'favorite',
-                            type:Type.TITLE_COUNT,
-                        },
-
-                    ]};
+                   ]};
                     */
+
                 let option = {field:{title:0,title_url:0},group:{group_140:0},foreigns:[
                     {
                         foreign_data_type:Type.DATA_ITEM,
@@ -166,9 +155,9 @@ describe('connect', function(){ this.timeout(25000);
                 //let option = {stat:{user_id:user.id,type:Type.STAT_VIEW,unique:false}};
                 //---
                 //let search = App_Logic.get_search(Type.DATA_PRODUCT,{},{date_create:-1},1,12);
-                let search = App_Logic.get_search(Type.DATA_PRODUCT,{id:'b83acd14-da97-47cd-810f-22163eba5343'},{date_create:-1},1,12);
+                //let search = App_Logic.get_search(Type.DATA_PRODUCT,{id:'b83acd14-da97-47cd-810f-22163eba5343'},{date_create:-1},1,12);
                 //---
-                const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option);
+                //const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option);
                 //---
                 //const [biz_error,biz_data] = await Portal.count(database,search.data_type,search.filter);
                 //---
@@ -178,7 +167,7 @@ describe('connect', function(){ this.timeout(25000);
                 //const [error,biz_data] = await Portal.get(database,group.data_type,group.id,option);
                 //const [error,biz_data] = await Portal.get(database,group.data_type,group.id);
                 //---
-                //const [error,biz_data] = await Portal.post(database,parent_item.data_type,parent_item);
+                const [error,biz_data] = await Portal.post(database,parent_item.data_type,parent_item);
                 //const [error,biz_data] = await Portal.post(database,user.data_type,user);
                 //const [error,biz_data] = await Portal.post(database,item.data_type,item);
                 //const [error,biz_data] = await Portal.post(database,image.data_type,image);
