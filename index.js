@@ -1892,28 +1892,23 @@ class Portal {
 		 *  Foreign
 			-- foreigns / type. obj items / ex. [
 					{
+						type:Type.Type.TITLE_ITEMS,Type.TITLE_COUNT,
 						foreign_data_type:Type.DATA_PRODUCT,
 						foreign_field:'id',
 						parent_field:'parent_id',
-						title:'field_title',
 						field:{field_show_1:1,field_hide_2:0},
-						type:Type.Type.TITLE_ITEMS,Type.TITLE_COUNT,
-						image:count:0,sort_by:Type.TITLE_SORT_BY_ASC
+						title:'field_title',
+						page_current:1,
+						page_size:0,
 					}];
 		*  Join
 			-- joins / type. obj items / ex. [
 					{
-						search:search_obj,
-						image:{count:0},
-						title:'field_title',
 						type:Type.Type.TITLE_ITEMS,Type.TITLE_COUNT
-						image:count:0,sort_by:Type.TITLE_SORT_BY_ASC
-					}];
-		 * Image
-			-- image / type. obj / ex. [
-					{
-						count:0 infinite, num 0 default
-						sort_by:Type.TITLE_SORT_BY_ASC,Type.TITLE_SORT_BY_DESC / ASC default
+						search:search_obj,
+						title:'field_title',
+						page_current:1,
+						page_size:0
 					}];
 		   --
 		 * Stat
@@ -1949,25 +1944,13 @@ class Portal {
  					const [biz_error,biz_data] = await Data.get(database,data_type,key,option);
 					data = biz_data;
 				},
-				//image
-				async function(call){
-					if(!Str.check_is_null(data.id) && option.image){
-						data.images = [];
-						let query = {parent_id:data.id};
-						let search = App_Logic.get_search(Type.DATA_IMAGE,query,option.image.sort_by?option.image.sort_by:{},1,option.image.count?option.image.count:0);
-						const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size);
-							if(biz_error){
-								error=Log.append(error,biz_error);
-							}else{
-								data[Type.TITLE_IMAGES] = biz_data.items;
-							}
-					}
-				},
 				//field_values
 				async function(call){
+					/*-old?
 					if(option.get_field_value && data.id){
 						data = Field_Logic.get_item_field_values(data);
 					}
+					*/
 				},
 				//foreign
 				async function(call){
@@ -1975,17 +1958,18 @@ class Portal {
 						let search_items = [];
 						for(const item of option.foreigns){
 								search_items.push({
+									type : item.type ? item.type : Type.TITLE_ITEMS,
 									foreign_data_type : item.foreign_data_type,
 									foreign_field : item.foreign_field,
 									parent_field : item.parent_field,
-									title : item.title ? item.title : item.foreign_data_type,
 									field : item.field ? item.field : {},
-									type : item.type ? item.type : Type.TITLE_ITEMS,
-									image : item.image ? item.image : {}
+									title : item.title ? item.title : Str.get_title_url(Type.get_title(item.foreign_data_type,{plural:true})),
+									page_current: item.page_current ? item.page_current : 1,
+									page_size: item.page_size ? item.page_size : 0,
 								});
 						}
 						for(const search_item of search_items){
-							let foreign_option = {field:search_item.field,image:search_item.image};
+							let foreign_option = {field:search_item.field};
 							if(search_item.type == Type.TITLE_ITEMS){
 								let query = {};
 								query[search_item.foreign_field] = data[search_item.parent_field];
@@ -1994,7 +1978,7 @@ class Portal {
 								if(biz_error){
 									error=Log.append(error,biz_error);
 								}else{
-									data[search_item.title] = biz_data.items;
+									data[search_item.title] = biz_data.items?biz_data.items.length>0:[];
 								}
 							}
 							else if(search_item.type == Type.TITLE_COUNT){
@@ -2005,7 +1989,18 @@ class Portal {
 								if(biz_error){
 									error=Log.append(error,biz_error);
 								}else{
-									data[search_item.title] = biz_data;
+									data[search_item.title] = biz_data?biz_data:0;
+								}
+							}
+							else if(search_item.type == Type.TITLE_ONE){
+								let query = {};
+								query[search_item.foreign_field] = data[search_item.parent_field];
+								let search = App_Logic.get_search(search_item.foreign_data_type,query,{},1,0);
+								const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,foreign_option);
+								if(biz_error){
+									error=Log.append(error,biz_error);
+								}else{
+									data[search_item.title] = biz_data.items[0] ? biz_data.items.length>0 : App_Logic.get_not_found(search_item.foreign_data_type,0);
 								}
 							}
 						}
@@ -2020,13 +2015,13 @@ class Portal {
 									type : item.type ? item.type : Type.TITLE_ITEMS,
 									search : item.search ? item.search : App_Logic.get_search(Type.DATA_BLANK,{},{},1,0),
 									field : item.field ? item.field : {},
-									image : item.image ? item.image : {count:0},
 									title : item.title ? item.title : item.search.data_type,
-									image : item.image ? item.image : {}
+									page_current : item.page_current ? item.page_current : 0,
+									page_size : item.page_size ? item.page_current : 0,
 								});
 						}
 						for(const search_item of search_items){
-							let join_option = {field:search_item.field,image:search_item.image};
+							let join_option = {field:search_item.field};
 							if(search_item.type == Type.TITLE_ITEMS){
 								let search = search_item.search;
 								const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,join_option);
@@ -2042,7 +2037,16 @@ class Portal {
 								if(biz_error){
 									error=Log.append(error,biz_error);
 								}else{
-									data[search_item.title] = biz_data;
+									data[search_item.title] = biz_data?biz_data:0;
+								}
+							}
+							if(search_item.type == Type.TITLE_ONE){
+								let search = search_item.search;
+								const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,join_option);
+								if(biz_error){
+									error=Log.append(error,biz_error);
+								}else{
+									data[search_item.title] = biz_data.items[0] ? biz_data.length>0 : App_Logic.ge_not_found(search_item.search.data_type,0);
 								}
 							}
 						}
@@ -2103,7 +2107,7 @@ class Portal {
 						}
 					}
 				},
-			//item
+				//item
 				async function(call){
 					if(option.items){
 						let search_items = [];
@@ -2112,15 +2116,17 @@ class Portal {
 									type : item.type ? item.type : Type.TITLE_ITEMS,
 									search : item.search ? item.search : App_Logic.get_search(Type.DATA_BLANK,{},{},1,0),
 									field : item.field ? item.field : {},
-									image : item.image ? item.image : {count:0},
 									title : item.title ? item.title : item.search.data_type,
+									page_current : item.page_current ? item.page_current : 1,
+									page_size : item.page_size ? item.page_size : 0,
 								});
 						}
+						Log.w('11_search_item',search_items);
 						for(const search_item of search_items){
-							let item_option = search_item.field ? {} : {};
-							item_option.image = search_item.image;
+							let item_option = {field:search_item.field};
 							if(search_item.type == Type.TITLE_ITEMS){
-								const [biz_error,biz_data] = await Portal.search_simple(database,search_item.search.data_type,search_item.search.filter,search_item.search.sort_by,search_item.search.page_current,search_item.search.page_size,item_option);
+								let search = search_item.search;
+								const [biz_error,biz_data] = await Portal.search_simple(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,item_option);
 							if(biz_error){
 									error=Log.append(error,biz_error);
 							}else{
@@ -2132,14 +2138,21 @@ class Portal {
 									data[title+'_filter'] = biz_data.filter;
 									data[title] = biz_data.items;
 								}
-							}
-							else if(search_item.type == Type.TITLE_COUNT){
+							}else if(search_item.type == Type.TITLE_COUNT){
 								const [biz_error,biz_data] = await Portal.count(database,search_item.search.data_type,search_item.search.filter);
 							if(biz_error){
 									error=Log.append(error,biz_error);
 							}else{
 									let title = Str.get_title_url(search_item.title);
-									data[title] = biz_data;
+									data[title] = biz_data?biz_data:0;
+								}
+							}else if(search_item.type == Type.TITLE_ONE){
+								const [biz_error,biz_data] = await Portal.search_simple(database,search_item.search.data_type,search_item.search.filter,search_item.search.sort_by,search_item.search.page_current,search_item.search.page_size,item_option);
+							if(biz_error){
+									error=Log.append(error,biz_error);
+							}else{
+									let title = Str.get_title_url(search_item.title);
+									data[title] = biz_data.items[0] ? biz_data.items.length>0 : App_Logic.get_not_found(Type.DATA_BLANK,0);
 								}
 							}
 						}
@@ -2195,29 +2208,7 @@ class Portal {
 						error=Log.append(error,err);
 					});
 				},
-				//image
-				async function(call){
-					if(option.image && data.items.length>0){
-						let query = { $or: [] };
-						for(const data_item of data.items){
-							let query_field = {};
-							query_field[Type.FIELD_PARENT_ID] = { $regex:String(data_item.id), $options: "i" };
-							query.$or.push(query_field);
-						};
-						let search = App_Logic.get_search(Type.DATA_IMAGE,query,option.image.sort_by?option.image.sort_by:{},1,option.image.count?option.image.count:0);
-						const [biz_error,biz_data] = await Portal.search_simple(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size);
-						for(const parent of data.items){
-							parent.images = [];
-							for(const image of biz_data.items){
-								if(parent.id == image.parent_id)
-								{
-									parent.images.push(image);
-								}
-							}
-						}
-					}
-				},
-					]).then(result => {
+				]).then(result => {
 				callback([error,data]);
 			}).catch(err => {
 				Log.error("Count-List-Data",err);
@@ -2230,12 +2221,6 @@ class Portal {
 		/* OPTIONS - START
 		 * Fields
 		   - field / type. obj / ex. {field_show_1:1,field_hide_2:0} / default. throw error
-		 * Image
-			-- image / type. obj / ex. [
-					{
-						count:0 infinite, num 0 default
-						sort_by:Type.TITLE_SORT_BY_ASC,Type.TITLE_SORT_BY_DESC / ASC default
-					}];
 	 	* Group
 		   - group / type. obj / ex.{} all, {group_show_1:1,group_hide_2:0} / default. throw error
  		* Distinct
@@ -2247,21 +2232,19 @@ class Portal {
 		*  Foreign
 			-- foreigns / type. obj items / ex. [
 					{
-						type:Type.Type.TITLE_ITEMS,Type.TITLE_COUNT,
+						type:Type.Type.TITLE_ITEMS,Type.TITLE_COUNT,Type.TITLE_ONE
 						foreign_data_type:Type.DATA_ITEM,
 						foreign_field:'id',
 						parent_field:'parent_id',
 						field:{field_show_1:1,field_hide_2:0},
-						image:count:0,sort_by:Type.TITLE_SORT_BY_ASC
 						title:'field_title',
 					}];
 		*  Item
 			-- items / type. obj items / ex. [
 					{
-						type:Type.Type.TITLE_ITEMS,Type.TITLE_COUNT,
+						type:Type.Type.TITLE_ITEMS,Type.TITLE_COUNT,Type.TITLE_ONE
 						search:search_obj,
 						field:{field_show_1:1,field_hide_2:0},
-						image:count:0,sort_by:Type.TITLE_SORT_BY_ASC
 						title:'field_title',
 					}];
 
@@ -2310,28 +2293,6 @@ class Portal {
 						call();
 					}
 				},
-				//image
-				async function(call){
-					if(option.image && data.items.length>0){
-						let query = { $or: [] };
-						for(const data_item of data.items){
-							let query_field = {};
-							query_field[Type.FIELD_PARENT_ID] = { $regex:String(data_item.id), $options: "i" };
-							query.$or.push(query_field);
-						};
-						let search = App_Logic.get_search(Type.DATA_IMAGE,query,option.image.sort_by?option.image.sort_by:{},1,option.image.count?option.image.count:0);
-						const [biz_error,biz_data] = await Portal.search_simple(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size);
-						for(const parent of data.items){
-							parent.images = [];
-							for(const image of biz_data.items){
-								if(parent.id == image.parent_id)
-								{
-									parent.images.push(image);
-								}
-							}
-						}
-					}
-				},
 				//foreign
 				async function(call){
 					if(option.foreigns && data.items.length>0){
@@ -2346,7 +2307,6 @@ class Portal {
 									title : foreign_item.title ? foreign_item.title : foreign_item.foreign_data_type,
 									field : foreign_item.field ? foreign_item.field : {},
 									type : foreign_item.type ?  foreign_item.type : Type.TITLE_LIST,
-									image : foreign_item.image ? foreign_item.image : {},
 									items : []
 								});
 							}
@@ -2360,7 +2320,6 @@ class Portal {
 							};
 							let search = App_Logic.get_search(search_item.foreign_data_type,query,{},1,0);
 							let join_option = search_item.field ? {} : {};
-							join_option.image = search_item.image;
 							const [biz_error,biz_data] = await Portal.search_simple(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,join_option);
 							if(biz_error){
 								error=Log.append(error,biz_error);
@@ -2373,7 +2332,6 @@ class Portal {
 												let query = {};
 												query[search_item.foreign_field] = data_item[search_item.parent_field];
 												let search = App_Logic.get_search(search_item.foreign_data_type,query,{},1,0);
-												const [biz_error,biz_data] = await Portal.search_simple(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,join_option);
 												data_item[search_item.title] = [];
 												if(biz_error){
 													error=Log.append(error,biz_error);
@@ -2392,7 +2350,18 @@ class Portal {
 												}else{
 													data_item[search_item.title] = biz_data;
 												}
+											}else if(search_item.type == Type.TITLE_ONE){
+												let query = {};
+												query[search_item.foreign_field] = data_item[search_item.parent_field];
+												let search = App_Logic.get_search(search_item.foreign_data_type,query,{},1,0);
+												const [biz_error,biz_data] = await Portal.search_simple(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,join_option);
+												if(biz_error){
+													error=Log.append(error,biz_error);
+												}else{
+													data_item[search_item.title] = biz_data;
+												}
 											}
+
 										}
 									}
 								}
@@ -2455,13 +2424,11 @@ class Portal {
 									type : item.type ? item.type : Type.TITLE_ITEMS,
 									search : item.search ? item.search : App_Logic.get_search(Type.DATA_BLANK,{},{},1,0),
 									field : item.field ? item.field : {},
-									image : item.image ? item.image : {count:0},
 									title : item.title ? item.title : item.search.data_type,
 								});
 						}
 						for(const search_item of search_items){
 							let item_option = search_item.field ? {} : {};
-							item_option.image = search_item.image;
 							if(search_item.type == Type.TITLE_ITEMS){
 								const [biz_error,biz_data] = await Portal.search_simple(database,search_item.search.data_type,search_item.search.filter,search_item.search.sort_by,search_item.search.page_current,search_item.search.page_size,item_option);
 							if(biz_error){
@@ -2611,7 +2578,7 @@ class Portal {
 		return new Promise((callback) => {
 			let error = null;
 			let data = {};
-			option = option ? option : {image:true};
+			option = option ? option : {};
 			async.series([
 				function(call){
 					Data.delete_cache(database,data_type,id).then(([biz_error,biz_data])=> {
@@ -2642,8 +2609,6 @@ class Portal {
 		 *   - description / type / example / required
 		 * Option
 		 * - delete_item
-		 *   - description / bool / example / default: false
-		 * - delete_image
 		 *   - description / bool / example / default: false
 		 * Return
 		 * - title
@@ -2750,8 +2715,8 @@ class Portal {
 		 */
 		return new Promise((callback) => {
 			let error = null;
-			let data = {delete_resultOK:false,delete_items_resultOK:false,delete_image_resultOK:false};
-			option = option ? option : {delete_resultOK:false,delete_image_resultOK:false,delete_group_resultOK:false};
+			let data = {delete_resultOK:false,delete_items_resultOK:false};
+			option = option ? option : {delete_resultOK:false,delete_group_resultOK:false};
 			async.series([
 				//get_parent_ids
 				function(call){
@@ -2817,26 +2782,6 @@ class Portal {
 								error=Log.append(error,biz_error);
 							}else{
 								data.delete_items_resultOK = true;
-							}
-							call();
-						}).catch(err => {
-							error = Log.append(error,err);
-							call();
-						});
-					}else{
-						call();
-					}
-				},
-				function(call){
-					if(option.delete_image){
-						let data_type = Type.DATA_IMAGE;
-						let filter = option.delete_image_query;
-						data.delete_image_resultOK = false;
-						Data.delete_items(database,data_type,filter).then(([biz_error,biz_data])=> {
-							if(biz_error){
-								error=Log.append(error,biz_error);
-							}else{
-								data.delete_image_resultOK = true;
 							}
 							call();
 						}).catch(err => {

@@ -92,9 +92,12 @@ describe('connect', function(){ this.timeout(25000);
                 //let favorite = Favorite_Logic.get_new(parent_item.data_type,parent_item.id,user.id);
                 //-->
                 //let option = {};
-                let item_type = App_Logic.get_item(Type.TITLE_LIST,App_Logic.get_search(Type.DATA_TYPE,{},{},1,0),{},{},'types');
-                let item_category = App_Logic.get_item(Type.TITLE_LIST,App_Logic.get_search(Type.DATA_CATEGORY,{},{},1,0),{},{},'categorys');
-                let option = {items:[item_type,item_category]};
+                //let item_1 = App_Logic.get_item(Type.TITLE_LIST,App_Logic.get_search(Type.DATA_ITEM,{id:'ddd'},{},1,0));
+                let item_2 = App_Logic.get_item(Type.TITLE_COUNT,App_Logic.get_search(Type.DATA_ITEM,{},{},1,0),{field:{title:0,title_url:0},title:'cool'});
+                //let item_1 = App_Logic.get_item(Type.TITLE_LIST,App_Logic.get_search(Type.DATA_ITEM,{},{},1,0),{},{},'');
+                let item_3 = App_Logic.get_item(Type.TITLE_COUNT,App_Logic.get_search(Type.DATA_BLOG_POST,{},{},1,0),{},{},'');
+                //let foreign_1 = App_Logic.get_foreign(Type.TITLE_LIST,Type.DATA_ITEM);
+                let option = {items:[item_2,item_3]};
                 //let option = {group:{group_33258:1}};
                 //let option = {group:{group_38669:1}};
                 //let option = {group:{}};
