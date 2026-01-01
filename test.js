@@ -27,7 +27,7 @@ const DATA_TYPE = Type.DATA_BLOG_POST;
 const OPTION = {};
 //const FILTER = {test_group_id:59367};
 const FILTER = {data_type:DATA_TYPE};
-const APP_ID = 'test-stage-dec31';
+const APP_ID = 'test-stage-jan1';
 //const APP_ID = 'app_id_98230';
 const SQL = {};
 /* --- TEST CONFIG END --- */
@@ -69,21 +69,10 @@ describe('connect', function(){ this.timeout(25000);
             },
             //- POST_ITEM - START
             async function(call){
-                //let id = 0;
-                /*
-                let id = "1";
-                let data_type = Type.DATA_PRODUCT;
-                let data_item = DataItem.get_new(data_type,id,{title:'primary',title_url:'primary'});
-                let key = "mobile_product_12";
-                let user_id = "63e7b9ea-7bf8-4780-bf90-5050e501f44c";
-                //let search = App_Logic.get_search(Type.DATA_CATEGORY,{id:'75a5f009-54c3-4fd3-a136-fd3880023ddb'},{date_create:-1},1,3);
-                */
                 //-->
-                let new_item_title = 'category '+Num.get_id();
-
+                let new_item_title = 'blog post '+Num.get_id();
                 //-->
-                let parent_item = DataItem.get_new(Type.DATA_CATEGORY,0,{title:new_item_title,title_url:Str.get_title_url(new_item_title),field_1:'field_1',field_2:'field_2'});
-
+                let parent_item = DataItem.get_new(Type.DATA_BLOG_POST,0,{title:new_item_title,title_url:Str.get_title_url(new_item_title),field_1:'field_1',field_2:'field_2'});
                 //let parent_item = DataItem.get_new(Type.DATA_PRODUCT,'b83acd14-da97-47cd-810f-22163eba5343');
                 //let parent_item = DataItem.get_new(Type.DATA_CATEGORY,0);
                //-->
@@ -95,55 +84,16 @@ describe('connect', function(){ this.timeout(25000);
                 //-->
                 //let item = DataItem.get_new(Type.DATA_ITEM,0,{parent_id:parent_item.id,parent_data_type:parent_item.data_type,title:new_item_title,title_url:Str.get_title_url(new_item_title)});
                 //let item = DataItem.get_new(Type.DATA_ITEM,'0cc868ef-76f6-42d7-a842-b5114e2ff075');
-                //item.field_1  = 'cool_1';
-                //item.field_2  = 'cool_2';
                 //-->
                 //let image = DataItem.get_new(Type.DATA_IMAGE,0,{parent_id:parent_item.id,parent_data_type:parent_item.data_type,title:new_item_title,title_url:Str.get_title_url(new_item_title)});
                 //let image = DataItem.get_new(Type.DATA_IMAGE,0,{parent_id:item.id,parent_data_type:item.data_type, title:new_item_title,title_url:Str.get_title_url(new_item_title)});
-                //image.field_1  = 'cool_1';
-                //image.field_2  = 'cool_2';
                 //-->
+                //
                 //let favorite = Favorite_Logic.get_new(parent_item.data_type,parent_item.id,user.id);
-                //image.field_1  = 'cool_1';
-                //image.field_2  = 'cool_2';
                 //-->
                 //let option = {};
-                /*
-                let option = {foreigns:[
-                    {
-                        foreign_data_type:Type.DATA_ITEM,
-                        foreign_field:'parent_id',
-                        parent_field:'id',
-                        title:'items_bean',
-                        type:Type.TITLE_ITEMS,
-                        field:{id:1,title:1,title_url:0},
-                        image:{count:2}
-                    }
-
-                ]};
-                */
-                /*
-                let option =
-                    {joins:[
-                        {
-                            search:App_Logic.get_search(Type.DATA_ITEM,{},{},1,0),
-                            title:'cool_bean',
-                            type:Type.TITLE_ITEMS,
-                            image:{count:2}
-                        },
-                   ]};
-                    */
-
-                let option = {field:{title:0,title_url:0},group:{group_140:0},foreigns:[
-                    {
-                        foreign_data_type:Type.DATA_ITEM,
-                        foreign_field:'parent_id',
-                        parent_field:'id',
-                        title:'items_bean',
-                        type:Type.TITLE_COUNT,
-                        field:{}
-                    }
-                ]};
+                let join_type = App_Logic.get_join(Type.TITLE_LIST,App_Logic.get_search(Type.DATA_TYPE,{},{},1,0),{},{},'types');
+                let option = {joins:[join_type]};
                 //let option = {group:{group_33258:1}};
                 //let option = {group:{group_38669:1}};
                 //let option = {group:{}};
@@ -154,10 +104,9 @@ describe('connect', function(){ this.timeout(25000);
                 //let option = {field:{title_url:0}};
                 //let option = {stat:{user_id:user.id,type:Type.STAT_VIEW,unique:false}};
                 //---
-                //let search = App_Logic.get_search(Type.DATA_PRODUCT,{},{date_create:-1},1,12);
-                //let search = App_Logic.get_search(Type.DATA_PRODUCT,{id:'b83acd14-da97-47cd-810f-22163eba5343'},{date_create:-1},1,12);
+                let search = App_Logic.get_search(Type.DATA_BLOG_POST,{},{date_create:-1},1,12);
                 //---
-                //const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option);
+                const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option);
                 //---
                 //const [biz_error,biz_data] = await Portal.count(database,search.data_type,search.filter);
                 //---
@@ -167,7 +116,7 @@ describe('connect', function(){ this.timeout(25000);
                 //const [error,biz_data] = await Portal.get(database,group.data_type,group.id,option);
                 //const [error,biz_data] = await Portal.get(database,group.data_type,group.id);
                 //---
-                const [error,biz_data] = await Portal.post(database,parent_item.data_type,parent_item);
+                //const [error,biz_data] = await Portal.post(database,parent_item.data_type,parent_item);
                 //const [error,biz_data] = await Portal.post(database,user.data_type,user);
                 //const [error,biz_data] = await Portal.post(database,item.data_type,item);
                 //const [error,biz_data] = await Portal.post(database,image.data_type,image);
@@ -179,7 +128,8 @@ describe('connect', function(){ this.timeout(25000);
 
                 //---
                 Log.w('99_biz_data',biz_data);
-                Log.w('99_biz_data_parents',biz_data.items[0]);
+                Log.w('99_option',option);
+                //Log.w('99_biz_data_parents',biz_data.items[0]);
                 //Log.w('99_biz_data_images',biz_data.items_bean[0].images.length);
                 //Log.w('99_biz_data_len',biz_data.groups.length);
                 //Log.w('99_biz_data_groups',biz_data.data_list[0].groups);

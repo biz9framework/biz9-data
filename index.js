@@ -100,7 +100,7 @@ class Blog_Post_Data {
 		return new Promise((callback) => {
 			let blog_post = DataItem.get_new(Type.DATA_BLOG_POST,0);
 			let error = null;
-			option = option ? option : {get_image:false};
+			option = option ? option : {};
 			async.series([
 				async function(call){
 					const [biz_error,biz_data] = await Portal.get(database,Type.DATA_BLOG_POST,key,option);
@@ -124,7 +124,7 @@ class Blog_Post_Data {
 		return new Promise((callback) => {
 			let data = {item_count:0,page_count:1,filter:{},data_type:Type.DATA_BLOG_POST,blog_posts:[]};
 			let error = null;
-			option = option ? option : {get_image:false};
+			option = option ? option : {};
 			async.series([
 				async function(call){
 					const [biz_error,biz_data] = await Portal.search(database,Type.DATA_BLOG_POST,filter,sort_by,page_current,page_size,option);
@@ -152,7 +152,7 @@ class Category_Data { //9_category_get
 		return new Promise((callback) => {
 			let category = DataItem.get_new(Type.DATA_CATEGORY,0);
 			let error = null;
-			option = option ? option : {get_image:false};
+			option = option ? option : {};
 			async.series([
 				async function(call){
 					const [biz_error,biz_data] = await Portal.get(database,Type.DATA_CATEGORY,key,option);
@@ -175,7 +175,7 @@ class Category_Data { //9_category_get
 		return new Promise((callback) => {
 			let data = {item_count:0,page_count:1,filter:{},data_type:Type.DATA_CATEGORY,categorys:[]};
 			let error = null;
-			option = option ? option : {get_image:false};
+			option = option ? option : {};
 			async.series([
 				async function(call){
 					const [biz_error,biz_data] = await Portal.search(database,Type.DATA_CATEGORY,filter,sort_by,page_current,page_size,option);
@@ -204,7 +204,7 @@ class Content_Data {
 		return new Promise((callback) => {
 			let content = DataItem.get_new(Type.DATA_CONTENT,0);
 			let error = null;
-			option = option ? option : {get_image:false};
+			option = option ? option : {};
 			async.series([
 				async function(call){
 					const [biz_error,biz_data] = await Portal.get(database,Type.DATA_CONTENT,key,option);
@@ -227,7 +227,7 @@ class Content_Data {
 		return new Promise((callback) => {
 			let data = {item_count:0,page_count:1,filter:{},data_type:Type.DATA_CONTENT,contents:[]};
 			let error = null;
-			option = option ? option : {get_image:false};
+			option = option ? option : {};
 			async.series([
 				async function(call){
 					const [biz_error,biz_data] = await Portal.search(database,Type.DATA_CONTENT,filter,sort_by,page_current,page_size,option);
@@ -279,7 +279,7 @@ class Page_Data {
 		return new Promise((callback) => {
 			let data = {item_count:0,page_count:1,filter:{},data_type:Type.DATA_PAGE,pages:[]};
 			let error = null;
-			option = option ? option : {get_image:false};
+			option = option ? option : {};
 			async.series([
 				async function(call){
 					const [biz_error,biz_data] = await Portal.search(database,Type.DATA_PAGE,filter,sort_by,page_current,page_size,option);
@@ -308,7 +308,7 @@ class Template_Data {
 		return new Promise((callback) => {
 			let template = DataItem.get_new(Type.DATA_TEMPLATE,0);
 			let error = null;
-			option = option ? option : {get_image:false};
+			option = option ? option : {};
 			async.series([
 				async function(call){
 					const [biz_error,biz_data] = await Portal.get(database,Type.DATA_TEMPLATE,key,option);
@@ -331,7 +331,7 @@ class Template_Data {
 		return new Promise((callback) => {
 			let data = {item_count:0,page_count:1,filter:{},data_type:Type.DATA_TEMPLATE,templates:[]};
 			let error = null;
-			option = option ? option : {get_image:false};
+			option = option ? option : {};
 			async.series([
 				async function(call){
 					const [biz_error,biz_data] = await Portal.search(database,Type.DATA_TEMPLATE,filter,sort_by,page_current,page_size,option);
@@ -360,7 +360,7 @@ class Gallery_Data {
 		return new Promise((callback) => {
 			let gallery = DataItem.get_new(Type.DATA_GALLERY,0);
 			let error = null;
-			option = option ? option : {get_image:false};
+			option = option ? option : {};
 			async.series([
 				async function(call){
 					const [biz_error,biz_data] = await Portal.get(database,Type.DATA_GALLERY,key,option);
@@ -381,7 +381,7 @@ class Gallery_Data {
 		return new Promise((callback) => {
 			let data = {gallery_count:0,page_count:1,filter:{},data_type:Type.DATA_GALLERY,gallerys:[]};
 			let error = null;
-			option = option ? option : {get_image:false};
+			option = option ? option : {};
 			async.series([
 				async function(call){
 					const [biz_error,biz_data] = await Portal.search(database,Type.DATA_GALLERY,filter,sort_by,page_current,page_size,option);
@@ -412,7 +412,7 @@ class Event_Data {
 		return new Promise((callback) => {
 			let event = DataItem.get_new(Type.DATA_EVENT,0);
 			let error = null;
-			option = option ? option : {get_image:false};
+			option = option ? option : {};
 			async.series([
 				async function(call){
 					const [biz_error,biz_data] = await Portal.get(database,Type.DATA_EVENT,key,option);
@@ -433,7 +433,7 @@ class Event_Data {
 		return new Promise((callback) => {
 			let data = {event_count:0,page_count:1,filter:{},data_type:Type.DATA_EVENT,events:[]};
 			let error = null;
-			option = option ? option : {get_image:false};
+			option = option ? option : {};
 			async.series([
 				async function(call){
 					const [biz_error,biz_data] = await Portal.search(database,Type.DATA_EVENT,filter,sort_by,page_current,page_size,option);
@@ -1143,7 +1143,7 @@ class Product_Data {
 		return new Promise((callback) => {
 			let product = DataItem.get_new(Type.DATA_PRODUCT,0);
 			let error = null;
-			option = option ? option : {get_image:false};
+			option = option ? option : {};
 			async.series([
 				async function(call){
 					const [biz_error,biz_data] = await Portal.get(database,Type.DATA_PRODUCT,key,option);
@@ -1166,7 +1166,7 @@ class Product_Data {
 		return new Promise((callback) => {
 			let data = {item_count:0,page_count:1,filter:{},data_type:Type.DATA_PRODUCT,products:[]};
 			let error = null;
-			option = option ? option : {get_image:false};
+			option = option ? option : {};
 			async.series([
 				async function(call){
 					const [biz_error,biz_data] = await Portal.search(database,Type.DATA_PRODUCT,filter,sort_by,page_current,page_size,option);
@@ -1260,7 +1260,7 @@ class Review_Data {
 		return new Promise((callback) => {
 			let data = {item_count:0,page_count:1,filter:{},data_type:Type.DATA_REVIEW,reviews:[]};
 			let error = null;
-			option = option ? option : {get_image:false};
+			option = option ? option : {};
 			async.series([
 				async function(call){
 					const [biz_error,biz_data] = await Portal.search(database,Type.DATA_REVIEW,filter,sort_by,page_current,page_size,option);
@@ -2017,11 +2017,11 @@ class Portal {
 						let search_items = [];
 						for(const item of option.joins){
 								search_items.push({
-									search : item.search,
-									image : item.image ? item.image : {count:0},
-									field : item.field ? item.field : {},
-									title : item.title ? item.title : item.search.data_type,
 									type : item.type ? item.type : Type.TITLE_ITEMS,
+									search : item.search ? item.search ? App_Logic.get_search(Type.DATA_BLANK,{},{},1,0);
+									field : item.field ? item.field : {},
+									image : item.image ? item.image : {count:0},
+									title : item.title ? item.title : item.search.data_type,
 									image : item.image ? item.image : {}
 								});
 						}
@@ -2152,28 +2152,29 @@ class Portal {
 						error=Log.append(error,err);
 					});
 				},
-				//get_image
+				//image
 				async function(call){
-					if(option.get_join && data.items.length>0){
+					if(option.image && data.items.length>0){
 						let query = { $or: [] };
 						for(const data_item of data.items){
 							let query_field = {};
 							query_field[Type.FIELD_PARENT_ID] = { $regex:String(data_item.id), $options: "i" };
 							query.$or.push(query_field);
 						};
-						let search = App_Logic.get_search(DataTyp.IMAGE,query,{},1,0);
+						let search = App_Logic.get_search(Type.DATA_IMAGE,query,option.image.sort_by?option.image.sort_by:{},1,option.image.count?option.image.count:0);
 						const [biz_error,biz_data] = await Portal.search_simple(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size);
-						data.items.forEach(data_a =>{
-							data_a.images = [];
-							data.items.forEach(data_b =>{
-								if(data_b.parent_id == data_a.id){
-									data_a.images.push(data_b);
+						for(const parent of data.items){
+							parent.images = [];
+							for(const image of biz_data.items){
+								if(parent.id == image.parent_id)
+								{
+									parent.images.push(image);
 								}
-							});
-						});
+							}
+						}
 					}
 				},
-			]).then(result => {
+					]).then(result => {
 				callback([error,data]);
 			}).catch(err => {
 				Log.error("Count-List-Data",err);
@@ -2203,14 +2204,24 @@ class Portal {
 		*  Foreign
 			-- foreigns / type. obj items / ex. [
 					{
+						type:Type.Type.TITLE_ITEMS,Type.TITLE_COUNT,
 						foreign_data_type:Type.DATA_ITEM,
 						foreign_field:'id',
 						parent_field:'parent_id',
-						title:'field_title',
 						field:{field_show_1:1,field_hide_2:0},
-						type:Type.Type.TITLE_ITEMS,Type.TITLE_COUNT,
 						image:count:0,sort_by:Type.TITLE_SORT_BY_ASC
+						title:'field_title',
 					}];
+		*  Item
+			-- items / type. obj items / ex. [
+					{
+						type:Type.Type.TITLE_ITEMS,Type.TITLE_COUNT,
+						search:search_obj,
+						field:{field_show_1:1,field_hide_2:0},
+						image:count:0,sort_by:Type.TITLE_SORT_BY_ASC
+						title:'field_title',
+					}];
+
 		 * Return
 			- data_type
 			- item_count
@@ -2306,7 +2317,7 @@ class Portal {
 							};
 							let search = App_Logic.get_search(search_item.foreign_data_type,query,{},1,0);
 							let join_option = search_item.field ? {} : {};
-							join_option.get_image = search_item.get_image;
+							join_option.image = search_item.image;
 							const [biz_error,biz_data] = await Portal.search_simple(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,join_option);
 							if(biz_error){
 								error=Log.append(error,biz_error);
@@ -2392,6 +2403,65 @@ class Portal {
 						}
 					}
 				},
+				//item
+				async function(call){
+					if(option.items){
+						let search_items = [];
+						for(const foreign_item of option.foreigns){
+							for(const data_item of data.items){
+								search_items.push({
+									type : item.type ? item.type : Type.TITLE_ITEMS,
+									search : item.search ? item.search ? App_Logic.get_search(Type.DATA_BLANK,{},{},1,0);
+									field : item.field ? item.field : {},
+									image : item.image ? item.image : {count:0},
+									title : item.title ? item.title : item.search.data_type,
+									image : item.image ? item.image : {}
+								});
+							}
+						}
+						for(const search_item of search_items){
+							let join_option = search_item.field ? {} : {};
+							join_option.image = search_item.image;
+							const [biz_error,biz_data] = await Portal.search_simple(database,search_item.data_type,search_item.filter,search_item.sort_by,search_item.page_current,search_item.page_size,join_option);
+							if(biz_error){
+								error=Log.append(error,biz_error);
+							}else{
+								search_item.items = biz_data.items;
+								if(search_items.length> 0){
+									for(const search_item of search_items){
+										for(const data_item of data.items){
+											if(search_item.type == Type.TITLE_ITEMS){
+												let query = {};
+												query[search_item.foreign_field] = data_item[search_item.parent_field];
+												let search = App_Logic.get_search(search_item.foreign_data_type,query,{},1,0);
+												const [biz_error,biz_data] = await Portal.search_simple(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,join_option);
+												data_item[search_item.title] = [];
+												if(biz_error){
+													error=Log.append(error,biz_error);
+												}else{
+													for(const sub_data_item of biz_data.items){
+														data_item[search_item.title].push(sub_data_item);
+													}
+												}
+											}else if(search_item.type == Type.TITLE_COUNT){
+												let query = {};
+												query[search_item.foreign_field] = data_item[search_item.parent_field];
+												let search = App_Logic.get_search(search_item.foreign_data_type,query,{},1,0);
+												const [biz_error,biz_data] = await Portal.count(database,search.data_type,search.filter);
+												if(biz_error){
+													error=Log.append(error,biz_error);
+												}else{
+													data_item[search_item.title] = biz_data;
+												}
+											}
+										}
+									}
+								}
+							}
+							}
+						}
+				},
+
 			]).then(result => {
 				callback([error,data]);
 			}).catch(err => {
@@ -2410,7 +2480,7 @@ class Portal {
 		return new Promise((callback) => {
 			let error = null;
 			let data = DataItem.get_new(data_type,0);
-			option = option ? option : {}; //get_item:false,get_image:false,post_stat:false,user_id:0,delete_cache:false
+			option = option ? option : {};
 			async.series([
 				function(call){
 					Data.post(database,data_type,item,option).then(([biz_error,biz_data])=> {
@@ -2515,7 +2585,7 @@ class Portal {
 		return new Promise((callback) => {
 			let error = null;
 			let data = {};
-			option = option ? option : {get_image:false};
+			option = option ? option : {image:true};
 			async.series([
 				function(call){
 					Data.delete_cache(database,data_type,id).then(([biz_error,biz_data])=> {
@@ -3084,7 +3154,7 @@ class Service_Data {
 		return new Promise((callback) => {
 			let service = DataItem.get_new(Type.DATA_SERVICE,0);
 			let error = null;
-			option = option ? option : {get_image:false};
+			option = option ? option : {};
 			async.series([
 				async function(call){
 					const [biz_error,biz_data] = await Portal.get(database,Type.DATA_SERVICE,key,option);
@@ -3107,7 +3177,7 @@ class Service_Data {
 		return new Promise((callback) => {
 			let data = {item_count:0,page_count:1,filter:{},data_type:Type.DATA_SERVICE,services:[]};
 			let error = null;
-			option = option ? option : {get_image:false};
+			option = option ? option : {};
 			async.series([
 				async function(call){
 					const [biz_error,biz_data] = await Portal.search(database,Type.DATA_SERVICE,filter,sort_by,page_current,page_size,option);
