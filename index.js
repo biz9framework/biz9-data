@@ -1887,17 +1887,6 @@ class Portal {
 		   - cache_delete / type. bool / ex. true/false / default. false
 		 * Fields
 		   - field / type. obj / ex. {field_show_1:1,field_hide_2:0} / default. throw error
-	 	 *  Item
-			-- items / type. obj. item_search / ex. [
-					{
-						type:Type.Type.TITLE_ITEMS,Type.TITLE_COUNT,
-						search:search_obj,
-						field:{field_show_1:1,field_hide_2:0},
-						title:{group_show_1:1,group_hide_2:0},
-						page_current:1,
-						page_size:0,
-					}];
-
  		 *  Group
 			-- groups / type. obj. group_search / ex. [
 					{
@@ -1970,7 +1959,7 @@ class Portal {
 					}
 					*/
 				},
-				//9_get_foreign
+				//9_get_item_foreign
 				async function(call){
 					if(option.foreigns && data.id){
 						let search_items = [];
@@ -1996,7 +1985,7 @@ class Portal {
 								if(biz_error){
 									error=Log.append(error,biz_error);
 								}else{
-									data[search_item.title] = biz_data.items?biz_data.items.length>0:[];
+									data[search_item.title] = biz_data.items.length>0?biz_data.items:[];
 								}
 							}
 							else if(search_item.type == Type.TITLE_COUNT){
@@ -2024,7 +2013,7 @@ class Portal {
 						}
 					}
 				},
-				//9_get_group
+				//9_get_item_group
 				async function(call){
 					if(option.groups && data.id){
 						data.groups = [];
@@ -2093,7 +2082,7 @@ class Portal {
 							}
 						}
 				},
-				//9_get_item_join
+				//9_get_items_join
 				async function(call){
 					if(option.joins){
 						let search_items = [];
@@ -2158,8 +2147,7 @@ class Portal {
 				},
 
 			]).then(result => {
-				Log.w('www',data);
-				//callback([error,data]);
+				callback([error,data]);
 			}).catch(err => {
 				Log.error("ERROR-PORTAL-GET-2",err);
 				callback([error,{}]);
@@ -2226,13 +2214,14 @@ class Portal {
 						field:{field_show_1:1,field_hide_2:0},
 						title:'field_title',
 					}];
-		*  Item
-			-- items / type. obj items / ex. [
+		*  Join
+			-- joins / type. obj. join_search / ex. [
 					{
-						type:Type.Type.TITLE_ITEMS,Type.TITLE_COUNT,Type.TITLE_ONE
+						type:Type.Type.TITLE_ITEMS,Type.TITLE_COUNT
 						search:search_obj,
-						field:{field_show_1:1,field_hide_2:0},
 						title:'field_title',
+						page_current:1,
+						page_size:0
 					}];
 
 		 * Return
@@ -2247,7 +2236,7 @@ class Portal {
 			let error=null;
 			option = option ? option : {};
 			async.series([
-				//items
+				//9_get_items
 				function(call){
 					let search = Data_Logic.get_search(data_type,filter,sort_by,page_current,page_size);
 					Data.get_items(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option).then(([biz_error,items,item_count,page_count])=>{
@@ -2266,7 +2255,7 @@ class Portal {
 						error=Log.append(error,err);
 					});
 				},
-				//distinct
+				//9_get_items_distinct
 				function(call){
 					if(option.distinct && data.items.length>0){
 						data.items = data.items.filter((obj, index, self) =>
@@ -2280,7 +2269,7 @@ class Portal {
 						call();
 					}
 				},
-				//foreign
+				//9_get_items_foreign
 				async function(call){
 					if(option.foreigns && data.items.length>0){
 						let foreign_search_items = [];
@@ -2356,7 +2345,7 @@ class Portal {
 							}
 						}
 				},
-				//group
+				//9_get_item_groups
 				async function(call){
 					if(option.group && data.items.length>0){
 						let group_option = {};
@@ -2402,11 +2391,11 @@ class Portal {
 						}
 					}
 				},
-				//item
+				//9_get_items_join
 				async function(call){
-					if(option.items){
+					if(option.joins){
 						let search_items = [];
-						for(const item of option.items){
+						for(const item of option.joins){
 								search_items.push({
 									type : item.type ? item.type : Type.TITLE_ITEMS,
 									search : item.search ? item.search : Data_Logic.get_search(Type.DATA_BLANK,{},{},1,0),

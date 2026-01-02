@@ -72,16 +72,15 @@ describe('connect', function(){ this.timeout(25000);
                 // - TO DO
                 // -- Item - Join --
                 // -- Item - Group --
-                // -- Item - Foreign --here
-                // -- List - Item
-                // -- List - Join
+                // -- Item - Foreign --
+                // -- List - Join-- here
                 // -- List - Group
                 // -- List - Foreign
                 //-->
                 let new_item_title = 'group '+Num.get_id();
                 //-->
-                //let parent_item = Data_Logic.get_new(Type.DATA_BLOG_POST,0,{title:new_item_title,title_url:Str.get_title_url(new_item_title),field_1:'field_1',field_2:'field_2'});
-                let parent_item = Data_Logic.get_new(Type.DATA_BLOG_POST,'5dc7ed63-dd2d-46fe-93c4-6e0243a9c7fc');
+                let parent_item = Data_Logic.get_new(Type.DATA_BLOG_POST,0,{title:new_item_title,title_url:Str.get_title_url(new_item_title),field_1:'field_1',field_2:'field_2'});
+                //let parent_item = Data_Logic.get_new(Type.DATA_BLOG_POST,'5dc7ed63-dd2d-46fe-93c4-6e0243a9c7fc');
                 //let parent_item = Data_Logic.get_new(Type.DATA_CATEGORY,0);
                //-->
                 //let parent_item = Data_Logic.get_new(Type.DATA_BLOG_POST,0,{title:new_item_title,title_url:Str.get_title_url(new_item_title),field_1:'field_1',field_2:'field_2'});
@@ -102,25 +101,27 @@ describe('connect', function(){ this.timeout(25000);
                 //let favorite = Favorite_Logic.get_new(parent_item.data_type,parent_item.id,user.id);
                 //-->
                 //let option = {};
-                //let join_search_1 = Data_Logic.get_search_join(Type.TITLE_LIST,Data_Logic.get_search(Type.DATA_ITEM,{},{},1,0));
+                let join_search_1 = Data_Logic.get_search_join(Type.TITLE_LIST,Data_Logic.get_search(Type.DATA_ITEM,{},{},1,0));
+                let option = {joins:[join_search_1]};
                 //let join_search_2 = Data_Logic.get_search_join(Type.TITLE_COUNT,Data_Logic.get_search(Type.DATA_ITEM,{},{},1,0),{field:{title:0,title_url:0},title:'my_count'});
-                let group_search_1 = Data_Logic.get_search_group({title:{group_78157:0},field:{title:1,title_url:1}});
+                //let group_search_1 = Data_Logic.get_search_group({title:{group_78157:0},field:{title:1,title_url:1}});
                 //let group_search_2 = Data_Logic.get_search_group();
-                let option = {groups:[group_search_1]};
+                //let foreign_search_1 = Data_Logic.get_search_foreign(Type.TITLE_LIST,Type.DATA_ITEM,Type.FIELD_PARENT_ID,Type.FIELD_ID);
+                //let option = {foreigns:[foreign_search_1]};
 
                 //let option = {groups:{}};
                 //let option = {field:{id:1,title:1,title_url:1}};
                 //let option = {stat:{user_id:user.id,type:Type.STAT_VIEW,unique:false}};
                 //---
-                //let search = Data_Logic.get_search(Type.DATA_BLOG_POST,{},{date_create:-1},1,12);
+                let search = Data_Logic.get_search(Type.DATA_BLOG_POST,{},{date_create:-1},1,12);
                 //---
-                //const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option);
+                const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option);
                 //---
                 //const [biz_error,biz_data] = await Portal.count(database,search.data_type,search.filter);
                 //---
                 //const [error,biz_data] = await Portal.copy(database,parent_item.data_type,parent_item.id,option);
                 //---
-                const [error,biz_data] = await Portal.get(database,parent_item.data_type,parent_item.id,option);
+                //const [error,biz_data] = await Portal.get(database,parent_item.data_type,parent_item.id,option);
                 //const [error,biz_data] = await Portal.get(database,group.data_type,group.id,option);
                 //const [error,biz_data] = await Portal.get(database,group.data_type,group.id);
                 //---
