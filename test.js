@@ -104,7 +104,8 @@ describe('connect', function(){ this.timeout(25000);
                 //let option = {};
                 //let join_search_1 = Data_Logic.get_search_join(Type.TITLE_LIST,Data_Logic.get_search(Type.DATA_ITEM,{},{},1,0));
                 //let join_search_2 = Data_Logic.get_search_join(Type.TITLE_COUNT,Data_Logic.get_search(Type.DATA_ITEM,{},{},1,0),{field:{title:0,title_url:0},title:'my_count'});
-                let group_search_1 = Data_Logic.get_search_group(Type.TITLE_LIST,{title:{group_78157:0},field:{title:1,title_url:1}});//here
+                let group_search_1 = Data_Logic.get_search_group({title:{group_78157:0},field:{title:1,title_url:1}});
+                //let group_search_2 = Data_Logic.get_search_group();
                 let option = {groups:[group_search_1]};
 
                 //let option = {groups:{}};

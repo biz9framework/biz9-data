@@ -1970,7 +1970,7 @@ class Portal {
 					}
 					*/
 				},
-				//foreign
+				//9_get_foreign
 				async function(call){
 					if(option.foreigns && data.id){
 						let search_items = [];
@@ -2024,7 +2024,7 @@ class Portal {
 						}
 					}
 				},
-				//get_get_item_groups-here
+				//9_get_group
 				async function(call){
 					if(option.groups && data.id){
 						data.groups = [];
@@ -2073,6 +2073,7 @@ class Portal {
 												if(group_title.field == group.title_url){
 													let match_hide_group = hide_group_list.find(item=>item.field == group.title_url);
 														if(!match_hide_group){
+															data[Str.get_title_url(group.title)] = group;
 															data.groups.push(group);
 														}
 												}
@@ -2082,6 +2083,7 @@ class Portal {
 										for(const group of biz_data.items) {
 											let match_hide_group = hide_group_list.find(item=>item.field == group.title_url);
 												if(!match_hide_group){
+													data[Str.get_title_url(group.title)] = group;
 													data.groups.push(group);
 												}
 										}
@@ -2156,6 +2158,7 @@ class Portal {
 				},
 
 			]).then(result => {
+				Log.w('www',data);
 				//callback([error,data]);
 			}).catch(err => {
 				Log.error("ERROR-PORTAL-GET-2",err);
