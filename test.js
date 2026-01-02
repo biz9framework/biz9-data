@@ -70,10 +70,9 @@ describe('connect', function(){ this.timeout(25000);
             //- POST_ITEM - START
             async function(call){
                 // - TO DO
-                // -- Item - Item --here
-                // -- Item - Join
-                // -- Item - Group
-                // -- Item - Foreign
+                // -- Item - Join --
+                // -- Item - Group --
+                // -- Item - Foreign --here
                 // -- List - Item
                 // -- List - Join
                 // -- List - Group
@@ -84,6 +83,8 @@ describe('connect', function(){ this.timeout(25000);
                 //let parent_item = Data_Logic.get_new(Type.DATA_BLOG_POST,0,{title:new_item_title,title_url:Str.get_title_url(new_item_title),field_1:'field_1',field_2:'field_2'});
                 let parent_item = Data_Logic.get_new(Type.DATA_BLOG_POST,'5dc7ed63-dd2d-46fe-93c4-6e0243a9c7fc');
                 //let parent_item = Data_Logic.get_new(Type.DATA_CATEGORY,0);
+               //-->
+                //let parent_item = Data_Logic.get_new(Type.DATA_BLOG_POST,0,{title:new_item_title,title_url:Str.get_title_url(new_item_title),field_1:'field_1',field_2:'field_2'});
                //-->
                 //let user = Data_Logic.get_new(Type.DATA_USER,0,{title:new_item_title,title_url:Str.get_title_url(new_item_title)});
                 //let user = Data_Logic.get_new(Type.DATA_USER,'cf495d5e-20ca-401f-af43-9e06d064ca7a');
@@ -101,20 +102,13 @@ describe('connect', function(){ this.timeout(25000);
                 //let favorite = Favorite_Logic.get_new(parent_item.data_type,parent_item.id,user.id);
                 //-->
                 //let option = {};
-                let item_search_1 = Data_Logic.get_search_item(Type.TITLE_LIST,Data_Logic.get_search(Type.DATA_ITEM,{},{},1,0));
-                let item_search_2 = Data_Logic.get_search_item(Type.TITLE_COUNT,Data_Logic.get_search(Type.DATA_ITEM,{},{},1,0),{field:{title:0,title_url:0},title:'cool'});
-                //let item_1 = Data_Logic.get_search_item(Type.TITLE_LIST,Data_Logic.get_search(Type.DATA_ITEM,{},{},1,0),{},{},'');
-                //let item_3 = Data_Logic.get_search_item(Type.TITLE_COUNT,Data_Logic.get_search(Type.DATA_BLOG_POST,{},{},1,0),{},{},'');
-                //let foreign_1 = App_Logic.get_search_foreign(Type.TITLE_LIST,Type.DATA_ITEM);
-                let option = {items:[item_search_1,item_search_2]};
-                //let option = {group:{group_33258:1}};
-                //let option = {group:{group_38669:1}};
-                //let option = {group:{}};
+                //let join_search_1 = Data_Logic.get_search_join(Type.TITLE_LIST,Data_Logic.get_search(Type.DATA_ITEM,{},{},1,0));
+                //let join_search_2 = Data_Logic.get_search_join(Type.TITLE_COUNT,Data_Logic.get_search(Type.DATA_ITEM,{},{},1,0),{field:{title:0,title_url:0},title:'my_count'});
+                let group_search_1 = Data_Logic.get_search_group(Type.TITLE_LIST,{title:{group_78157:0},field:{title:1,title_url:1}});//here
+                let option = {groups:[group_search_1]};
+
                 //let option = {groups:{}};
-                //let option = {};
-                //let option = {image:{count:0,sort_by:{date_create:Type.TITLE_SORT_BY_ASC}}};
                 //let option = {field:{id:1,title:1,title_url:1}};
-                //let option = {field:{title_url:0}};
                 //let option = {stat:{user_id:user.id,type:Type.STAT_VIEW,unique:false}};
                 //---
                 //let search = Data_Logic.get_search(Type.DATA_BLOG_POST,{},{date_create:-1},1,12);
@@ -140,7 +134,7 @@ describe('connect', function(){ this.timeout(25000);
                 //const [error,biz_data] = await Portal.delete(database,parent_item.data_type,parent_item.id,option);
 
                 //---
-                //Log.w('99_biz_data',biz_data);
+                Log.w('99_biz_data',biz_data);
                 //Log.w('99_option',option);
                 //Log.w('99_biz_data_parents',biz_data.items[0]);
                 //Log.w('99_biz_data_images',biz_data.items_bean[0].images.length);
