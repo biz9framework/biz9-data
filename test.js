@@ -27,7 +27,7 @@ const DATA_TYPE = Type.DATA_BLOG_POST;
 const OPTION = {};
 //const FILTER = {test_group_id:59367};
 const FILTER = {data_type:DATA_TYPE};
-const APP_ID = 'test-stage-jan1';
+const APP_ID = 'test-stage-jan3';
 //const APP_ID = 'app_id_98230';
 const SQL = {};
 /* --- TEST CONFIG END --- */
@@ -53,13 +53,7 @@ describe('connect', function(){ this.timeout(25000);
     it("_connect", function(done){
         let error=null;
         let database = {};
-        let cart = {};
-        let order = {};
         let data = {};
-        let data_type = Type.DATA_PRODUCT;
-        let id = "95fc25b7-43d0-49ff-bb86-0f5ba207cf18";
-        let user_id = "f63d6bd2-ce86-4a36-808f-40fe59069077";
-        let option = {post_stat:true,user_id:user_id};
         async.series([
             async function(call){
                 console.log('DATABASE-START');
@@ -71,69 +65,63 @@ describe('connect', function(){ this.timeout(25000);
             async function(call){
                 // - TO DO
                 // -- Item - Join --
-                // -- Item - Group --
                 // -- Item - Foreign --
-                // -- List - Join-- here
+                // -- Item - Group --
+                // -- List - Join -- here
                 // -- List - Group
                 // -- List - Foreign
                 //-->
-                let new_item_title = 'group '+Num.get_id();
+                let new_data_type = Type.DATA_PRODUCT;
                 //-->
-                let parent_item = Data_Logic.get_new(Type.DATA_BLOG_POST,0,{title:new_item_title,title_url:Str.get_title_url(new_item_title),field_1:'field_1',field_2:'field_2'});
-                //let parent_item = Data_Logic.get_new(Type.DATA_BLOG_POST,'5dc7ed63-dd2d-46fe-93c4-6e0243a9c7fc');
-                //let parent_item = Data_Logic.get_new(Type.DATA_CATEGORY,0);
-               //-->
-                //let parent_item = Data_Logic.get_new(Type.DATA_BLOG_POST,0,{title:new_item_title,title_url:Str.get_title_url(new_item_title),field_1:'field_1',field_2:'field_2'});
-               //-->
-                //let user = Data_Logic.get_new(Type.DATA_USER,0,{title:new_item_title,title_url:Str.get_title_url(new_item_title)});
+                let parent = Data_Logic.get_biz(new_data_type,0,{test:true,generate_title:true});
+                //let parent = Data_Logic.get_new(new_data_type,'234e5c23-dec0-45be-b9fd-914e967af1c7');
+                //let parent = Data_Logic.get_new(Type.DATA_CATEGORY,0);
+                //-->
+                //let blank = Data_Logic.get_biz(Type.DATA_BLANK,0,{test:true,generate_title:true,parent:parent});
+                //-->
+                //let group = Data_Logic.get_biz(Type.DATA_GROUP,0,{test:true,generate_title:true,parent:parent});
+                //-->
+                //let user = Data_Logic.get_new_biz(Type.DATA_USER,0,{test:true,generate_title:true});
                 //let user = Data_Logic.get_new(Type.DATA_USER,'cf495d5e-20ca-401f-af43-9e06d064ca7a');
                 //-->
-                //-->
-                //let group = Data_Logic.get_new(Type.DATA_GROUP,0,{parent_id:parent_item.id,parent_data_type:parent_item.data_type,title:new_item_title,title_url:Str.get_title_url(new_item_title),field_1:'field_1',field_2:'field_2'});
-                //-->
-                //let item = Data_Logic.get_new(Type.DATA_ITEM,0,{parent_id:parent_item.id,parent_data_type:parent_item.data_type,title:new_item_title,title_url:Str.get_title_url(new_item_title)});
-                //let item = Data_Logic.get_new(Type.DATA_ITEM,'0cc868ef-76f6-42d7-a842-b5114e2ff075');
-                //-->
-                //let image = Data_Logic.get_new(Type.DATA_IMAGE,0,{parent_id:parent_item.id,parent_data_type:parent_item.data_type,title:new_item_title,title_url:Str.get_title_url(new_item_title)});
-                //let image = Data_Logic.get_new(Type.DATA_IMAGE,0,{parent_id:item.id,parent_data_type:item.data_type, title:new_item_title,title_url:Str.get_title_url(new_item_title)});
-                //-->
-                //
-                //let favorite = Favorite_Logic.get_new(parent_item.data_type,parent_item.id,user.id);
+                //let favorite = Favorite_Logic.get_new(parent.data_type,parent.id,user.id);
                 //-->
                 //let option = {};
-                let join_search_1 = Data_Logic.get_search_join(Type.TITLE_LIST,Data_Logic.get_search(Type.DATA_ITEM,{},{},1,0));
-                let option = {joins:[join_search_1]};
-                //let join_search_2 = Data_Logic.get_search_join(Type.TITLE_COUNT,Data_Logic.get_search(Type.DATA_ITEM,{},{},1,0),{field:{title:0,title_url:0},title:'my_count'});
-                //let group_search_1 = Data_Logic.get_search_group({title:{group_78157:0},field:{title:1,title_url:1}});
-                //let group_search_2 = Data_Logic.get_search_group();
-                //let foreign_search_1 = Data_Logic.get_search_foreign(Type.TITLE_LIST,Type.DATA_ITEM,Type.FIELD_PARENT_ID,Type.FIELD_ID);
-                //let option = {foreigns:[foreign_search_1]};
+                //let join_search_1 = Data_Logic.get_search_join(Type.TITLE_ONE,Data_Logic.get_search(Type.DATA_BLANK,{},{},1,0));
+                //let option = {joins:[join_search_1]};
+                let foreign_search_1 = Data_Logic.get_search_foreign(Type.TITLE_ONE,Type.DATA_BLANK,Type.FIELD_PARENT_ID,Type.FIELD_ID);
+                let option = {foreigns:[foreign_search_1]};
+
+                //let group_search_1 = Data_Logic.get_search_group();
+                //let group_search_1 = Data_Logic.get_search_group({title:{group_43270:1}});
+                //let group_search_2 = Data_Logic.get_search_group({title:{group_78157:0},field:{title:1,title_url:1}});
+                //let option = {groups:[group_search_1]};
 
                 //let option = {groups:{}};
                 //let option = {field:{id:1,title:1,title_url:1}};
                 //let option = {stat:{user_id:user.id,type:Type.STAT_VIEW,unique:false}};
                 //---
-                let search = Data_Logic.get_search(Type.DATA_BLOG_POST,{},{date_create:-1},1,12);
+                let search = Data_Logic.get_search(Type.DATA_PRODUCT,{},{date_create:-1},1,12);
                 //---
                 const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option);
                 //---
                 //const [biz_error,biz_data] = await Portal.count(database,search.data_type,search.filter);
                 //---
-                //const [error,biz_data] = await Portal.copy(database,parent_item.data_type,parent_item.id,option);
+                //const [error,biz_data] = await Portal.copy(database,parent.data_type,parent.id,option);
                 //---
-                //const [error,biz_data] = await Portal.get(database,parent_item.data_type,parent_item.id,option);
+                //const [error,biz_data] = await Portal.get(database,parent.data_type,parent.id,option);
                 //const [error,biz_data] = await Portal.get(database,group.data_type,group.id,option);
                 //const [error,biz_data] = await Portal.get(database,group.data_type,group.id);
                 //---
-                //const [error,biz_data] = await Portal.post(database,parent_item.data_type,parent_item);
+                //const [error,biz_data] = await Portal.post(database,parent.data_type,parent);
+                //const [error,biz_data] = await Portal.post(database,blank.data_type,blank);
                 //const [error,biz_data] = await Portal.post(database,user.data_type,user);
-                //const [error,biz_data] = await Portal.post(database,item.data_type,item);
                 //const [error,biz_data] = await Portal.post(database,image.data_type,image);
                 //const [error,biz_data] = await Portal.post(database,group.data_type,group);
                 //---
-                //const [error,biz_data] = await Portal.post_items(database,[parent_item,parent_item_1,parent_item_2]);
+                //const [error,biz_data] = await Portal.post_items(database,[parent,parent_item_1,parent_item_2]);
                 //---
-                //const [error,biz_data] = await Portal.delete(database,parent_item.data_type,parent_item.id,option);
+                //const [error,biz_data] = await Portal.delete(database,parent.data_type,parent.id,option);
 
                 //---
                 Log.w('99_biz_data',biz_data);
@@ -149,6 +137,7 @@ describe('connect', function(){ this.timeout(25000);
 
                 //const [biz_error,biz_data] = await Portal.get(database,data_type,id,option);
                 //const [biz_error,biz_data] = await Portal.post(database,data_type,data_item,{});
+                //const [biz_error,biz_data] = await Portal.post(database,group.data_type,group);
                 //const [biz_error,biz_data] = await Portal.search_simple(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option);
                 //const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option);
                 //const [biz_error,biz_data] = await Page_Data.get(database,Type.PAGE_PRODUCT_HOME);
@@ -681,7 +670,7 @@ describe('post_data', function(){ this.timeout(25000);
                     //let title_2 = Num.get_id()+"_title_2";
                     //let blog_post = Data_Logic.get_new(Type.DATA_BLOG_POST,'d86ec25e-4b15-4c4a-8ef9-ce82c9067571',{title:title,title_url:Str.get_title_url(title),author:Num.get_id()+"_cool"});
                     //let blog_post = Data_Logic.get_new(Type.DATA_BLOG_POST,key);
-                    //let item = Data_Logic.get_new(Type.DATA_ITEM,0,{title:title_2,title_url:Str.get_title_url(title_2)});
+                    //let item = Data_Logic.get_new(Type.DATA_BLANK,0,{title:title_2,title_url:Str.get_title_url(title_2)});
                     //let full_item = Data_Logic.get_new_full_item(item,blog_post,blog_post,{title:title,title_url:Str.get_title_url(title)});
                     //console.log('aaaa');
                     //console.log(blog_post);
@@ -692,7 +681,7 @@ describe('post_data', function(){ this.timeout(25000);
                     //Log.w('sub_item',sub_item);
                     //console.log('ccccc');
                     //const [error,data] = await Portal.post(database,Type.DATA_BLOG_POST,blog_post);
-                    //const [error,data] = await Portal.post(database,Type.DATA_ITEM,full_item);
+                    //const [error,data] = await Portal.post(database,Type.DATA_BLANK,full_item);
                     //Log.w('cool',data);
                     /*
                 if(error){
@@ -711,10 +700,10 @@ describe('post_data', function(){ this.timeout(25000);
                 let parent_data_type = Type.DATA_PRODUCT;
                 let parent_id = "7620c413-e542-4b89-82e6-60c5b1e06a55";
                 let user_id = "ea790ecf-2a91-4fe4-951d-5cae0d9551a4";
-                let parent_sub_item_1_data_type = Type.DATA_ITEM;
+                let parent_sub_item_1_data_type = Type.DATA_BLANK;
                 let parent_sub_item_1_id = "0eb7b268-7c19-4705-a94e-e939568b85d8";
 
-                let parent_sub_item_2_data_type = Type.DATA_ITEM;
+                let parent_sub_item_2_data_type = Type.DATA_BLANK;
                 let parent_sub_item_2_id = "1e95bd1b-f902-4fc0-8424-da0c93b81b48";
 
                 let cart = Cart_Logic.get_new(parent_data_type,user_id);
@@ -909,9 +898,9 @@ describe('item_update', function(){ this.timeout(25000);
                 let user_id = "f7765250-75bf-4d43-b17e-5f01154acad0";
                 let parent_data_type = Type.DATA_SERVICE;
                 let parent_id = "a9956e2f-a9ca-4c32-a432-993ecccff0ad";
-                let sub_item_1_data_type = Type.DATA_ITEM;
+                let sub_item_1_data_type = Type.DATA_BLANK;
                 let sub_item_1_id = "cd2cd782-cdc8-4eef-8284-779d0b065969";
-                let sub_item_2_data_type =  Type.DATA_ITEM;
+                let sub_item_2_data_type =  Type.DATA_BLANK;
                 let sub_item_2_id = "01b4fd96-27ec-43f8-874d-78b7ba01ef22";
 
                 let cart = Cart_Logic.get_cart(user_id);
@@ -1225,11 +1214,12 @@ describe('get_data', function(){ this.timeout(25000);
                 console.log('TEST-GET-START');
                 let data_type = Type.DATA_PRODUCT;
                 //let key = "CA-51129";
-                let parent_tem = Data_Logic.get_new(Type.DATA_PRODUCT,"4294d558-384b-47c9-ade0-63f2c54a2939");
-                let group = Data_Logic.get_new(Type.DATA_GROUP,'4294d558-384b-47c9-ade0-63f2c54a2939',{parent_id:parent_item.id,parent_data_type:parent_item.data_type});
-                let item = Data_Logic.get_new(Type.DATA_ITEM,0,{parent_id:group.id,parent_data_type:group.data_type});
+                let parent = Data_Logic.get_new(Type.DATA_PRODUCT,0);
+                //let parent = Data_Logic.get_new(Type.DATA_PRODUCT,"4294d558-384b-47c9-ade0-63f2c54a2939");
+                let group = Data_Logic.get_new(Type.DATA_GROUP,'4294d558-384b-47c9-ade0-63f2c54a2939',{parent_id:parent.id,parent_data_type:parent.data_type});
+                let item = Data_Logic.get_new(Type.DATA_BLANK,0,{parent_id:group.id,parent_data_type:group.data_type});
                 let option = {get_group:true};
-	            //let option = {get_join:true,field_key_list:[{foreign_data_type:Type.DATA_ITEM,foreign_field:'parent_id',parent_field:'id',title:'items_cool',type:Type.LIST}]};
+	            //let option = {get_join:true,field_key_list:[{foreign_data_type:Type.DATA_BLANK,foreign_field:'parent_id',parent_field:'id',title:'items_cool',type:Type.LIST}]};
                 //let key = "d86ec25e-4b15-4c4a-8ef9-ce82c9067571";
                 //let search  = Data_Logic.get_search(Type.DATA_GROUP,{id:'7d92ea90-c1a7-49c9-80e4-8064d06546b1'},{},1,0);
                 //let option = {get_search:true,search_data_type:Type.DATA_CATEGORY,search_field:'category',item_search_value:'title'};
@@ -1238,8 +1228,8 @@ describe('get_data', function(){ this.timeout(25000);
                 //let option = {};
                 //let option = {get_count:true,item_data_type:Type.DATA_PRODUCT,item_field:'category',item_value:'title'};
                 //Log.w('search',search);
-                //Log.w('parent_item',parent_item);
-                //const [biz_error,biz_data] = await Portal.get(database,parent_item.data_type,parent_item.id,option);
+                //Log.w('parent',parent);
+                //const [biz_error,biz_data] = await Portal.get(database,parent.data_type,parent.id,option);
                 //////const [biz_error,biz_data] = await Content_Data.get(database,key,{get_item:true});
                 //const [biz_error,biz_data] = await Faq_Data.get(database,'primary');
                 //const [biz_error,biz_data] = await Blog_Post_Data.get(database,key,{get_item:true});
@@ -1252,7 +1242,7 @@ describe('get_data', function(){ this.timeout(25000);
                 //const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option);
                 //Log.w('99_option',option);
                 //Log.w('99_search',search);
-                Log.w('99_biz_data',biz_data);
+                //Log.w('99_biz_data',biz_data);
                 //Log.w('99_biz_data',biz_data.data_list[0]);
                 console.log('TEST-GET-SUCCESS');
                 console.log('TEST-GET-END');
