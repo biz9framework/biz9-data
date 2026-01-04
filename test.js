@@ -27,7 +27,7 @@ const DATA_TYPE = Type.DATA_BLOG_POST;
 const OPTION = {};
 //const FILTER = {test_group_id:59367};
 const FILTER = {data_type:DATA_TYPE};
-const APP_ID = 'test-stage-jan3';
+const APP_ID = 'test-stage-jan4';
 //const APP_ID = 'app_id_98230';
 const SQL = {};
 /* --- TEST CONFIG END --- */
@@ -67,19 +67,19 @@ describe('connect', function(){ this.timeout(25000);
                 // -- Item - Join --
                 // -- Item - Foreign --
                 // -- Item - Group --
-                // -- List - Join -- here
-                // -- List - Group
+                // -- List - Join
+                // -- List - Group-- here
                 // -- List - Foreign
                 //-->
                 let new_data_type = Type.DATA_PRODUCT;
                 //-->
                 let parent = Data_Logic.get_biz(new_data_type,0,{test:true,generate_title:true});
-                //let parent = Data_Logic.get_new(new_data_type,'4086fcdd-5cf7-49c4-a732-e997bdd346bb');
+                //let parent = Data_Logic.get_new(new_data_type,'81da148d-4472-4b8f-b4bb-7ceedcad9f5f');
                 //let parent = Data_Logic.get_new(Type.DATA_CATEGORY,0);
                 //-->
                 let blank = Data_Logic.get_biz(Type.DATA_BLANK,0,{test:true,generate_title:true,parent:parent});
                 //-->
-                //let group = Data_Logic.get_biz(Type.DATA_GROUP,0,{test:true,generate_title:true,parent:parent});
+                let group = Data_Logic.get_biz(Type.DATA_GROUP,0,{test:true,generate_title:true,parent:parent});
                 //-->
                 //let user = Data_Logic.get_new_biz(Type.DATA_USER,0,{test:true,generate_title:true});
                 //let user = Data_Logic.get_new(Type.DATA_USER,'cf495d5e-20ca-401f-af43-9e06d064ca7a');
@@ -87,15 +87,15 @@ describe('connect', function(){ this.timeout(25000);
                 //let favorite = Favorite_Logic.get_new(parent.data_type,parent.id,user.id);
                 //-->
                 //let option = {};
-                let join_search_1 = Data_Logic.get_search_join(Type.TITLE_ONE,Data_Logic.get_search(Type.DATA_BLANK,{},{},1,2),{title:'cool'});
-                let option = {joins:[join_search_1]};
+                //let join_search_1 = Data_Logic.get_search_join(Type.TITLE_ONE,Data_Logic.get_search(Type.DATA_BLANK,{},{},1,2),{title:'cool'});
+                //let option = {joins:[join_search_1]};
                 //let foreign_search_1 = Data_Logic.get_search_foreign(Type.TITLE_ONE,Type.DATA_BLANK,Type.FIELD_PARENT_ID,Type.FIELD_ID);
                 //let option = {foreigns:[foreign_search_1]};
 
                 //let group_search_1 = Data_Logic.get_search_group();
-                //let group_search_1 = Data_Logic.get_search_group({title:{group_43270:1}});
+                let group_search_1 = Data_Logic.get_search_group({title:{group_55589:1}});
                 //let group_search_2 = Data_Logic.get_search_group({title:{group_78157:0},field:{title:1,title_url:1}});
-                //let option = {groups:[group_search_1]};
+                let option = {groups:[group_search_1]};
 
                 //let option = {groups:{}};
                 //let option = {field:{id:1,title:1,title_url:1}};
@@ -124,7 +124,9 @@ describe('connect', function(){ this.timeout(25000);
                 //const [error,biz_data] = await Portal.delete(database,parent.data_type,parent.id,option);
 
                 //---
-                //Log.w('99_biz_data',biz_data);
+                Log.w('99_biz_data',biz_data);
+                Log.w('99_biz_data_00',biz_data.items[0].groups);
+                Log.w('99_biz_data_11',biz_data.items[1].groups);
                 //Log.w('99_option',option);
                 //Log.w('99_biz_data_parents',biz_data.items[0]);
                 //Log.w('99_biz_data_images',biz_data.items_bean[0].images.length);
@@ -133,41 +135,12 @@ describe('connect', function(){ this.timeout(25000);
                 //Log.w('99_biz_data_post',biz_data.data_list[0]);
                 //Log.w('group',group);
 
-                //let option = {get_join:true,get_distinct:true,distinct_field:'title',field_key_list:[{primary_data_type:Type.DATA_PRODUCT,primary_field:'type',item_field:'title',title:'my_count',type:Type.COUNT}]};
-
-                //const [biz_error,biz_data] = await Portal.get(database,data_type,id,option);
-                //const [biz_error,biz_data] = await Portal.post(database,data_type,data_item,{});
-                //const [biz_error,biz_data] = await Portal.post(database,group.data_type,group);
-                //const [biz_error,biz_data] = await Portal.search_simple(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option);
-                //const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option);
-                //const [biz_error,biz_data] = await Page_Data.get(database,Type.PAGE_PRODUCT_HOME);
-                //const [biz_error,biz_data] = await Faq_Data.get(database,'primary');
-                //const [biz_error,biz_data] = await Review_Data.get(database,data_type,id,{date_create:-1},1,0,{});
-                //let search = Data_Logic.get_search(Type.DATA_REVIEW,query,{date_create:-1,date_create:-1},1,20);
-                //const [biz_error,biz_data] = await Review_Data.get(database,Type.DATA_PRODUCT,'1',{date_create:-1},1,12);
-                //Log.w('99_final_post',biz_data);
-                //Log.w('99_final_post',biz_data.data_list[0]);
-
-                //let field_list_group = Field_Logic.get_value_list_group(biz_data,2,1);
-                //Log.w('rrrrrr',field_list_group);
-                /*
-
-                let field_title = Field_Logic.get_field_value_title(Type.FIELD_VALUE_LIST,3);
-                Log.w('22_field_value_title',field_title);
-                let field_value_value = Field_Logic.get_field_value_value(Type.FIELD_VALUE_LIST,biz_data,2);
-                Log.w('33_field_value_value',field_value_value);
-                */
-
                 /*
                  *   {edit_mode?Project_Logic.get_item_field_value_edit(template.data_type,template.id,Type.FIELD_VALUE_LIST,2,{list_value_count:2}):""}
                     {Field_Logic.get_field_value_value(Type.FIELD_VALUE_LIST,template,2,{list_value_count:2}).map((item)
 
                 */
 
-                //Log.w('33_post',biz_data.data_list.length);
-                //Log.w('44_post',biz_data.data_list[0]);
-                //cart = biz_data;
-                //Log.w('33_cart',cart);
              },
             //- POST_ITEM - END
             //- SEARCH - START
