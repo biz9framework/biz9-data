@@ -2278,13 +2278,15 @@ class Portal {
 						for(const foreign_item of option.foreigns){
 							for(const data_item of data.items){
 								foreign_search_items.push({
+									type : foreign_item.type ? foreign_item.type : Type.TITLE_ITEMS,
 									foreign_data_type : foreign_item.foreign_data_type,
 									foreign_field : foreign_item.foreign_field,
-									parent_value : data_item[foreign_item.parent_field],
 									parent_field : foreign_item.parent_field,
-									title : foreign_item.title ? foreign_item.title : foreign_item.foreign_data_type,
+									parent_value : data_item[foreign_item.parent_field],
 									field : foreign_item.field ? foreign_item.field : {},
-									type : foreign_item.type ?  foreign_item.type : Type.TITLE_LIST,
+									title : foreign_item.title ? foreign_item.title : foreign_item.foreign_data_type,
+									page_current : foreign_item.page_current ? foreign_item.page_current : 1,
+									page_size : foreign_item.page_size ? foreign_item.page_size : 0,
 									items : []
 								});
 							}
@@ -2306,12 +2308,12 @@ class Portal {
 								if(foreign_search_items.length> 0){
 									for(const search_item of foreign_search_items){
 										for(const data_item of data.items){
-
 											if(search_item.type == Type.TITLE_ITEMS){
 												let query = {};
 												query[search_item.foreign_field] = data_item[search_item.parent_field];
 												let search = Data_Logic.get_search(search_item.foreign_data_type,query,{},1,0);
 												data_item[search_item.title] = [];
+												const [biz_error,biz_data] = await Portal.search_simple(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,join_option);
 												if(biz_error){
 													error=Log.append(error,biz_error);
 												}else{
@@ -2357,71 +2359,50 @@ class Portal {
 								type : join_item.type ?  join_item.type : Type.TITLE_LIST,
 								search : join_item.search ? join_item.search : Data_Logic.get_search(Type.DATA_BLANK,{},{},1,0),
 								field : join_item.field ? join_item.field : {},
+								title : join_item.title ? join_item.title : Str.get_title_url(Type.get_title(join_item.foreign_data_type,{plural:true})),
+								page_current : join_item.page_current ? join_item.page_current : 1,
+								page_size : join_item.page_size ? join_item.page_size : 0,
 								items : []
 							});
 						}
+						Log.w('my_join_search_items',join_search_items);
 						for(const search_item of join_search_items){
-							let query = {};
-							let search = Data_Logic.get_search(search_item.search.filter,search_item.search,query,search_item.search.sort_by,search.search.page_current,search.search.page_size);
+							let search = Data_Logic.get_search(search_item.search.data_type,search_item.search.filter,search_item.search.sort_by,search_item.search.page_current,search_item.search.page_size);
 							let join_option = search_item.field ? {} : {};
 							const [biz_error,biz_data] = await Portal.search_simple(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,join_option);
 							if(biz_error){
 								error=Log.append(error,biz_error);
 							}else{
-								search_item.items = biz_data.items;
-								if(join_search_items.length> 0){
-									for(const search_item of join_search_items){
-										if(search_item.type == Type.TITLE_ITEMS){
-											let query = {};
-											let search = Data_Logic.get_search(search_item.join_data_type,query,{},1,0);
-											let title = Str.get_title_url(search_item.title);
-											data[search_item.title] = [];
-											Log.w('cool',search_item.title);
-											Log.w('rrr',data[search_item.title]);
-
-											/*
-											if(biz_error){
-												error=Log.append(error,biz_error);
-											}else{
-												data[title+'_data_type'] = biz_data.data_type;
-												data[title+'_item_count'] = biz_data.item_count;
-												data[title+'_page_count'] = biz_data.page_count;
-												data[title+'_search'] = biz_data.search;
-												data[title+'_filter'] = biz_data.filter;
-												data[title] = biz_data.items;
-											}
-											*/
-												/*
-											}else if(search_item.type == Type.TITLE_COUNT){
-												let query = {};
-												query[search_item.join_field] = data_item[search_item.parent_field];
-												let search = Data_Logic.get_search(search_item.join_data_type,query,{},1,0);
-												const [biz_error,biz_data] = await Portal.count(database,search.data_type,search.filter);
-												if(biz_error){
-													error=Log.append(error,biz_error);
-												}else{
-													data_item[search_item.title] = biz_data;
-												}
-											}else if(search_item.type == Type.TITLE_ONE){
-												let query = {};
-												query[search_item.join_field] = data_item[search_item.parent_field];
-												let search = Data_Logic.get_search(search_item.join_data_type,query,{},1,1);
-												const [biz_error,biz_data] = await Portal.search_simple(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,join_option);
-												if(biz_error){
-													error=Log.append(error,biz_error);
-												}else{
-													data_item[search_item.title] = biz_data.items.length ? biz_data.items[0] : Data_Logic.get_not_found(search_item.join_data_type,0);
-												}
-											}
-											*/
-
+								if(search_item.type == Type.TITLE_ITEMS){
+									let title = Str.get_title_url(search_item.title);
+									data[title+'_data_type'] = biz_data.data_type;
+									data[title+'_item_count'] = biz_data.item_count;
+									data[title+'_page_count'] = biz_data.page_count;
+									data[title+'_search'] = biz_data.search;
+									data[title+'_filter'] = biz_data.filter;
+									data[title] = biz_data.items;
+								}else if(search_item.type == Type.TITLE_COUNT){
+									let search = Data_Logic.get_search(search_item.search.data_type,search_item.search.filter,search_item.search.sort_by,search_item.search.page_current,search_item.search.page_size);
+									const [biz_error,biz_data] = await Portal.count(database,search.data_type,search.filter);
+									if(biz_error){
+										error=Log.append(error,biz_error);
+									}else{
+										data[search_item.title] = biz_data;
 									}
-								}
-							}
-							}
+								}else if(search_item.type == Type.TITLE_ONE){
+										let search = Data_Logic.get_search(search_item.search.data_type,search_item.search.filter,search_item.search.sort_by,search_item.search.page_current,search_item.search.page_size);
+										let join_option = search_item.field ? {} : {};
+										const [biz_error,biz_data] = await Portal.search_simple(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,join_option);
+										if(biz_error){
+											error=Log.append(error,biz_error);
+										}else{
+											data[search_item.title] = biz_data.items.length ? biz_data.items[0] : Data_Logic.get_not_found(search_item.search.data_type,0);
+										}
+									}
 						}
 					}
-					Log.w('aaaaaaa',data);
+					}
+					Log.w('aaaaa',data);
 				},
 				//9_get_item_groups
 				async function(call){

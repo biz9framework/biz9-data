@@ -74,10 +74,10 @@ describe('connect', function(){ this.timeout(25000);
                 let new_data_type = Type.DATA_PRODUCT;
                 //-->
                 let parent = Data_Logic.get_biz(new_data_type,0,{test:true,generate_title:true});
-                //let parent = Data_Logic.get_new(new_data_type,'234e5c23-dec0-45be-b9fd-914e967af1c7');
+                //let parent = Data_Logic.get_new(new_data_type,'4086fcdd-5cf7-49c4-a732-e997bdd346bb');
                 //let parent = Data_Logic.get_new(Type.DATA_CATEGORY,0);
                 //-->
-                //let blank = Data_Logic.get_biz(Type.DATA_BLANK,0,{test:true,generate_title:true,parent:parent});
+                let blank = Data_Logic.get_biz(Type.DATA_BLANK,0,{test:true,generate_title:true,parent:parent});
                 //-->
                 //let group = Data_Logic.get_biz(Type.DATA_GROUP,0,{test:true,generate_title:true,parent:parent});
                 //-->
@@ -87,10 +87,10 @@ describe('connect', function(){ this.timeout(25000);
                 //let favorite = Favorite_Logic.get_new(parent.data_type,parent.id,user.id);
                 //-->
                 //let option = {};
-                //let join_search_1 = Data_Logic.get_search_join(Type.TITLE_ONE,Data_Logic.get_search(Type.DATA_BLANK,{},{},1,0));
-                //let option = {joins:[join_search_1]};
-                let foreign_search_1 = Data_Logic.get_search_foreign(Type.TITLE_ONE,Type.DATA_BLANK,Type.FIELD_PARENT_ID,Type.FIELD_ID);
-                let option = {foreigns:[foreign_search_1]};
+                let join_search_1 = Data_Logic.get_search_join(Type.TITLE_ONE,Data_Logic.get_search(Type.DATA_BLANK,{},{},1,2),{title:'cool'});
+                let option = {joins:[join_search_1]};
+                //let foreign_search_1 = Data_Logic.get_search_foreign(Type.TITLE_ONE,Type.DATA_BLANK,Type.FIELD_PARENT_ID,Type.FIELD_ID);
+                //let option = {foreigns:[foreign_search_1]};
 
                 //let group_search_1 = Data_Logic.get_search_group();
                 //let group_search_1 = Data_Logic.get_search_group({title:{group_43270:1}});
@@ -124,7 +124,7 @@ describe('connect', function(){ this.timeout(25000);
                 //const [error,biz_data] = await Portal.delete(database,parent.data_type,parent.id,option);
 
                 //---
-                Log.w('99_biz_data',biz_data);
+                //Log.w('99_biz_data',biz_data);
                 //Log.w('99_option',option);
                 //Log.w('99_biz_data_parents',biz_data.items[0]);
                 //Log.w('99_biz_data_images',biz_data.items_bean[0].images.length);
