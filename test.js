@@ -56,10 +56,8 @@ describe('connect', function(){ this.timeout(25000);
         let data = {};
         async.series([
             async function(call){
-                console.log('DATABASE-START');
                 const [biz_error,biz_data] = await Database.get(DATA_CONFIG);
                 database = biz_data;
-                console.log('DATABASE-END');
             },
             //- POST_ITEM - START
             async function(call){
@@ -92,8 +90,8 @@ describe('connect', function(){ this.timeout(25000);
                 //let foreign_search_1 = Data_Logic.get_search_foreign(Type.TITLE_ONE,Type.DATA_BLANK,Type.FIELD_PARENT_ID,Type.FIELD_ID);
                 //let option = {foreigns:[foreign_search_1]};
 
-                let group_search_1 = Data_Logic.get_search_group();
-                //let group_search_1 = Data_Logic.get_search_group({title:{group_55589:0}});
+                //let group_search_1 = Data_Logic.get_search_group();
+                let group_search_1 = Data_Logic.get_search_group({title:{group_43815:0}});
                 //let group_search_2 = Data_Logic.get_search_group({title:{group_78157:0},field:{title:1,title_url:1}});
                 let option = {groups:[group_search_1]};
 
@@ -124,7 +122,7 @@ describe('connect', function(){ this.timeout(25000);
                 //const [error,biz_data] = await Portal.delete(database,parent.data_type,parent.id,option);
 
                 //---
-                Log.w('99_biz_data',biz_data);
+                //Log.w('99_biz_data',biz_data);
                 //Log.w('99_option',option);
                 //Log.w('99_biz_data_parents',biz_data.items[0]);
                 //Log.w('99_biz_data_images',biz_data.items_bean[0].images.length);
@@ -481,13 +479,12 @@ describe('post_data', function(){ this.timeout(25000);
                 //let parent_item = Data_Logic.get_new(Type.DATA_PRODUCT,0,{my_parent_title:'my parent_'+Num.get_id()});
                 //let parent_item = Data_Logic.get_new(Type.DATA_PRODUCT,'fbbaa1ee-df67-44a0-8437-e243185b47c8');
                 //let group = Data_Logic.get_new(Type.DATA_GROUP,0,{parent_id:parent_item.id,parent_data_type:parent_item.data_type});
-                let group = Data_Logic.get_new(Type.DATA_GROUP,'ec0facb0-2a11-4786-a5c8-fdb763ce50d3');
+                //let group = Data_Logic.get_new(Type.DATA_GROUP,'ec0facb0-2a11-4786-a5c8-fdb763ce50d3');
                 //const [error,biz_data] = await Portal.get(database,parent_item.data_type,parent_item.id);
                 //const [error,biz_data] = await Portal.get(database,parent_item.data_type,parent_item.id);
                 const [error,biz_data] = await Portal.get(database,group.data_type,group.id);
                 //const [error,biz_data] = await Portal.post(database,parent_item.data_type,parent_item);
                 //parent_item = data;
-                Log.w('biz_data',biz_data);
                 //Log.w('group',group);
             },
             /*

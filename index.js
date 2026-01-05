@@ -1968,6 +1968,95 @@ class Portal {
 						}
 					}
 				},
+				//9_get_item_groups //here
+				async function(call){
+					if(option.groups && data.id){
+						data.groups = [];
+						let search_items = [];
+					for(const item of option.groups){
+							search_items.push({
+								field : item.field ? item.field : {},
+								title : item.title ? item.title : {}, // {groupShow:1,groupHide:0},{0:all}
+								image : item.image ? item.image : {count:0,sort_by:Type.TITLE_SORT_BY_ASC},
+								page_current : item.page_current ? item.page_current : 1,
+								page_size : item.page_current ? item.page_current : 0,
+							});
+						}
+						for(const search_item of search_items){
+							let group_list = [];
+							let hide_group_list = [];
+
+							let item_group_join_search = {};
+							let item_group_join_option = {field:search_item.field,page_current:search_item.page_current,page_size:search_item.page_size};
+							for(const field in search_item.title) {
+                        		let new_item = {};
+                        		new_item[field] = search_item.title[field];
+                        		if(new_item[field]){
+                            		group_list.push({field:field,value:new_item[field]});
+                        		}else{
+                            		hide_group_list.push({field:field,value:new_item[field]});
+                        		}
+                    		}
+							Log.w('group_list',group_list);
+							Log.w('hide_group_list',hide_group_list);
+							if(group_list.length <= 0){
+								if(hide_group_list.length<=0){
+									var  group_query = {$or:[]};
+									var  query_field = {};
+									query_field[Type.FIELD_PARENT_ID] = { $regex:String(data.id), $options: "i" };
+									group_query.$or.push(query_field);
+								}else{
+									 var group_query = {$or:[],$and:[]};
+								}
+								group_query = {parent_id:data.id}
+								item_group_join_search = Data_Logic.get_search(Type.DATA_GROUP,group_query,{},search_item.page_current,search_item.page_size);
+								console.log('errrr');
+								console.log(group_query);
+								/*
+								for(const group of hide_group_list) {
+									let query_field = {};
+									query_field[Type.FIELD_TITLE_URL] = { $ne:group.field };
+									group_query.$and.push(query_field);
+								}
+								Log.w('11_group_query',group_query);
+								Log.w('22_item_group_join_search',item_group_join_search);
+								*/
+							}
+							else{
+								let group_query = {};
+								if(hide_group_list.length<=0){
+									 group_query = {$or:[]};
+								}else{
+									 group_query = {$or:[],$and:[]};
+								}
+								//db.users.find({ status: { $ne: "inactive" } })
+								for(const group of group_list) {
+									let query_field = {};
+									query_field[Type.FIELD_TITLE_URL] = { $regex:String(group.field), $options: "i" };
+									group_query.$or.push(query_field);
+								}
+								for(const group of hide_group_list) {
+									let query_field = {};
+									query_field[Type.FIELD_TITLE_URL] = { $ne:group.field };
+									group_query.$and.push(query_field);
+								}
+
+								//item_group_join_search = Data_Logic.get_search(Type.DATA_GROUP,group_query,{},search_item.page_current,search_item.page_size);
+								//Log.w('rrr',item_group_join_search);
+							}
+
+							const [biz_error,biz_data] = await Portal.search(database,item_group_join_search.data_type,item_group_join_search.filter,item_group_join_search.sort_by,item_group_join_search.page_current,item_group_join_search.page_size,item_group_join_option);
+								if(biz_error){
+									error=Log.append(error,biz_error);
+								}else{
+									data.groups = biz_data.items.length>0?biz_data.items:[];
+								}
+							}
+
+					}
+					//Log.w('my_data',data);
+				},
+
 				//9_get_item_foreigns
 				async function(call){
 					if(option.foreigns && data.id){
@@ -2022,17 +2111,7 @@ class Portal {
 						}
 					}
 				},
-				//9_get_item_groups
-				async function(call){
-					console.log('11111111');
-					if(option.groups && data.id){
-						const [biz_error,biz_data] = await Portal.get_data_groups(database,data,option);
-						if(!error){
-							data =  biz_data;
-						}
-					}
-				},
-		//post-stat
+					//post-stat
 				async function(call){
 					if(option.stat && data.id){
 						let post_stat = Stat_Logic.get_new(data.data_type,data.id,option.stat.type?option.stat.type:Type.STAT_VIEW,option.stat.user_id?option.stat.user_id:0,data);
@@ -2102,7 +2181,6 @@ class Portal {
 							let group_option = {field:search_item.field};
 							let group_query = {};
 							let group_list = [];
-							let group_post_list = [];
 							let hide_group_list = [];
 							if(search_item.type == Type.TITLE_ITEMS){
 								for(const field in search_item.title) {
@@ -2114,25 +2192,17 @@ class Portal {
                             			hide_group_list.push({field:field,value:new_item[field]});
                         			}
                     			}
-
 								//get_all_groups
 								if(group_list.length <= 0){
 									//items list
 									if(Obj.check_is_array(data.items)){
-										console.log('aaaaaaaa');
-										/*
-										group_query = { $or: [] };
-										for(const item of data.items) {
-											let query_field = {};
-											query_field[Type.FIELD_PARENT_ID] = { $regex:String(item.id), $options: "i" };
-											query.$or.push(query_field);
-										}
-										*/
+										//item
 									}else{
 										group_query = {parent_id:data.id}
+
+
 									}
 								}
-								Log.w('22_group_query',group_query);
 								/*
 								for(const group of group_list) {
 									let query_field = {};
@@ -2189,7 +2259,7 @@ class Portal {
 		});
 	};
 
-	//9_items_join //9_get_items_join //9_joins 9_get_data_joins
+	//9_items_join //9_get_items_join //9_joins 9_get_data_joins //9_data_joins
 	static get_data_joins = (database,data,option) => {
 		return new Promise((callback) => {
 			let join_search_items = [];
@@ -2410,8 +2480,8 @@ class Portal {
 								query.$or.push(query_field);
 							};
 							let search = Data_Logic.get_search(search_item.foreign_data_type,query,{},1,0);
-							let join_option = search_item.field ? {} : {};
-							const [biz_error,biz_data] = await Portal.search_simple(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,join_option);
+							let foreign_option = search_item.field ? {} : {};
+							const [biz_error,biz_data] = await Portal.search_simple(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,foreign_option);
 							if(biz_error){
 								error=Log.append(error,biz_error);
 							}else{
@@ -2424,7 +2494,7 @@ class Portal {
 												query[search_item.foreign_field] = data_item[search_item.parent_field];
 												let search = Data_Logic.get_search(search_item.foreign_data_type,query,{},1,0);
 												data_item[search_item.title] = [];
-												const [biz_error,biz_data] = await Portal.search_simple(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,join_option);
+												const [biz_error,biz_data] = await Portal.search_simple(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,foreign_option);
 												if(biz_error){
 													error=Log.append(error,biz_error);
 												}else{
@@ -2446,7 +2516,7 @@ class Portal {
 												let query = {};
 												query[search_item.foreign_field] = data_item[search_item.parent_field];
 												let search = Data_Logic.get_search(search_item.foreign_data_type,query,{},1,1);
-												const [biz_error,biz_data] = await Portal.search_simple(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,join_option);
+												const [biz_error,biz_data] = await Portal.search_simple(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,foreign_option);
 												if(biz_error){
 													error=Log.append(error,biz_error);
 												}else{
@@ -2644,7 +2714,6 @@ class Portal {
 			option = option ? option : {};
 			async.series([
 				function(call){
-					console.log('111111111111');
 					call();
 					/*
 					Data.delete(database,data_type,id).then(([biz_error,biz_data])=> {
