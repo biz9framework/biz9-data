@@ -1997,21 +1997,79 @@ class Portal {
                             		hide_group_list.push({field:field,value:new_item[field]});
                         		}
                     		}
+							if(group_list.length<=0){
+								if(hide_group_list.length>0){
+									//var group_query = {$or:[],$and:[]};
+								}else{
+									//all groups
+									//let group_query = {$or:[],$and:[]};
+									let group_query = {$and:[]};
+
+									//add_parent_id
+									let query_field = {};
+									query_field[Type.FIELD_PARENT_ID] = { $regex:String(data.id), $options: "i" };
+									group_query.$and.push(query_field);
+
+									let item_group_join_search = Data_Logic.get_search(Type.DATA_GROUP,group_query,{},search_item.page_current,search_item.page_size);
+									Log.w('item_group_join_search',item_group_join_search);
+
+									const [biz_error,biz_data] = await Portal.search(database,item_group_join_search.data_type,item_group_join_search.filter,item_group_join_search.sort_by,item_group_join_search.page_current,item_group_join_search.page_size,item_group_join_option);
+									Log.w('ddddd',biz_data);
+									if(biz_error){
+										error=Log.append(error,biz_error);
+									}else{
+										data.groups = biz_data.items.length>0?biz_data.items:[];
+									}
+								}
+
+							}else{
+								// select groups
+								let group_query = {$or:[],$and:[]};
+								for(const group of group_list) {
+									let query_field = {};
+									query_field[Type.FIELD_TITLE_URL] = { $regex:String(group.field), $options: "i" };
+									group_query.$or.push(query_field);
+								}
+								//add_parent_id
+								let query_field = {};
+								query_field[Type.FIELD_PARENT_ID] = { $regex:String(data.id), $options: "i" };
+								group_query.$and.push(query_field);
+								let item_group_join_search = Data_Logic.get_search(Type.DATA_GROUP,group_query,{},search_item.page_current,search_item.page_size);
+	const [biz_error,biz_data] = await Portal.search(database,item_group_join_search.data_type,item_group_join_search.filter,item_group_join_search.sort_by,item_group_join_search.page_current,item_group_join_search.page_size,item_group_join_option);
+								Log.w('eee',biz_data);
+									if(biz_error){
+										error=Log.append(error,biz_error);
+									}else{
+										data.groups = biz_data.items.length>0?biz_data.items:[];
+									}
+
+
+							}
 							Log.w('group_list',group_list);
 							Log.w('hide_group_list',hide_group_list);
-							if(group_list.length <= 0){
+							//if(group_list.length <= 0){
+								/*
 								if(hide_group_list.length<=0){
-									var  group_query = {$or:[]};
-									var  query_field = {};
+									console.log('aaaaaaa');
+									var group_query = {$or:[]};
+									query_field = {};
 									query_field[Type.FIELD_PARENT_ID] = { $regex:String(data.id), $options: "i" };
-									group_query.$or.push(query_field);
 								}else{
+									console.log('bbbbbb');
 									 var group_query = {$or:[],$and:[]};
+									//group_query = {parent_id:data.id}
 								}
-								group_query = {parent_id:data.id}
-								item_group_join_search = Data_Logic.get_search(Type.DATA_GROUP,group_query,{},search_item.page_current,search_item.page_size);
+								Log.w('group_query',group_query);
+								*/
+								//add parent
+								/*
+								let query_field_parent = {};
+								query_field_parent[Type.FIELD_PARENT_ID] = { $regex:String(data.id), $options: "i" };
+								group_query.$or.push(query_field_parent);
+								//item_group_join_search = Data_Logic.get_search(Type.DATA_GROUP,group_query,{},search_item.page_current,search_item.page_size);
 								console.log('errrr');
 								console.log(group_query);
+								*/
 								/*
 								for(const group of hide_group_list) {
 									let query_field = {};
@@ -2021,8 +2079,9 @@ class Portal {
 								Log.w('11_group_query',group_query);
 								Log.w('22_item_group_join_search',item_group_join_search);
 								*/
-							}
-							else{
+							//}
+							//else{
+								/*
 								let group_query = {};
 								if(hide_group_list.length<=0){
 									 group_query = {$or:[]};
@@ -2040,17 +2099,20 @@ class Portal {
 									query_field[Type.FIELD_TITLE_URL] = { $ne:group.field };
 									group_query.$and.push(query_field);
 								}
+								*/
 
 								//item_group_join_search = Data_Logic.get_search(Type.DATA_GROUP,group_query,{},search_item.page_current,search_item.page_size);
 								//Log.w('rrr',item_group_join_search);
-							}
+							//}
 
+							/*
 							const [biz_error,biz_data] = await Portal.search(database,item_group_join_search.data_type,item_group_join_search.filter,item_group_join_search.sort_by,item_group_join_search.page_current,item_group_join_search.page_size,item_group_join_option);
 								if(biz_error){
 									error=Log.append(error,biz_error);
 								}else{
 									data.groups = biz_data.items.length>0?biz_data.items:[];
 								}
+							*/
 							}
 
 					}

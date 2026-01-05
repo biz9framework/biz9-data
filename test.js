@@ -91,7 +91,7 @@ describe('connect', function(){ this.timeout(25000);
                 //let option = {foreigns:[foreign_search_1]};
 
                 //let group_search_1 = Data_Logic.get_search_group();
-                let group_search_1 = Data_Logic.get_search_group({title:{group_43815:0}});
+                let group_search_1 = Data_Logic.get_search_group({title:{group_43815:1}});
                 //let group_search_2 = Data_Logic.get_search_group({title:{group_78157:0},field:{title:1,title_url:1}});
                 let option = {groups:[group_search_1]};
 
