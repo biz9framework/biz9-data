@@ -45,8 +45,6 @@ const DATA_CONFIG ={
     REDIS_PORT_ID:"27019"
 };
 /* --- DATA CONFIG END --- */
-Log.w('Test_Data_Config',DATA_CONFIG);
-
 //9_connect - 9_test_connect
 /* --- BiZ9_CORE_CONFIG-END --- */
 describe('connect', function(){ this.timeout(25000);
