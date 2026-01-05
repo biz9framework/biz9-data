@@ -685,7 +685,7 @@ class Order_Data {
 					if(!Str.check_is_null(data.order.id)){
 						data.order.order_items.forEach(order_item => {
 							let query_field = {};
-							query_field[Type.FIELD_ID] = { $regex:String(order_item.parent_id), $options: "i" };
+							query_field[Type.FIELD_ID] = order_item.parent_id;
 							order_parent_item_query.$or.push(query_field);
 						});
 						let search = Data_Logic.get_search(data.order.parent_data_type,order_parent_item_query,{},1,0);
@@ -702,7 +702,7 @@ class Order_Data {
 				//get_order_sub_items
 				async function(call){
 					if(!Str.check_is_null(data.order.id)){
-						let filter = { order_number: { $regex:String(order_number), $options: "i" } };
+						let filter = { order_number:order_number };
 						let search = Data_Logic.get_search(Type.DATA_ORDER_SUB_ITEM,filter,{},1,0);
 						const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,{});
 						if(biz_error){
@@ -717,7 +717,7 @@ class Order_Data {
 					if(!Str.check_is_null(data.order.id)){
 						order_sub_items.forEach(order_sub_item => {
 							let query_field = {};
-							query_field['id'] = { $regex:String(order_sub_item.parent_id), $options: "i" };
+							query_field['id'] = order_sub_item.parent_id;
 							order_sub_item_query.$or.push(query_field);
 						});
 						let search = Data_Logic.get_search(Type.DATA_PRODUCT,order_sub_item_query,{},1,0);
@@ -1020,7 +1020,7 @@ class Cart_Data {
 					if(!Str.check_is_null(data.cart.id)){
 						data.cart.cart_items.forEach(cart_item => {
 							let query_field = {};
-							query_field[Type.FIELD_ID] = { $regex:String(cart_item.parent_id), $options: "i" };
+							query_field[Type.FIELD_ID] = cart_item.parent_id;
 							cart_parent_item_query.$or.push(query_field);
 						});
 						let search = Data_Logic.get_search(data.cart.parent_data_type,cart_parent_item_query,{},1,0);
@@ -1052,7 +1052,7 @@ class Cart_Data {
 					if(!Str.check_is_null(data.cart.id)){
 						cart_sub_items.forEach(cart_sub_item => {
 							let query_field = {};
-							query_field[Type.FIELD_ID] = { $regex:String(cart_sub_item.parent_id), $options: "i" };
+							query_field[Type.FIELD_ID] = cart_sub_item.parent_id;
 							cart_sub_item_query.$or.push(query_field);
 						});
 						let search = Data_Logic.get_search(Type.DATA_PRODUCT,cart_sub_item_query,{},1,0);
@@ -1974,7 +1974,7 @@ class Portal {
 						data.groups = [];
 						let search_items = [];
 					for(const item of option.groups){
-							search_items.push({
+						search_items.push({
 								field : item.field ? item.field : {},
 								title : item.title ? item.title : {}, // {groupShow:1,groupHide:0},{0:all}
 								image : item.image ? item.image : {count:0,sort_by:Type.TITLE_SORT_BY_ASC},
@@ -1985,138 +1985,39 @@ class Portal {
 						for(const search_item of search_items){
 							let group_list = [];
 							let hide_group_list = [];
-
-							let item_group_join_search = {};
-							let item_group_join_option = {field:search_item.field,page_current:search_item.page_current,page_size:search_item.page_size};
+							let group_query = {$or:[],$and:[]};
 							for(const field in search_item.title) {
                         		let new_item = {};
                         		new_item[field] = search_item.title[field];
                         		if(new_item[field]){
-                            		group_list.push({field:field,value:new_item[field]});
+									let query_field = {};
+									query_field[Type.FIELD_TITLE_URL] = field;
+									group_query.$or.push(query_field);
                         		}else{
-                            		hide_group_list.push({field:field,value:new_item[field]});
+									let query_field = {};
+									query_field[Type.FIELD_TITLE_URL] = {$ne:field};
+									group_query.$and.push(query_field);
                         		}
                     		}
-							if(group_list.length<=0){
-								if(hide_group_list.length>0){
-									//var group_query = {$or:[],$and:[]};
-								}else{
-									//all groups
-									//let group_query = {$or:[],$and:[]};
-									let group_query = {$and:[]};
+							//add_parent_id
+							let query_field = {};
+							query_field[Type.FIELD_PARENT_ID] = data.id;
+							group_query.$and.push(query_field);
 
-									//add_parent_id
-									let query_field = {};
-									query_field[Type.FIELD_PARENT_ID] = { $regex:String(data.id), $options: "i" };
-									group_query.$and.push(query_field);
-
-									let item_group_join_search = Data_Logic.get_search(Type.DATA_GROUP,group_query,{},search_item.page_current,search_item.page_size);
-									Log.w('item_group_join_search',item_group_join_search);
-
-									const [biz_error,biz_data] = await Portal.search(database,item_group_join_search.data_type,item_group_join_search.filter,item_group_join_search.sort_by,item_group_join_search.page_current,item_group_join_search.page_size,item_group_join_option);
-									Log.w('ddddd',biz_data);
-									if(biz_error){
-										error=Log.append(error,biz_error);
-									}else{
-										data.groups = biz_data.items.length>0?biz_data.items:[];
-									}
-								}
-
-							}else{
-								// select groups
-								let group_query = {$or:[],$and:[]};
-								for(const group of group_list) {
-									let query_field = {};
-									query_field[Type.FIELD_TITLE_URL] = { $regex:String(group.field), $options: "i" };
-									group_query.$or.push(query_field);
-								}
-								//add_parent_id
-								let query_field = {};
-								query_field[Type.FIELD_PARENT_ID] = { $regex:String(data.id), $options: "i" };
-								group_query.$and.push(query_field);
-								let item_group_join_search = Data_Logic.get_search(Type.DATA_GROUP,group_query,{},search_item.page_current,search_item.page_size);
-	const [biz_error,biz_data] = await Portal.search(database,item_group_join_search.data_type,item_group_join_search.filter,item_group_join_search.sort_by,item_group_join_search.page_current,item_group_join_search.page_size,item_group_join_option);
-								Log.w('eee',biz_data);
-									if(biz_error){
-										error=Log.append(error,biz_error);
-									}else{
-										data.groups = biz_data.items.length>0?biz_data.items:[];
-									}
-
-
+							if(group_query.$or.length <= 0){
+								delete group_query.$or;
 							}
-							Log.w('group_list',group_list);
-							Log.w('hide_group_list',hide_group_list);
-							//if(group_list.length <= 0){
-								/*
-								if(hide_group_list.length<=0){
-									console.log('aaaaaaa');
-									var group_query = {$or:[]};
-									query_field = {};
-									query_field[Type.FIELD_PARENT_ID] = { $regex:String(data.id), $options: "i" };
-								}else{
-									console.log('bbbbbb');
-									 var group_query = {$or:[],$and:[]};
-									//group_query = {parent_id:data.id}
-								}
-								Log.w('group_query',group_query);
-								*/
-								//add parent
-								/*
-								let query_field_parent = {};
-								query_field_parent[Type.FIELD_PARENT_ID] = { $regex:String(data.id), $options: "i" };
-								group_query.$or.push(query_field_parent);
-								//item_group_join_search = Data_Logic.get_search(Type.DATA_GROUP,group_query,{},search_item.page_current,search_item.page_size);
-								console.log('errrr');
-								console.log(group_query);
-								*/
-								/*
-								for(const group of hide_group_list) {
-									let query_field = {};
-									query_field[Type.FIELD_TITLE_URL] = { $ne:group.field };
-									group_query.$and.push(query_field);
-								}
-								Log.w('11_group_query',group_query);
-								Log.w('22_item_group_join_search',item_group_join_search);
-								*/
-							//}
-							//else{
-								/*
-								let group_query = {};
-								if(hide_group_list.length<=0){
-									 group_query = {$or:[]};
-								}else{
-									 group_query = {$or:[],$and:[]};
-								}
-								//db.users.find({ status: { $ne: "inactive" } })
-								for(const group of group_list) {
-									let query_field = {};
-									query_field[Type.FIELD_TITLE_URL] = { $regex:String(group.field), $options: "i" };
-									group_query.$or.push(query_field);
-								}
-								for(const group of hide_group_list) {
-									let query_field = {};
-									query_field[Type.FIELD_TITLE_URL] = { $ne:group.field };
-									group_query.$and.push(query_field);
-								}
-								*/
-
-								//item_group_join_search = Data_Logic.get_search(Type.DATA_GROUP,group_query,{},search_item.page_current,search_item.page_size);
-								//Log.w('rrr',item_group_join_search);
-							//}
-
-							/*
+							let item_group_join_option = {field:search_item.field,page_current:search_item.page_current,page_size:search_item.page_size};
+							let item_group_join_search = Data_Logic.get_search(Type.DATA_GROUP,group_query,{},search_item.page_current,search_item.page_size);
 							const [biz_error,biz_data] = await Portal.search(database,item_group_join_search.data_type,item_group_join_search.filter,item_group_join_search.sort_by,item_group_join_search.page_current,item_group_join_search.page_size,item_group_join_option);
-								if(biz_error){
-									error=Log.append(error,biz_error);
-								}else{
-									data.groups = biz_data.items.length>0?biz_data.items:[];
-								}
-							*/
+									if(biz_error){
+										error=Log.append(error,biz_error);
+									}else{
+										data.groups = biz_data.items.length>0?biz_data.items:[];
+									}
 							}
-
 					}
-					//Log.w('my_data',data);
+					Log.w('my_data',data);
 				},
 
 				//9_get_item_foreigns
@@ -2538,7 +2439,7 @@ class Portal {
 							let query = { $or: [] };
 							for(const data_item of data.items){
 								let query_field = {};
-								query_field[search_item.foreign_field] = { $regex:String(search_item.parent_value), $options: "i" };
+								query_field[search_item.foreign_field] = search_item.parent_value;
 								query.$or.push(query_field);
 							};
 							let search = Data_Logic.get_search(search_item.foreign_data_type,query,{},1,0);

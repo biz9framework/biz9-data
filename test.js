@@ -90,8 +90,8 @@ describe('connect', function(){ this.timeout(25000);
                 //let foreign_search_1 = Data_Logic.get_search_foreign(Type.TITLE_ONE,Type.DATA_BLANK,Type.FIELD_PARENT_ID,Type.FIELD_ID);
                 //let option = {foreigns:[foreign_search_1]};
 
-                //let group_search_1 = Data_Logic.get_search_group();
-                let group_search_1 = Data_Logic.get_search_group({title:{group_43815:1}});
+                let group_search_1 = Data_Logic.get_search_group();
+                //let group_search_1 = Data_Logic.get_search_group({title:{group_43815:1,group_83574:0}});
                 //let group_search_2 = Data_Logic.get_search_group({title:{group_78157:0},field:{title:1,title_url:1}});
                 let option = {groups:[group_search_1]};
 
@@ -122,7 +122,7 @@ describe('connect', function(){ this.timeout(25000);
                 //const [error,biz_data] = await Portal.delete(database,parent.data_type,parent.id,option);
 
                 //---
-                //Log.w('99_biz_data',biz_data);
+                Log.w('99_biz_data',biz_data);
                 //Log.w('99_option',option);
                 //Log.w('99_biz_data_parents',biz_data.items[0]);
                 //Log.w('99_biz_data_images',biz_data.items_bean[0].images.length);
