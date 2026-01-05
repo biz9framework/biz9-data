@@ -1968,7 +1968,7 @@ class Portal {
 						}
 					}
 				},
-				//9_get_item_groups //here
+				//9_get_item_groups
 				async function(call){
 					if(option.groups && data.id){
 						data.groups = [];
@@ -1986,13 +1986,14 @@ class Portal {
 							let group_list = [];
 							let hide_group_list = [];
 							let group_query = {$or:[],$and:[]};
+							//let group_query = {$and:[]};
 							for(const field in search_item.title) {
                         		let new_item = {};
                         		new_item[field] = search_item.title[field];
                         		if(new_item[field]){
 									let query_field = {};
 									query_field[Type.FIELD_TITLE_URL] = field;
-									group_query.$or.push(query_field);
+									group_query.$and.push(query_field);
                         		}else{
 									let query_field = {};
 									query_field[Type.FIELD_TITLE_URL] = {$ne:field};
@@ -2013,13 +2014,14 @@ class Portal {
 									if(biz_error){
 										error=Log.append(error,biz_error);
 									}else{
+										for(const group of biz_data.items){
+											data[Str.get_title_url(group.title_url)] = group;
+										}
 										data.groups = biz_data.items.length>0?biz_data.items:[];
 									}
 							}
 					}
-					Log.w('my_data',data);
 				},
-
 				//9_get_item_foreigns
 				async function(call){
 					if(option.foreigns && data.id){
@@ -2505,11 +2507,63 @@ class Portal {
 				},
 				//9_get_items_group
 				async function(call){
-					if(option.joins){
-						const [biz_error,biz_data] = await Portal.get_data_groups(database,data,option);
-						if(!biz_error){
-							data = biz_data;
+					if(option.groups && data.items.length>0){
+						let search_items = [];
+					for(const item of option.groups){
+						search_items.push({
+								field : item.field ? item.field : {},
+								title : item.title ? item.title : {}, // {groupShow:1,groupHide:0},{0:all}
+								image : item.image ? item.image : {count:0,sort_by:Type.TITLE_SORT_BY_ASC},
+								page_current : item.page_current ? item.page_current : 1,
+								page_size : item.page_current ? item.page_current : 0,
+							});
 						}
+						for(const search_item of search_items){
+							let group_list = [];
+							let hide_group_list = [];
+							let group_query = {$or:[],$and:[]};
+							for(const field in search_item.title) {
+                        		let new_item = {};
+                        		new_item[field] = search_item.title[field];
+                        		if(new_item[field]){
+									let query_field = {};
+									query_field[Type.FIELD_TITLE_URL] = field;
+									group_query.$or.push(query_field);
+                        		}else{
+									let query_field = {};
+									query_field[Type.FIELD_TITLE_URL] = {$ne:field};
+									group_query.$and.push(query_field);
+                        		}
+                    		}
+							//add_parents_id
+							for(const item of data.items){
+								let query_field = {};
+								query_field[Type.FIELD_PARENT_ID] = item.id;
+								group_query.$and.push(query_field);
+							}
+							if(group_query.$or.length <= 0){
+								delete group_query.$or;
+							}
+							let item_group_join_option = {field:search_item.field,page_current:search_item.page_current,page_size:search_item.page_size};
+							let item_group_join_search = Data_Logic.get_search(Type.DATA_GROUP,{},{},search_item.page_current,search_item.page_size);
+						const [biz_error,biz_data] = await Portal.search_simple(database,item_group_join_search.data_type,item_group_join_search.filter,item_group_join_search.sort_by,item_group_join_search.page_current,item_group_join_search.page_size,item_group_join_option);
+									if(biz_error){
+										error=Log.append(error,biz_error);
+									}else{
+										for(const data_item of data.items){
+											data_item.groups = [];
+											for(const group of biz_data.items){
+												if(data_item.id == group.parent_id){
+													if(!data_item[Str.get_title_url(group.title)]){
+														data_item[Str.get_title_url(group.title)] = [];
+													}
+													data_item[Str.get_title_url(group.title)].push(group);
+													data_item.groups.push(group);
+												}
+											}
+										}
+									}
+							}
 					}
 				},
 			]).then(result => {
