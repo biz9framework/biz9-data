@@ -70,15 +70,15 @@ describe('connect', function(){ this.timeout(25000);
                 let new_data_type = Type.DATA_PRODUCT;
                 //-->
                 //let parent = Data_Logic.get_biz(new_data_type,0,{test:true,generate_title:true});
-                let parent = Data_Logic.get_new(new_data_type,'3b012908-c391-4bfe-95a0-920777baee48');
-                //let parent = Data_Logic.get_new(Type.DATA_CATEGORY,0);
+                let parent = Data_Logic.get(new_data_type,'3b012908-c391-4bfe-95a0-920777baee48');
+                //let parent = Data_Logic.get(Type.DATA_CATEGORY,0);
                 //-->
                 let blank = Data_Logic.get_biz(Type.DATA_BLANK,0,{test:true,generate_title:true,parent:parent});
                 //-->
                 let group = Data_Logic.get_biz(Type.DATA_GROUP,0,{test:true,generate_title:true,parent:parent});
                 //-->
-                //let user = Data_Logic.get_new_biz(Type.DATA_USER,0,{test:true,generate_title:true});
-                //let user = Data_Logic.get_new(Type.DATA_USER,'cf495d5e-20ca-401f-af43-9e06d064ca7a');
+                //let user = Data_Logic.get_biz(Type.DATA_USER,0,{test:true,generate_title:true});
+                //let user = Data_Logic.get(Type.DATA_USER,'cf495d5e-20ca-401f-af43-9e06d064ca7a');
                 //-->
                 //let favorite = Favorite_Logic.get_new(parent.data_type,parent.id,user.id);
                 //-->
@@ -329,7 +329,7 @@ describe('connect', function(){ this.timeout(25000);
             //create app
             async function(call){
                 let app_num = order.order_number.replace('OR-','');
-                let app = Data_Logic.get_new(Type.DATA_APP,0,{
+                let app = Data_Logic.get(Type.DATA_APP,0,{
                 app_id:app_num,
                 user_id:user_id,
                 title:"App " + app_num,
@@ -459,12 +459,12 @@ describe('connect', function(){ this.timeout(25000);
 //9_post_data
 describe('post_data', function(){ this.timeout(25000);
     it("_post_data", function(done){
-        let data = {cart:Data_Logic.get_new(Type.DATA_CART,0)};
+        let data = {cart:Data_Logic.get(Type.DATA_CART,0)};
         let error=null;
         let database = {};
         let parent_item = {};
         let content_item_list = [];
-        //var item = Data_Logic.get_new(DATA_TYPE,KEY);
+        //var item = Data_Logic.get(DATA_TYPE,KEY);
         async.series([
             async function(call){
                 console.log('TEST-CONNECT-START');
@@ -474,10 +474,10 @@ describe('post_data', function(){ this.timeout(25000);
                 console.log('TEST-CONNECT-END');
             },
             async function(call){
-                //let parent_item = Data_Logic.get_new(Type.DATA_PRODUCT,0,{my_parent_title:'my parent_'+Num.get_id()});
-                //let parent_item = Data_Logic.get_new(Type.DATA_PRODUCT,'fbbaa1ee-df67-44a0-8437-e243185b47c8');
-                //let group = Data_Logic.get_new(Type.DATA_GROUP,0,{parent_id:parent_item.id,parent_data_type:parent_item.data_type});
-                //let group = Data_Logic.get_new(Type.DATA_GROUP,'ec0facb0-2a11-4786-a5c8-fdb763ce50d3');
+                //let parent_item = Data_Logic.get(Type.DATA_PRODUCT,0,{my_parent_title:'my parent_'+Num.get_id()});
+                //let parent_item = Data_Logic.get(Type.DATA_PRODUCT,'fbbaa1ee-df67-44a0-8437-e243185b47c8');
+                //let group = Data_Logic.get(Type.DATA_GROUP,0,{parent_id:parent_item.id,parent_data_type:parent_item.data_type});
+                //let group = Data_Logic.get(Type.DATA_GROUP,'ec0facb0-2a11-4786-a5c8-fdb763ce50d3');
                 //const [error,biz_data] = await Portal.get(database,parent_item.data_type,parent_item.id);
                 //const [error,biz_data] = await Portal.get(database,parent_item.data_type,parent_item.id);
                 const [error,biz_data] = await Portal.get(database,group.data_type,group.id);
@@ -554,7 +554,7 @@ describe('post_data', function(){ this.timeout(25000);
 
             /*
             async function(call){
-                parent_item = Data_Logic.get_new(Type.DATA_BLOG_POST,0,{title:'my_parent_'+Num.get_id()});
+                parent_item = Data_Logic.get(Type.DATA_BLOG_POST,0,{title:'my_parent_'+Num.get_id()});
                 const [error,data] = await Portal.post(database,parent_item.data_type,parent_item);
                 parent_item = data;
         //Log.w('parent_item',parent_item);
@@ -608,10 +608,10 @@ describe('post_data', function(){ this.timeout(25000);
 
                     //
                     //- user - start
-                    //let user = Data_Logic.get_new(Type.DATA_USER,0,{title:'ceo',title_url:'ceo',email:"ceo@bossappz.com",password:"1234567",role:FieldType.USER_ROLE_SUPER_ADMIN});
+                    //let user = Data_Logic.get(Type.DATA_USER,0,{title:'ceo',title_url:'ceo',email:"ceo@bossappz.com",password:"1234567",role:FieldType.USER_ROLE_SUPER_ADMIN});
                     //let title = Num.get_id() + "user";
-                    //let user = Data_Logic.get_new(Type.DATA_USER,0,{title:title,title_url:title,email:title+"@bossappz.com",password:"1234567",role:FieldType.USER_ROLE_USER});
-                    //let user = Data_Logic.get_new(Type.DATA_USER,0,{email:'ceo@bossappz.com',password:"1234567"});
+                    //let user = Data_Logic.get(Type.DATA_USER,0,{title:title,title_url:title,email:title+"@bossappz.com",password:"1234567",role:FieldType.USER_ROLE_USER});
+                    //let user = Data_Logic.get(Type.DATA_USER,0,{email:'ceo@bossappz.com',password:"1234567"});
                     //Log.w('user',user);
                     //const [error,data] = await User_Data.register(database,user,null,null,null);
                     //const [error,data] = await User_Data.login(database,user,null,null,null);
@@ -634,15 +634,15 @@ describe('post_data', function(){ this.timeout(25000);
                     //console.log('111111');
                     //let title = Num.get_id()+"_title";
                     //let title_2 = Num.get_id()+"_title_2";
-                    //let blog_post = Data_Logic.get_new(Type.DATA_BLOG_POST,'d86ec25e-4b15-4c4a-8ef9-ce82c9067571',{title:title,title_url:Str.get_title_url(title),author:Num.get_id()+"_cool"});
-                    //let blog_post = Data_Logic.get_new(Type.DATA_BLOG_POST,key);
-                    //let item = Data_Logic.get_new(Type.DATA_BLANK,0,{title:title_2,title_url:Str.get_title_url(title_2)});
-                    //let full_item = Data_Logic.get_new_full_item(item,blog_post,blog_post,{title:title,title_url:Str.get_title_url(title)});
+                    //let blog_post = Data_Logic.get(Type.DATA_BLOG_POST,'d86ec25e-4b15-4c4a-8ef9-ce82c9067571',{title:title,title_url:Str.get_title_url(title),author:Num.get_id()+"_cool"});
+                    //let blog_post = Data_Logic.get(Type.DATA_BLOG_POST,key);
+                    //let item = Data_Logic.get(Type.DATA_BLANK,0,{title:title_2,title_url:Str.get_title_url(title_2)});
+                    //let full_item = Data_Logic.get_full_item(item,blog_post,blog_post,{title:title,title_url:Str.get_title_url(title)});
                     //console.log('aaaa');
                     //console.log(blog_post);
                     //console.log(item);
                     //console.log(full_item);
-                    //let sub_item = Data_Logic.get_new_full_item());
+                    //let sub_item = Data_Logic.get_full_item());
                     //console.log('bbbbb');
                     //Log.w('sub_item',sub_item);
                     //console.log('ccccc');
@@ -746,7 +746,7 @@ describe('post_data', function(){ this.timeout(25000);
     //9_item_delete_data
 describe('item_delete_data', function(){ this.timeout(25000);
     it("_item_delete_data", function(done){
-        let cloud_data = {cart:Data_Logic.get_new(Type.DATA_CART,0)};
+        let cloud_data = {cart:Data_Logic.get(Type.DATA_CART,0)};
         let cloud_error=null;
         let database = {};
         async.series([
@@ -790,8 +790,8 @@ describe('item_get', function(){ this.timeout(25000);
     it("_item_get", function(done){
         let cloud_error=null;
         let database = {};
-        var item = Data_Logic.get_new(DATA_TYPE,0);
-        //var item = Data_Logic.get_new(DATA_TYPE,KEY);
+        var item = Data_Logic.get(DATA_TYPE,0);
+        //var item = Data_Logic.get(DATA_TYPE,KEY);
         async.series([
             async function(call){
                 console.log('DATABASE-START');
@@ -933,7 +933,7 @@ describe('item_delete', function(){ this.timeout(25000);
         let data_type = Type.DATA_PRODUCT;
         let id = '05620fca-9de3-4268-bff7-885adc99ddb3';
         let option = {delete_item:true,delete_item_query:{parent_id:id},delete_image:true,delete_image_query:{parent_id:id}};
-        var item = Data_Logic.get_new(data_type,id);
+        var item = Data_Logic.get(data_type,id);
         async.series([
             async function(call){
                 console.log('DATABASE-START');
@@ -1180,10 +1180,10 @@ describe('get_data', function(){ this.timeout(25000);
                 console.log('TEST-GET-START');
                 let data_type = Type.DATA_PRODUCT;
                 //let key = "CA-51129";
-                let parent = Data_Logic.get_new(Type.DATA_PRODUCT,0);
-                //let parent = Data_Logic.get_new(Type.DATA_PRODUCT,"4294d558-384b-47c9-ade0-63f2c54a2939");
-                let group = Data_Logic.get_new(Type.DATA_GROUP,'4294d558-384b-47c9-ade0-63f2c54a2939',{parent_id:parent.id,parent_data_type:parent.data_type});
-                let item = Data_Logic.get_new(Type.DATA_BLANK,0,{parent_id:group.id,parent_data_type:group.data_type});
+                let parent = Data_Logic.get(Type.DATA_PRODUCT,0);
+                //let parent = Data_Logic.get(Type.DATA_PRODUCT,"4294d558-384b-47c9-ade0-63f2c54a2939");
+                let group = Data_Logic.get(Type.DATA_GROUP,'4294d558-384b-47c9-ade0-63f2c54a2939',{parent_id:parent.id,parent_data_type:parent.data_type});
+                let item = Data_Logic.get(Type.DATA_BLANK,0,{parent_id:group.id,parent_data_type:group.data_type});
                 let option = {get_group:true};
 	            //let option = {get_join:true,field_key_list:[{foreign_data_type:Type.DATA_BLANK,foreign_field:'parent_id',parent_field:'id',title:'items_cool',type:Type.LIST}]};
                 //let key = "d86ec25e-4b15-4c4a-8ef9-ce82c9067571";
