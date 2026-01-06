@@ -41,8 +41,8 @@ describe('connect', function(){ this.timeout(25000);
                 //-->
                 let new_data_type = Type.DATA_PRODUCT;
                 //-->
-                let parent = Data_Logic.get_new(new_data_type,0,{test:true,generate_title:true});
-                //let parent = Data_Logic.get_new(Type.DATA_USER,'54b31f02-afb4-4fa7-9835-f923da7a6749');
+                //let parent = Data_Logic.get_new(new_data_type,0,{test:true,generate_title:true});
+                let parent = Data_Logic.get_new(Type.DATA_PRODUCT,'957');
 
                 //-->
                 //let group = Data_Logic.get_new(Type.DATA_GROUP,0,{test:true,generate_title:true,parent:parent});
@@ -76,11 +76,11 @@ describe('connect', function(){ this.timeout(25000);
                 //---
                 //const [error,biz_data] = await Portal.copy(database,parent.data_type,parent.id,option);
                 //---
-                //const [error,biz_data] = await Portal.get(database,parent.data_type,parent.id,option);
+                const [error,biz_data] = await Portal.get(database,parent.data_type,parent.id,option);
                 //const [error,biz_data] = await Portal.get(database,group.data_type,group.id,option);
                 //const [error,biz_data] = await Portal.get(database,group.data_type,group.id);
                 //---
-                const [error,biz_data] = await Portal.post(database,parent.data_type,parent);
+                //const [error,biz_data] = await Portal.post(database,parent.data_type,parent);
                 //const [error,biz_data] = await Portal.post(database,blank.data_type,blank);
                 //const [error,biz_data] = await Portal.post(database,user.data_type,user);
                 //const [error,biz_data] = await Portal.post(database,image.data_type,image);

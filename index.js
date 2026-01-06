@@ -1868,8 +1868,10 @@ class Portal {
 		});
 	};
 	//9_portal_get
-	static get = async(database,data_type,key,option) => {
+	static get = async(database,data_type,id,option) => {
 		/* Options
+		 * Key
+		   - key_field / type. str / ex. title_url / default. id
 		 * Cache
 		   - cache_delete / type. bool / ex. true/false / default. false
 		 * Fields
@@ -1916,26 +1918,19 @@ class Portal {
 		 */
 		return new Promise((callback) => {
 			let error = null;
-			let data = Data_Logic.get_new(data_type,0,{key:key?key:Type.TITLE_BLANK});
+			let data = Data_Logic.get_new(data_type,0);
 			let stat_view = Data_Logic.get_new(Type.DATA_STAT,0,{resultOK:false});
 			option = option ? option : {};
 			async.series([
-				function(call){
-					if(!Str.check_is_guid(key) && !Number.isInteger(key) && key){
-						option.title_url = key.toLowerCase();
-						key = key.toLowerCase();
-					}
-					call();
-				},
 				//delete_cache_item
 				async function(call){
-					if(option.cache_delete && Str.check_is_guid(key)){
-						const [biz_error,biz_data] = await Portal.delete_cache(database,data_type,key);
+					if(option.cache_delete){
+						const [biz_error,biz_data] = await Portal.delete_cache(database,data_type,id,option);
 					}
 				},
 				//item_by_id
 				async function(call){
- 					const [biz_error,biz_data] = await Data.get(database,data_type,key,option);
+ 					const [biz_error,biz_data] = await Data.get(database,data_type,id,option);
 					data = biz_data;
 				},
 				//field_values
@@ -3180,8 +3175,8 @@ class Data {
 	static post = async (db_connect,data_type,data,option) => {
 		return [error,data] = await post_item_adapter(db_connect,data_type,data,option);
 	};
-	static get = async (db_connect,data_type,key,option) => {
-		return [error,data] = await get_item_adapter(db_connect,data_type,key,option);
+	static get = async (db_connect,data_type,id,option) => {
+		return [error,data] = await get_item_adapter(db_connect,data_type,id,option);
 	};
 	static delete = async (db_connect,data_type,id) => {
 		return [error,data] = await delete_item_adapter(db_connect,data_type,id);

@@ -180,19 +180,41 @@ const get_item_list_adapter = (db_connect,data_type,filter,sort_by,page_current,
         });
     });
 }
-const get_item_adapter = (db_connect,data_type,key,option) => {
+const get_item_adapter = (db_connect,data_type,id,option) => {
     return new Promise((callback) => {
         if(!option){
             option = {};
         }
         let cache_connect = {};
-        item_data = Data_Logic.get_new(data_type,0,{data:{key:key}});
+        data = Data_Logic.get_new(data_type,0);
+        option = option ? option : {};
         async.series([
             async function(call) {
                 const [error,data] = await get_cache_connect_main(db_connect.data_config);
                 cache_connect = data;
             },
             async function(call) {
+                if(!option.key_field){
+                    const [biz_error,biz_data] = await get_item_cache_db(cache_connect,db_connect,data.data_type,data.id,option);
+                    data = biz_data;
+                }else{
+                    let query_field={};
+                    query_field=[option.key_field] = id;
+                    let page_current=1;
+                    let page_size=1;
+                    const [biz_error,biz_data] = await get_item_list_adapter(db_connect,data_type,query_field,{},page_current,page_size,option);
+                        if(biz_data.length>0){
+                            data = biz_data[0];
+                        }else{
+                            data[Type.FIELD_ID] = 0;
+                            data[Type.FIELD_SOURCE_KEY] = key;
+                            data[Type.FIELD_SOURCE] = DB_TITLE;
+                            data[Type.FIELD_TITLE] = NOT_FOUND_TITLE;
+                            data[Type.FIELD_TITLE_URL] = Str.get_title_url(NOT_FOUND_TITLE);
+                            data.filter = option.filter;
+                        }
+               }
+                /*
                 if(option.filter){
                     let sort_by={};
                     let page_current=1;
@@ -231,9 +253,19 @@ const get_item_adapter = (db_connect,data_type,key,option) => {
                     const [error,data] = await get_item_cache_db(cache_connect,db_connect,item_data.data_type,item_data.key,option);
                     item_data = data;
                 }
+                */
             },
+            async function(call) {
+                    data[Type.FIELD_ID] = 0;
+                            data[Type.FIELD_SOURCE_KEY] = key;
+                            data[Type.FIELD_SOURCE] = DB_TITLE;
+                            data[Type.FIELD_TITLE] = NOT_FOUND_TITLE;
+                            data[Type.FIELD_TITLE_URL] = Str.get_title_url(NOT_FOUND_TITLE);
+                            data.filter = option.filter;
+
+             },
         ]).then(result => {
-            callback([error,item_data]);
+            callback([error,data]);
         }).catch(error => {
             Log.error("Adapter-Get-Item-Adapter-5",error);
             callback([error,null]);

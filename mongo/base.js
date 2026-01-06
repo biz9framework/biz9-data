@@ -79,7 +79,8 @@ const post_item_base = (db_connect,data_type,item,option) => {
     return new Promise((callback) => {
         option = !Obj.check_is_empty(option) ? option : {overwrite_data:false};
         if (Str.check_is_null(item.id)){//insert
-            item[Type.FIELD_ID] = Str.get_guid();
+            //item[Type.FIELD_ID] = Str.get_guid();
+            item[Type.FIELD_ID] = Num.get_id(999);
             item[Type.FIELD_DATE_CREATE] = DateTime.get_new();
             item[Type.FIELD_DATE_SAVE] = DateTime.get_new();
             if(check_db_connect_base(db_connect)){
