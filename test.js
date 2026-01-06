@@ -94,7 +94,6 @@ describe('connect', function(){ this.timeout(25000);
                 //---
                 Log.w('search',search);
                 const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option);
-                console.log('done');
                 //---
                 //const [biz_error,biz_data] = await Portal.count(database,search.data_type,search.filter);
                 //---

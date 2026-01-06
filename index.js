@@ -2287,11 +2287,9 @@ class Portal {
 						if(biz_error){
 							error=Log.append(error,biz_error);
 						}else{
-							data.data_type=data_type;
 							data.item_count=item_count;
 							data.page_count=page_count;
 							data.search=search;
-							data.filter=filter;
 							data.items=items;
 							call();
 						}
