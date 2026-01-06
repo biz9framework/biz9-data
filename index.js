@@ -132,9 +132,8 @@ class Blog_Post_Data {
 						error=Log.append(error,biz_error);
 					}else{
 						data.item_count = biz_data.item_count;
-						data.data_type = Type.DATA_BLOG_POST;
 						data.page_count = biz_data.page_count;
-						data.filter = biz_data.filter;
+						data.search = biz_data.search;
 						data.blog_posts = biz_data.items;
 					}
 				},
@@ -183,9 +182,8 @@ class Category_Data { //9_category_get
 						error=Log.append(error,biz_error);
 					}else{
 						data.item_count = biz_data.item_count;
-						data.data_type = Type.DATA_CATEGORY;
 						data.page_count = biz_data.page_count;
-						data.filter = biz_data.filter;
+						data.search = biz_data.search;
 						data.categorys = biz_data.items;
 					}
 				},
@@ -235,9 +233,8 @@ class Content_Data {
 						error=Log.append(error,biz_error);
 					}else{
 						data.item_count = biz_data.item_count;
-						data.data_type = Type.DATA_CONTENT;
 						data.page_count = biz_data.page_count;
-						data.filter = biz_data.filter;
+						data.search = biz_data.search;
 						data.contents = biz_data.items;
 					}
 				},
@@ -287,9 +284,8 @@ class Page_Data {
 						error=Log.append(error,biz_error);
 					}else{
 						data.item_count = biz_data.item_count;
-						data.data_type =Type.DATA_PAGE;
 						data.page_count = biz_data.page_count;
-						data.filter = biz_data.filter;
+						data.search =Type.search;
 						data.pages = biz_data.items;
 					}
 				},
@@ -339,9 +335,8 @@ class Template_Data {
 						error=Log.append(error,biz_error);
 					}else{
 						data.item_count = biz_data.item_count;
-						data.data_type = Type.DATA_TEMPLATE;
 						data.page_count = biz_data.page_count;
-						data.filter = biz_data.filter;
+						data.search = biz_data.search;
 						data.templates = biz_data.items;
 					}
 				},
@@ -389,10 +384,8 @@ class Gallery_Data {
 						error=Log.append(error,biz_error);
 					}else{
 						data.item_count = biz_data.item_count;
-						data.data_type = Type.DATA_GALLERY;
 						data.page_count = biz_data.page_count;
-						data.filter = biz_data.filter;
-						data.data_type = biz_data.data_type;
+						data.search = biz_data.search;
 						data.gallerys = biz_data.items;
 					}
 				},
@@ -441,10 +434,8 @@ class Event_Data {
 						error=Log.append(error,biz_error);
 					}else{
 						data.item_count = biz_data.item_count;
-						data.data_type = Type.DATA_EVENT;
 						data.page_count = biz_data.page_count;
-						data.filter = biz_data.filter;
-						data.data_type = biz_data.data_type;
+						data.search = biz_data.search;
 						data.events = biz_data.items;
 					}
 				},
@@ -1174,9 +1165,8 @@ class Product_Data {
 						error=Log.append(error,biz_error);
 					}else{
 						data.item_count = biz_data.item_count;
-						data.data_type = Type.DATA_PRODUCT;
 						data.page_count = biz_data.page_count;
-						data.filter = biz_data.filter;
+						data.search = biz_data.search;
 						data.products = biz_data.items;
 					}
 				},
@@ -1268,9 +1258,8 @@ class Review_Data {
 						error=Log.append(error,biz_error);
 					}else{
 						data.item_count = biz_data.item_count;
-						data.data_type = Type.DATA_REVIEW;
 						data.page_count = biz_data.page_count;
-						data.filter = biz_data.filter;
+						data.search = biz_data.search;
 						data.reviews = biz_data.items;
 					}
 				},
@@ -1299,11 +1288,9 @@ class Review_Data {
 					if(biz_error){
 						error=Log.append(error,biz_error);
 					}else{
-						data.option = option;
-						data.data_type=biz_data.data_type;
 						data.item_count=biz_data.item_count;
 						data.page_count=biz_data.page_count;
-						data.filter=biz_data.filter;
+						data.search=biz_data.search;
 						data.reviews=biz_data.items;
 					}
 				},
@@ -2250,11 +2237,9 @@ class Portal {
 							}else{
 								if(search_item.type == Type.TITLE_ITEMS){
 									let title = Str.get_title_url(search_item.title);
-									data[title+'_data_type'] = biz_data.data_type;
 									data[title+'_item_count'] = biz_data.item_count;
 									data[title+'_page_count'] = biz_data.page_count;
 									data[title+'_search'] = biz_data.search;
-									data[title+'_filter'] = biz_data.filter;
 									data[title] = biz_data.items;
 								}else if(search_item.type == Type.TITLE_COUNT){
 									let search = Data_Logic.get_search(search_item.search.data_type,search_item.search.filter,search_item.search.sort_by,search_item.search.page_current,search_item.search.page_size);
@@ -2391,7 +2376,6 @@ class Portal {
 						if(biz_error){
 							error=Log.append(error,biz_error);
 						}else{
-							data.data_type=data_type;
 							data.item_count=item_count;
 							data.page_count=page_count;
 							data.search=search;
@@ -3168,9 +3152,8 @@ class Stat_Data {
 						error=Log.append(error,biz_error);
 					}else{
 						data.item_count = biz_data.item_count;
-						data.data_type = Type.DATA_BLOG_POST;
 						data.page_count = biz_data.page_count;
-						data.filter = biz_data.filter;
+						data.search = biz_data.search;
 						data.stats = biz_data.items;
 					}
 					call();
@@ -3261,9 +3244,8 @@ class Service_Data {
 						error=Log.append(error,biz_error);
 					}else{
 						data.item_count = biz_data.item_count;
-						data.data_type = Type.DATA_SERVICE;
 						data.page_count = biz_data.page_count;
-						data.filter = biz_data.filter;
+						data.search = biz_data.search;
 						data.services = biz_data.items;
 					}
 				},

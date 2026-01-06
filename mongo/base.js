@@ -183,6 +183,8 @@ const get_id_list_base = (db_connect,data_type,filter,sort_by,page_current,page_
         let collection = {};
         async.series([
             function(call) {
+                if(page_size>0){
+                    console.log('run_me');
                 if(check_db_connect_base(db_connect)){
                     db_connect.collection(data_type).countDocuments(filter).then((data) => {
                         if(data){
@@ -196,6 +198,10 @@ const get_id_list_base = (db_connect,data_type,filter,sort_by,page_current,page_
                 }else{
                     Log.error("DATA-MONGO-BASE-GET-SQL-PAGING-TBLID-BASE-ERROR-2",error);
                     callback(['No connection',0,[]]);
+                }
+                }else{
+                    console.log('noooooo');
+                    call();
                 }
             },
             function(call) {
@@ -215,7 +221,14 @@ const get_id_list_base = (db_connect,data_type,filter,sort_by,page_current,page_
                     Log.error("DATA-Mongo-Base-Get-SQL-PAGING-TBLID-BASE-ERROR-4",error);
                     callback(['No connection',0,[]]);
                 }
+            },
+            function(call) {
+               if(page_size==0){
+                    total_count = data_list.length;
+                }
+                call();
             }
+
         ]).then(result => {
             callback([error,total_count,data_list]);
         }).catch(error => {

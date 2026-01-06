@@ -167,7 +167,7 @@ const get_item_list_adapter = (db_connect,data_type,filter,sort_by,page_current,
             },
             function(call) {
                 page_count = !Str.check_is_null(Math.round(item_count/page_size+1)) ? Math.round(item_count/page_size+1) : 0;
-                page_count = page_count == "Infinity" || Str.check_is_null(page_count) ? "1" : page_count;
+                page_count = page_count == "Infinity" || Str.check_is_null(page_count) ? 1 : page_count;
                 item_count = Str.check_is_null(item_count) ? "0" : item_count;
                 page_size = Str.check_is_null(page_size) ? "0" : page_size;
                 call();
