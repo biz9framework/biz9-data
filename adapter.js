@@ -7,7 +7,7 @@ Description: BiZ9 Framework: Data - Mongo - Adapter
 const async = require('async');
 const {get_db_connect_main,check_db_connect_main,delete_db_connect_main,post_item_main,post_bulk_main,get_item_main,delete_item_main,get_id_list_main,delete_item_list_main,get_count_item_list_main} = require('./mongo/index.js');
 const {get_cache_connect_main,delete_cache_connect_main,get_cache_string_main,delete_cache_string_main,post_cache_string_main} = require('./redis/index.js');
-const {DataItem,Type}=require("biz9-logic");
+const {Type,Data_Logic}=require("/home/think2/www/doqbox/biz9-framework/biz9-logic/code");
 const {Log,Str,Num,Obj}=require("biz9-utility");
 const DB_TITLE='DB';
 const CACHE_TITLE='CACHE';
@@ -186,7 +186,7 @@ const get_item_adapter = (db_connect,data_type,key,option) => {
             option = {};
         }
         let cache_connect = {};
-        item_data = DataItem.get_new(data_type,0,{key:key});
+        item_data = Data_Logic.get_new(data_type,0,{data:{key:key}});
         async.series([
             async function(call) {
                 const [error,data] = await get_cache_connect_main(db_connect.data_config);
@@ -272,7 +272,7 @@ const post_cache_item = (cache_connect,data_type,id,item_data) => {
 }
 const delete_item_adapter = (db_connect,data_type,id,option) => {
     return new Promise((callback) => {
-        let item_data = DataItem.get_new(data_type,id);
+        let item_data = Data_Logic.get_new(data_type,id);
         async.series([
             async function(call) {
                 const [error,data] = await delete_item_cache_db(db_connect,data_type,id);
@@ -289,7 +289,7 @@ const delete_item_adapter = (db_connect,data_type,id,option) => {
 const get_item_cache_db = (cache_connect,db_connect,data_type,id,option) => {
     return new Promise((callback) => {
         let cache_key_list = [];
-        let item_data = DataItem.get_new(data_type,id,{source:NOT_FOUND_TITLE});
+        let item_data = Data_Logic.get_new(data_type,id,{data:{source:NOT_FOUND_TITLE}});
         let field_list = [];
         let hide_field_list = [];
         option = option ? option : {};
@@ -315,9 +315,9 @@ const get_item_cache_db = (cache_connect,db_connect,data_type,id,option) => {
                     if(data){
                         item_data = data;
                         const [error,data2] = await post_cache_item(cache_connect,data_type,id,data);
-                       item_data[Type.FIELD_SOURCE] = DB_TITLE;
+                        item_data[Type.FIELD_SOURCE] = DB_TITLE;
                     }else{
-                        item_data[Type.FIELD_SOURCE] = get_blank_item(item_data);
+                        item_data[Type.FIELD_SOURCE] = NOT_FOUND_TITLE;
                     }
                 }else{
                     //cache
@@ -410,7 +410,7 @@ const delete_item_cache=(db_connect,data_type,id,option)=>{
         let cache_connect = {};
         let cache_key_list = '';
         let cache_string_list = '';
-        let item_data = DataItem.get_new(data_type,id);
+        let item_data = Data_Logic.get_new(data_type,id);
         async.series([
              async function(call) {
                 const [error,data] = await get_cache_connect_main(db_connect.data_config);
@@ -451,7 +451,7 @@ const delete_item_cache_db = (db_connect,data_type,id) => {
         let cache_connect = {};
         let cache_key_list = '';
         let cache_string_list = '';
-        let item_data = DataItem.get_new(data_type,id);
+        let item_data = Data_Logic.get_new(data_type,id);
         async.series([
             async function(call) {
                 const [error,data] = await get_cache_connect_main(db_connect.data_config);

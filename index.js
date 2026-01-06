@@ -98,7 +98,7 @@ class Blog_Post_Data {
 	//9_blog_post_get
 	static get = async (database,key,option) => {
 		return new Promise((callback) => {
-			let blog_post = Data_Logic.get(Type.DATA_BLOG_POST,0);
+			let blog_post = Data_Logic.get_new(Type.DATA_BLOG_POST,0);
 			let error = null;
 			option = option ? option : {};
 			async.series([
@@ -149,7 +149,7 @@ class Blog_Post_Data {
 class Category_Data { //9_category_get
 	static get = async (database,key,option) => {
 		return new Promise((callback) => {
-			let category = Data_Logic.get(Type.DATA_CATEGORY,0);
+			let category = Data_Logic.get_new(Type.DATA_CATEGORY,0);
 			let error = null;
 			option = option ? option : {};
 			async.series([
@@ -200,7 +200,7 @@ class Content_Data {
 	//9_content_get
 	static get = async (database,key,option) => {
 		return new Promise((callback) => {
-			let content = Data_Logic.get(Type.DATA_CONTENT,0);
+			let content = Data_Logic.get_new(Type.DATA_CONTENT,0);
 			let error = null;
 			option = option ? option : {};
 			async.series([
@@ -251,7 +251,7 @@ class Page_Data {
 	//9_page_data_get
 	static get = async (database,key,option) => {
 		return new Promise((callback) => {
-			let page = Data_Logic.get(Type.DATA_PAGE,0);
+			let page = Data_Logic.get_new(Type.DATA_PAGE,0);
 			let error = null;
 			option = option ? option : {};
 			async.series([
@@ -302,7 +302,7 @@ class Template_Data {
 	//9_template_data_get
 	static get = async (database,key,option) => {
 		return new Promise((callback) => {
-			let template = Data_Logic.get(Type.DATA_TEMPLATE,0);
+			let template = Data_Logic.get_new(Type.DATA_TEMPLATE,0);
 			let error = null;
 			option = option ? option : {};
 			async.series([
@@ -353,7 +353,7 @@ class Gallery_Data {
 	//9_gallery_data_get
 	static get = async (database,key,option) => {
 		return new Promise((callback) => {
-			let gallery = Data_Logic.get(Type.DATA_GALLERY,0);
+			let gallery = Data_Logic.get_new(Type.DATA_GALLERY,0);
 			let error = null;
 			option = option ? option : {};
 			async.series([
@@ -403,7 +403,7 @@ class Event_Data {
 	//9_event_data_get
 	static get = async (database,key,option) => {
 		return new Promise((callback) => {
-			let event = Data_Logic.get(Type.DATA_EVENT,0);
+			let event = Data_Logic.get_new(Type.DATA_EVENT,0);
 			let error = null;
 			option = option ? option : {};
 			async.series([
@@ -452,7 +452,7 @@ class Order_Data {
 	//9_order_post
 	static post = async (database,order,order_payments,option) => {
 		return new Promise((callback) => {
-			let data = {order:Data_Logic.get(Type.DATA_ORDER,0, {
+			let data = {order:Data_Logic.get_new(Type.DATA_ORDER,0, {
 				order_number:0,
 				parent_data_type:order.parent_data_type,
 				user_id:0,
@@ -485,7 +485,7 @@ class Order_Data {
 				async function(call){
 					if(order.order_items.length>0){
 						for(const order_item of order.order_items){
-							let post_order_item = Data_Logic.get(Type.DATA_ORDER_ITEM,0);
+							let post_order_item = Data_Logic.get_new(Type.DATA_ORDER_ITEM,0);
 							for(const key in order_item){
 								order_item.temp_row_id = Num.get_id();
 								if(!Str.check_is_null(order_item[key])
@@ -515,7 +515,7 @@ class Order_Data {
 					if(order.order_items.length>0){
 						for(const order_item of order.order_items){
 							for(const order_sub_item of order_item.order_sub_items){
-								let post_order_sub_item = Data_Logic.get(Type.DATA_ORDER_SUB_ITEM,0);
+								let post_order_sub_item = Data_Logic.get_new(Type.DATA_ORDER_SUB_ITEM,0);
 								for(const key in order_sub_item){
 									order_sub_item.temp_row_id = Num.get_id();
 									if(!Str.check_is_null(order_sub_item[key])
@@ -637,7 +637,7 @@ class Order_Data {
 	//9_order_get
 	static get = (database,order_number,option) => {
 		return new Promise((callback) => {
-			let data = {order:Data_Logic.get(Type.DATA_ORDER,0,{order_number:order_number,grand_total:0,order_items:[],user:Data_Logic.get(Type.DATA_USER,0)})};
+			let data = {order:Data_Logic.get_new(Type.DATA_ORDER,0,{order_number:order_number,grand_total:0,order_items:[],user:Data_Logic.get_new(Type.DATA_USER,0)})};
 			let order_parent_item_query = { $or: [] };
 			let order_sub_item_query = { $or: [] };
 			let error = null;
@@ -757,7 +757,7 @@ class Order_Data {
 		return new Promise((callback) => {
 			let data = {};
 			let error = null;
-			data.order = Data_Logic.get(Type.DATA_ORDER,id);
+			data.order = Data_Logic.get_new(Type.DATA_ORDER,id);
 			async.series([
 				//get_order
 				async function(call){
@@ -819,7 +819,7 @@ class Cart_Data {
 			let data = {};
 			let error = null;
 			option = option ? option : {post_stat:false};
-			data.cart = Data_Logic.get(Type.DATA_CART,cart.id,{cart_number:cart.cart_number,parent_data_type:cart.parent_data_type,user_id:cart.user_id,grand_total: 0});
+			data.cart = Data_Logic.get_new(Type.DATA_CART,cart.id,{cart_number:cart.cart_number,parent_data_type:cart.parent_data_type,user_id:cart.user_id,grand_total: 0});
 			data.cart_items = [];
 			data.cart_sub_items = [];
 			async.series([
@@ -848,7 +848,7 @@ class Cart_Data {
 				async function(call){
 					if(cart.cart_items.length>0){
 						for(const cart_item of cart.cart_items){
-							let post_cart_item = Data_Logic.get(Type.DATA_CART_ITEM,0);
+							let post_cart_item = Data_Logic.get_new(Type.DATA_CART_ITEM,0);
 							for(const key in cart_item){
 								cart_item.temp_row_id = Num.get_id();
 								if(!Str.check_is_null(cart_item[key])
@@ -878,7 +878,7 @@ class Cart_Data {
 					if(cart.cart_items.length>0){
 						for(const cart_item of cart.cart_items){
 							for(const cart_sub_item of cart_item.cart_sub_items){
-								let post_cart_sub_item = Data_Logic.get(Type.DATA_CART_SUB_ITEM,0);
+								let post_cart_sub_item = Data_Logic.get_new(Type.DATA_CART_SUB_ITEM,0);
 								for(const key in cart_sub_item){
 									cart_sub_item.temp_row_id = Num.get_id();
 									if(!Str.check_is_null(cart_sub_item[key])
@@ -973,7 +973,7 @@ class Cart_Data {
 	//9_cart_get
 	static get = (database,cart_number) => {
 		return new Promise((callback) => {
-			let data = {cart:Data_Logic.get(Type.DATA_CART,0,{cart_number:cart_number,cart_items:[],user:Data_Logic.get(Type.DATA_USER,0)})};
+			let data = {cart:Data_Logic.get_new(Type.DATA_CART,0,{cart_number:cart_number,cart_items:[],user:Data_Logic.get_new(Type.DATA_USER,0)})};
 			let cart_parent_item_query = { $or: [] };
 			let cart_sub_item_query = { $or: [] };
 			let error = null;
@@ -1082,7 +1082,7 @@ class Cart_Data {
 		return new Promise((callback) => {
 			let data = {};
 			let error = null;
-			data.cart = Data_Logic.get(Type.DATA_CART,id);
+			data.cart = Data_Logic.get_new(Type.DATA_CART,id);
 			async.series([
 				//get_cart
 				async function(call){
@@ -1132,7 +1132,7 @@ class Product_Data {
 	//9_product_get
 	static get = async (database,key,option) => {
 		return new Promise((callback) => {
-			let product = Data_Logic.get(Type.DATA_PRODUCT,0);
+			let product = Data_Logic.get_new(Type.DATA_PRODUCT,0);
 			let error = null;
 			option = option ? option : {};
 			async.series([
@@ -1184,7 +1184,7 @@ class Review_Data {
 	static post = async(database,parent_data_type,parent_id,user_id,post_review,option) => {
 		return new Promise((callback) => {
 			let error = null;
-			let data = {parent_item:Data_Logic.get(parent_data_type,parent_id),review:Data_Logic.get(Type.DATA_REVIEW,0)};
+			let data = {parent_item:Data_Logic.get_new(parent_data_type,parent_id),review:Data_Logic.get_new(Type.DATA_REVIEW,0)};
 			let review = Review_Logic.get_new(parent_data_type,parent_id,user_id,post_review.title,post_review.comment,post_review.rating);
 			option = option ? option : {post_stat:false,user_id:0};
 			async.series([
@@ -1306,8 +1306,8 @@ class Review_Data {
 	static delete = async(database,parent_data_type,parent_id,review_id) => {
 		return new Promise((callback) => {
 			let error = null;
-			let data = {parent_item:Data_Logic.get(parent_data_type,parent_id),review:Data_Logic.get(Type.DATA_REVIEW,0)};
-			let review = Data_Logic.get(Type.DATA_REVIEW,review_id);
+			let data = {parent_item:Data_Logic.get_new(parent_data_type,parent_id),review:Data_Logic.get_new(Type.DATA_REVIEW,0)};
+			let review = Data_Logic.get_new(Type.DATA_REVIEW,review_id);
 			async.series([
 				//review_post
 				async function(call){
@@ -1509,7 +1509,7 @@ class User_Data {
 				email_resultOK:false,
 				title_resultOK:false,
 				user:post_data.user,
-				stat:Data_Logic.get(Type.DATA_STAT,0)
+				stat:Data_Logic.get_new(Type.DATA_STAT,0)
 			};
 			let post_ip_address = post_data.ip_address?post_data.ip_address:null;
 			let post_geo_key = post_data.geo_key?post_data.geo_key:null;
@@ -1611,7 +1611,7 @@ class User_Data {
 			let data = {
 				user_resultOK:false,
 				user:post_data.user,
-				stat:Data_Logic.get(Type.DATA_STAT,0)
+				stat:Data_Logic.get_new(Type.DATA_STAT,0)
 			};
 			let post_ip_address = post_data.ip_address?post_data.ip_address:null;
 			let post_geo_key = post_data.geo_key?post_data.geo_key:null;
@@ -1916,8 +1916,8 @@ class Portal {
 		 */
 		return new Promise((callback) => {
 			let error = null;
-			let data = Data_Logic.get(data_type,0,{key:key?key:Type.TITLE_BLANK});
-			let stat_view = Data_Logic.get(Type.DATA_STAT,0,{resultOK:false});
+			let data = Data_Logic.get_new(data_type,0,{key:key?key:Type.TITLE_BLANK});
+			let stat_view = Data_Logic.get_new(Type.DATA_STAT,0,{resultOK:false});
 			option = option ? option : {};
 			async.series([
 				function(call){
@@ -2088,7 +2088,7 @@ class Portal {
 	static blank = (database) => {
 		return new Promise((callback) => {
 			let error = null;
-			let data = Data_Logic.get(Type.DATA_BLANK,0);
+			let data = Data_Logic.get_new(Type.DATA_BLANK,0);
 			data.test_resultOK = false;
 			async.series([
 				async function(call){
@@ -2290,6 +2290,7 @@ class Portal {
 							data.item_count=item_count;
 							data.page_count=page_count;
 							data.search=search;
+							data.filter=filter;
 							data.items=items;
 							call();
 						}
@@ -2626,7 +2627,7 @@ class Portal {
 		 */
 		return new Promise((callback) => {
 			let error = null;
-			let data = Data_Logic.get(data_type,0);
+			let data = Data_Logic.get_new(data_type,0);
 			async.series([
 				function(call){
 					Data.post_bulk(database,data_type,items).then(([biz_error,biz_data])=> {
@@ -2934,9 +2935,9 @@ class Portal {
 		 */
 		return new Promise((callback) => {
 			let error = null;
-			let data = Data_Logic.get(data_type,id);
-			let top_data = Data_Logic.get(data_type,0);
-			let copy_data = Data_Logic.get(data_type,0);
+			let data = Data_Logic.get_new(data_type,id);
+			let top_data = Data_Logic.get_new(data_type,0);
+			let copy_data = Data_Logic.get_new(data_type,0);
 			option = option ? option : {copy_group:true};
 			option.get_group =  option.copy_group  ? option.copy_group : true;
 			async.series([
@@ -3000,7 +3001,7 @@ class Faq_Data{
 	//9_faq_get
 	static get = (database,key,option) => {
 		return new Promise((callback) => {
-			let data = {faq:Data_Logic.get(Type.DATA_FAQ,0)};
+			let data = {faq:Data_Logic.get_new(Type.DATA_FAQ,0)};
 			let questions = [];
 			let error = null;
 			option = option ? option : {question_count:19};
@@ -3038,7 +3039,7 @@ class Stat_Data {
 			let error = null;
 			option = option ? option : {unique:false};
 			let resultOK = true;
-			data.stat = Data_Logic.get(Type.DATA_STAT,stat.id,{parent_data_type:stat.parent_data_type,user_id:stat.user_id,type:stat.type});
+			data.stat = Data_Logic.get_new(Type.DATA_STAT,stat.id,{parent_data_type:stat.parent_data_type,user_id:stat.user_id,type:stat.type});
 			async.series([
 				async function(call){
 					for(const key in stat) {
@@ -3116,9 +3117,9 @@ class Stat_Data {
 	};
 	static post_user = (database,user_id,stat_type,post_data,option) => {
 		return new Promise((callback) => {
-			let post_stat = Data_Logic.get(Type.DATA_STAT,0,{user_id:user_id,type:stat_type});
+			let post_stat = Data_Logic.get_new(Type.DATA_STAT,0,{user_id:user_id,type:stat_type});
 			post_stat = Obj.merge(post_stat,post_data);
-			let data = Data_Logic.get(Type.DATA_STAT,0);
+			let data = Data_Logic.get_new(Type.DATA_STAT,0);
 			let error = null;
 			async.series([
 				//post_stat
@@ -3141,7 +3142,7 @@ class Stat_Data {
 	//9_search
 	static search = (database,filter,sort_by,page_current,page_size,option) => {
 		return new Promise((callback) => {
-			let data = Data_Logic.get(Type.DATA_BLANK,0);
+			let data = Data_Logic.get_new(Type.DATA_BLANK,0);
 			let error = null;
 			async.series([
 				async function(call){
@@ -3209,7 +3210,7 @@ class Service_Data {
 	//9_service_get
 	static get = async (database,key,option) => {
 		return new Promise((callback) => {
-			let service = Data_Logic.get(Type.DATA_SERVICE,0);
+			let service = Data_Logic.get_new(Type.DATA_SERVICE,0);
 			let error = null;
 			option = option ? option : {};
 			async.series([
@@ -3261,7 +3262,7 @@ class Blank_Data {
 	static blank = (database) => {
 		return new Promise((callback) => {
 			let error = null;
-			let data = Data_Logic.get(Type.DATA_BLANK,0);
+			let data = Data_Logic.get_new(Type.DATA_BLANK,0);
 			data.test_resultOK = false;
 			async.series([
 				async function(call){
