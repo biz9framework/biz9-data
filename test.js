@@ -40,18 +40,25 @@ describe('connect', function(){ this.timeout(25000);
             async function(call){
                 //-->
                 let new_data_type = Type.DATA_PRODUCT;
-                let id = '656';
-                let title_url = 'product_243';
+                let id = '13';
+                let title_url = 'product_282';
                 let print_test = true;
 
                 //-->
                 //let parent = Data_Logic.get_new(new_data_type,0,{test:true,generate_title:true});
                 let parent = Data_Logic.get_new(Type.DATA_PRODUCT,id);
+                /*
+                let parent_list = [
+                    Data_Logic.get_new(new_data_type,0,{test:true,generate_title:true}),
+                    Data_Logic.get_new(new_data_type,0,{test:true,generate_title:true}),
+                    Data_Logic.get_new(new_data_type,0,{test:true,generate_title:true})
+                ];
+                */
                 //-->
                 //let group = Data_Logic.get_new(Type.DATA_GROUP,0,{test:true,generate_title:true,parent:parent});
                 //let group = Data_Logic.get_new(Type.DATA_GROUP,id);
                 //-->
-                let blank = Data_Logic.get_new(Type.DATA_BLANK,0,{test:true,generate_title:true,parent:parent});
+                //let blank = Data_Logic.get_new(Type.DATA_BLANK,0,{test:true,generate_title:true,parent:parent});
                 //let blank = Data_Logic.get_new(Type.DATA_BLANK,id);
 
 
@@ -61,14 +68,14 @@ describe('connect', function(){ this.timeout(25000);
                 //-->
                 //let favorite = Favorite_Logic.get_new(parent.data_type,parent.id,user.id);
                 //-->
-                //let option = {};
+                let option = {};
                 //let option = {id_field:'title_url',id_field_value:title_url};
                 //let option = {groups:{}};
                 //let option = {field:{id:1,title:1,title_url:1}};
                 //let join_search_1 = Data_Logic.get_search_join(Type.TITLE_LIST,Data_Logic.get_search(Type.DATA_BLANK,{},{},1,0),{title:'cool'});
                 //let option = {joins:[join_search_1]};
-                let foreign_search_1 = Data_Logic.get_search_foreign(Type.TITLE_COUNT,Type.DATA_BLANK,Type.FIELD_PARENT_ID,Type.FIELD_ID);
-                let option = {foreigns:[foreign_search_1]};
+                //let foreign_search_1 = Data_Logic.get_search_foreign(Type.TITLE_LIST,Type.DATA_BLANK,Type.FIELD_PARENT_ID,Type.FIELD_ID);
+                //let option = {foreigns:[foreign_search_1]};
 
                 //let group_search_1 = Data_Logic.get_search_group();
                 //let group_search_1 = Data_Logic.get_search_group({title:{group_43815:0,group_83574:1}});
@@ -79,7 +86,7 @@ describe('connect', function(){ this.timeout(25000);
                 //---
                 let search = Data_Logic.get_search(Type.DATA_PRODUCT,{},{date_create:-1},1,0);
                 //---
-                const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option);
+                //const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option);
                 //---
                 //const [biz_error,biz_data] = await Portal.count(database,search.data_type,search.filter);
                 //---
@@ -95,9 +102,15 @@ describe('connect', function(){ this.timeout(25000);
                 //const [error,biz_data] = await Portal.post(database,user.data_type,user);
                 //const [error,biz_data] = await Portal.post(database,image.data_type,image);
                 //---
-                //const [error,biz_data] = await Portal.post_items(database,[parent,parent_item_1,parent_item_2]);
+                //const [error,biz_data] = await Portal.post_items(database,parent_list);
                 //---
                 //const [error,biz_data] = await Portal.delete(database,parent.data_type,parent.id,option);
+                console.log('aaa');
+                Log.w('data_type',parent.data_type);
+                Log.w('search_filter',search.filter);
+                const [error,biz_data] = await Portal.delete_search(database,parent.data_type,search.filter,option);
+                console.log('bbbbb');
+                //---
 
                 //---
                 if(print_test){;

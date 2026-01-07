@@ -359,13 +359,15 @@ const get_item_cache_db = (cache_connect,database,data_type,id,option) => {
 }
 const delete_item_list_adapter = (database,data_type,filter,option) => {
     return new Promise((callback) => {
+	    let error = null;
         let item_id_list = [];
+        let item_count = 0;
         let item_data_new_list = [];
+	    option = option ? option : {};
         async.series([
             async function(call) {
                 const [error,total_count,data_list] = await get_id_list_main(database,data_type,filter,{},0,9999,option);
-                    error=error;
-                    total_count=total_count;
+                    item_count=total_count;
                     item_id_list=data_list;
             },
             async function(call){
@@ -413,7 +415,7 @@ const delete_item_cache=(database,data_type,id,option)=>{
             },
             async function(call){
                 const [error,data] = await delete_cache_string_main(cache_connect,get_cache_item_attr_list_key(data_type,id));
-                item_data.cache_del = true;
+                item_data.delete_cache_resultOK = true;
                 item_data.cache_item_attr_list = get_cache_item_attr_list_key(data_type,id);
             },
             function(call) {
@@ -429,16 +431,22 @@ const delete_item_cache=(database,data_type,id,option)=>{
 }
 const delete_item_cache_db = (database,data_type,id) => {
     return new Promise((callback) => {
+        console.log('aaaaaa');
         let cache_connect = {};
         let cache_key_list = '';
         let cache_string_list = '';
-        let item_data = Data_Logic.get_new(data_type,id);
+        let data = Data_Logic.get_new(data_type,id);
+        data[Type.FIELD_RESULT_OK_DELETE] = false;
+        data[Type.FIELD_RESULT_OK_DELETE_CACHE] = false;
+        data[Type.FIELD_RESULT_OK_DELETE_DATABASE] = false;
         async.series([
             async function(call) {
+                console.log('bbbbbbb');
                 const [error,data] = await get_cache_connect_main(database.data_config);
                 cache_connect = data;
             },
             async function(call) {
+                console.log('cccccc');
                 const [error,data] = await get_cache_string_main(cache_connect,get_cache_item_attr_list_key(data_type,id));
                     cache_key_list=data;
             },
@@ -454,17 +462,23 @@ const delete_item_cache_db = (database,data_type,id) => {
             },
             async function(call){
                 const [error,data] = await delete_cache_string_main(cache_connect,get_cache_item_attr_list_key(data_type,id));
-                item_data.cache_del = true;
+                if(!error){
+                    data[Type.FIELD_RESULT_OK_DELETE_CACHE] = true;
+                }
             },
             async function(call){
                 const [error,data] = await delete_item_main(database,data_type,id);
-                item_data.db_del = true;
+                if(!error){
+                    data[Type.FIELD_RESULT_OK_DELETE_DATABASE] = true;
+                }
             },
-            function(call) {
-                call();
-            },
+            async function(call){
+                if(data[Type.FIELD_RESULT_OK_DELETE_DATABASE] && data[Type.FIELD_RESULT_OK_DELETE_CACHE]){
+                    data[Type.FIELD_RESULT_OK_DELETE] = true;
+                }
+            }
         ]).then(result => {
-            callback([error,item_data]);
+            callback([error,data]);
         }).catch(error => {
             Log.error("Data-Adapter-Delete-Item-Cache-DB-5",error);
             callback([error,null]);
