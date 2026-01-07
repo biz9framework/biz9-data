@@ -196,7 +196,7 @@ const get_item_adapter = (database,data_type,id,option) => {
                     if(biz_data.id){
                         data = biz_data;
                     }else{
-                        data.source = Type.TITLE_SOURCE_NOT_FOUND;
+						data = Data_Logic.get_not_found(data_type,id);
                     }
                 }else{
                     let query_field={};
@@ -207,19 +207,10 @@ const get_item_adapter = (database,data_type,id,option) => {
                         if(biz_data.length>0){
                             data = biz_data[0];
                         }else{
-                        data.source = Type.TITLE_SOURCE_NOT_FOUND;
+							data = Data_Logic.get_not_found(data_type,id);
                         }
                 }
             },
-            async function(call) {
-                if(!data.id){
-                    data[Type.FIELD_ID] = 0;
-                    data[Type.FIELD_SOURCE_ID] = id;
-                    data[Type.FIELD_SOURCE] = Type.TITLE_SOURCE_DATABASE;
-                    data[Type.FIELD_TITLE] = Type.TITLE_SOURCE_NOT_FOUND;
-                    data[Type.FIELD_TITLE_URL] = Str.get_title_url(Type.TITLE_SOURCE_NOT_FOUND);
-                }
-             },
         ]).then(result => {
             callback([error,data]);
         }).catch(error => {
@@ -287,7 +278,7 @@ const delete_item_adapter = (database,data_type,id,option) => {
 const get_item_cache_db = (cache_connect,database,data_type,id,option) => {
     return new Promise((callback) => {
         let cache_key_list = [];
-        let item_data = Data_Logic.get_new(data_type,id,{data:{source:Type.TITLE_SOURCE_NOT_FOUND}});
+        let item_data = Data_Logic.get_new(data_type,id);
         let field_list = [];
         let hide_field_list = [];
         option = option ? option : {};
@@ -308,7 +299,7 @@ const get_item_cache_db = (cache_connect,database,data_type,id,option) => {
                         const [error,data2] = await post_cache_item(cache_connect,data_type,id,data);
                         item_data[Type.FIELD_SOURCE] = Type.TITLE_SOURCE_DATABASE;
                     }else{
-                        item_data[Type.FIELD_SOURCE] = Type.TITLE_SOURCE_NOT_FOUND;
+						item_data  = Data_Logic.get_not_found(data_type,id);
                     }
                 }else{
                     //cache

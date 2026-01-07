@@ -10,7 +10,7 @@ const {Type,Data_Logic} = require("/home/think2/www/doqbox/biz9-framework/biz9-l
 - connect
 */
 /* --- TEST CONFIG START --- */
-const APP_ID = 'test-stage-jan6';
+const APP_ID = 'test-stage-jan7';
 /* --- TEST CONFIG END --- */
 
 /* --- DATA CONFIG START --- */
@@ -86,7 +86,7 @@ describe('connect', function(){ this.timeout(25000);
                 //---
                 let search = Data_Logic.get_search(Type.DATA_PRODUCT,{},{date_create:-1},1,0);
                 //---
-                //const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option);
+                const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option);
                 //---
                 //const [biz_error,biz_data] = await Portal.count(database,search.data_type,search.filter);
                 //---
@@ -104,7 +104,7 @@ describe('connect', function(){ this.timeout(25000);
                 //---
                 //const [error,biz_data] = await Portal.post_items(database,parent_list);
                 //---
-                const [error,biz_data] = await Portal.delete(database,parent.data_type,parent.id,option);
+                //const [error,biz_data] = await Portal.delete(database,parent.data_type,parent.id,option);
                 //const [error,biz_data] = await Portal.delete_search(database,parent.data_type,search.filter,option);
                 //---
 
