@@ -9,7 +9,7 @@ const {Num,Log,Str,Obj,DateTime} = require("biz9-utility");
 const {Type} = require("biz9-logic");
 const {MongoClient} = require("mongodb");
 let client_db = {};
-const get_db_connect_base = (data_config,option) => {
+const get_database_base = (data_config,option) => {
     return new Promise((callback) => {
         const mongo_full_url="mongodb://"+data_config.MONGO_USERNAME_PASSWORD+data_config.MONGO_IP+":"+data_config.MONGO_PORT_ID+"?retryWrites=true&w=majority&maxIdleTimeMS=60000&connectTimeoutMS=150000&socketTimeoutMS=90000&maxPoolSize=900000&maxConnecting=10000";
         client_db = new MongoClient(mongo_full_url);
@@ -34,7 +34,7 @@ const get_db_connect_base = (data_config,option) => {
         });
     });
 }
-const delete_db_connect_base = (db_connect,option) => {
+const delete_database_base = (database,option) => {
     return new Promise((callback) => {
         client_db.close().then((data)=> {
             callback([error,null]);
@@ -44,11 +44,11 @@ const delete_db_connect_base = (db_connect,option) => {
         });
     });
 }
-const get_item_base = (db_connect,data_type,id,option) => {
+const get_item_base = (database,data_type,id,option) => {
     return new Promise((callback) => {
         let data = null;
-        if(check_db_connect_base(db_connect)){
-            db_connect.collection(data_type).findOne({id:id}).then((data) => {
+        if(check_database_base(database)){
+            database.collection(data_type).findOne({id:id}).then((data) => {
                 if(data){
                     data = data;
                     delete data['_id'];
@@ -61,30 +61,30 @@ const get_item_base = (db_connect,data_type,id,option) => {
         }
     });
 }
-const check_db_connect_base = (db_connect) => {
-    if(!db_connect.client){
+const check_database_base = (database) => {
+    if(!database.client){
         return false;
-    }else if(!db_connect.client.topology){
+    }else if(!database.client.topology){
         return false;
-    }else if(!db_connect.client.topology){
+    }else if(!database.client.topology){
         return false;
     }else{
         return true;
     }
 }
-const check_db_client_connected = (db_connect) => {
-    return !!db_connect && !!db_connect.topology && !!db_connect.topology.isConnected()
+const check_db_client_connected = (database) => {
+    return !!database && !!database.topology && !!database.topology.isConnected()
 }
-const post_item_base = (db_connect,data_type,item,option) => {
+const post_item_base = (database,data_type,item,option) => {
     return new Promise((callback) => {
-        option = !Obj.check_is_empty(option) ? option : {overwrite_data:false};
-        if (Str.check_is_null(item.id)){//insert
+       	option = option ? option : {};
+	    if (Str.check_is_null(item.id)){//insert
             //item[Type.FIELD_ID] = Str.get_guid();
-            item[Type.FIELD_ID] = Num.get_id(999);
+            item[Type.FIELD_ID] = String(Num.get_id(999));
             item[Type.FIELD_DATE_CREATE] = DateTime.get_new();
             item[Type.FIELD_DATE_SAVE] = DateTime.get_new();
-            if(check_db_connect_base(db_connect)){
-                db_connect.collection(data_type).insertOne(item).then((data) => {
+            if(check_database_base(database)){
+                database.collection(data_type).insertOne(item).then((data) => {
                     if(data){
                         delete item['_id'];
                     }
@@ -97,7 +97,7 @@ const post_item_base = (db_connect,data_type,item,option) => {
         }else{
             item.date_save = DateTime.get_new();
             if(!option.overwrite_data){
-                db_connect.collection(data_type).updateOne({id:item.id},{$set: item}).then((data) => {
+                database.collection(data_type).updateOne({id:item.id},{$set: item}).then((data) => {
                     if(data){
                         delete item['_id'];
                     }
@@ -107,7 +107,7 @@ const post_item_base = (db_connect,data_type,item,option) => {
                     callback([error,null]);
                 });
             }else{
-                db_connect.collection(data_type).replaceOne({id:item.id},item).then((data) => {
+                database.collection(data_type).replaceOne({id:item.id},item).then((data) => {
                     if(data){
                         delete item['_id'];
                     }
@@ -120,7 +120,7 @@ const post_item_base = (db_connect,data_type,item,option) => {
         }
     });
 }
-const post_bulk_base = (db_connect,data_type,data_list) => {
+const post_bulk_base = (database,data_type,data_list) => {
     return new Promise((callback) => {
         let data = {result_OK:false};
         let bulk_list = [];
@@ -132,9 +132,9 @@ const post_bulk_base = (db_connect,data_type,data_list) => {
             bulk_list.push(item);
         }
 
-        if(check_db_connect_base(db_connect)){
+        if(check_database_base(database)){
             try {
-                db_connect.collection(data_type).bulkWrite(bulk_list,
+                database.collection(data_type).bulkWrite(bulk_list,
                 { ordered: false } )
                 } catch( error ) {
                     Log.w('bulk_write_error',error);
@@ -145,11 +145,11 @@ const post_bulk_base = (db_connect,data_type,data_list) => {
             }
         });
 }
-const delete_item_base = (db_connect,data_type,id,option) => {
+const delete_item_base = (database,data_type,id,option) => {
     return new Promise((callback) => {
         let data = null;
-        if(check_db_connect_base(db_connect)){
-            db_connect.collection(data_type).deleteMany({id:id}).then((data) => {
+        if(check_database_base(database)){
+            database.collection(data_type).deleteMany({id:id}).then((data) => {
                 if(data){
                     data = data;
                 };
@@ -161,11 +161,11 @@ const delete_item_base = (db_connect,data_type,id,option) => {
         }
     });
 }
-const delete_item_list_base = (db_connect,data_type,filter) => {
+const delete_item_list_base = (database,data_type,filter) => {
     return new Promise((callback) => {
         let data = null;
-        if(check_db_connect_base(db_connect)){
-            db_connect.collection(data_type).deleteMany(filter).then((data) => {
+        if(check_database_base(database)){
+            database.collection(data_type).deleteMany(filter).then((data) => {
                 if(data){
                     data = data;
                 }
@@ -177,7 +177,7 @@ const delete_item_list_base = (db_connect,data_type,filter) => {
         }
     });
 }
-const get_id_list_base = (db_connect,data_type,filter,sort_by,page_current,page_size,option) => {
+const get_id_list_base = (database,data_type,filter,sort_by,page_current,page_size,option) => {
     return new Promise((callback) => {
         let total_count = 0;
         let data_list = [];
@@ -185,8 +185,8 @@ const get_id_list_base = (db_connect,data_type,filter,sort_by,page_current,page_
         async.series([
             function(call) {
                 if(page_size>0){
-                if(check_db_connect_base(db_connect)){
-                    db_connect.collection(data_type).countDocuments(filter).then((data) => {
+                if(check_database_base(database)){
+                    database.collection(data_type).countDocuments(filter).then((data) => {
                         if(data){
                             total_count = data;
                         }
@@ -204,10 +204,10 @@ const get_id_list_base = (db_connect,data_type,filter,sort_by,page_current,page_
                 }
             },
             function(call) {
-                if(check_db_connect_base(db_connect)){
+                if(check_database_base(database)){
                     page_current = parseInt(page_current);
                     page_size = parseInt(page_size);
-                    db_connect.collection(data_type).find(filter).sort(sort_by).collation({locale:"en_US",numericOrdering:true}).skip(page_current>0?((page_current-1)*page_size):0).limit(page_size).project({id:1,data_type:1,_id:0}).toArray().then((data) => {
+                    database.collection(data_type).find(filter).sort(sort_by).collation({locale:"en_US",numericOrdering:true}).skip(page_current>0?((page_current-1)*page_size):0).limit(page_size).project({id:1,data_type:1,_id:0}).toArray().then((data) => {
                         if(data){
                             data_list = data;
                         }
@@ -236,10 +236,10 @@ const get_id_list_base = (db_connect,data_type,filter,sort_by,page_current,page_
         });
     });
 }
-const get_count_item_list_base = async (db_connect,data_type,filter,option) => {
+const get_count_item_list_base = async (database,data_type,filter,option) => {
     return new Promise((callback) => {
         let data = 0;
-        db_connect.collection(data_type).countDocuments(filter).then((data) => {
+        database.collection(data_type).countDocuments(filter).then((data) => {
             if(data){
                 data = data;
             }
@@ -251,9 +251,9 @@ const get_count_item_list_base = async (db_connect,data_type,filter,option) => {
     });
 }
 module.exports = {
-    get_db_connect_base,
-    check_db_connect_base,
-    delete_db_connect_base,
+    get_database_base,
+    check_database_base,
+    delete_database_base,
     post_item_base,
     post_bulk_base,
     get_item_base,
