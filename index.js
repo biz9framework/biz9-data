@@ -2632,7 +2632,11 @@ class Portal {
 						if(biz_error){
 							error=Log.append(error,biz_error);
 						}else{
-							data[Type.FIELD_RESULT_OK_DELETE]  = true;
+							if(biz_data[Type.FIELD_RESULT_OK_DELETE]){
+								data[Type.FIELD_RESULT_OK_DELETE]  = true;
+								data[Type.FIELD_RESULT_OK_DELETE_CACHE] = true;
+								data[Type.FIELD_RESULT_OK_DELETE_DATABASE] = true;
+							}
 						}
 						call();
 					}).catch(err => {
@@ -2647,23 +2651,29 @@ class Portal {
 					if(biz_error){
 						error=Log.append(error,biz_error);
 					}else{
-						data[Type.FIELD_RESULT_OK_GROUP_DELETE] = true;
-					}
-					/*
-					Data.delete_search(database,data_type,filter).then(([biz_error,biz_data])=> {
-						if(biz_error){
-							error=Log.append(error,biz_error);
-						}else{
-							data[Type.FIELD_RESULT_OK_DELETE]  = true;
+						if(biz_data[Type.FIELD_RESULT_OK_DELETE]){
+							data[Type.FIELD_RESULT_OK_GROUP_DELETE] = true;
 						}
-						call();
-					}).catch(err => {
-						error = Log.append(error,err);
-						call();
-					});
-					*/
-
+					}
 				},
+				async function(call){
+					let filter = {parent_id:data.id};
+					let data_type = Type.DATA_IMAGE;
+					const [biz_error,biz_data] = await Portal.delete_search(database,data_type,filter);
+					if(biz_error){
+						error=Log.append(error,biz_error);
+					}else{
+						if(biz_data[Type.FIELD_RESULT_OK_DELETE]){
+							data[Type.FIELD_RESULT_OK_IMAGE_DELETE] = true;
+						}
+					}
+				},
+				async function(call){
+					if(data[Type.FIELD_RESULT_OK_GROUP_DELETE] && data[Type.FIELD_RESULT_OK_IMAGE_DELETE]){
+						data[Type.FIELD_RESULT_OK_DELETE] = true;
+					}
+				},
+
 				]).then(result => {
 				callback([error,data]);
 			}).catch(err => {
@@ -2711,6 +2721,7 @@ class Portal {
 			let data = Data_Logic.get_new(data_type,0);
 			data[Type.FIELD_RESULT_OK_DELETE] = false;
 			data[Type.FIELD_RESULT_OK_GROUP_DELETE] = false;
+			data[Type.FIELD_RESULT_OK_IMAGE_DELETE] = false;
 			let delete_item_query = { $or: [] };
 			option = option ? option : {};
 			async.series([
@@ -2730,19 +2741,42 @@ class Portal {
 						};
 						}
 				}
-					Log.w('delete_item_query',delete_item_query);
 				},
 				async function(call){
-					let data_type = Type.DATA_GROUP;
+					if(delete_item_query.$or.length > 0){
+						let data_type = Type.DATA_GROUP;
+						let search = Data_Logic.get_search(data_type,delete_item_query,{},1,0);
+						const [biz_error,biz_data] = await Data.delete_items(database,data_type,search.filter);
+						if(biz_error){
+							error=Log.append(error,biz_error);
+						}else{
+							data[Type.FIELD_RESULT_OK_GROUP_DELETE] = true;
+						}
+					}else{
+							data[Type.FIELD_RESULT_OK_GROUP_DELETE] = true;
+					}
+				},
+				async function(call){
+					if(delete_item_query.$or.length > 0){
+					let data_type = Type.DATA_IMAGE;
 					let search = Data_Logic.get_search(data_type,delete_item_query,{},1,0);
 					const [biz_error,biz_data] = await Data.delete_items(database,data_type,search.filter);
-					Log.w('rrr',biz_data);
 					if(biz_error){
 						error=Log.append(error,biz_error);
 					}else{
-						data[Type.FIELD_RESULT_OK_GROUP_DELETE] = true;
+						data[Type.FIELD_RESULT_OK_IMAGE_DELETE] = true;
 					}
+
+					}else{
+						data[Type.FIELD_RESULT_OK_IMAGE_DELETE] = true;
+					}
+
 				},
+				async function(call){
+					if(data[Type.FIELD_RESULT_OK_GROUP_DELETE] && data[Type.FIELD_RESULT_OK_IMAGE_DELETE]){
+						data[Type.FIELD_RESULT_OK_DELETE] = true;
+					}
+				}
 			]).then(result => {
 				callback([error,data]);
 			}).catch(err => {

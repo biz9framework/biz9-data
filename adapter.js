@@ -260,14 +260,24 @@ const post_cache_item = (cache_connect,data_type,id,item_data) => {
 }
 const delete_item_adapter = (database,data_type,id,option) => {
     return new Promise((callback) => {
-        let item_data = Data_Logic.get_new(data_type,id);
+        let data = Data_Logic.get_new(data_type,id);
+		data[Type.FIELD_RESULT_OK_DELETE] = false;
+		data[Type.FIELD_RESULT_OK_DELETE_CACHE] = false;
+		data[Type.FIELD_RESULT_OK_DELETE_DATABASE] = false;
         async.series([
             async function(call) {
-                const [error,data] = await delete_item_cache_db(database,data_type,id);
-                item_data = data;
+                const [biz_error,biz_data] = await delete_item_cache_db(database,data_type,id);
+				if(biz_error){
+					error = biz_error;
+				}else{
+                	data = biz_data;
+					data[Type.FIELD_RESULT_OK_DELETE] = true;
+					data[Type.FIELD_RESULT_OK_DELETE_CACHE] = true;
+					data[Type.FIELD_RESULT_OK_DELETE_DATABASE] = true;
+				}
             },
         ]).then(result => {
-            callback([error,item_data]);
+            callback([error,data]);
         }).catch(error => {
             Log.error("Adapter-Get-Item-Adapter-4",error);
             callback([error,null]);
@@ -431,7 +441,6 @@ const delete_item_cache=(database,data_type,id,option)=>{
 }
 const delete_item_cache_db = (database,data_type,id) => {
     return new Promise((callback) => {
-        console.log('aaaaaa');
         let cache_connect = {};
         let cache_key_list = '';
         let cache_string_list = '';
@@ -441,12 +450,10 @@ const delete_item_cache_db = (database,data_type,id) => {
         data[Type.FIELD_RESULT_OK_DELETE_DATABASE] = false;
         async.series([
             async function(call) {
-                console.log('bbbbbbb');
                 const [error,data] = await get_cache_connect_main(database.data_config);
                 cache_connect = data;
             },
             async function(call) {
-                console.log('cccccc');
                 const [error,data] = await get_cache_string_main(cache_connect,get_cache_item_attr_list_key(data_type,id));
                     cache_key_list=data;
             },

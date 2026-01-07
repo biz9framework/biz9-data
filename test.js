@@ -40,7 +40,7 @@ describe('connect', function(){ this.timeout(25000);
             async function(call){
                 //-->
                 let new_data_type = Type.DATA_PRODUCT;
-                let id = '13';
+                let id = '119';
                 let title_url = 'product_282';
                 let print_test = true;
 
@@ -55,7 +55,7 @@ describe('connect', function(){ this.timeout(25000);
                 ];
                 */
                 //-->
-                //let group = Data_Logic.get_new(Type.DATA_GROUP,0,{test:true,generate_title:true,parent:parent});
+                let group = Data_Logic.get_new(Type.DATA_GROUP,0,{test:true,generate_title:true,parent:parent});
                 //let group = Data_Logic.get_new(Type.DATA_GROUP,id);
                 //-->
                 //let blank = Data_Logic.get_new(Type.DATA_BLANK,0,{test:true,generate_title:true,parent:parent});
@@ -104,12 +104,8 @@ describe('connect', function(){ this.timeout(25000);
                 //---
                 //const [error,biz_data] = await Portal.post_items(database,parent_list);
                 //---
-                //const [error,biz_data] = await Portal.delete(database,parent.data_type,parent.id,option);
-                console.log('aaa');
-                Log.w('data_type',parent.data_type);
-                Log.w('search_filter',search.filter);
-                const [error,biz_data] = await Portal.delete_search(database,parent.data_type,search.filter,option);
-                console.log('bbbbb');
+                const [error,biz_data] = await Portal.delete(database,parent.data_type,parent.id,option);
+                //const [error,biz_data] = await Portal.delete_search(database,parent.data_type,search.filter,option);
                 //---
 
                 //---
