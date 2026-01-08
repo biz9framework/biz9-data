@@ -1,7 +1,7 @@
 const async = require('async');
 const assert = require('node:assert');
 
-const {Data,Database,Portal} = require(".");
+const {Data,Database,Portal,User_Data} = require(".");
 
 const {Log,Num,Str} = require("biz9-utility");
 const {Type,Data_Logic} = require("/home/think2/www/doqbox/biz9-framework/biz9-logic/code");
@@ -65,6 +65,9 @@ describe('connect', function(){ this.timeout(25000);
                 //-->
                 //let user = Data_Logic.get_new(Type.DATA_USER,0,{test:true,generate_title:true});
                 //let user = Data_Logic.get_new(Type.DATA_USER,'54b31f02-afb4-4fa7-9835-f923da7a6749');
+                //let user = Data_Logic.get_new(Type.DATA_USER,0,{test:true,data:{email:'ceo@bossappz.com',password:'123456789Ab!'}});
+                let user = Data_Logic.get_new(Type.DATA_USER,0,{test:true,data:{password:'123456789Ab!'}});
+                Log.w('user',user);
                 //-->
                 //let favorite = Favorite_Logic.get_new(parent.data_type,parent.id,user.id);
                 //-->
@@ -84,9 +87,9 @@ describe('connect', function(){ this.timeout(25000);
 
                 //let option = {stat:{user_id:user.id,type:Type.STAT_VIEW,unique:false}};
                 //---
-                let search = Data_Logic.get_search(Type.DATA_PRODUCT,{},{date_create:-1},1,0);
+                //let search = Data_Logic.get_search(Type.DATA_PRODUCT,{},{date_create:-1},1,0);
                 //---
-                const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option);
+                //const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option);
                 //---
                 //const [biz_error,biz_data] = await Portal.count(database,search.data_type,search.filter);
                 //---
@@ -106,6 +109,13 @@ describe('connect', function(){ this.timeout(25000);
                 //---
                 //const [error,biz_data] = await Portal.delete(database,parent.data_type,parent.id,option);
                 //const [error,biz_data] = await Portal.delete_search(database,parent.data_type,search.filter,option);
+                //---
+                //const [error,biz_data] = await User_Data.login(database,user,option);
+                const [error,biz_data] = await User_Data.register(database,user,option);
+
+                //  //const [error,biz_data] = await Portal.delete(database,parent.data_type,parent.id,option);
+
+                //
                 //---
 
                 //---
