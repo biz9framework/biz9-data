@@ -1610,6 +1610,7 @@ class User_Data {
 		return new Promise((callback) => {
 			let error = null;
 			data[Type.FIELD_RESULT_OK_USER] = false;
+
 			//let post_ip_address = post_data.ip_address?post_data.ip_address:null;
 			//let post_geo_key = post_data.geo_key?post_data.geo_key:null;
 			//let post_device = post_data.device?post_data.device:null;
