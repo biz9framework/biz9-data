@@ -40,13 +40,13 @@ describe('connect', function(){ this.timeout(25000);
             async function(call){
                 //-->
                 let new_data_type = Type.DATA_PRODUCT;
-                let id = '119';
+                let id = '418';
                 let title_url = 'product_282';
                 let print_test = true;
 
                 //-->
                 //let parent = Data_Logic.get_new(new_data_type,0,{test:true,generate_title:true});
-                let parent = Data_Logic.get_new(Type.DATA_PRODUCT,id);
+                let parent = Data_Logic.get_new(Type.DATA_TYPE,id);
                 /*
                 let parent_list = [
                     Data_Logic.get_new(new_data_type,0,{test:true,generate_title:true}),
@@ -55,7 +55,7 @@ describe('connect', function(){ this.timeout(25000);
                 ];
                 */
                 //-->
-                let group = Data_Logic.get_new(Type.DATA_GROUP,0,{test:true,generate_title:true,parent:parent});
+                //let group = Data_Logic.get_new(Type.DATA_GROUP,0,{test:true,generate_title:true,parent:parent});
                 //let group = Data_Logic.get_new(Type.DATA_GROUP,id);
                 //-->
                 //let blank = Data_Logic.get_new(Type.DATA_BLANK,0,{test:true,generate_title:true,parent:parent});
@@ -65,8 +65,8 @@ describe('connect', function(){ this.timeout(25000);
                 //-->
                 //let user = Data_Logic.get_new(Type.DATA_USER,0,{test:true,generate_title:true});
                 //let user = Data_Logic.get_new(Type.DATA_USER,'54b31f02-afb4-4fa7-9835-f923da7a6749');
-                let user = Data_Logic.get_new(Type.DATA_USER,0,{test:true,data:{email:'ceo@bossappz.com',password:'123456789Ab!'}});
-                Log.w('user',user);
+                //let user = Data_Logic.get_new(Type.DATA_USER,0,{test:true,data:{email:'ceo@bossappz.com',password:'123456789Ab!'}});
+                //Log.w('user',user);
                 //-->
                 //let favorite = Favorite_Logic.get_new(parent.data_type,parent.id,user.id);
                 //-->
@@ -92,7 +92,7 @@ describe('connect', function(){ this.timeout(25000);
                 //---
                 //const [biz_error,biz_data] = await Portal.count(database,search.data_type,search.filter);
                 //---
-                //const [error,biz_data] = await Portal.copy(database,parent.data_type,parent.id,option);
+                const [error,biz_data] = await Portal.copy(database,parent.data_type,parent.id,option);
                 //---
                 //const [error,biz_data] = await Portal.get(database,parent.data_type,parent.id,option);
                 //const [error,biz_data] = await Portal.get(database,group.data_type,group.id,option);
@@ -109,7 +109,7 @@ describe('connect', function(){ this.timeout(25000);
                 //const [error,biz_data] = await Portal.delete(database,parent.data_type,parent.id,option);
                 //const [error,biz_data] = await Portal.delete_search(database,parent.data_type,search.filter,option);
                 //---
-                const [error,biz_data] = await User_Data.login(database,user,option);
+                //const [error,biz_data] = await User_Data.login(database,user,option);
                 //const [error,biz_data] = await User_Data.register(database,user,option);
 
                 //  //const [error,biz_data] = await Portal.delete(database,parent.data_type,parent.id,option);

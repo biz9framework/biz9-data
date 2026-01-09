@@ -9,7 +9,7 @@ const dayjs = require('dayjs');
 const {get_database_main,check_database_main,delete_database_main,post_item_main,get_item_main,delete_item_main,get_id_list_main,delete_item_list_main,get_count_item_list_main,post_bulk_main} = require('./mongo/index.js');
 const {Scriptz}=require("biz9-scriptz");
 const {Log,Str,Num,Obj,DateTime}=require("biz9-utility");
-const {Type,Favorite_Logic,Stat_Logic,Review_Logic,Data_Logic,Product_Logic,Demo_Logic,Category_Logic,Cart_Logic,Order_Logic,Field_Logic,Item_Logic}=require("/home/think2/www/doqbox/biz9-framework/biz9-logic/code");
+const {Type,Favorite_Logic,Stat_Logic,Review_Logic,Data_Logic,Product_Logic,Demo_Logic,Category_Logic,Cart_Logic,Order_Logic,Field_Logic}=require("/home/think2/www/doqbox/biz9-framework/biz9-logic/code");
 const { get_database_adapter,check_database_adapter,delete_database_adapter,post_item_adapter,post_item_list_adapter,post_bulk_adapter,get_item_adapter,delete_item_adapter,get_item_list_adapter,delete_item_list_adapter,get_count_item_list_adapter,delete_item_cache }  = require('./adapter.js');
 class Database {
 	static get = async (data_config,option) => {
@@ -1895,7 +1895,6 @@ class Portal {
 							let group_list = [];
 							let hide_group_list = [];
 							let group_query = {$or:[],$and:[]};
-							//let group_query = {$and:[]};
 							for(const field in search_item.title) {
                         		let new_item = {};
                         		new_item[field] = search_item.title[field];
@@ -2815,11 +2814,11 @@ class Portal {
 			let data = Data_Logic.get_new(data_type,id);
 			let top_data = Data_Logic.get_new(data_type,0);
 			let copy_data = Data_Logic.get_new(data_type,0);
-			option = option ? option : {copy_group:true};
-			option.get_group =  option.copy_group  ? option.copy_group : true;
+			option = option ? option : {};
 			async.series([
 				async function(call){
-					const [biz_error,biz_data] = await Portal.get(database,data_type,id,option);
+					let data_group_option = Data_Logic.get_search_group();
+					const [biz_error,biz_data] = await Portal.get(database,data_type,id,{groups:[data_group_option]});
 					if(biz_error){
 						error=Log.append(error,biz_error);
 					}else{
@@ -2829,7 +2828,7 @@ class Portal {
 				//top_item
 				async function(call){
 					if(top_data.id){
-					copy_data = Item_Logic.copy(data_type,top_data);
+					copy_data = Data_Logic.copy(data_type,top_data);
 					copy_data[Type.FIELD_TITLE] = 'Copy '+top_data[Type.FIELD_TITLE];
 					copy_data[Type.FIELD_TITLE_URL] = 'copy_'+top_data[Type.FIELD_TITLE_URL];
 					copy_data[Type.FIELD_SOURCE_ID] = top_data.id;
@@ -2849,7 +2848,7 @@ class Portal {
 						copy_data.groups = [];
 						let post_groups = [];
 						for(const group of top_data.groups){
-							let copy_group = Item_Logic.copy(Type.DATA_GROUP,group);
+							let copy_group = Data_Logic.copy(Type.DATA_GROUP,group);
 							copy_group[Type.FIELD_TITLE] = 'Copy '+group[Type.FIELD_TITLE];
 							copy_group[Type.FIELD_TITLE_URL] = 'copy_'+group[Type.FIELD_TITLE_URL];
 							copy_group[Type.FIELD_SOURCE_ID] = group.id;
