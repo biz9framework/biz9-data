@@ -8,7 +8,7 @@ const async = require('async');
 const dayjs = require('dayjs');
 const {get_database_main,check_database_main,delete_database_main,post_item_main,get_item_main,delete_item_main,get_id_list_main,delete_item_list_main,get_count_item_list_main,post_bulk_main} = require('./mongo/index.js');
 const {Scriptz}=require("biz9-scriptz");
-const {Log,Str,Num,Obj,DateTime}=require("biz9-utility");
+const {Log,Str,Num,Obj,DateTime}=require("/home/think2/www/doqbox/biz9-framework/biz9-utility/code");
 const {Type,Favorite_Logic,Stat_Logic,Review_Logic,Data_Logic,Product_Logic,Demo_Logic,Category_Logic,Cart_Logic,Order_Logic,Field_Logic}=require("/home/think2/www/doqbox/biz9-framework/biz9-logic/code");
 const { get_database_adapter,check_database_adapter,delete_database_adapter,post_item_adapter,post_item_list_adapter,post_bulk_adapter,get_item_adapter,delete_item_adapter,get_item_list_adapter,delete_item_list_adapter,get_count_item_list_adapter,delete_item_cache }  = require('./adapter.js');
 class Database {
@@ -2461,6 +2461,22 @@ class Portal {
 			let error = null;
 			option = option ? option : {};
 			async.series([
+				//clean
+        		async function(call){
+					if(option.clean == true){
+            		for(const field in data){
+                		if(Obj.check_is_array(data[field])){
+                    		delete data[field];
+                		}
+						if(!Obj.check_is_value(data[field])){
+                    		delete data[field];
+                		}
+						if(Str.check_if_str_exist(field,'_item_count') || Str.check_if_str_exist(field,'_page_count')){
+                    		delete data[field];
+						}
+            		}
+					}
+        		},
 				function(call){
 					Data.post(database,data_type,data,option).then(([biz_error,biz_data])=> {
 						if(biz_error){
@@ -2476,22 +2492,14 @@ class Portal {
 				},
 				//delete cache item
 				async function(call){
-					if(option.overwrite){
+					if(option.overwrite == true){
 						const [biz_error,biz_data] = await Portal.delete_cache(database,data_type,data.id);
 						if(biz_error){
 							error=Log.append(error,biz_error);
 						}
 					}
 				},
- 				//clean
-        		async function(call){
-            		for(const field in data){
-                		if(Obj.check_is_array(data[field])){
-                    		delete data[field];
-                		}
-            		}
-        		},
-				//get_save_data
+ 			//get_save_data
 				async function(call){
 					if(option.get_update_data && data.id){
 						const [biz_error,biz_data] = await Portal.get(database,data_type,data.id,option);
