@@ -56,12 +56,12 @@ describe('connect', function(){ this.timeout(25000);
                 */
                 //-->
                 //let group = Data_Logic.get_new(Type.DATA_GROUP,0,{test:true,generate_title:true,parent:parent});
-                let group = Data_Logic.get_new(Type.DATA_GROUP,'658');
+                //let group = Data_Logic.get_new(Type.DATA_GROUP,'658');
                 //-->
                 //let blank = Data_Logic.get_new(Type.DATA_BLANK,0,{test:true,generate_title:true,parent:parent});
                 //let blank = Data_Logic.get_new(Type.DATA_BLANK,id);
                 //-->
-                let image = Data_Logic.get_new(Type.DATA_IMAGE,0,{test:true,parent:group});
+                //let image = Data_Logic.get_new(Type.DATA_IMAGE,0,{test:true,parent:group});
                 //-->
                 //
                 //let user = Data_Logic.get_new(Type.DATA_USER,0,{test:true,generate_title:true});
@@ -87,9 +87,9 @@ describe('connect', function(){ this.timeout(25000);
 
                 //let option = {stat:{user_id:user.id,type:Type.STAT_VIEW,unique:false}};
                 //---
-                //let search = Data_Logic.get_search(Type.DATA_TYPE,{},{date_create:-1},1,0);
+                let search = Data_Logic.get_search(Type.DATA_PRODUCT,{},{date_create:-1},1,0);
                 //---
-                //const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option);
+                const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option);
                 //---
                 //const [biz_error,biz_data] = await Portal.count(database,search.data_type,search.filter);
                 //---

@@ -2421,7 +2421,8 @@ class Portal {
 							if(group_query.$or.length <= 0){
 								delete group_query.$or;
 							}
-							let item_group_join_option = {field:search_item.field,page_current:search_item.page_current,page_size:search_item.page_size};
+							let item_group_image_foreign_option = Data_Logic.get_search_foreign(Type.TITLE_LIST,Type.DATA_IMAGE,Type.FIELD_PARENT_ID,Type.FIELD_ID);
+							let item_group_join_option = {field:search_item.field,foreigns:[item_group_image_foreign_option]};
 							let item_group_join_search = Data_Logic.get_search(Type.DATA_GROUP,{},{},search_item.page_current,search_item.page_size);
 						const [biz_error,biz_data] = await Portal.search_simple(database,item_group_join_search.data_type,item_group_join_search.filter,item_group_join_search.sort_by,item_group_join_search.page_current,item_group_join_search.page_size,item_group_join_option);
 									if(biz_error){
