@@ -1879,8 +1879,10 @@ class Portal {
 				},
 				//9_get_item_groups
 				async function(call){
-					if(option.groups && data.id){
+					if(option.groups){
 						data.groups = [];
+					}
+					if(data.id && option.groups){
 						let search_items = [];
 					for(const item of option.groups){
 						search_items.push({
@@ -1912,11 +1914,11 @@ class Portal {
 							let query_field = {};
 							query_field[Type.FIELD_PARENT_ID] = data.id;
 							group_query.$and.push(query_field);
-
 							if(group_query.$or.length <= 0){
 								delete group_query.$or;
 							}
-							let item_group_join_option = {field:search_item.field,page_current:search_item.page_current,page_size:search_item.page_size};
+							let item_group_image_foreign_option = Data_Logic.get_search_foreign(Type.TITLE_LIST,Type.DATA_IMAGE,Type.FIELD_PARENT_ID,Type.FIELD_ID);
+							let item_group_join_option = {field:search_item.field,foreigns:[item_group_image_foreign_option]};
 							let item_group_join_search = Data_Logic.get_search(Type.DATA_GROUP,group_query,{},search_item.page_current,search_item.page_size);
 							const [biz_error,biz_data] = await Portal.search(database,item_group_join_search.data_type,item_group_join_search.filter,item_group_join_search.sort_by,item_group_join_search.page_current,item_group_join_search.page_size,item_group_join_option);
 									if(biz_error){
@@ -1932,7 +1934,7 @@ class Portal {
 				},
 				//9_get_item_foreigns
 				async function(call){
-					if(option.foreigns && data.id){
+					if(data.id && option.foreigns){
 						let search_items = [];
 						for(const item of option.foreigns){
 								search_items.push({
@@ -2456,6 +2458,7 @@ class Portal {
 		   - overwrite / type. bool / ex. true,false / default. false -- post brand new obj.deleteing old.
 		   - get_update_data / type. bool / ex. true,false / default. false -- get update item aka recently saved item.
 		   - clean / type. bool / ex. true,false / default. false -- checks and removes any list, groups, etc.
+		   - delete_cache / type. bool / ex. true,false / default. false -- clear cache.
 		   */
 		return new Promise((callback) => {
 			let error = null;
@@ -2477,6 +2480,15 @@ class Portal {
             		}
 					}
         		},
+				//delete cache item
+				async function(call){
+					if(option.overwrite == true || option.delete_cache){
+						const [biz_error,biz_data] = await Portal.delete_cache(database,data_type,data.id);
+						if(biz_error){
+							error=Log.append(error,biz_error);
+						}
+					}
+				},
 				function(call){
 					Data.post(database,data_type,data,option).then(([biz_error,biz_data])=> {
 						if(biz_error){
@@ -2490,16 +2502,7 @@ class Portal {
 						call();
 					});
 				},
-				//delete cache item
-				async function(call){
-					if(option.overwrite == true){
-						const [biz_error,biz_data] = await Portal.delete_cache(database,data_type,data.id);
-						if(biz_error){
-							error=Log.append(error,biz_error);
-						}
-					}
-				},
- 			//get_save_data
+				//get_save_data
 				async function(call){
 					if(option.get_update_data && data.id){
 						const [biz_error,biz_data] = await Portal.get(database,data_type,data.id,option);

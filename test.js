@@ -10,7 +10,7 @@ const {Type,Data_Logic} = require("/home/think2/www/doqbox/biz9-framework/biz9-l
 - connect
 */
 /* --- TEST CONFIG START --- */
-const APP_ID = 'test-stage-jan9';
+const APP_ID = 'test-stage-jan10';
 /* --- TEST CONFIG END --- */
 
 /* --- DATA CONFIG START --- */
@@ -40,13 +40,13 @@ describe('connect', function(){ this.timeout(25000);
             async function(call){
                 //-->
                 let new_data_type = Type.DATA_PRODUCT;
-                let id = '418';
+                let id = '944';
                 let title_url = 'product_282';
                 let print_test = true;
 
                 //-->
-                //let parent = Data_Logic.get_new(new_data_type,0,{test:true,generate_title:true});
-                //let parent = Data_Logic.get_new(Type.DATA_TYPE,id);
+                //let parent = Data_Logic.get(new_data_type,0,{test:true});
+                let parent = Data_Logic.get_new(new_data_type,id);
                 /*
                 let parent_list = [
                     Data_Logic.get_new(new_data_type,0,{test:true,generate_title:true}),
@@ -56,11 +56,14 @@ describe('connect', function(){ this.timeout(25000);
                 */
                 //-->
                 //let group = Data_Logic.get_new(Type.DATA_GROUP,0,{test:true,generate_title:true,parent:parent});
-                //let group = Data_Logic.get_new(Type.DATA_GROUP,id);
+                let group = Data_Logic.get_new(Type.DATA_GROUP,'658');
                 //-->
                 //let blank = Data_Logic.get_new(Type.DATA_BLANK,0,{test:true,generate_title:true,parent:parent});
                 //let blank = Data_Logic.get_new(Type.DATA_BLANK,id);
                 //-->
+                let image = Data_Logic.get_new(Type.DATA_IMAGE,0,{test:true,parent:group});
+                //-->
+                //
                 //let user = Data_Logic.get_new(Type.DATA_USER,0,{test:true,generate_title:true});
                 //let user = Data_Logic.get_new(Type.DATA_USER,'54b31f02-afb4-4fa7-9835-f923da7a6749');
                 //let user = Data_Logic.get_new(Type.DATA_USER,0,{test:true,data:{email:'ceo@bossappz.com',password:'123456789Ab!'}});
@@ -68,7 +71,7 @@ describe('connect', function(){ this.timeout(25000);
                 //-->
                 //let favorite = Favorite_Logic.get_new(parent.data_type,parent.id,user.id);
                 //-->
-                let option = {};
+                //let option = {};
                 //let option = {id_field:'title_url',id_field_value:title_url};
                 //let option = {groups:{}};
                 //let option = {field:{id:1,title:1,title_url:1}};
@@ -77,14 +80,14 @@ describe('connect', function(){ this.timeout(25000);
                 //let foreign_search_1 = Data_Logic.get_search_foreign(Type.TITLE_LIST,Type.DATA_BLANK,Type.FIELD_PARENT_ID,Type.FIELD_ID);
                 //let option = {foreigns:[foreign_search_1]};
 
-                //let group_search_1 = Data_Logic.get_search_group();
+                let group_search_1 = Data_Logic.get_search_group();
                 //let group_search_1 = Data_Logic.get_search_group({title:{group_43815:0,group_83574:1}});
                 //let group_search_2 = Data_Logic.get_search_group({title:{group_924:0},field:{title:1,title_url:1}});
-                //let option = {groups:[group_search_1]};
+                let option = {groups:[group_search_1]};
 
                 //let option = {stat:{user_id:user.id,type:Type.STAT_VIEW,unique:false}};
                 //---
-                let search = Data_Logic.get_search(Type.DATA_TYPE,{},{date_create:-1},1,0);
+                //let search = Data_Logic.get_search(Type.DATA_TYPE,{},{date_create:-1},1,0);
                 //---
                 //const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option);
                 //---
@@ -105,7 +108,7 @@ describe('connect', function(){ this.timeout(25000);
                 //const [error,biz_data] = await Portal.post_items(database,parent_list);
                 //---
                 //const [error,biz_data] = await Portal.delete(database,parent.data_type,parent.id,option);
-                const [biz_error,biz_data] = await Portal.delete_search(database,search.data_type,search.filter,option);
+                //const [biz_error,biz_data] = await Portal.delete_search(database,search.data_type,search.filter,option);
                 //---
                 //const [error,biz_data] = await User_Data.login(database,user,option);
                 //const [error,biz_data] = await User_Data.register(database,user,option);
