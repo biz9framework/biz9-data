@@ -1802,6 +1802,8 @@ class Portal {
 		   - cache_delete / type. bool / ex. true/false / default. false
 		 * Fields
 		   - field / type. obj / ex. {field_show_1:1,field_hide_2:0} / default. throw error
+ 		* Field Values ( Page Edit )
+		   - field_value / type. bool / ex. true/false / default. throw error
  		 *  Group
 			-- groups / type. obj. group_search / ex. [
 					{
@@ -1862,11 +1864,9 @@ class Portal {
 				},
 				//field_values
 				async function(call){
-					/*-old?
-					if(option.get_field_value && data.id){
+					if(option.field_value && data.id){
 						data = Field_Logic.get_item_field_values(data);
 					}
-					*/
 				},
 				//9_get_item_join
 				async function(call){
@@ -2453,8 +2453,9 @@ class Portal {
 	static post = async (database,data_type,data,option) => {
 		/* option params
 		 * Fields
-		   - overwrite_data / type. bool / ex. true,false / default. false -- post brand new obj.deleteing old.
+		   - overwrite / type. bool / ex. true,false / default. false -- post brand new obj.deleteing old.
 		   - get_update_data / type. bool / ex. true,false / default. false -- get update item aka recently saved item.
+		   - clean / type. bool / ex. true,false / default. false -- checks and removes any list, groups, etc.
 		   */
 		return new Promise((callback) => {
 			let error = null;
@@ -2475,13 +2476,21 @@ class Portal {
 				},
 				//delete cache item
 				async function(call){
-					if(option.overwrite_data){
+					if(option.overwrite){
 						const [biz_error,biz_data] = await Portal.delete_cache(database,data_type,data.id);
 						if(biz_error){
 							error=Log.append(error,biz_error);
 						}
 					}
 				},
+ 				//clean
+        		async function(call){
+            		for(const field in data){
+                		if(Obj.check_is_array(data[field])){
+                    		delete data[field];
+                		}
+            		}
+        		},
 				//get_save_data
 				async function(call){
 					if(option.get_update_data && data.id){
@@ -2586,17 +2595,16 @@ class Portal {
 		});
 	};
 	//9_portal_delete
-	static delete = async (database,data_type,id,option) => {
+	static delete = async(database,data_type,id,option) => {
 		/*
 		 * Params
 		 * - title
 		 *   - description / type / example / required
 		 * Option
-		 * - delete_item
-		 *   - description / bool / example / default: false
+		 *   - delete_group / bool / true/false / default: false - delete Type.DATA_GROUP
+		 *   - delete_image / bool / true/false / default: false - delete Type.DATA_GROUP
 		 * Return
-		 * - title
-		 *   - description / type /
+		 * - tbd
 		 */
 		return new Promise((callback) => {
 			let error = null;
@@ -2604,7 +2612,6 @@ class Portal {
 			data[Type.FIELD_RESULT_OK_DELETE] = false;
 			data[Type.FIELD_RESULT_OK_DELETE_CACHE] = false;
 			data[Type.FIELD_RESULT_OK_DELETE_DATABASE] = false;
-			data[Type.FIELD_RESULT_OK_GROUP_DELETE] = false;
 			option = option ? option : {};
 			async.series([
 				function(call){
@@ -2625,35 +2632,35 @@ class Portal {
 					});
 				},
 				async function(call){
-					let filter = {parent_id:data.id};
-					let data_type = Type.DATA_GROUP;
-					const [biz_error,biz_data] = await Portal.delete_search(database,data_type,filter);
-					if(biz_error){
-						error=Log.append(error,biz_error);
-					}else{
-						if(biz_data[Type.FIELD_RESULT_OK_DELETE]){
-							data[Type.FIELD_RESULT_OK_GROUP_DELETE] = true;
+					if(option.delete_group){
+						data[Type.FIELD_RESULT_OK_GROUP_DELETE] = false;
+						let filter = {parent_id:data.id};
+						let data_type = Type.DATA_GROUP;
+						const [biz_error,biz_data] = await Portal.delete_search(database,data_type,filter);
+						if(biz_error){
+							error=Log.append(error,biz_error);
+						}else{
+							if(biz_data[Type.FIELD_RESULT_OK_DELETE]){
+								data[Type.FIELD_RESULT_OK_GROUP_DELETE] = true;
+							}
 						}
 					}
 				},
 				async function(call){
-					let filter = {parent_id:data.id};
-					let data_type = Type.DATA_IMAGE;
-					const [biz_error,biz_data] = await Portal.delete_search(database,data_type,filter);
-					if(biz_error){
-						error=Log.append(error,biz_error);
-					}else{
-						if(biz_data[Type.FIELD_RESULT_OK_DELETE]){
-							data[Type.FIELD_RESULT_OK_IMAGE_DELETE] = true;
+					if(option.delete_image){
+						data[Type.FIELD_RESULT_OK_IMAGE_DELETE] = false;
+						let filter = {parent_id:data.id};
+						let data_type = Type.DATA_IMAGE;
+						const [biz_error,biz_data] = await Portal.delete_search(database,data_type,filter);
+						if(biz_error){
+							error=Log.append(error,biz_error);
+						}else{
+							if(biz_data[Type.FIELD_RESULT_OK_DELETE]){
+								data[Type.FIELD_RESULT_OK_IMAGE_DELETE] = true;
+							}
 						}
 					}
 				},
-				async function(call){
-					if(data[Type.FIELD_RESULT_OK_GROUP_DELETE] && data[Type.FIELD_RESULT_OK_IMAGE_DELETE]){
-						data[Type.FIELD_RESULT_OK_DELETE] = true;
-					}
-				},
-
 				]).then(result => {
 				callback([error,data]);
 			}).catch(err => {
@@ -2698,12 +2705,12 @@ class Portal {
 		 */
 		return new Promise((callback) => {
 			let error = null;
-			let data = Data_Logic.get_new(data_type,0);
+			let data = Data_Logic.get_new(data_type,0,{data:{filter:filter}});
 			data[Type.FIELD_RESULT_OK_DELETE] = false;
-			data[Type.FIELD_RESULT_OK_GROUP_DELETE] = false;
-			data[Type.FIELD_RESULT_OK_IMAGE_DELETE] = false;
 			let delete_item_query = { $or: [] };
 			option = option ? option : {};
+			Log.w('11_delete_search_data_type',data_type);
+			Log.w('22_delete_search_data_filter',filter);
 			async.series([
 				async function(call){
 					let search = Data_Logic.get_search(data_type,filter,{},1,0);
@@ -2718,12 +2725,15 @@ class Portal {
 							let query_field = {};
 							query_field[Type.FIELD_PARENT_ID] = data_item.id
 							delete_item_query.$or.push(query_field);
+							const [biz_error,biz_data] = await Data.delete(database,data_type,data_item.id);
 						};
 						}
+						data[Type.FIELD_RESULT_OK_DELETE] = true;
 				}
 				},
 				async function(call){
-					if(delete_item_query.$or.length > 0){
+					if(option.delete_group && delete_item_query.$or.length > 0){
+						data[Type.FIELD_RESULT_OK_GROUP_DELETE] = false;
 						let data_type = Type.DATA_GROUP;
 						let search = Data_Logic.get_search(data_type,delete_item_query,{},1,0);
 						const [biz_error,biz_data] = await Data.delete_items(database,data_type,search.filter);
@@ -2732,12 +2742,11 @@ class Portal {
 						}else{
 							data[Type.FIELD_RESULT_OK_GROUP_DELETE] = true;
 						}
-					}else{
-							data[Type.FIELD_RESULT_OK_GROUP_DELETE] = true;
 					}
 				},
 				async function(call){
-					if(delete_item_query.$or.length > 0){
+					if(option.delete_image && delete_item_query.$or.length > 0){
+					data[Type.FIELD_RESULT_OK_IMAGE_DELETE] = false;
 					let data_type = Type.DATA_IMAGE;
 					let search = Data_Logic.get_search(data_type,delete_item_query,{},1,0);
 					const [biz_error,biz_data] = await Data.delete_items(database,data_type,search.filter);
@@ -2746,17 +2755,8 @@ class Portal {
 					}else{
 						data[Type.FIELD_RESULT_OK_IMAGE_DELETE] = true;
 					}
-
-					}else{
-						data[Type.FIELD_RESULT_OK_IMAGE_DELETE] = true;
 					}
-
 				},
-				async function(call){
-					if(data[Type.FIELD_RESULT_OK_GROUP_DELETE] && data[Type.FIELD_RESULT_OK_IMAGE_DELETE]){
-						data[Type.FIELD_RESULT_OK_DELETE] = true;
-					}
-				}
 			]).then(result => {
 				callback([error,data]);
 			}).catch(err => {
@@ -2913,7 +2913,7 @@ class Stat_Data {
 		return new Promise((callback) => {
 			let error = null;
 			option = option ? option : {};
-			data = Data_Logic.get_new(Type.DATA_STAT,stat.id,{parent_data_type:stat.parent_data_type,user_id:stat.user_id,type:stat.type});
+			data = Data_Logic.get_new(Type.DATA_STAT,stat.id,{data:{parent_data_type:stat.parent_data_type,user_id:stat.user_id,type:stat.type}});
 			field_result_ok = false;
 			async.series([
 				async function(call){
@@ -2945,7 +2945,7 @@ class Stat_Data {
 				},
 				//post - stat
 				async function(call){
-					if(data[FIELD_RESULT_OK]){
+					if(field_result_ok){
 						const [biz_error,biz_data] = await Portal.post(database,Type.DATA_STAT,data);
 						if(biz_error){
 							error=Log.append(error,biz_error);
