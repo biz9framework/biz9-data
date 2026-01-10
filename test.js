@@ -56,12 +56,12 @@ describe('connect', function(){ this.timeout(25000);
                 */
                 //-->
                 //let group = Data_Logic.get_new(Type.DATA_GROUP,0,{test:true,generate_title:true,parent:parent});
-                //let group = Data_Logic.get_new(Type.DATA_GROUP,'658');
+                let group = Data_Logic.get_new(Type.DATA_GROUP,'658');
                 //-->
                 //let blank = Data_Logic.get_new(Type.DATA_BLANK,0,{test:true,generate_title:true,parent:parent});
                 //let blank = Data_Logic.get_new(Type.DATA_BLANK,id);
                 //-->
-                //let image = Data_Logic.get_new(Type.DATA_IMAGE,0,{test:true,parent:group});
+                let image = Data_Logic.get_new(Type.DATA_IMAGE,0,{test:true,parent:group});
                 //-->
                 //
                 //let user = Data_Logic.get_new(Type.DATA_USER,0,{test:true,generate_title:true});
@@ -80,14 +80,15 @@ describe('connect', function(){ this.timeout(25000);
                 //let foreign_search_1 = Data_Logic.get_search_foreign(Type.TITLE_LIST,Type.DATA_BLANK,Type.FIELD_PARENT_ID,Type.FIELD_ID);
                 //let option = {foreigns:[foreign_search_1]};
 
-                let group_search_1 = Data_Logic.get_search_group();
+                let group_search_1 = Data_Logic.get_search_group({image:{show:true}});
+                Log.w('group_search_1',group_search_1);
                 //let group_search_1 = Data_Logic.get_search_group({title:{group_43815:0,group_83574:1}});
                 //let group_search_2 = Data_Logic.get_search_group({title:{group_924:0},field:{title:1,title_url:1}});
                 let option = {groups:[group_search_1]};
 
                 //let option = {stat:{user_id:user.id,type:Type.STAT_VIEW,unique:false}};
                 //---
-                let search = Data_Logic.get_search(Type.DATA_PRODUCT,{},{date_create:-1},1,0);
+                let search = Data_Logic.get_search(Type.DATA_PRODUCT,{id:'944'},{date_create:-1},1,0);
                 //---
                 const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option);
                 //---
@@ -121,6 +122,8 @@ describe('connect', function(){ this.timeout(25000);
                 //---
                 if(print_test){;
                     Log.w('99_biz_data',biz_data);
+                    Log.w('99_2_biz_data',biz_data.items[0].groups);
+                    Log.w('99_3_biz_data',biz_data.items[0].groups.length);
                 }
                 //Log.w('99_option',option);
                 //Log.w('99_biz_data_parents',biz_data.items[0]);

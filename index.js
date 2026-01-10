@@ -1888,7 +1888,7 @@ class Portal {
 						search_items.push({
 								field : item.field ? item.field : {},
 								title : item.title ? item.title : {}, // {groupShow:1,groupHide:0},{0:all}
-								image : item.image ? item.image : {count:0,sort_by:Type.TITLE_SORT_BY_ASC},
+								image : item.image ? item.image : {show:false},
 								page_current : item.page_current ? item.page_current : 1,
 								page_size : item.page_current ? item.page_current : 0,
 							});
@@ -1917,8 +1917,10 @@ class Portal {
 							if(group_query.$or.length <= 0){
 								delete group_query.$or;
 							}
-							let item_group_image_foreign_option = Data_Logic.get_search_foreign(Type.TITLE_LIST,Type.DATA_IMAGE,Type.FIELD_PARENT_ID,Type.FIELD_ID);
-							let item_group_join_option = {field:search_item.field,foreigns:[item_group_image_foreign_option]};
+							let item_group_join_option = {field:search_item.field};
+							if(search_item.image.show){
+								item_group_join_option['foreigns'] = [Data_Logic.get_search_foreign(Type.TITLE_LIST,Type.DATA_IMAGE,Type.FIELD_PARENT_ID,Type.FIELD_ID)];
+							}
 							let item_group_join_search = Data_Logic.get_search(Type.DATA_GROUP,group_query,{},search_item.page_current,search_item.page_size);
 							const [biz_error,biz_data] = await Portal.search(database,item_group_join_search.data_type,item_group_join_search.filter,item_group_join_search.sort_by,item_group_join_search.page_current,item_group_join_search.page_size,item_group_join_option);
 									if(biz_error){
@@ -2006,96 +2008,16 @@ class Portal {
 			});
 		});
 	};
-	//9_get_data_groups 9_data_groups
-	static get_data_groups = (database,data,option) => {
+	//9_items_foreigns //9_get_items_foreigns //9_joins 9_get_data_foreigns //9_data_joins
+	static get_data_foreigns = (database,data,option) => {
 		return new Promise((callback) => {
-			let search_items = [];
+			let error = null;
+			let data = Data_Logic.get_new(Type.DATA_BLANK,0);
 			async.series([
 				async function(call){
-					if(option.groups){
-						for(const item of option.groups){
-							search_items.push({
-								type : item.type ? item.type : Type.TITLE_ITEMS,
-								field : item.field ? item.field : {},
-								title : item.title ? item.title : {}, // {groupShow:1,groupHide:0},{0:all}
-								image : item.image ? item.image : {},
-								page_current : item.page_current ? item.page_current : 1,
-								page_size : item.page_current ? item.page_current : 0,
-							});
-						}
-						for(const search_item of search_items){
-							let group_option = {field:search_item.field};
-							let group_query = {};
-							let group_list = [];
-							let hide_group_list = [];
-							if(search_item.type == Type.TITLE_ITEMS){
-								for(const field in search_item.title) {
-                        			let new_item = {};
-                        			new_item[field] = search_item.title[field];
-                        			if(new_item[field]){
-                            			group_list.push({field:field,value:new_item[field]});
-                        			}else{
-                            			hide_group_list.push({field:field,value:new_item[field]});
-                        			}
-                    			}
-								//get_all_groups
-								if(group_list.length <= 0){
-									//items list
-									if(Obj.check_is_array(data.items)){
-										//item
-									}else{
-										group_query = {parent_id:data.id}
-
-
-									}
-								}
-								/*
-								for(const group of group_list) {
-									let query_field = {};
-									query_field[Type.FIELD_TITLE_URL] = { $regex:String(group.field), $options: "i" };
-									group_query.$or.push(query_field);
-								};
-								let group_search = Data_Logic.get_search(Type.DATA_GROUP,group_query,{},search_item.page_current,search_item.page_size);
-								const [biz_error,biz_data] = await Portal.search(database,group_search.data_type,group_search.filter,group_search.sort_by,group_search.page_current,group_search.page_size,group_option);
-								if(biz_data.items.length> 0){
-									if(group_list.length>0){
-										for(const group_title of group_list) {
-											for(const group of biz_data.items) {
-												if(group_title.field == group.title_url){
-													let match_hide_group = hide_group_list.find(item=>item.field == group.title_url);
-														if(!match_hide_group){
-
-															if(data.items.length>0){
-																for(const item of data.items) {
-																}
-
-															}
-															data.groups = [];
-															//add to get
-															data[Str.get_title_url(group.title)] = group;
-															data.groups.push(group);
-															//add toi list
-														}
-												}
-											}
-										}
-									}else{
-										for(const group of biz_data.items) {
-											let match_hide_group = hide_group_list.find(item=>item.field == group.title_url);
-												if(!match_hide_group){
-													data[Str.get_title_url(group.title)] = group;
-													data.groups.push(group);
-												}
-										}
-									}
-								}
-								*/
-
-							}
-							}
-						}
-
-				},
+					const [biz_error,biz_data] = await Data.get(database,data.data_type,data.id,option);
+					data = biz_data;
+			},
 			]).then(result => {
 				callback([error,data]);
 			}).catch(err => {
@@ -2390,7 +2312,7 @@ class Portal {
 						search_items.push({
 								field : item.field ? item.field : {},
 								title : item.title ? item.title : {}, // {groupShow:1,groupHide:0},{0:all}
-								image : item.image ? item.image : {count:0,sort_by:Type.TITLE_SORT_BY_ASC},
+								image : item.image ? item.image : {show:false},
 								page_current : item.page_current ? item.page_current : 1,
 								page_size : item.page_current ? item.page_current : 0,
 							});
@@ -2421,10 +2343,12 @@ class Portal {
 							if(group_query.$or.length <= 0){
 								delete group_query.$or;
 							}
-							let item_group_image_foreign_option = Data_Logic.get_search_foreign(Type.TITLE_LIST,Type.DATA_IMAGE,Type.FIELD_PARENT_ID,Type.FIELD_ID);
-							let item_group_join_option = {field:search_item.field,foreigns:[item_group_image_foreign_option]};
-							let item_group_join_search = Data_Logic.get_search(Type.DATA_GROUP,{},{},search_item.page_current,search_item.page_size);
-						const [biz_error,biz_data] = await Portal.search_simple(database,item_group_join_search.data_type,item_group_join_search.filter,item_group_join_search.sort_by,item_group_join_search.page_current,item_group_join_search.page_size,item_group_join_option);
+							let item_group_join_option = {field:search_item.field};
+							if(search_item.image.show){
+								item_group_join_option['foreigns'] = [Data_Logic.get_search_foreign(Type.TITLE_LIST,Type.DATA_IMAGE,Type.FIELD_PARENT_ID,Type.FIELD_ID)];
+							}
+							let item_group_join_search = Data_Logic.get_search(Type.DATA_GROUP,group_query,{},search_item.page_current,search_item.page_size);
+							const [biz_error,biz_data] = await Portal.search_simple(database,item_group_join_search.data_type,item_group_join_search.filter,item_group_join_search.sort_by,item_group_join_search.page_current,item_group_join_search.page_size,item_group_join_option);
 									if(biz_error){
 										error=Log.append(error,biz_error);
 									}else{
