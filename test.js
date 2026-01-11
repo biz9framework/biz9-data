@@ -58,7 +58,7 @@ describe('connect', function(){ this.timeout(25000);
                 //let group = Data_Logic.get_new(Type.DATA_GROUP,0,{test:true,generate_title:true,parent:parent});
                 let group = Data_Logic.get_new(Type.DATA_GROUP,'658');
                 //-->
-                //let blank = Data_Logic.get_new(Type.DATA_BLANK,0,{test:true,generate_title:true,parent:parent});
+                let blank = Data_Logic.get_new(Type.DATA_BLANK,0,{test:true,parent:parent});
                 //let blank = Data_Logic.get_new(Type.DATA_BLANK,id);
                 //-->
                 let image = Data_Logic.get_new(Type.DATA_IMAGE,0,{test:true,parent:group});
@@ -81,7 +81,7 @@ describe('connect', function(){ this.timeout(25000);
                 //let option = {foreigns:[foreign_search_1]};
 
                 let group_search_1 = Data_Logic.get_search_group({image:{show:true}});
-                Log.w('group_search_1',group_search_1);
+                //Log.w('group_search_1',group_search_1);
                 //let group_search_1 = Data_Logic.get_search_group({title:{group_43815:0,group_83574:1}});
                 //let group_search_2 = Data_Logic.get_search_group({title:{group_924:0},field:{title:1,title_url:1}});
                 let option = {groups:[group_search_1]};
@@ -122,8 +122,9 @@ describe('connect', function(){ this.timeout(25000);
                 //---
                 if(print_test){;
                     Log.w('99_biz_data',biz_data);
-                    Log.w('99_2_biz_data',biz_data.items[0].groups);
-                    Log.w('99_3_biz_data',biz_data.items[0].groups.length);
+                    Log.w('99_biz_data_parents',biz_data.items[0]);
+                    Log.w('99_biz_data_parents',biz_data.items[0].groups[0]);
+
                 }
                 //Log.w('99_option',option);
                 //Log.w('99_biz_data_parents',biz_data.items[0]);

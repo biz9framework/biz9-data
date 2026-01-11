@@ -2012,13 +2012,86 @@ class Portal {
 	static get_data_foreigns = (database,data,option) => {
 		return new Promise((callback) => {
 			let error = null;
-			let data = Data_Logic.get_new(Type.DATA_BLANK,0);
+			let foreign_search_items = [];
 			async.series([
 				async function(call){
-					const [biz_error,biz_data] = await Data.get(database,data.data_type,data.id,option);
-					data = biz_data;
+					for(const foreign_item of option.foreigns){
+						for(const data_item of data.items){
+							foreign_search_items.push({
+								type : foreign_item.type ? foreign_item.type : Type.TITLE_ITEMS,
+								foreign_data_type : foreign_item.foreign_data_type,
+								foreign_field : foreign_item.foreign_field,
+								parent_field : foreign_item.parent_field,
+								parent_value : data_item[foreign_item.parent_field],
+								field : foreign_item.field ? foreign_item.field : {},
+								title : foreign_item.title ? foreign_item.title : foreign_item.foreign_data_type,
+								page_current : foreign_item.page_current ? foreign_item.page_current : 1,
+								page_size : foreign_item.page_size ? foreign_item.page_size : 0,
+									items : []
+							});
+						}
+					}
+						for(const search_item of foreign_search_items){
+							let query = { $or: [] };
+							for(const data_item of data.items){
+								let query_field = {};
+								query_field[search_item.foreign_field] = search_item.parent_value;
+								query.$or.push(query_field);
+							};
+							let search = Data_Logic.get_search(search_item.foreign_data_type,query,{},1,0);
+							let foreign_option = search_item.field ? {} : {};
+							const [biz_error,biz_data] = await Portal.search_simple(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,foreign_option);
+							if(biz_error){
+								error=Log.append(error,biz_error);
+							}else{
+								search_item.items = biz_data.items;
+								if(foreign_search_items.length> 0){
+									for(const search_item of foreign_search_items){
+										for(const data_item of data.items){
+											if(search_item.type == Type.TITLE_ITEMS){
+												let query = {};
+												query[search_item.foreign_field] = data_item[search_item.parent_field];
+												let search = Data_Logic.get_search(search_item.foreign_data_type,query,{},1,0);
+												data_item[search_item.title] = [];
+												const [biz_error,biz_data] = await Portal.search_simple(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,foreign_option);
+												if(biz_error){
+													error=Log.append(error,biz_error);
+												}else{
+													for(const sub_data_item of biz_data.items){
+														data_item[search_item.title].push(sub_data_item);
+													}
+												}
+											}else if(search_item.type == Type.TITLE_COUNT){
+												let query = {};
+												query[search_item.foreign_field] = data_item[search_item.parent_field];
+												let search = Data_Logic.get_search(search_item.foreign_data_type,query,{},1,0);
+												const [biz_error,biz_data] = await Portal.count(database,search.data_type,search.filter);
+												if(biz_error){
+													error=Log.append(error,biz_error);
+												}else{
+													data_item[search_item.title] = biz_data;
+												}
+											}else if(search_item.type == Type.TITLE_ONE){
+												let query = {};
+												query[search_item.foreign_field] = data_item[search_item.parent_field];
+												let search = Data_Logic.get_search(search_item.foreign_data_type,query,{},1,1);
+												const [biz_error,biz_data] = await Portal.search_simple(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,foreign_option);
+												if(biz_error){
+													error=Log.append(error,biz_error);
+												}else{
+													data_item[search_item.title] = biz_data.items.length ? biz_data.items[0] : Data_Logic.get_not_found(search_item.foreign_data_type,0);
+												}
+											}
+
+										}
+									}
+								}
+							}
+							}
 			},
 			]).then(result => {
+				console.log('rrrrrrrrrrrrrrrr');
+				console.log(data);
 				callback([error,data]);
 			}).catch(err => {
 				Log.error("Blank-Get",err);
@@ -2114,6 +2187,15 @@ class Portal {
 						Log.error('DATA-SEARCH-ERROR-1',err);
 						error=Log.append(error,err);
 					});
+				},
+				//9_get_items_foreign
+				async function(call){
+					if(option.foreigns && data.items.length>0){
+						const [biz_error,biz_data] = await Portal.get_data_foreigns(database,data,option);
+						if(!biz_error){
+							data = biz_data;
+						}
+					}
 				},
 				//9_get_items_join
 				async function(call){
@@ -2219,81 +2301,11 @@ class Portal {
 				//9_get_items_foreign
 				async function(call){
 					if(option.foreigns && data.items.length>0){
-						let foreign_search_items = [];
-						for(const foreign_item of option.foreigns){
-							for(const data_item of data.items){
-								foreign_search_items.push({
-									type : foreign_item.type ? foreign_item.type : Type.TITLE_ITEMS,
-									foreign_data_type : foreign_item.foreign_data_type,
-									foreign_field : foreign_item.foreign_field,
-									parent_field : foreign_item.parent_field,
-									parent_value : data_item[foreign_item.parent_field],
-									field : foreign_item.field ? foreign_item.field : {},
-									title : foreign_item.title ? foreign_item.title : foreign_item.foreign_data_type,
-									page_current : foreign_item.page_current ? foreign_item.page_current : 1,
-									page_size : foreign_item.page_size ? foreign_item.page_size : 0,
-									items : []
-								});
-							}
+						const [biz_error,biz_data] = await Portal.get_data_foreigns(database,data,option);
+						if(!biz_error){
+							data = biz_data;
 						}
-						for(const search_item of foreign_search_items){
-							let query = { $or: [] };
-							for(const data_item of data.items){
-								let query_field = {};
-								query_field[search_item.foreign_field] = search_item.parent_value;
-								query.$or.push(query_field);
-							};
-							let search = Data_Logic.get_search(search_item.foreign_data_type,query,{},1,0);
-							let foreign_option = search_item.field ? {} : {};
-							const [biz_error,biz_data] = await Portal.search_simple(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,foreign_option);
-							if(biz_error){
-								error=Log.append(error,biz_error);
-							}else{
-								search_item.items = biz_data.items;
-								if(foreign_search_items.length> 0){
-									for(const search_item of foreign_search_items){
-										for(const data_item of data.items){
-											if(search_item.type == Type.TITLE_ITEMS){
-												let query = {};
-												query[search_item.foreign_field] = data_item[search_item.parent_field];
-												let search = Data_Logic.get_search(search_item.foreign_data_type,query,{},1,0);
-												data_item[search_item.title] = [];
-												const [biz_error,biz_data] = await Portal.search_simple(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,foreign_option);
-												if(biz_error){
-													error=Log.append(error,biz_error);
-												}else{
-													for(const sub_data_item of biz_data.items){
-														data_item[search_item.title].push(sub_data_item);
-													}
-												}
-											}else if(search_item.type == Type.TITLE_COUNT){
-												let query = {};
-												query[search_item.foreign_field] = data_item[search_item.parent_field];
-												let search = Data_Logic.get_search(search_item.foreign_data_type,query,{},1,0);
-												const [biz_error,biz_data] = await Portal.count(database,search.data_type,search.filter);
-												if(biz_error){
-													error=Log.append(error,biz_error);
-												}else{
-													data_item[search_item.title] = biz_data;
-												}
-											}else if(search_item.type == Type.TITLE_ONE){
-												let query = {};
-												query[search_item.foreign_field] = data_item[search_item.parent_field];
-												let search = Data_Logic.get_search(search_item.foreign_data_type,query,{},1,1);
-												const [biz_error,biz_data] = await Portal.search_simple(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,foreign_option);
-												if(biz_error){
-													error=Log.append(error,biz_error);
-												}else{
-													data_item[search_item.title] = biz_data.items.length ? biz_data.items[0] : Data_Logic.get_not_found(search_item.foreign_data_type,0);
-												}
-											}
-
-										}
-									}
-								}
-							}
-							}
-						}
+					}
 				},
 				//9_get_items_join
 				async function(call){
