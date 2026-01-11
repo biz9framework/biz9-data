@@ -39,8 +39,8 @@ describe('connect', function(){ this.timeout(25000);
             },
             async function(call){
                 //-->
-                let new_data_type = Type.DATA_PRODUCT;
-                let id = '944';
+                let new_data_type = Type.DATA_GROUP;
+                let id = '613';
                 let title_url = 'product_282';
                 let print_test = true;
 
@@ -77,26 +77,26 @@ describe('connect', function(){ this.timeout(25000);
                 //let option = {field:{id:1,title:1,title_url:1}};
                 //let join_search_1 = Data_Logic.get_search_join(Type.TITLE_LIST,Data_Logic.get_search(Type.DATA_BLANK,{},{},1,0),{title:'cool'});
                 //let option = {joins:[join_search_1]};
-                //let foreign_search_1 = Data_Logic.get_search_foreign(Type.TITLE_LIST,Type.DATA_BLANK,Type.FIELD_PARENT_ID,Type.FIELD_ID);
-                //let option = {foreigns:[foreign_search_1]};
+                let foreign_search_1 = Data_Logic.get_search_foreign(Type.TITLE_LIST,Type.DATA_IMAGE,Type.FIELD_PARENT_ID,Type.FIELD_ID);
+                let option = {foreigns:[foreign_search_1]};
 
-                let group_search_1 = Data_Logic.get_search_group({image:{show:true}});
+                //let group_search_1 = Data_Logic.get_search_group({image:{show:true}});
                 //Log.w('group_search_1',group_search_1);
                 //let group_search_1 = Data_Logic.get_search_group({title:{group_43815:0,group_83574:1}});
                 //let group_search_2 = Data_Logic.get_search_group({title:{group_924:0},field:{title:1,title_url:1}});
-                let option = {groups:[group_search_1]};
+                //let option = {groups:[group_search_1]};
 
                 //let option = {stat:{user_id:user.id,type:Type.STAT_VIEW,unique:false}};
                 //---
-                let search = Data_Logic.get_search(Type.DATA_PRODUCT,{id:'944'},{date_create:-1},1,0);
+                //let search = Data_Logic.get_search(Type.DATA_PRODUCT,{id:'944'},{date_create:-1},1,0);
                 //---
-                const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option);
+                //const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option);
                 //---
                 //const [biz_error,biz_data] = await Portal.count(database,search.data_type,search.filter);
                 //---
                 //const [error,biz_data] = await Portal.copy(database,parent.data_type,parent.id,option);
                 //---
-                //const [error,biz_data] = await Portal.get(database,parent.data_type,parent.id,option);
+                const [error,biz_data] = await Portal.get(database,parent.data_type,parent.id,option);
                 //const [error,biz_data] = await Portal.get(database,group.data_type,group.id,option);
                 //const [error,biz_data] = await Portal.get(database,group.data_type,group.id);
                 //---
@@ -122,8 +122,8 @@ describe('connect', function(){ this.timeout(25000);
                 //---
                 if(print_test){;
                     Log.w('99_biz_data',biz_data);
-                    Log.w('99_biz_data_parents',biz_data.items[0]);
-                    Log.w('99_biz_data_parents',biz_data.items[0].groups[0]);
+                    //Log.w('99_biz_data_parents',biz_data.items[0]);
+                    //Log.w('99_biz_data_parents',biz_data.items[0].groups[0]);
 
                 }
                 //Log.w('99_option',option);
