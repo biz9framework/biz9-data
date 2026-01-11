@@ -1,6 +1,6 @@
 {
   "name": "biz9-data",
-  "version": "2.5.360",
+  "version": "2.5.361",
   "description": "The BiZ9-Data-Server Package is an object-relational mapper (ORM) that lets you build a clean, portable, reusable, and high-level data access layer with Node.js for data driven applications. The package consists of create, read, update and destroy (CRUD) methods to handle data access and manipulations. The framework is fast and used for rapid application development for scaling applications from 0 to millions of records seamlessly and effortless. New data is written and persisted to the MongoDB tables/collections. Fetching data is obtained from the server cache memory using Redis. Using MongoDB with Redis speeds up the overall application tremendously. This framework is used as a [data access component] for mobile and website applications. It is best suited to be used as a package within Express.js. It can also be utilized for other Javascript based applications.",
   "main": "index.js",
   "directories": {
