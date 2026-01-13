@@ -10,7 +10,7 @@ const {Type,Data_Logic} = require("/home/think1/www/doqbox/biz9-framework/biz9-l
 - connect
 */
 /* --- TEST CONFIG START --- */
-const APP_ID = 'test-stage-jan12';
+const APP_ID = 'test-stage-jan13';
 /* --- TEST CONFIG END --- */
 
 /* --- DATA CONFIG START --- */
@@ -39,14 +39,14 @@ describe('connect', function(){ this.timeout(25000);
             },
             async function(call){
                 //-->
-                let new_data_type = Type.DATA_PAGE;
-                //let id = '836';
-                let id = 'home22';
+                let new_data_type = Type.DATA_CATEGORY;
+                let id = '972';
+                //let id = 'home22';
                 let print_test = true;
 
                 //-->
                 //let parent = Data_Logic.get(new_data_type,0,{test:true});
-                let parent = Data_Logic.get(new_data_type,0,{test:true,title:'home'});
+                let parent = Data_Logic.get(new_data_type,0,{test:true,title:'Apple 4'});
                 //let parent = Data_Logic.get_new(new_data_type,id);
                 /*
                 let parent_list = [
@@ -74,8 +74,10 @@ describe('connect', function(){ this.timeout(25000);
                 //let favorite = Favorite_Logic.get_new(parent.data_type,parent.id,user.id);
                 //-->
                 //let option = {};
-                let option = {id_field:'title_url'};
+                //let option = {id_field:'title_url'};
                 //let option = {groups:{}};
+                let option = {distinct:{field:'title',sort_by:Type.TITLE_SORT_BY_DESC},field:{title:1,title_url:1}};
+
                 //let option = {field:{id:1,title:1,title_url:1}};
                 //let join_search_1 = Data_Logic.get_search_join(Type.TITLE_LIST,Data_Logic.get_search(Type.DATA_BLANK,{},{},1,0),{title:'cool'});
                 //let option = {joins:[join_search_1]};
@@ -90,10 +92,10 @@ describe('connect', function(){ this.timeout(25000);
 
                 //let option = {stat:{user_id:user.id,type:Type.STAT_VIEW,unique:false}};
                 //---
-                let search = Data_Logic.get_search(Type.DATA_PRODUCT,{},{date_create:-1},1,0);
+                let search = Data_Logic.get_search(Type.DATA_CATEGORY,{},{date_create:-1},1,0);
                 //---
-                //const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option);
-                const [biz_error,biz_data] = await Product_Data.search(database,search.filter,search.sort_by,search.page_current,search.page_size,option);
+                const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option);
+                //const [biz_error,biz_data] = await Product_Data.search(database,search.filter,search.sort_by,search.page_current,search.page_size,option);
                 //---
                 //const [biz_error,biz_data] = await Portal.count(database,search.data_type,search.filter);
                 //---
