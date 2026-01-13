@@ -7,7 +7,7 @@ Description: BiZ9 Framework: Data - Mongo - Adapter
 const async = require('async');
 const {get_database_main,check_database_main,delete_database_main,post_item_main,post_bulk_main,get_item_main,delete_item_main,get_id_list_main,delete_item_list_main,get_count_item_list_main} = require('./mongo/index.js');
 const {get_cache_connect_main,delete_cache_connect_main,get_cache_string_main,delete_cache_string_main,post_cache_string_main} = require('./redis/index.js');
-const {Type,Data_Logic}=require("/home/think2/www/doqbox/biz9-framework/biz9-logic/code");
+const {Type,Data_Logic}=require("/home/think1/www/doqbox/biz9-framework/biz9-logic/code");
 const {Log,Str,Num,Obj}=require("biz9-utility");
 const get_database_adapter=(data_config,option)=>{
     return new Promise((callback) => {
@@ -183,7 +183,7 @@ const get_item_adapter = (database,data_type,id,option) => {
             option = {};
         }
         let cache_connect = {};
-        let data = Data_Logic.get_new(data_type,id);
+        let data = Data_Logic.get(data_type,id);
         option = option ? option : {};
         async.series([
             async function(call) {
@@ -200,9 +200,9 @@ const get_item_adapter = (database,data_type,id,option) => {
                     }
                 }else{
                     let query_field={};
-                    query_field[option.id_field] = option.id_field_value;
+                    query_field[option.id_field] = id;
                     let page_current=1;
-                    let page_size=1;
+                    let page_size=0;
                     const [biz_error,biz_data] = await get_item_list_adapter(database,data_type,query_field,{},page_current,page_size,option);
                         if(biz_data.length>0){
                             data = biz_data[0];
@@ -251,7 +251,7 @@ const post_cache_item = (cache_connect,data_type,id,item_data) => {
 }
 const delete_item_adapter = (database,data_type,id,option) => {
     return new Promise((callback) => {
-        let data = Data_Logic.get_new(data_type,id);
+        let data = Data_Logic.get(data_type,id);
 		data[Type.FIELD_RESULT_OK_DELETE] = false;
 		data[Type.FIELD_RESULT_OK_DELETE_CACHE] = false;
 		data[Type.FIELD_RESULT_OK_DELETE_DATABASE] = false;
@@ -278,7 +278,7 @@ const delete_item_adapter = (database,data_type,id,option) => {
 const get_item_cache_db = (cache_connect,database,data_type,id,option) => {
     return new Promise((callback) => {
         let cache_key_list = [];
-        let item_data = Data_Logic.get_new(data_type,id);
+        let item_data = Data_Logic.get(data_type,id);
         let field_list = [];
         let hide_field_list = [];
         option = option ? option : {};
@@ -394,7 +394,7 @@ const delete_item_cache=(database,data_type,id,option)=>{
         let cache_connect = {};
         let cache_key_list = '';
         let cache_string_list = '';
-        let item_data = Data_Logic.get_new(data_type,id);
+        let item_data = Data_Logic.get(data_type,id);
         async.series([
              async function(call) {
                 const [error,data] = await get_cache_connect_main(database.data_config);
@@ -435,7 +435,7 @@ const delete_item_cache_db = (database,data_type,id) => {
         let cache_connect = {};
         let cache_key_list = '';
         let cache_string_list = '';
-        let data = Data_Logic.get_new(data_type,id);
+        let data = Data_Logic.get(data_type,id);
         data[Type.FIELD_RESULT_OK_DELETE] = false;
         data[Type.FIELD_RESULT_OK_DELETE_CACHE] = false;
         data[Type.FIELD_RESULT_OK_DELETE_DATABASE] = false;
