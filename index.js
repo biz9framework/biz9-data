@@ -256,7 +256,6 @@ class Page_Data {
 			option = option ? option : {};
 			async.series([
 				async function(call){
-                    Log.w('option',option);
 					const [biz_error,biz_data] = await Portal.get(database,Type.DATA_PAGE,id,option);
 					if(biz_error){
 						error=Log.append(error,biz_error);
@@ -2090,8 +2089,6 @@ class Portal {
 							}
 			},
 			]).then(result => {
-				console.log('rrrrrrrrrrrrrrrr');
-				console.log(data);
 				callback([error,data]);
 			}).catch(err => {
 				Log.error("Blank-Get",err);
@@ -2657,8 +2654,6 @@ class Portal {
 			data[Type.FIELD_RESULT_OK_DELETE] = false;
 			let delete_item_query = { $or: [] };
 			option = option ? option : {};
-			Log.w('11_delete_search_data_type',data_type);
-			Log.w('22_delete_search_data_filter',filter);
 			async.series([
 				async function(call){
 					let search = Data_Logic.get_search(data_type,filter,{},1,0);

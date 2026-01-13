@@ -1,7 +1,7 @@
 const async = require('async');
 const assert = require('node:assert');
 
-const {Data,Database,Portal,User_Data,Page_Data} = require(".");
+const {Data,Database,Portal,User_Data,Page_Data,Product_Data} = require(".");
 
 const {Log,Num,Str} = require("biz9-utility");
 const {Type,Data_Logic} = require("/home/think1/www/doqbox/biz9-framework/biz9-logic/code");
@@ -90,9 +90,10 @@ describe('connect', function(){ this.timeout(25000);
 
                 //let option = {stat:{user_id:user.id,type:Type.STAT_VIEW,unique:false}};
                 //---
-                //let search = Data_Logic.get_search(Type.DATA_PRODUCT,{id:'944'},{date_create:-1},1,0);
+                let search = Data_Logic.get_search(Type.DATA_PRODUCT,{},{date_create:-1},1,0);
                 //---
                 //const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option);
+                const [biz_error,biz_data] = await Product_Data.search(database,search.filter,search.sort_by,search.page_current,search.page_size,option);
                 //---
                 //const [biz_error,biz_data] = await Portal.count(database,search.data_type,search.filter);
                 //---
@@ -101,6 +102,7 @@ describe('connect', function(){ this.timeout(25000);
                 //const [error,biz_data] = await Portal.get(database,parent.data_type,parent.id,option);
                 //const [error,biz_data] = await Portal.get(database,group.data_type,group.id,option);
                 //const [error,biz_data] = await Portal.get(database,group.data_type,group.id);
+                //const [error,biz_data] = await Page_Data.get(database,id,option);
                 //---
                 //const [error,biz_data] = await Portal.post(database,parent.data_type,parent);
                 //const [error,biz_data] = await Portal.post(database,group.data_type,group);
@@ -115,11 +117,6 @@ describe('connect', function(){ this.timeout(25000);
                 //---
                 //const [error,biz_data] = await User_Data.login(database,user,option);
                 //const [error,biz_data] = await User_Data.register(database,user,option);
-                //---
-                const [error,biz_data] = await Page_Data.get(database,id,option);
-
-
-                //
                 //---
 
                 //---
