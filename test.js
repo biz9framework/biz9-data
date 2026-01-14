@@ -40,14 +40,14 @@ describe('connect', function(){ this.timeout(25000);
             async function(call){
                 //-->
                 let new_data_type = Type.DATA_CATEGORY;
-                let id = '972';
+                let id = '32';
                 //let id = 'home22';
                 let print_test = true;
 
                 //-->
                 //let parent = Data_Logic.get(new_data_type,0,{test:true});
-                let parent = Data_Logic.get(new_data_type,0,{test:true,title:'Apple 4'});
-                //let parent = Data_Logic.get_new(new_data_type,id);
+                //let parent = Data_Logic.get(new_data_type,0,{test:true,title:'Apple 4'});
+                let parent = Data_Logic.get_new(new_data_type,id);
                 /*
                 let parent_list = [
                     Data_Logic.get_new(new_data_type,0,{test:true,generate_title:true}),
@@ -57,12 +57,12 @@ describe('connect', function(){ this.timeout(25000);
                 */
                 //-->
                 //let group = Data_Logic.get_new(Type.DATA_GROUP,0,{test:true,generate_title:true,parent:parent});
-                let group = Data_Logic.get_new(Type.DATA_GROUP,'658');
+                //let group = Data_Logic.get_new(Type.DATA_GROUP,'658');
                 //-->
-                let blank = Data_Logic.get_new(Type.DATA_BLANK,0,{test:true,parent:parent});
+                //let blank = Data_Logic.get_new(Type.DATA_BLANK,0,{test:true,parent:parent});
                 //let blank = Data_Logic.get_new(Type.DATA_BLANK,id);
                 //-->
-                let image = Data_Logic.get_new(Type.DATA_IMAGE,0,{test:true,parent:group});
+                //let image = Data_Logic.get_new(Type.DATA_IMAGE,0,{test:true,parent:group});
                 //-->
                 //-->
                 //
@@ -76,13 +76,13 @@ describe('connect', function(){ this.timeout(25000);
                 //let option = {};
                 //let option = {id_field:'title_url'};
                 //let option = {groups:{}};
-                let option = {distinct:{field:'title',sort_by:Type.TITLE_SORT_BY_DESC},field:{title:1,title_url:1}};
+                //let option = {distinct:{field:'title',sort_by:Type.TITLE_SORT_BY_DESC},field:{title:1,title_url:1}};
 
                 //let option = {field:{id:1,title:1,title_url:1}};
-                //let join_search_1 = Data_Logic.get_search_join(Type.TITLE_LIST,Data_Logic.get_search(Type.DATA_BLANK,{},{},1,0),{title:'cool'});
+                //let join_search_1 = Data_Logic.get_search_join(Type.TITLE_ONE,Data_Logic.get_search(Type.DATA_PRODUCT,{},{},1,0),{title:'join_field'});
                 //let option = {joins:[join_search_1]};
-                //let foreign_search_1 = Data_Logic.get_search_foreign(Type.TITLE_LIST,Type.DATA_IMAGE,Type.FIELD_PARENT_ID,Type.FIELD_ID);
-                //let option = {foreigns:[foreign_search_1]};
+                let foreign_search_1 = Data_Logic.get_search_foreign(Type.TITLE_ONE,Type.DATA_PRODUCT,Type.FIELD_CATEGORY,Type.FIELD_TITLE,{title:'product_count'});
+                let option = {foreigns:[foreign_search_1],distinct:{field:'title'}};
 
                 //let group_search_1 = Data_Logic.get_search_group({image:{show:true}});
                 //Log.w('group_search_1',group_search_1);
@@ -123,7 +123,9 @@ describe('connect', function(){ this.timeout(25000);
 
                 //---
                 if(print_test){;
+                    Log.w('99_option',option);
                     Log.w('99_biz_data',biz_data);
+                    Log.w('99_biz_data.count',biz_data.items.length);
                     //Log.w('99_biz_data_parents',biz_data.items[0]);
                     //Log.w('99_biz_data_parents',biz_data.items[0].groups[0]);
 
