@@ -5,7 +5,7 @@ License GNU General Public License v3.0
 Description: BiZ9 Framework: Data - Mongo - Adapter
 */
 const async = require('async');
-const {get_database,delete_database,get_id_list,post_item,get_item,delete_item,delete_item_list,get_count_item_list}= require("./mongo/base.js");
+const {get_database,delete_database,check_database,get_id_list,post_item,get_item,delete_item,delete_item_list,get_count_item_list}= require("./mongo/base.js");
 const {get_cache,delete_cache,get_cache_value,post_cache_value,delete_cache_value} = require('./redis/base.js');
 const {Type,Data_Logic}=require("/home/think1/www/doqbox/biz9-framework/biz9-logic/code");
 const {Log,Str,Num,Obj}=require("biz9-utility");
@@ -30,7 +30,7 @@ const delete_database_adapter=(database,option)=>{
     });
 }
 const check_database_adapter=(database,option)=>{
-    return check_database_main(database,option);
+    return check_database(database,option);
 }
 const post_item_list_adapter=(database,item_data_list,option)=>{
     return new Promise((callback) => {
@@ -110,7 +110,6 @@ const post_item_adapter=(database,data_type,item_data,option) => {
                 cache_connect = biz_data;
             },
             async function(call){
-                here
                 const [biz_error,biz_data] = await post_item(database,data_type,item_data,option);
             },
             function(call){
@@ -179,6 +178,7 @@ const get_item_list_adapter = (database,data_type,filter,sort_by,page_current,pa
 }
 const get_item_adapter = (database,data_type,id,option) => {
     return new Promise((callback) => {
+        let error = null;
         if(!option){
             option = {};
         }
@@ -221,6 +221,7 @@ const get_item_adapter = (database,data_type,id,option) => {
 }
 const post_cache_item = (cache_connect,data_type,id,item_data) => {
     return new Promise((callback) => {
+        let error = null;
         let cache_string_str = '';
         let prop_list = [];
         async.series([
@@ -277,6 +278,7 @@ const delete_item_adapter = (database,data_type,id,option) => {
 }
 const get_item_cache_db = (cache_connect,database,data_type,id,option) => {
     return new Promise((callback) => {
+        let error = null;
         let cache_key_list = [];
         let item_data = Data_Logic.get(data_type,id);
         let field_list = [];

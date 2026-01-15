@@ -40,49 +40,49 @@ describe('connect', function(){ this.timeout(25000);
             async function(call){
                 //-->
                 let new_data_type = Type.DATA_PRODUCT;
-                let id = '604';
+                let id = '884';
                 //let id = 'home22';
                 let print_test = true;
 
                 //-->
-                let parent = Data_Logic.get(new_data_type,0,{test:true});
+                //let parent = Data_Logic.get(new_data_type,0,{test:true});
                 //Log.w('parent',parent);
                 //let parent = Data_Logic.get(new_data_type,0,{test:true,title:'Apple 4'});
-                //let parent = Data_Logic.get_new(new_data_type,id);
+                let parent = Data_Logic.get(new_data_type,id);
                 /*
                 let parent_list = [
-                    Data_Logic.get_new(new_data_type,0,{test:true,generate_title:true}),
-                    Data_Logic.get_new(new_data_type,0,{test:true,generate_title:true}),
-                    Data_Logic.get_new(new_data_type,0,{test:true,generate_title:true})
+                    Data_Logic.get(new_data_type,0,{test:true,generate_title:true}),
+                    Data_Logic.get(new_data_type,0,{test:true,generate_title:true}),
+                    Data_Logic.get(new_data_type,0,{test:true,generate_title:true})
                 ];
                 */
                 //-->
-                //let group = Data_Logic.get_new(Type.DATA_GROUP,0,{test:true,generate_title:true,parent:parent});
-                //let group = Data_Logic.get_new(Type.DATA_GROUP,'658');
+                //let group = Data_Logic.get(Type.DATA_GROUP,0,{test:true,generate_title:true,parent:parent});
+                //let group = Data_Logic.get(Type.DATA_GROUP,'658');
                 //-->
-                //let blank = Data_Logic.get_new(Type.DATA_BLANK,0,{test:true,parent:parent});
-                //let blank = Data_Logic.get_new(Type.DATA_BLANK,id);
+                let blank = Data_Logic.get(Type.DATA_BLANK,0,{test:true,parent:parent});
+                //let blank = Data_Logic.get(Type.DATA_BLANK,id);
                 //-->
-                //let image = Data_Logic.get_new(Type.DATA_IMAGE,0,{test:true,parent:group});
+                //let image = Data_Logic.get(Type.DATA_IMAGE,0,{test:true,parent:group});
                 //-->
                 //-->
                 //
-                //let user = Data_Logic.get_new(Type.DATA_USER,0,{test:true,generate_title:true});
-                //let user = Data_Logic.get_new(Type.DATA_USER,'54b31f02-afb4-4fa7-9835-f923da7a6749');
-                //let user = Data_Logic.get_new(Type.DATA_USER,0,{test:true,data:{email:'ceo@bossappz.com',password:'123456789Ab!'}});
+                //let user = Data_Logic.get(Type.DATA_USER,0,{test:true,generate_title:true});
+                //let user = Data_Logic.get(Type.DATA_USER,'54b31f02-afb4-4fa7-9835-f923da7a6749');
+                //let user = Data_Logic.get(Type.DATA_USER,0,{test:true,data:{email:'ceo@bossappz.com',password:'123456789Ab!'}});
                 //Log.w('user',user);
                 //-->
-                //let favorite = Favorite_Logic.get_new(parent.data_type,parent.id,user.id);
+                //let favorite = Favorite_Logic.get(parent.data_type,parent.id,user.id);
                 //-->
-                let option = {};
+                //let option = {};
                 //let option = {clean:true,overwrite:true};
                 //let option = {id_field:'title_url'};
                 //let option = {groups:{}};
                 //let option = {distinct:{field:'title',sort_by:Type.TITLE_SORT_BY_DESC},field:{title:1,title_url:1}};
 
                 //let option = {field:{id:1,title:1,title_url:1}};
-                //let join_search_1 = Data_Logic.get_search_join(Type.TITLE_ONE,Data_Logic.get_search(Type.DATA_PRODUCT,{},{},1,0),{title:'join_field'});
-                //let option = {joins:[join_search_1]};
+                let join_search_1 = Data_Logic.get_search_join(Type.TITLE_LIST,Data_Logic.get_search(Type.DATA_BLANK,{},{},1,0),{title:'join_field'});
+                let option = {joins:[join_search_1]};
                 //let foreign_search_1 = Data_Logic.get_search_foreign(Type.TITLE_ITEMS,Type.DATA_BLANK,Type.FIELD_PARENT_ID,Type.FIELD_ID,{title:'cool'});
                 //let option = {foreigns:[foreign_search_1]};
 
@@ -103,12 +103,12 @@ describe('connect', function(){ this.timeout(25000);
                 //---
                 //const [error,biz_data] = await Portal.copy(database,parent.data_type,parent.id,option);
                 //---
-                //const [error,biz_data] = await Portal.get(database,parent.data_type,parent.id,option);
+                const [error,biz_data] = await Portal.get(database,parent.data_type,parent.id,option);
                 //const [error,biz_data] = await Portal.get(database,group.data_type,group.id,option);
                 //const [error,biz_data] = await Portal.get(database,group.data_type,group.id);
                 //const [error,biz_data] = await Page_Data.get(database,id,option);
                 //---
-                const [error,biz_data] = await Portal.post(database,parent.data_type,parent,option);
+                //const [error,biz_data] = await Portal.post(database,parent.data_type,parent,option);
                 //const [error,biz_data] = await Portal.post(database,group.data_type,group);
                 //const [error,biz_data] = await Portal.post(database,blank.data_type,blank);
                 //const [error,biz_data] = await Portal.post(database,user.data_type,user);

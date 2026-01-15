@@ -44,10 +44,11 @@ const delete_database = (database,option) => {
         });
     });
 }
-const get_item_base = (database,data_type,id,option) => {
+const get_item = (database,data_type,id,option) => {
     return new Promise((callback) => {
+        let error = null;
         let data = null;
-        if(check_database_base(database)){
+        if(check_database(database)){
             database.collection(data_type).findOne({id:id}).then((data) => {
                 if(data){
                     data = data;
@@ -61,7 +62,7 @@ const get_item_base = (database,data_type,id,option) => {
         }
     });
 }
-const check_database_base = (database) => {
+const check_database = (database) => {
     if(!database.client){
         return false;
     }else if(!database.client.topology){
@@ -84,7 +85,7 @@ const post_item = (database,data_type,item,option) => {
             item[Type.FIELD_ID] = String(Num.get_id(999));
             item[Type.FIELD_DATE_CREATE] = DateTime.get_new();
             item[Type.FIELD_DATE_SAVE] = DateTime.get_new();
-            if(check_database_base(database)){
+            if(check_database(database)){
                 database.collection(data_type).insertOne(item).then((data) => {
                     if(data){
                         delete item['_id'];
@@ -133,7 +134,7 @@ const post_bulk_base = (database,data_type,data_list) => {
             bulk_list.push(item);
         }
 
-        if(check_database_base(database)){
+        if(check_database(database)){
             try {
                 database.collection(data_type).bulkWrite(bulk_list,
                 { ordered: false } )
@@ -146,10 +147,10 @@ const post_bulk_base = (database,data_type,data_list) => {
             }
         });
 }
-const delete_item_base = (database,data_type,id,option) => {
+const delete_item = (database,data_type,id,option) => {
     return new Promise((callback) => {
         let data = null;
-        if(check_database_base(database)){
+        if(check_database(database)){
             database.collection(data_type).deleteMany({id:id}).then((data) => {
                 if(data){
                     data = data;
@@ -162,10 +163,10 @@ const delete_item_base = (database,data_type,id,option) => {
         }
     });
 }
-const delete_item_list_base = (database,data_type,filter) => {
+const delete_item_list = (database,data_type,filter) => {
     return new Promise((callback) => {
         let data = null;
-        if(check_database_base(database)){
+        if(check_database(database)){
             database.collection(data_type).deleteMany(filter).then((data) => {
                 if(data){
                     data = data;
@@ -180,13 +181,14 @@ const delete_item_list_base = (database,data_type,filter) => {
 }
 const get_id_list = (database,data_type,filter,sort_by,page_current,page_size,option) => {
     return new Promise((callback) => {
+        let error = null;
         let total_count = 0;
         let data_list = [];
         let collection = {};
         async.series([
             function(call) {
                 if(page_size>0){
-                if(check_database_base(database)){
+                if(check_database(database)){
                     database.collection(data_type).countDocuments(filter).then((data) => {
                         if(data){
                             total_count = data;
@@ -205,7 +207,7 @@ const get_id_list = (database,data_type,filter,sort_by,page_current,page_size,op
                 }
             },
             function(call) {
-                if(check_database_base(database)){
+                if(check_database(database)){
                     page_current = parseInt(page_current);
                     page_size = parseInt(page_size);
                     database.collection(data_type).find(filter).sort(sort_by).collation({locale:"en_US",numericOrdering:true}).skip(page_current>0?((page_current-1)*page_size):0).limit(page_size).project({id:1,data_type:1,_id:0}).toArray().then((data) => {
@@ -237,7 +239,7 @@ const get_id_list = (database,data_type,filter,sort_by,page_current,page_size,op
         });
     });
 }
-const get_count_item_list_base = async (database,data_type,filter,option) => {
+const get_count_item_list = async (database,data_type,filter,option) => {
     return new Promise((callback) => {
         let data = 0;
         database.collection(data_type).countDocuments(filter).then((data) => {
@@ -253,13 +255,13 @@ const get_count_item_list_base = async (database,data_type,filter,option) => {
 }
 module.exports = {
     get_database,
-    check_database_base,
+    check_database,
     delete_database,
     post_item,
     post_bulk_base,
-    get_item_base,
-    delete_item_base,
-    delete_item_list_base,
-    get_count_item_list_base,
+    get_item,
+    delete_item,
+    delete_item_list,
+    get_count_item_list,
     get_id_list
 };

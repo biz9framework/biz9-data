@@ -9,7 +9,9 @@ const dayjs = require('dayjs');
 const {Scriptz}=require("biz9-scriptz");
 const {Log,Str,Num,Obj,DateTime}=require("/home/think1/www/doqbox/biz9-framework/biz9-utility/code");
 const {Type,Favorite_Logic,Stat_Logic,Review_Logic,Data_Logic,Product_Logic,Demo_Logic,Category_Logic,Cart_Logic,Order_Logic,Field_Logic}=require("/home/think1/www/doqbox/biz9-framework/biz9-logic/code");
+
 const {get_database_adapter,check_database_adapter,delete_database_adapter,post_item_adapter,post_item_list_adapter,post_bulk_adapter,get_item_adapter,delete_item_adapter,get_item_list_adapter,delete_item_list_adapter,get_count_item_list_adapter,delete_item_cache }  = require('./adapter.js');
+
 class Database {
 	static get = async (data_config,option) => {
 		/* return
@@ -1868,7 +1870,8 @@ class Portal {
 			async.series([
 				//delete_cache_item
 				function(call){
-                    Portal.delete_cache(database,data.data_type,data.id,option).then(([biz_error,biz_data])=>{
+                     if(option.cache_delete){
+                    delete_item_cache(database,data.data_type,data.id,option).then(([biz_error,biz_data])=>{
                         if(biz_error){
                             error=Log.append(error,biz_error);
                         }else{
@@ -1878,6 +1881,9 @@ class Portal {
                         Log.error('Data-Portal-Get',err);
                         error=Log.append(error,err);
                     });
+                     }else{
+                         call();
+                     }
 				},
 				//item_by_id
 				function(call){
@@ -1900,8 +1906,9 @@ class Portal {
 					}
 				},
 				//9_get_item_join
-				async function(call){
+				function(call){
 					if(option.joins){
+	                    let join_search_items = [];
 						for(const join_item of option.joins){
 							join_search_items.push({
 								type : join_item.type ?  join_item.type : Type.TITLE_LIST,
@@ -1916,9 +1923,24 @@ class Portal {
 						for(const search_item of join_search_items){
 							let search = Data_Logic.get_search(search_item.search.data_type,search_item.search.filter,search_item.search.sort_by,search_item.search.page_current,search_item.search.page_size);
 							let join_option = search_item.field ? search_item.field : {};
-							const [biz_error,items,item_count,page_count] = await get_item_list_adapter(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,join_option);
+							//const [biz_error,items,item_count,page_count] = await get_item_list_adapter(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,join_option);
+                           	data[search_item.title] = [];
+                            get_item_list_adapter(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,join_option).then(([biz_error,items,item_count,page_count])=>{
+                                if(biz_error){
+                                    error=Log.append(error,biz_error);
+                                }else{
+                                    for(const sub_data_item of items){
+									    data[search_item.title].push(sub_data_item);
+									}
+                                    call();
+                                }
+                                }).catch(err => {
+                                    Log.error('Data-Blank',err);
+                                    error=Log.append(error,err);
+                                });
+                            /*
 							if(biz_error){
-								error=Log.append(error,biz_error);
+								eeroreLog.append(error,biz_error);
 							}else{
 								if(search_item.type == Type.TITLE_ITEMS){
 									let title = Str.get_title_url(search_item.title);
@@ -1944,7 +1966,8 @@ class Portal {
 											data[search_item.title] = items.length ? items[0] : Data_Logic.get_not_found(search_item.search.data_type,0);
 										}
 									}
-						}
+						    }
+                            */
 					}
 					}
 				},
@@ -2080,6 +2103,7 @@ class Portal {
 		});
 	};
 	//9_items_foreigns //9_get_items_foreigns //9_joins 9_get_data_foreigns //9_data_foreigns 9_foreigns
+    /*
 	static get_data_foreigns = (database,data,option) => {
 		return new Promise((callback) => {
 			let error = null;
@@ -2115,8 +2139,6 @@ class Portal {
                                 if(biz_error){
                                     error=Log.append(error,biz_error);
                                 }else{
-                                    console.log('here');
-                                    /*
                         		search_item.items = items;
 								if(foreign_search_items.length> 0){
 									for(const search_item of foreign_search_items){
@@ -2162,7 +2184,6 @@ class Portal {
 										}
 									}
 								}
-                                    */
                                    }
                             }).catch(err => {
                                 Log.error('Data-Blank',err);
@@ -2180,6 +2201,7 @@ class Portal {
 			});
 		});
 	};
+    */
 
 	//9_items_join //9_get_items_join //9_joins 9_get_data_joins //9_data_joins
 	static get_data_joins = (database,data,option) => {
