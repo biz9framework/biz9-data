@@ -5,17 +5,14 @@ License GNU General Public License v3.0
 Description: BiZ9 Framework: Data - Mongo - Adapter
 */
 const async = require('async');
-const {check_database_main,delete_database_main,post_item_main,post_bulk_main,get_item_main,delete_item_main,get_id_list_main,delete_item_list_main,get_count_item_list_main} = require('./mongo/index.js');
-
-const {get_database_base,delete_database_base,get_id_list_base,post_item_base}= require("./mongo/base.js");
-
-const {get_cache_connect_main,delete_cache_connect_main,get_cache_string_main,delete_cache_string_main,post_cache_string_main} = require('./redis/index.js');
+const {get_database,delete_database,get_id_list,post_item,get_item,delete_item,delete_item_list,get_count_item_list}= require("./mongo/base.js");
+const {get_cache,delete_cache,get_cache_value,post_cache_value,delete_cache_value} = require('./redis/base.js');
 const {Type,Data_Logic}=require("/home/think1/www/doqbox/biz9-framework/biz9-logic/code");
 const {Log,Str,Num,Obj}=require("biz9-utility");
 const  get_database_adapter=(data_config,option)=>{
     return new Promise((callback) => {
         async function main() {
-            const [error,biz_data] = await get_database_base(data_config);
+            const [error,biz_data] = await get_database(data_config);
             biz_data.data_config=data_config;
             callback([error,biz_data]);
         }
@@ -25,7 +22,7 @@ const  get_database_adapter=(data_config,option)=>{
 const delete_database_adapter=(database,option)=>{
     return new Promise((callback) => {
         async function main() {
-            const [error,biz_data] = await delete_database_base(database);
+            const [error,biz_data] = await delete_database(database);
             biz_data.data_config=data_config;
             callback([error,biz_data]);
         }
@@ -41,7 +38,7 @@ const post_item_list_adapter=(database,item_data_list,option)=>{
         let item_data_new_list=[];
         async.series([
             async function(call) {
-                const [biz_error,biz_data] = await get_cache_connect_main(database.data_config);
+                const [biz_error,biz_data] = await get_cache(database.data_config);
                 cache_connect = biz_data;
             },
             function(call){
@@ -65,10 +62,10 @@ const post_item_list_adapter=(database,item_data_list,option)=>{
                 async.forEachOf(item_data_list,(item,key,go)=>{
                     if(item){
                         async function main() {
-                            const [error,data] = await post_item_base(database,item.data_type,item);
+                            const [error,data] = await post_item(database,item.data_type,item);
                                 if(data){
                                     item.id=data.id;
-                                    delete_cache_string_main(cache_connect,get_cache_item_attr_list_key(item.data_type,data.id)).then(([error,data]) => {
+                                    delete_cache_value(cache_connect,get_cache_item_attr_list_key(item.data_type,data.id)).then(([error,data]) => {
                                     go();
                                     }).catch(error => {
                                         Log.error("Data-Adapter-Update-Item-List-2",error);
@@ -105,14 +102,16 @@ const post_item_list_adapter=(database,item_data_list,option)=>{
 }
 const post_item_adapter=(database,data_type,item_data,option) => {
     return new Promise((callback) => {
+        let error = null;
         let cache_connect={};
         async.series([
             async function(call) {
-                const [error,data] = await get_cache_connect_main(database.data_config);
-                cache_connect = data;
+                const [biz_error,biz_data] = await get_cache(database.data_config);
+                cache_connect = biz_data;
             },
             async function(call){
-                const [error,data] = await post_item_base(database,data_type,item_data,option);
+                here
+                const [biz_error,biz_data] = await post_item(database,data_type,item_data,option);
             },
             function(call){
                 if(item_data.id){
@@ -121,7 +120,7 @@ const post_item_adapter=(database,data_type,item_data,option) => {
                 call();
             },
             async function(call){
-                const [error,data] = await delete_cache_string_main(cache_connect,get_cache_item_attr_list_key(item_data.data_type,item_data.id));
+                const [error,data] = await delete_cache_value(cache_connect,get_cache_item_attr_list_key(item_data.data_type,item_data.id));
             },
         ]).then(result => {
             callback([error,item_data]);
@@ -140,14 +139,14 @@ const get_item_list_adapter = (database,data_type,filter,sort_by,page_current,pa
         let page_count = 0;
         async.series([
             async function(call) {
-                const [error,data] = await get_cache_connect_main(database.data_config);
+                const [error,data] = await get_cache(database.data_config);
                 cache_connect = data;
             },
             async function(call) {
                 if(!page_current){
                     page_current=1;
                 }
-                const [error,total_count,data_list] = await get_id_list_base(database,data_type,filter,sort_by,page_current,page_size,option);
+                const [error,total_count,data_list] = await get_id_list(database,data_type,filter,sort_by,page_current,page_size,option);
                 if(data_list.length>0){
                     item_count=total_count;
                     item_id_list=data_list;
@@ -188,7 +187,7 @@ const get_item_adapter = (database,data_type,id,option) => {
         option = option ? option : {};
         async.series([
             async function(call) {
-                const [error,data] = await get_cache_connect_main(database.data_config);
+                const [error,data] = await get_cache(database.data_config);
                 cache_connect = data;
             },
             async function(call) {
@@ -236,11 +235,11 @@ const post_cache_item = (cache_connect,data_type,id,item_data) => {
             async function(call) {
                 for(const item of prop_list) {
                     cache_string_str=cache_string_str+item.title+',';
-                    await post_cache_string_main(cache_connect,get_cache_item_attr_key(data_type,id,item.title),item.value);
+                    await post_cache_value(cache_connect,get_cache_item_attr_key(data_type,id,item.title),item.value);
                 }
             },
             async function(call) {
-                const [error,data] = await post_cache_string_main(cache_connect,get_cache_item_attr_list_key(data_type,id),cache_string_str);
+                const [error,data] = await post_cache_value(cache_connect,get_cache_item_attr_list_key(data_type,id),cache_string_str);
             },
         ]).then(result => {
             callback([error,item_data]);
@@ -286,7 +285,7 @@ const get_item_cache_db = (cache_connect,database,data_type,id,option) => {
         async.series([
             //cache_field_list
             async function(call) {
-                const [error,data] = await get_cache_string_main(cache_connect,get_cache_item_attr_list_key(data_type,id));
+                const [error,data] = await get_cache_value(cache_connect,get_cache_item_attr_list_key(data_type,id));
                 if(data){
                     cache_key_list=data.split(',');
                 }
@@ -294,7 +293,7 @@ const get_item_cache_db = (cache_connect,database,data_type,id,option) => {
             async function(call) {
                 if(cache_key_list.length==0){
                     //db
-                    const [error,data] = await get_item_main(database,data_type,id);
+                    const [error,data] = await get_item(database,data_type,id);
                     if(data){
                         item_data = data;
                         const [error,data2] = await post_cache_item(cache_connect,data_type,id,data);
@@ -306,7 +305,7 @@ const get_item_cache_db = (cache_connect,database,data_type,id,option) => {
                     //cache
                     for(const item of cache_key_list) {
                         if(item){
-                            const [error,val] = await get_cache_string_main(cache_connect,get_cache_item_attr_key(data_type,id,item));
+                            const [error,val] = await get_cache_value(cache_connect,get_cache_item_attr_key(data_type,id,item));
                             if(val){
                                 item_data[item] = val;
                             }else{
@@ -368,12 +367,12 @@ const delete_item_list_adapter = (database,data_type,filter,option) => {
         option = option ? option : {};
         async.series([
             async function(call) {
-                const [error,total_count,data_list] = await get_id_list_main(database,data_type,filter,{},0,9999,option);
+                const [error,total_count,data_list] = await get_id_list(database,data_type,filter,{},0,9999,option);
                 item_count=total_count;
                 item_id_list=data_list;
             },
             async function(call){
-                const [error,data] = await delete_item_list_main(database,data_type,filter);
+                const [error,data] = await delete_item_list(database,data_type,filter);
             },
             async function(call) {
                 var list = [];
@@ -398,11 +397,11 @@ const delete_item_cache=(database,data_type,id,option)=>{
         let item_data = Data_Logic.get(data_type,id);
         async.series([
             async function(call) {
-                const [error,data] = await get_cache_connect_main(database.data_config);
+                const [error,data] = await get_cache(database.data_config);
                 cache_connect = data;
             },
             async function(call) {
-                const [error,data] = await get_cache_string_main(cache_connect,get_cache_item_attr_list_key(data_type,id));
+                const [error,data] = await get_cache_value(cache_connect,get_cache_item_attr_list_key(data_type,id));
                 cache_key_list=data;
             },
             async function(call) {
@@ -411,12 +410,12 @@ const delete_item_cache=(database,data_type,id,option)=>{
                 }
                 for(const item of cache_string_list) {
                     if(item){
-                        const [error,val] = await delete_cache_string_main(cache_connect,get_cache_item_attr_key(data_type,id,item));
+                        const [error,val] = await delete_cache_value(cache_connect,get_cache_item_attr_key(data_type,id,item));
                     }
                 }
             },
             async function(call){
-                const [error,data] = await delete_cache_string_main(cache_connect,get_cache_item_attr_list_key(data_type,id));
+                const [error,data] = await delete_cache_value(cache_connect,get_cache_item_attr_list_key(data_type,id));
                 item_data.delete_cache_resultOK = true;
                 item_data.cache_item_attr_list = get_cache_item_attr_list_key(data_type,id);
             },
@@ -442,11 +441,11 @@ const delete_item_cache_db = (database,data_type,id) => {
         data[Type.FIELD_RESULT_OK_DELETE_DATABASE] = false;
         async.series([
             async function(call) {
-                const [error,data] = await get_cache_connect_main(database.data_config);
+                const [error,data] = await get_cache(database.data_config);
                 cache_connect = data;
             },
             async function(call) {
-                const [error,data] = await get_cache_string_main(cache_connect,get_cache_item_attr_list_key(data_type,id));
+                const [error,data] = await get_cache_value(cache_connect,get_cache_item_attr_list_key(data_type,id));
                 cache_key_list=data;
             },
             async function(call) {
@@ -455,18 +454,18 @@ const delete_item_cache_db = (database,data_type,id) => {
                 }
                 for(const item of cache_string_list) {
                     if(item){
-                        const [error,val] = await delete_cache_string_main(cache_connect,get_cache_item_attr_key(data_type,id,item));
+                        const [error,val] = await delete_cache_value(cache_connect,get_cache_item_attr_key(data_type,id,item));
                     }
                 }
             },
             async function(call){
-                const [error,data] = await delete_cache_string_main(cache_connect,get_cache_item_attr_list_key(data_type,id));
+                const [error,data] = await delete_cache_value(cache_connect,get_cache_item_attr_list_key(data_type,id));
                 if(!error){
                     data[Type.FIELD_RESULT_OK_DELETE_CACHE] = true;
                 }
             },
             async function(call){
-                const [error,data] = await delete_item_main(database,data_type,id);
+                const [error,data] = await delete_item(database,data_type,id);
                 if(!error){
                     data[Type.FIELD_RESULT_OK_DELETE_DATABASE] = true;
                 }
@@ -489,7 +488,7 @@ const get_count_item_list_adapter = (database,data_type,filter,option) => {
         let item_data = {};
         async.series([
             async function(call) {
-                const [error,data] = await get_count_item_list_main(database,data_type,filter);
+                const [error,data] = await get_count_item_list(database,data_type,filter);
                 item_data.count = data;
                 item_data.data_type = data_type;
                 item_data.filter = filter;

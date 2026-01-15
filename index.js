@@ -6,11 +6,10 @@ Description: BiZ9 Framework: Data
 */
 const async = require('async');
 const dayjs = require('dayjs');
-const {get_database_main,check_database_main,delete_database_main,post_item_main,get_item_main,delete_item_main,get_id_list_main,delete_item_list_main,get_count_item_list_main,post_bulk_main} = require('./mongo/index.js');
 const {Scriptz}=require("biz9-scriptz");
 const {Log,Str,Num,Obj,DateTime}=require("/home/think1/www/doqbox/biz9-framework/biz9-utility/code");
 const {Type,Favorite_Logic,Stat_Logic,Review_Logic,Data_Logic,Product_Logic,Demo_Logic,Category_Logic,Cart_Logic,Order_Logic,Field_Logic}=require("/home/think1/www/doqbox/biz9-framework/biz9-logic/code");
-const { get_database_adapter,check_database_adapter,delete_database_adapter,post_item_adapter,post_item_list_adapter,post_bulk_adapter,get_item_adapter,delete_item_adapter,get_item_list_adapter,delete_item_list_adapter,get_count_item_list_adapter,delete_item_cache }  = require('./adapter.js');
+const {get_database_adapter,check_database_adapter,delete_database_adapter,post_item_adapter,post_item_list_adapter,post_bulk_adapter,get_item_adapter,delete_item_adapter,get_item_list_adapter,delete_item_list_adapter,get_count_item_list_adapter,delete_item_cache }  = require('./adapter.js');
 class Database {
 	static get = async (data_config,option) => {
 		/* return
@@ -36,18 +35,18 @@ class Database {
 			if(data_config.APP_ID==null){
 				error=Log.append(error,"Database Error: Missing app_id.");
 			}
-            async function main() {
-                const [biz_error,biz_data] = await get_database_adapter(data_config);
-                    if(biz_error){
-		                error=Log.append(error,biz_error);
-                        Log.w('Data Connect Error',error);
-                    }else{
-	                    biz_data.data_config=data_config;
-				        biz_data.app_id=data_config.APP_ID;
-				        callback([error,biz_data]);
-                    }
-                }
-            main();
+            get_database_adapter(data_config).then(([biz_error,biz_data])=>{
+                if(biz_error){
+                    error=Log.append(error,biz_error);
+                }else{
+                    biz_data.data_config=data_config;
+				    biz_data.app_id=data_config.APP_ID;
+				    callback([error,biz_data]);
+                 }
+                }).catch(err => {
+                    Log.error('Data-Database-Get',err);
+                    error=Log.append(error,err);
+                });
 		});
 	}
 	static delete = async (database) => {
@@ -62,18 +61,18 @@ class Database {
 		 */
 		let error=null;
 		return new Promise((callback) => {
-            async function main() {
-                const [biz_error,biz_data] = await delete_database_adapter(data_config);
+            delete_database_adapter(data_config).then(([biz_error,biz_data])=>{
                 if(biz_error){
-		            error=Log.append(error,biz_error);
-                    Log.w('Data Connect Error',error);
+                    error=Log.append(error,biz_error);
                 }else{
-	                biz_data.data_config=data_config;
+                    biz_data.data_config=data_config;
 				    biz_data.app_id=data_config.APP_ID;
 		            callback([err,null]);
                 }
-            }
-            main();
+                }).catch(err => {
+                    Log.error('Data-Db-Delete',err);
+                    error=Log.append(error,err);
+                });
 		});
 	}
 	static info = async (database,option) => {
@@ -1868,15 +1867,31 @@ class Portal {
 			option = option ? option : {};
 			async.series([
 				//delete_cache_item
-				async function(call){
-					if(option.cache_delete){
-						const [biz_error,biz_data] = await Portal.delete_cache(database,data_type,id,option);
-					}
+				function(call){
+                    Portal.delete_cache(database,data.data_type,data.id,option).then(([biz_error,biz_data])=>{
+                        if(biz_error){
+                            error=Log.append(error,biz_error);
+                        }else{
+                            call();
+                        }
+                    }).catch(err => {
+                        Log.error('Data-Portal-Get',err);
+                        error=Log.append(error,err);
+                    });
 				},
 				//item_by_id
-				async function(call){
- 					const [biz_error,biz_data] = await get_item_adapter(database,data_type,id,option);
-					data = biz_data;
+				function(call){
+                    get_item_adapter(database,data_type,id,option).then(([biz_error,biz_data])=>{
+                        if(biz_error){
+                            error=Log.append(error,biz_error);
+                        }else{
+                   	        data = biz_data;
+                            call();
+                        }
+                    }).catch(err => {
+                        Log.error('Data-Blank',err);
+                        error=Log.append(error,err);
+                    });
 				},
 				//field_values
 				async function(call){
@@ -1887,10 +1902,50 @@ class Portal {
 				//9_get_item_join
 				async function(call){
 					if(option.joins){
-						const [biz_error,biz_data] = await Portal.get_data_joins(database,data,option);
-						if(!biz_error){
-							data = biz_data;
+						for(const join_item of option.joins){
+							join_search_items.push({
+								type : join_item.type ?  join_item.type : Type.TITLE_LIST,
+								search : join_item.search ? join_item.search : Data_Logic.get_search(Type.DATA_BLANK,{},{},1,0),
+								field : join_item.field ? join_item.field : null,
+								title : join_item.title ? join_item.title : Str.get_title_url(Type.get_title(join_item.foreign_data_type,{plural:true})),
+								page_current : join_item.page_current ? join_item.page_current : 1,
+								page_size : join_item.page_size ? join_item.page_size : 0,
+								items : []
+							});
 						}
+						for(const search_item of join_search_items){
+							let search = Data_Logic.get_search(search_item.search.data_type,search_item.search.filter,search_item.search.sort_by,search_item.search.page_current,search_item.search.page_size);
+							let join_option = search_item.field ? search_item.field : {};
+							const [biz_error,items,item_count,page_count] = await get_item_list_adapter(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,join_option);
+							if(biz_error){
+								error=Log.append(error,biz_error);
+							}else{
+								if(search_item.type == Type.TITLE_ITEMS){
+									let title = Str.get_title_url(search_item.title);
+									data[title+'_item_count'] = item_count;
+									data[title+'_page_count'] = page_count;
+									data[title+'_search'] = search;
+									data[title] = items;
+								}else if(search_item.type == Type.TITLE_COUNT){
+									let search = Data_Logic.get_search(search_item.search.data_type,search_item.search.filter,search_item.search.sort_by,search_item.search.page_current,search_item.search.page_size);
+									const [biz_error,biz_data] = await Portal.count(database,search.data_type,search.filter);
+									if(biz_error){
+										error=Log.append(error,biz_error);
+									}else{
+										data[search_item.title] = biz_data;
+									}
+								}else if(search_item.type == Type.TITLE_ONE){
+										let search = Data_Logic.get_search(search_item.search.data_type,search_item.search.filter,search_item.search.sort_by,search_item.search.page_current,search_item.search.page_size);
+										let join_option = search_item.field ? {} : {};
+										const [biz_error,items,item_count,page_count] = await get_item_list_adapter(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,join_option);
+										if(biz_error){
+											error=Log.append(error,biz_error);
+										}else{
+											data[search_item.title] = items.length ? items[0] : Data_Logic.get_not_found(search_item.search.data_type,0);
+										}
+									}
+						}
+					}
 					}
 				},
 				//9_get_item_groups

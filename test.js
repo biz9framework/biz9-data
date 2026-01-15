@@ -60,7 +60,7 @@ describe('connect', function(){ this.timeout(25000);
                 //let group = Data_Logic.get_new(Type.DATA_GROUP,0,{test:true,generate_title:true,parent:parent});
                 //let group = Data_Logic.get_new(Type.DATA_GROUP,'658');
                 //-->
-                let blank = Data_Logic.get_new(Type.DATA_BLANK,0,{test:true,parent:parent});
+                //let blank = Data_Logic.get_new(Type.DATA_BLANK,0,{test:true,parent:parent});
                 //let blank = Data_Logic.get_new(Type.DATA_BLANK,id);
                 //-->
                 //let image = Data_Logic.get_new(Type.DATA_IMAGE,0,{test:true,parent:group});

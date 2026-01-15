@@ -1,6 +1,6 @@
 const redis = require('redis');
 const {Log} = require("biz9-utility");
-const get_cache_connect_base = (data_config) => {
+const get_cache = (data_config) => {
 	return new Promise((callback) => {
 		let error = null;
         let set_cache=false;
@@ -13,7 +13,7 @@ const get_cache_connect_base = (data_config) => {
 		});
 	});
 }
-const delete_cache_connect_base = (cache_connect) => {
+const delete_cache = (cache_connect) => {
 	return new Promise((callback) => {
 		let error = null;
         let set_cache=false;
@@ -25,7 +25,7 @@ const delete_cache_connect_base = (cache_connect) => {
 		});
 	});
 }
-const delete_cache_string_base = (client_redis,key) => {
+const delete_cache_value = (client_redis,key) => {
 	return new Promise((callback) => {
 		let error = null;
 		client_redis.del(key).then((data) => {
@@ -36,7 +36,7 @@ const delete_cache_string_base = (client_redis,key) => {
 		});
 	});
 }
-const get_cache_string_base = (client_redis,key) => {
+const get_cache_value = (client_redis,key) => {
 	return new Promise((callback) => {
 		let error = null;
 		client_redis.get(key).then((data) => {
@@ -47,7 +47,7 @@ const get_cache_string_base = (client_redis,key) => {
 		});
 	});
 }
-const post_cache_string_base = (client_redis,key,value) => {
+const post_cache_value = (client_redis,key,value) => {
 	return new Promise((callback) => {
 		let error = null;
 		let data = null;
@@ -64,9 +64,9 @@ const post_cache_string_base = (client_redis,key,value) => {
 	});
 }
 module.exports = {
-	get_cache_connect_base,
-	get_cache_string_base,
-	post_cache_string_base,
-	delete_cache_connect_base,
-	delete_cache_string_base,
+	get_cache,
+	delete_cache,
+	get_cache_value,
+	delete_cache_value,
+	post_cache_value,
 };

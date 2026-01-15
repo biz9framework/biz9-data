@@ -9,7 +9,7 @@ const {Num,Log,Str,Obj,DateTime} = require("biz9-utility");
 const {Type} = require("biz9-logic");
 const {MongoClient} = require("mongodb");
 let client_db = {};
-const get_database_base = (data_config,option) => {
+const get_database = (data_config,option) => {
     return new Promise((callback) => {
         const mongo_full_url="mongodb://"+data_config.MONGO_USERNAME_PASSWORD+data_config.MONGO_IP+":"+data_config.MONGO_PORT_ID+"?retryWrites=true&w=majority&maxIdleTimeMS=60000&connectTimeoutMS=150000&socketTimeoutMS=90000&maxPoolSize=900000&maxConnecting=10000";
         client_db = new MongoClient(mongo_full_url);
@@ -34,7 +34,7 @@ const get_database_base = (data_config,option) => {
         });
     });
 }
-const delete_database_base = (database,option) => {
+const delete_database = (database,option) => {
     return new Promise((callback) => {
         client_db.close().then((data)=> {
             callback([error,null]);
@@ -75,8 +75,9 @@ const check_database_base = (database) => {
 const check_db_client_connected = (database) => {
     return !!database && !!database.topology && !!database.topology.isConnected()
 }
-const post_item_base = (database,data_type,item,option) => {
+const post_item = (database,data_type,item,option) => {
     return new Promise((callback) => {
+        let error = null;
        	option = option ? option : {};
 	    if (Str.check_is_null(item.id)){//insert
             //item[Type.FIELD_ID] = Str.get_guid();
@@ -177,7 +178,7 @@ const delete_item_list_base = (database,data_type,filter) => {
         }
     });
 }
-const get_id_list_base = (database,data_type,filter,sort_by,page_current,page_size,option) => {
+const get_id_list = (database,data_type,filter,sort_by,page_current,page_size,option) => {
     return new Promise((callback) => {
         let total_count = 0;
         let data_list = [];
@@ -251,14 +252,14 @@ const get_count_item_list_base = async (database,data_type,filter,option) => {
     });
 }
 module.exports = {
-    get_database_base,
+    get_database,
     check_database_base,
-    delete_database_base,
-    post_item_base,
+    delete_database,
+    post_item,
     post_bulk_base,
     get_item_base,
     delete_item_base,
     delete_item_list_base,
     get_count_item_list_base,
-    get_id_list_base
+    get_id_list
 };
