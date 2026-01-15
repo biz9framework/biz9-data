@@ -485,8 +485,9 @@ const delete_item_cache_db = (database,data_type,id) => {
         });
     });
 }
-const get_count_item_list_adapter = (database,data_type,filter,option) => {
+const get_count_item_list_adapter = (database,data_type,filter) => {
     return new Promise((callback) => {
+        let error = null;
         let item_data = {};
         async.series([
             async function(call) {

@@ -241,6 +241,7 @@ const get_id_list = (database,data_type,filter,sort_by,page_current,page_size,op
 }
 const get_count_item_list = async (database,data_type,filter,option) => {
     return new Promise((callback) => {
+        let error = null;
         let data = 0;
         database.collection(data_type).countDocuments(filter).then((data) => {
             if(data){

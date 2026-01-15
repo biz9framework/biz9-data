@@ -81,7 +81,7 @@ describe('connect', function(){ this.timeout(25000);
                 //let option = {distinct:{field:'title',sort_by:Type.TITLE_SORT_BY_DESC},field:{title:1,title_url:1}};
 
                 //let option = {field:{id:1,title:1,title_url:1}};
-                let join_search_1 = Data_Logic.get_search_join(Type.TITLE_LIST,Data_Logic.get_search(Type.DATA_BLANK,{},{},1,0),{title:'join_field'});
+                let join_search_1 = Data_Logic.get_search_join(Type.TITLE_COUNT,Data_Logic.get_search(Type.DATA_BLANK,{},{},1,0),{title:'join_field'});
                 let option = {joins:[join_search_1]};
                 //let foreign_search_1 = Data_Logic.get_search_foreign(Type.TITLE_ITEMS,Type.DATA_BLANK,Type.FIELD_PARENT_ID,Type.FIELD_ID,{title:'cool'});
                 //let option = {foreigns:[foreign_search_1]};

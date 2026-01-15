@@ -1920,59 +1920,62 @@ class Portal {
 								items : []
 							});
 						}
-						for(const search_item of join_search_items){
-							let search = Data_Logic.get_search(search_item.search.data_type,search_item.search.filter,search_item.search.sort_by,search_item.search.page_current,search_item.search.page_size);
-							let join_option = search_item.field ? search_item.field : {};
-							//const [biz_error,items,item_count,page_count] = await get_item_list_adapter(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,join_option);
-                           	data[search_item.title] = [];
-                            get_item_list_adapter(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,join_option).then(([biz_error,items,item_count,page_count])=>{
-                                if(biz_error){
-                                    error=Log.append(error,biz_error);
-                                }else{
-                                    for(const sub_data_item of items){
-									    data[search_item.title].push(sub_data_item);
-									}
-                                    call();
+                        for(const search_item of join_search_items){
+						    if(search_item.type == Type.TITLE_ITEMS){
+                                function get_data() {
+                                    return new Promise((resolve) => {
+                                        let search = Data_Logic.get_search(search_item.search.data_type,search_item.search.filter,search_item.search.sort_by,search_item.search.page_current,search_item.search.page_size);
+							            let join_option = search_item.field ? search_item.field : {};
+                                        get_item_list_adapter(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,join_option).then(([biz_error,items,item_count,page_count])=>{
+                                            if(biz_error){
+                                                error=Log.append(error,biz_error);
+                                            }else{
+									            let title = Str.get_title_url(search_item.title);
+									            data[title+'_item_count'] = item_count;
+									            data[title+'_page_count'] = page_count;
+									            data[title+'_search'] = search;
+									            data[title] = items;
+                                            }
+                                            resolve();
+                                        }).catch(err => {
+                                            Log.error('Data-Blank',err);
+                                            error=Log.append(error,err);
+                                        });
+                                    });
                                 }
-                                }).catch(err => {
-                                    Log.error('Data-Blank',err);
-                                    error=Log.append(error,err);
-                                });
-                            /*
-							if(biz_error){
-								eeroreLog.append(error,biz_error);
-							}else{
-								if(search_item.type == Type.TITLE_ITEMS){
-									let title = Str.get_title_url(search_item.title);
-									data[title+'_item_count'] = item_count;
-									data[title+'_page_count'] = page_count;
-									data[title+'_search'] = search;
-									data[title] = items;
-								}else if(search_item.type == Type.TITLE_COUNT){
-									let search = Data_Logic.get_search(search_item.search.data_type,search_item.search.filter,search_item.search.sort_by,search_item.search.page_current,search_item.search.page_size);
-									const [biz_error,biz_data] = await Portal.count(database,search.data_type,search.filter);
-									if(biz_error){
-										error=Log.append(error,biz_error);
-									}else{
-										data[search_item.title] = biz_data;
-									}
-								}else if(search_item.type == Type.TITLE_ONE){
-										let search = Data_Logic.get_search(search_item.search.data_type,search_item.search.filter,search_item.search.sort_by,search_item.search.page_current,search_item.search.page_size);
-										let join_option = search_item.field ? {} : {};
-										const [biz_error,items,item_count,page_count] = await get_item_list_adapter(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,join_option);
-										if(biz_error){
-											error=Log.append(error,biz_error);
-										}else{
-											data[search_item.title] = items.length ? items[0] : Data_Logic.get_not_found(search_item.search.data_type,0);
-										}
-									}
-						    }
-                            */
-					}
-					}
+                                get_data().then((value) => {
+                                    call();
+                                })
+                            }
+                            if(search_item.type == Type.TITLE_COUNT){
+                                function get_data() {
+                                    return new Promise((resolve) => {
+                                        let search = Data_Logic.get_search(search_item.search.data_type,search_item.search.filter,search_item.search.sort_by,search_item.search.page_current,search_item.search.page_size);
+get_count_item_list_adapter(database,search.data_type,search.filter).then(([biz_error,biz_data])=>{
+                                            if(biz_error){
+                                                error=Log.append(error,biz_error);
+                                            }else{
+									            data[Str.get_title_url(search_item.title)] = biz_data.count;
+                                            }
+                                            resolve();
+                                        }).catch(err => {
+                                            Log.error('Data-Blank',err);
+                                            error=Log.append(error,err);
+                                        });
+                                    });
+                                }
+                                get_data().then((value) => {
+                                    call();
+                                })
+                            }
+                          }
+					}else{
+                       call();
+                    }
 				},
 				//9_get_item_groups
 				async function(call){
+                    console.log('here');
 					if(option.groups){
 						data.groups = [];
 					}
@@ -2083,6 +2086,7 @@ class Portal {
 					}
 				},
 				//post-stat
+                /*
 				async function(call){
 					if(option.stat && data.id){
 						let post_stat = Stat_Logic.get_new(data.data_type,data.id,option.stat.type?option.stat.type:Type.STAT_VIEW,option.stat.user_id?option.stat.user_id:0,data);
@@ -2094,8 +2098,10 @@ class Portal {
 						}
 					}
 				},
+                */
 			]).then(result => {
-				callback([error,data]);
+                Log.w('aaaaaa',data);
+				//callback([error,data]);
 			}).catch(err => {
 				Log.error("ERROR-PORTAL-GET-2",err);
 				callback([error,{}]);
@@ -2143,6 +2149,7 @@ class Portal {
 								if(foreign_search_items.length> 0){
 									for(const search_item of foreign_search_items){
 										for(const data_item of data.items){
+
 											if(search_item.type == Type.TITLE_ITEMS){
 												let query = {};
 												query[search_item.foreign_field] = data_item[search_item.parent_field];
@@ -3111,6 +3118,17 @@ class Blank_Data {
                         Log.error('Data-Blank',err);
                         error=Log.append(error,err);
                     });
+                },
+                //then
+                function(call){
+                    function get_data() {
+                        return new Promise((resolve) => {
+                            resolve();
+                        });
+                    }
+                    get_data().then((value) => {
+                        //done
+                    })
                 },
 			]).then(result => {
 				callback([error,data]);
