@@ -5,29 +5,31 @@ License GNU General Public License v3.0
 Description: BiZ9 Framework: Data - Mongo - Adapter
 */
 const async = require('async');
-const {get_database_main,check_database_main,delete_database_main,post_item_main,post_bulk_main,get_item_main,delete_item_main,get_id_list_main,delete_item_list_main,get_count_item_list_main} = require('./mongo/index.js');
+const {check_database_main,delete_database_main,post_item_main,post_bulk_main,get_item_main,delete_item_main,get_id_list_main,delete_item_list_main,get_count_item_list_main} = require('./mongo/index.js');
+
+const {get_database_base,delete_database_base,get_id_list_base,post_item_base}= require("./mongo/base.js");
+
 const {get_cache_connect_main,delete_cache_connect_main,get_cache_string_main,delete_cache_string_main,post_cache_string_main} = require('./redis/index.js');
 const {Type,Data_Logic}=require("/home/think1/www/doqbox/biz9-framework/biz9-logic/code");
 const {Log,Str,Num,Obj}=require("biz9-utility");
-const get_database_adapter=(data_config,option)=>{
+const  get_database_adapter=(data_config,option)=>{
     return new Promise((callback) => {
-        get_database_main(data_config).then(([error,data])=>{
-            data.data_config=data_config;
-            callback([error,data]);
-        }).catch(error => {
-            Log.error("Data-Adapter-Get-DB-Adapter",error);
-            callback([error,null]);
-        });
+        async function main() {
+            const [error,biz_data] = await get_database_base(data_config);
+            biz_data.data_config=data_config;
+            callback([error,biz_data]);
+        }
+        main();
     });
 }
 const delete_database_adapter=(database,option)=>{
     return new Promise((callback) => {
-        delete_database_main(database).then(([error,data])=>{
-            callback([error,data]);
-        }).catch(error => {
-            Log.error("Data-Adapter-Close-DB-Connect-Adapter",error);
-            callback([error,null]);
-        });
+        async function main() {
+            const [error,biz_data] = await delete_database_base(database);
+            biz_data.data_config=data_config;
+            callback([error,biz_data]);
+        }
+        main();
     });
 }
 const check_database_adapter=(database,option)=>{
@@ -38,11 +40,11 @@ const post_item_list_adapter=(database,item_data_list,option)=>{
         let cache_connect = {};
         let item_data_new_list=[];
         async.series([
-          async function(call) {
-                const [error,data] = await get_cache_connect_main(database.data_config);
-                cache_connect = data;
+            async function(call) {
+                const [biz_error,biz_data] = await get_cache_connect_main(database.data_config);
+                cache_connect = biz_data;
             },
-              function(call){
+            function(call){
                 async.forEachOf(item_data_list,(item,key,go)=>{
                     for(property in item[key]){
                         if(row!='id'&&row!='data_type'){
@@ -59,25 +61,24 @@ const post_item_list_adapter=(database,item_data_list,option)=>{
                     call();
                 });
             },
-            function(call){
+            async function(call){
                 async.forEachOf(item_data_list,(item,key,go)=>{
                     if(item){
-                        post_item_main(database,item.data_type,item).then(([error,data]) => {
-                            if(data){
-                                item.id=data.id;
-                                delete_cache_string_main(cache_connect,get_cache_item_attr_list_key(item.data_type,data.id)).then(([error,data]) => {
+                        async function main() {
+                            const [error,data] = await post_item_base(database,item.data_type,item);
+                                if(data){
+                                    item.id=data.id;
+                                    delete_cache_string_main(cache_connect,get_cache_item_attr_list_key(item.data_type,data.id)).then(([error,data]) => {
                                     go();
-                                }).catch(error => {
-                                    Log.error("Data-Adapter-Update-Item-List-2",error);
-                                    callback([error,null]);
-                                });
-                            }else{
-                                go();
-                            }
-                        }).catch(error => {
-                            Log.error("Data-Adapter-Update-Item-List-3",error);
-                            callback([error,[]]);
-                        });
+                                    }).catch(error => {
+                                        Log.error("Data-Adapter-Update-Item-List-2",error);
+                                        callback([error,null]);
+                                    });
+                                }else{
+                                    go();
+                                }
+                        };
+                            main();
                     }else{
                         go();
                     }
@@ -111,7 +112,7 @@ const post_item_adapter=(database,data_type,item_data,option) => {
                 cache_connect = data;
             },
             async function(call){
-                const [error,data] = await post_item_main(database,data_type,item_data,option);
+                const [error,data] = await post_item_base(database,data_type,item_data,option);
             },
             function(call){
                 if(item_data.id){
@@ -138,7 +139,7 @@ const get_item_list_adapter = (database,data_type,filter,sort_by,page_current,pa
         let item_count = 0;
         let page_count = 0;
         async.series([
-         async function(call) {
+            async function(call) {
                 const [error,data] = await get_cache_connect_main(database.data_config);
                 cache_connect = data;
             },
@@ -146,11 +147,11 @@ const get_item_list_adapter = (database,data_type,filter,sort_by,page_current,pa
                 if(!page_current){
                     page_current=1;
                 }
-                const [error,total_count,data_list] = await get_id_list_main(database,data_type,filter,sort_by,page_current,page_size,option);
-                    if(data_list.length>0){
-                        item_count=total_count;
-                        item_id_list=data_list;
-                    }
+                const [error,total_count,data_list] = await get_id_list_base(database,data_type,filter,sort_by,page_current,page_size,option);
+                if(data_list.length>0){
+                    item_count=total_count;
+                    item_id_list=data_list;
+                }
             },
             async function(call) {
                 if(item_id_list.length>0){
@@ -196,7 +197,7 @@ const get_item_adapter = (database,data_type,id,option) => {
                     if(biz_data.id){
                         data = biz_data;
                     }else{
-						data = Data_Logic.get_not_found(data_type,id);
+                        data = Data_Logic.get_not_found(data_type,id);
                     }
                 }else{
                     let query_field={};
@@ -204,11 +205,11 @@ const get_item_adapter = (database,data_type,id,option) => {
                     let page_current=1;
                     let page_size=0;
                     const [biz_error,biz_data] = await get_item_list_adapter(database,data_type,query_field,{},page_current,page_size,option);
-                        if(biz_data.length>0){
-                            data = biz_data[0];
-                        }else{
-							data = Data_Logic.get_not_found(data_type,id);
-                        }
+                    if(biz_data.length>0){
+                        data = biz_data[0];
+                    }else{
+                        data = Data_Logic.get_not_found(data_type,id);
+                    }
                 }
             },
         ]).then(result => {
@@ -252,20 +253,20 @@ const post_cache_item = (cache_connect,data_type,id,item_data) => {
 const delete_item_adapter = (database,data_type,id,option) => {
     return new Promise((callback) => {
         let data = Data_Logic.get(data_type,id);
-		data[Type.FIELD_RESULT_OK_DELETE] = false;
-		data[Type.FIELD_RESULT_OK_DELETE_CACHE] = false;
-		data[Type.FIELD_RESULT_OK_DELETE_DATABASE] = false;
+        data[Type.FIELD_RESULT_OK_DELETE] = false;
+        data[Type.FIELD_RESULT_OK_DELETE_CACHE] = false;
+        data[Type.FIELD_RESULT_OK_DELETE_DATABASE] = false;
         async.series([
             async function(call) {
                 const [biz_error,biz_data] = await delete_item_cache_db(database,data_type,id);
-				if(biz_error){
-					error = biz_error;
-				}else{
-                	data = biz_data;
-					data[Type.FIELD_RESULT_OK_DELETE] = true;
-					data[Type.FIELD_RESULT_OK_DELETE_CACHE] = true;
-					data[Type.FIELD_RESULT_OK_DELETE_DATABASE] = true;
-				}
+                if(biz_error){
+                    error = biz_error;
+                }else{
+                    data = biz_data;
+                    data[Type.FIELD_RESULT_OK_DELETE] = true;
+                    data[Type.FIELD_RESULT_OK_DELETE_CACHE] = true;
+                    data[Type.FIELD_RESULT_OK_DELETE_DATABASE] = true;
+                }
             },
         ]).then(result => {
             callback([error,data]);
@@ -286,24 +287,24 @@ const get_item_cache_db = (cache_connect,database,data_type,id,option) => {
             //cache_field_list
             async function(call) {
                 const [error,data] = await get_cache_string_main(cache_connect,get_cache_item_attr_list_key(data_type,id));
-                    if(data){
-                        cache_key_list=data.split(',');
-                    }
+                if(data){
+                    cache_key_list=data.split(',');
+                }
             },
             async function(call) {
                 if(cache_key_list.length==0){
                     //db
-	                const [error,data] = await get_item_main(database,data_type,id);
+                    const [error,data] = await get_item_main(database,data_type,id);
                     if(data){
                         item_data = data;
                         const [error,data2] = await post_cache_item(cache_connect,data_type,id,data);
                         item_data[Type.FIELD_SOURCE] = Type.TITLE_SOURCE_DATABASE;
                     }else{
-						item_data  = Data_Logic.get_not_found(data_type,id);
+                        item_data  = Data_Logic.get_not_found(data_type,id);
                     }
                 }else{
                     //cache
-                     for(const item of cache_key_list) {
+                    for(const item of cache_key_list) {
                         if(item){
                             const [error,val] = await get_cache_string_main(cache_connect,get_cache_item_attr_key(data_type,id,item));
                             if(val){
@@ -360,16 +361,16 @@ const get_item_cache_db = (cache_connect,database,data_type,id,option) => {
 }
 const delete_item_list_adapter = (database,data_type,filter,option) => {
     return new Promise((callback) => {
-	    let error = null;
+        let error = null;
         let item_id_list = [];
         let item_count = 0;
         let item_data_new_list = [];
-	    option = option ? option : {};
+        option = option ? option : {};
         async.series([
             async function(call) {
                 const [error,total_count,data_list] = await get_id_list_main(database,data_type,filter,{},0,9999,option);
-                    item_count=total_count;
-                    item_id_list=data_list;
+                item_count=total_count;
+                item_id_list=data_list;
             },
             async function(call){
                 const [error,data] = await delete_item_list_main(database,data_type,filter);
@@ -396,13 +397,13 @@ const delete_item_cache=(database,data_type,id,option)=>{
         let cache_string_list = '';
         let item_data = Data_Logic.get(data_type,id);
         async.series([
-             async function(call) {
+            async function(call) {
                 const [error,data] = await get_cache_connect_main(database.data_config);
                 cache_connect = data;
             },
             async function(call) {
                 const [error,data] = await get_cache_string_main(cache_connect,get_cache_item_attr_list_key(data_type,id));
-                    cache_key_list=data;
+                cache_key_list=data;
             },
             async function(call) {
                 if(cache_key_list!=null){
@@ -446,7 +447,7 @@ const delete_item_cache_db = (database,data_type,id) => {
             },
             async function(call) {
                 const [error,data] = await get_cache_string_main(cache_connect,get_cache_item_attr_list_key(data_type,id));
-                    cache_key_list=data;
+                cache_key_list=data;
             },
             async function(call) {
                 if(cache_key_list!=null){
@@ -489,9 +490,9 @@ const get_count_item_list_adapter = (database,data_type,filter,option) => {
         async.series([
             async function(call) {
                 const [error,data] = await get_count_item_list_main(database,data_type,filter);
-                    item_data.count = data;
-                    item_data.data_type = data_type;
-                    item_data.filter = filter;
+                item_data.count = data;
+                item_data.data_type = data_type;
+                item_data.filter = filter;
             },
         ]).then(result => {
             callback([error,item_data]);
@@ -509,8 +510,8 @@ const post_bulk_adapter=(database,data_type,item_data_list) => {
             async function(call){
                 const [biz_error,biz_data] = await post_bulk_main(database,data_type,item_data_list);
                 if(biz_data.result_OK){
-                        data = biz_data;
-                    }
+                    data = biz_data;
+                }
             },
         ]).then(result => {
             callback([error,data]);

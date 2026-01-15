@@ -1262,6 +1262,7 @@ class Review_Data {
 			option = option ? option : {};
 			async.series([
 				async function(call){
+
 					const [biz_error,biz_data] = await Portal.search(database,Type.DATA_REVIEW,filter,sort_by,page_current,page_size,option);
 					if(biz_error){
 						error=Log.append(error,biz_error);
@@ -1280,7 +1281,6 @@ class Review_Data {
 			});
 		});
 	};
-
 	//9_review_get
 	static get = async (database,parent_data_type,parent_id,sort_by,page_current,page_size) => {
 		return new Promise((callback) => {
@@ -1289,11 +1289,18 @@ class Review_Data {
 			async.series([
 				//reviews
 				async function(call){
-					let query = {parent_id:'1',parent_data_type:parent_data_type};
-					//let query = {};
+					let query = {parent_id:parent_id,parent_data_type:parent_data_type};
 					let search = Data_Logic.get_search(Type.DATA_REVIEW,query,sort_by,page_current,page_size);
-					let option = {get_join:true,field_keys:[{foreign_data_type:parent_data_type,foreign_field:'id',item_field:'product',title:'parent_item'}],get_user:true};
+                    let foreign_user = Data_Logic.get_search_foreign(Type.TITLE_ONE,Type.DATA_USER,Type.FIELD_ID,Type.FIELD_USER_ID,{title:'user'});
+					let option = {foreigns:[foreign_user]};
+                    Log.w('query',query);
+                    Log.w('search',search);
+                    Log.w('foreign_user',foreign_user);
+                    Log.w('option',option);
 					const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option);
+                    Log.w('biz_data',biz_data);
+
+                    /*
 					if(biz_error){
 						error=Log.append(error,biz_error);
 					}else{
@@ -1302,9 +1309,10 @@ class Review_Data {
 						data.search=biz_data.search;
 						data.reviews=biz_data.items;
 					}
+                    */
 				},
 			]).then(result => {
-				callback([error,data]);
+				//callback([error,data]);
 			}).catch(err => {
 				Log.error("Review-Data-List",err);
 				callback([err,[]]);
@@ -2016,13 +2024,13 @@ class Portal {
 			});
 		});
 	};
-	//9_items_foreigns //9_get_items_foreigns //9_joins 9_get_data_foreigns //9_data_joins
+	//9_items_foreigns //9_get_items_foreigns //9_joins 9_get_data_foreigns //9_data_foreigns 9_foreigns
 	static get_data_foreigns = (database,data,option) => {
 		return new Promise((callback) => {
 			let error = null;
 			let foreign_search_items = [];
 			async.series([
-				async function(call){
+				function(call){
 					for(const foreign_item of option.foreigns){
 						for(const data_item of data.items){
 							foreign_search_items.push({
@@ -2047,12 +2055,14 @@ class Portal {
 								query.$or.push(query_field);
 							};
 							let search = Data_Logic.get_search(search_item.foreign_data_type,query,{},1,0);
-							let foreign_option = search_item.field ? search_item.field : {field:{id:1}};
-                           const [biz_error,items,item_count,page_count] = await get_item_list_adapter(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,foreign_option);
-							if(biz_error){
-								error=Log.append(error,biz_error);
-							}else{
-								search_item.items = items;
+							let foreign_option = search_item.field ? search_item.field : {};
+                            get_item_list_adapter(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,foreign_option).then(([biz_error,items,item_count,page_count])=>{
+                                if(biz_error){
+                                    error=Log.append(error,biz_error);
+                                }else{
+                                    console.log('here');
+                                    /*
+                        		search_item.items = items;
 								if(foreign_search_items.length> 0){
 									for(const search_item of foreign_search_items){
 										for(const data_item of data.items){
@@ -2061,14 +2071,18 @@ class Portal {
 												query[search_item.foreign_field] = data_item[search_item.parent_field];
 												let search = Data_Logic.get_search(search_item.foreign_data_type,query,{},1,0);
 												data_item[search_item.title] = [];
-												const [biz_error,items,item_count,page_count] = await get_item_list_adapter(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,foreign_option);
-												if(biz_error){
-													error=Log.append(error,biz_error);
-												}else{
-													for(const sub_data_item of items){
-														data_item[search_item.title].push(sub_data_item);
-													}
-												}
+                                                get_item_list_adapter(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,foreign_option).then(([biz_error,items,item_count,page_count])=>{
+                                                    if(biz_error){
+                                                        error=Log.append(error,biz_error);
+                                                    }else{
+                                                       	for(const sub_data_item of items){
+														    data_item[search_item.title].push(sub_data_item);
+													    }
+                                                    }
+                                                }).catch(err => {
+                                                    Log.error('Data-Foreigns',err);
+                                                    error=Log.append(error,err);
+                                                });
 											}else if(search_item.type == Type.TITLE_COUNT){
 												let query = {};
 												query[search_item.foreign_field] = data_item[search_item.parent_field];
@@ -2090,12 +2104,18 @@ class Portal {
 													data_item[search_item.title] = items.length ? items[0] : Data_Logic.get_not_found(search_item.foreign_data_type,0);
 												}
 											}
-
 										}
 									}
 								}
-                            }
-							}
+                                    */
+                                   }
+                            }).catch(err => {
+                                Log.error('Data-Blank',err);
+                                error=Log.append(error,err);
+                            });
+						}
+                    //Log.w('22_data',data);
+                    //call();
 			},
 			]).then(result => {
 				callback([error,data]);
@@ -2268,17 +2288,22 @@ class Portal {
 			option = option ? option : {};
 			async.series([
 				//9_get_items
-				async function(call){
+				 function(call){
 					let search = Data_Logic.get_search(data_type,filter,sort_by,page_current,page_size);
-		            const [biz_error,items,item_count,page_count] = await get_item_list_adapter(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option);
-					if(biz_error){
-					    error=Log.append(error,biz_error);
-					}else{
+                    get_item_list_adapter(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option).then(([biz_error,items,item_count,page_count])=>{
+                        if(biz_error){
+					        error=Log.append(error,biz_error);
+					    }else{
    						    data.item_count=item_count;
-							data.page_count=page_count;
-							data.search=search;
-							data.items=items;
-	                }
+						    data.page_count=page_count;
+						    data.search=search;
+						    data.items=items;
+	                    }
+                        call();
+                    }).catch(err => {
+                        Log.error('Data-Portal-Search',err);
+                        error=Log.append(error,err);
+                    });
 				},
 				//9_get_items_distinct
 				async function(call){
@@ -2394,7 +2419,7 @@ class Portal {
 			option = option ? option : {};
 			async.series([
 				//clean
-        		async function(call){
+        		function(call){
 					if(option.clean == true){
             		for(const field in data){
                 		if(Obj.check_is_array(data[field])){
@@ -2407,36 +2432,60 @@ class Portal {
                     		delete data[field];
 						}
             		}
-					}
+                        call();
+					}else{
+                        call();
+                    }
         		},
 				//delete cache item
-				async function(call){
+				function(call){
 					if(option.overwrite == true || option.delete_cache){
-						const [biz_error,biz_data] = await delete_item_cache(database,data_type,data.id);
-						if(biz_error){
-							error=Log.append(error,biz_error);
-						}
-					}
-				},
-				async function(call){
-	                const [biz_error,biz_data] = await post_item_adapter(database,data_type,data,option);
-					if(biz_error){
-						error=Log.append(error,biz_error);
+                        delete_item_cache(database,data_type,data.id).then(([biz_error,biz_data])=>{
+                            if(biz_error){
+                                error=Log.append(error,biz_error);
+                            }else{
+                                call();
+                            }
+                        }).catch(err => {
+                            Log.error('Data-Post-Delete-Cache',err);
+                            error=Log.append(error,err);
+                        });
 					}else{
-						data = biz_data;
-					}
+                        call();
+                    }
+				},
+				function(call){
+                    post_item_adapter(database,data_type,data,option).then(([biz_error,biz_data])=>{
+                        if(biz_error){
+                            error=Log.append(error,biz_error);
+                        }else{
+			                data = biz_data;
+                            call();
+                        }
+                    }).catch(err => {
+                        Log.error('Data-Post-Post-Item-Apapter',err);
+                        error=Log.append(error,err);
+                    });
 				},
 				//get_save_data
-				async function(call){
+				function(call){
 					if(option.get_update_data && data.id){
-						const [biz_error,biz_data] = await Portal.get(database,data_type,data.id,option);
-						if(biz_error){
-							error=Log.append(error,biz_error);
-						}else{
-							data = biz_data;
-						}
-					}
+                        get(database,data_type,data.id,option).then(([biz_error,biz_data])=>{
+                            if(biz_error){
+                                error=Log.append(error,biz_error);
+                            }else{
+                           	    data = biz_data;
+                                call();
+                            }
+                            }).catch(err => {
+                                Log.error('Data--Post-Get',err);
+                                error=Log.append(error,err);
+                            });
+					}else{
+                        call();
+                    }
 				},
+                /*
 				async function(call){
 					if(option.post_stat){
 						let post_stat = Stat_Logic.get_new(data_type,data.id,option.stat_type,option.user_id,item);
@@ -2446,6 +2495,7 @@ class Portal {
 						}
 					}
 				},
+                */
 			]).then(result => {
 				callback([error,data]);
 			}).catch(err => {
@@ -2964,11 +3014,27 @@ class Blank_Data {
 		return new Promise((callback) => {
 			let error = null;
 			let data = Data_Logic.get(Type.DATA_BLANK,0);
+            let option = {};
 			async.series([
+                //await
 				async function(call){
 					const [biz_error,biz_data] = await get_item_adapter(database,data.data_type,data.id,option);
 					data = biz_data;
-			},
+			    },
+                //plain
+	            function(call){
+                    get_item_adapter(database,data.data_type,data.id,option).then(([biz_error,biz_data])=>{
+                        if(biz_error){
+                            error=Log.append(error,biz_error);
+                        }else{
+                            //data logic here
+                            call();
+                        }
+                    }).catch(err => {
+                        Log.error('Data-Blank',err);
+                        error=Log.append(error,err);
+                    });
+                },
 			]).then(result => {
 				callback([error,data]);
 			}).catch(err => {

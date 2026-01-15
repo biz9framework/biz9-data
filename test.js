@@ -1,7 +1,7 @@
 const async = require('async');
 const assert = require('node:assert');
 
-const {Data,Database,Portal,User_Data,Page_Data,Product_Data} = require(".");
+const {Data,Database,Portal,User_Data,Page_Data,Product_Data,Review_Data} = require(".");
 
 const {Log,Num,Str} = require("biz9-utility");
 const {Type,Data_Logic} = require("/home/think1/www/doqbox/biz9-framework/biz9-logic/code");
@@ -10,7 +10,7 @@ const {Type,Data_Logic} = require("/home/think1/www/doqbox/biz9-framework/biz9-l
 - connect
 */
 /* --- TEST CONFIG START --- */
-const APP_ID = 'test-stage-jan13';
+const APP_ID = 'test-stage-jan15';
 /* --- TEST CONFIG END --- */
 
 /* --- DATA CONFIG START --- */
@@ -39,15 +39,16 @@ describe('connect', function(){ this.timeout(25000);
             },
             async function(call){
                 //-->
-                let new_data_type = Type.DATA_CATEGORY;
-                let id = '32';
+                let new_data_type = Type.DATA_PRODUCT;
+                let id = '604';
                 //let id = 'home22';
                 let print_test = true;
 
                 //-->
-                //let parent = Data_Logic.get(new_data_type,0,{test:true});
+                let parent = Data_Logic.get(new_data_type,0,{test:true});
+                //Log.w('parent',parent);
                 //let parent = Data_Logic.get(new_data_type,0,{test:true,title:'Apple 4'});
-                let parent = Data_Logic.get_new(new_data_type,id);
+                //let parent = Data_Logic.get_new(new_data_type,id);
                 /*
                 let parent_list = [
                     Data_Logic.get_new(new_data_type,0,{test:true,generate_title:true}),
@@ -59,7 +60,7 @@ describe('connect', function(){ this.timeout(25000);
                 //let group = Data_Logic.get_new(Type.DATA_GROUP,0,{test:true,generate_title:true,parent:parent});
                 //let group = Data_Logic.get_new(Type.DATA_GROUP,'658');
                 //-->
-                //let blank = Data_Logic.get_new(Type.DATA_BLANK,0,{test:true,parent:parent});
+                let blank = Data_Logic.get_new(Type.DATA_BLANK,0,{test:true,parent:parent});
                 //let blank = Data_Logic.get_new(Type.DATA_BLANK,id);
                 //-->
                 //let image = Data_Logic.get_new(Type.DATA_IMAGE,0,{test:true,parent:group});
@@ -73,7 +74,8 @@ describe('connect', function(){ this.timeout(25000);
                 //-->
                 //let favorite = Favorite_Logic.get_new(parent.data_type,parent.id,user.id);
                 //-->
-                //let option = {};
+                let option = {};
+                //let option = {clean:true,overwrite:true};
                 //let option = {id_field:'title_url'};
                 //let option = {groups:{}};
                 //let option = {distinct:{field:'title',sort_by:Type.TITLE_SORT_BY_DESC},field:{title:1,title_url:1}};
@@ -81,8 +83,8 @@ describe('connect', function(){ this.timeout(25000);
                 //let option = {field:{id:1,title:1,title_url:1}};
                 //let join_search_1 = Data_Logic.get_search_join(Type.TITLE_ONE,Data_Logic.get_search(Type.DATA_PRODUCT,{},{},1,0),{title:'join_field'});
                 //let option = {joins:[join_search_1]};
-                let foreign_search_1 = Data_Logic.get_search_foreign(Type.TITLE_ONE,Type.DATA_PRODUCT,Type.FIELD_CATEGORY,Type.FIELD_TITLE,{title:'product_count'});
-                let option = {foreigns:[foreign_search_1],distinct:{field:'title'}};
+                //let foreign_search_1 = Data_Logic.get_search_foreign(Type.TITLE_ITEMS,Type.DATA_BLANK,Type.FIELD_PARENT_ID,Type.FIELD_ID,{title:'cool'});
+                //let option = {foreigns:[foreign_search_1]};
 
                 //let group_search_1 = Data_Logic.get_search_group({image:{show:true}});
                 //Log.w('group_search_1',group_search_1);
@@ -92,9 +94,9 @@ describe('connect', function(){ this.timeout(25000);
 
                 //let option = {stat:{user_id:user.id,type:Type.STAT_VIEW,unique:false}};
                 //---
-                let search = Data_Logic.get_search(Type.DATA_CATEGORY,{},{date_create:-1},1,0);
+                //let search = Data_Logic.get_search(Type.DATA_PRODUCT,{},{date_create:-1},1,0);
                 //---
-                const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option);
+                //const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option);
                 //const [biz_error,biz_data] = await Product_Data.search(database,search.filter,search.sort_by,search.page_current,search.page_size,option);
                 //---
                 //const [biz_error,biz_data] = await Portal.count(database,search.data_type,search.filter);
@@ -106,7 +108,7 @@ describe('connect', function(){ this.timeout(25000);
                 //const [error,biz_data] = await Portal.get(database,group.data_type,group.id);
                 //const [error,biz_data] = await Page_Data.get(database,id,option);
                 //---
-                //const [error,biz_data] = await Portal.post(database,parent.data_type,parent);
+                const [error,biz_data] = await Portal.post(database,parent.data_type,parent,option);
                 //const [error,biz_data] = await Portal.post(database,group.data_type,group);
                 //const [error,biz_data] = await Portal.post(database,blank.data_type,blank);
                 //const [error,biz_data] = await Portal.post(database,user.data_type,user);
@@ -120,6 +122,7 @@ describe('connect', function(){ this.timeout(25000);
                 //const [error,biz_data] = await User_Data.login(database,user,option);
                 //const [error,biz_data] = await User_Data.register(database,user,option);
                 //---
+                //const [biz_error,biz_data] = await Review_Data.get(database,Type.DATA_PRODUCT,'1',{date_create:-1},1,12);
 
                 //---
                 if(print_test){;
