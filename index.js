@@ -2149,8 +2149,9 @@ resolve();
 							};
 							let search = Data_Logic.get_search(search_item.foreign_data_type,query,{},1,0);
 							let foreign_option = search_item.field ? search_item.field : {};
-                            //here
 						}
+
+
                     //Log.w('22_data',data);
                     //call();
 			},
@@ -2170,6 +2171,7 @@ resolve();
 			async.series([
 	            function(call){
                     let join_search_items = [];
+
 					for(const join_item of option.joins){
 					    join_search_items.push({
 							type : join_item.type ?  join_item.type : Type.TITLE_LIST,
@@ -2180,7 +2182,52 @@ resolve();
 							page_size : join_item.page_size ? join_item.page_size : 0,
 							items : []
 						});
-						}
+					}
+                    function get_data(search_item) {
+                        return new Promise((resolve) => {
+						        if(search_item.type == Type.TITLE_ITEMS){
+                                    let search = Data_Logic.get_search(search_item.search.data_type,search_item.search.filter,search_item.search.sort_by,search_item.search.page_current,search_item.search.page_size);
+							        let join_option = search_item.field ? search_item.field : {};
+                                    get_item_list_adapter(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,join_option).then(([biz_error,items,item_count,page_count])=>{
+                                        if(biz_error){
+                                                error=Log.append(error,biz_error);
+                                            }else{
+									            let title = Str.get_title_url(search_item.title);
+									            data[title+'_item_count'] = item_count;
+									            data[title+'_page_count'] = page_count;
+									            data[title+'_search'] = search;
+									            data[title] = items;
+                                            }
+                                            resolve();
+
+                                        }).catch(err => {
+                                            Log.error('Data-Portal-Get-Joins-Items',err);
+                                            error=Log.append(error,err);
+                                        });
+                                }
+                        });
+                    }
+                    const go = async () => {
+                        for(const search_item of join_search_items){
+                            await get_data(search_item);
+                        }
+                    }
+                    go().then(() => {
+                        call();
+                    });
+                    /*
+                    async.forEachOf(join_search_items,(item,key,go)=>{
+                        go();
+                        }, error => {
+                        console.log('error');
+                    });
+                    */
+                    //console.log(data);
+                    //call();
+
+
+
+                        /*
                         for(const search_item of join_search_items){
 						    if(search_item.type == Type.TITLE_ITEMS){
                                 function get_data() {
@@ -2253,6 +2300,7 @@ get_count_item_list_adapter(database,search.data_type,search.filter).then(([biz_
                                 })
                             }
                           }
+                    */
                 },
 			]).then(result => {
 				callback([error,data]);
@@ -2273,7 +2321,6 @@ get_count_item_list_adapter(database,search.data_type,search.filter).then(([biz_
 			option = option ? option : {};
 			async.series([
 				function(call){
-                    console.log('aaaaaaaa');
 					let search = Data_Logic.get_search(data_type,filter,sort_by,page_current,page_size);
                     get_item_list_adapter(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option).then(([biz_error,items,item_count,page_count])=>{
                         if(biz_error){

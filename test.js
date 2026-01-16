@@ -81,10 +81,12 @@ describe('connect', function(){ this.timeout(25000);
                 //let option = {distinct:{field:'title',sort_by:Type.TITLE_SORT_BY_DESC},field:{title:1,title_url:1}};
 
                 //let option = {field:{id:1,title:1,title_url:1}};
-                //let join_search_1 = Data_Logic.get_search_join(Type.TITLE_ITEMS,Data_Logic.get_search(Type.DATA_PRODUCT,{},{},1,0),{title:'join_field'});
-                //let option = {joins:[join_search_1]};
-                let foreign_search_1 = Data_Logic.get_search_foreign(Type.TITLE_ITEMS,Type.DATA_BLANK,Type.FIELD_PARENT_ID,Type.FIELD_ID,{title:'cool'});
-                let option = {foreigns:[foreign_search_1]};
+                let join_search_1 = Data_Logic.get_search_join(Type.TITLE_ITEMS,Data_Logic.get_search(Type.DATA_PRODUCT,{},{},1,0),{title:'apple'});
+                let join_search_2 = Data_Logic.get_search_join(Type.TITLE_ITEMS,Data_Logic.get_search(Type.DATA_BLANK,{},{},1,0),{title:'cool'});
+                let option = {joins:[join_search_1,join_search_2]};
+
+                //let foreign_search_1 = Data_Logic.get_search_foreign(Type.TITLE_ITEMS,Type.DATA_BLANK,Type.FIELD_PARENT_ID,Type.FIELD_ID,{title:'cool'});
+                //let option = {foreigns:[foreign_search_1]};
 
                 //let group_search_1 = Data_Logic.get_search_group({image:{show:true}});
                 //let group_search_1 = Data_Logic.get_search_group({title:{group_43815:0,group_83574:1}});
@@ -93,16 +95,16 @@ describe('connect', function(){ this.timeout(25000);
 
                 //let option = {stat:{user_id:user.id,type:Type.STAT_VIEW,unique:false}};
                 //---
-                let search = Data_Logic.get_search(Type.DATA_PRODUCT,{},{date_create:-1},1,0);
+                //let search = Data_Logic.get_search(Type.DATA_PRODUCT,{},{date_create:-1},1,0);
                 //---
-                const [biz_error,biz_data] = await Portal.search_simple(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option);
+                //const [biz_error,biz_data] = await Portal.search_simple(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option);
                 //const [biz_error,biz_data] = await Product_Data.search(database,search.filter,search.sort_by,search.page_current,search.page_size,option);
                 //---
                 //const [biz_error,biz_data] = await Portal.count(database,search.data_type,search.filter);
                 //---
                 //const [error,biz_data] = await Portal.copy(database,parent.data_type,parent.id,option);
                 //---
-                //const [error,biz_data] = await Portal.get(database,parent.data_type,parent.id,option);
+                const [error,biz_data] = await Portal.get(database,parent.data_type,parent.id,option);
                 //const [error,biz_data] = await Portal.get(database,group.data_type,group.id,option);
                 //const [error,biz_data] = await Portal.get(database,group.data_type,group.id);
                 //const [error,biz_data] = await Page_Data.get(database,id,option);
