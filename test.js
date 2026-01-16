@@ -60,7 +60,7 @@ describe('connect', function(){ this.timeout(25000);
                 //let group = Data_Logic.get(Type.DATA_GROUP,0,{test:true,generate_title:true,parent:parent});
                 //let group = Data_Logic.get(Type.DATA_GROUP,'658');
                 //-->
-                let blank = Data_Logic.get(Type.DATA_BLANK,0,{test:true,parent:parent});
+                //let blank = Data_Logic.get(Type.DATA_BLANK,0,{test:true,parent:parent});
                 //let blank = Data_Logic.get(Type.DATA_BLANK,id);
                 //-->
                 //let image = Data_Logic.get(Type.DATA_IMAGE,0,{test:true,parent:group});
@@ -81,16 +81,15 @@ describe('connect', function(){ this.timeout(25000);
                 //let option = {distinct:{field:'title',sort_by:Type.TITLE_SORT_BY_DESC},field:{title:1,title_url:1}};
 
                 //let option = {field:{id:1,title:1,title_url:1}};
-                let join_search_1 = Data_Logic.get_search_join(Type.TITLE_COUNT,Data_Logic.get_search(Type.DATA_BLANK,{},{},1,0),{title:'join_field'});
-                let option = {joins:[join_search_1]};
+                //let join_search_1 = Data_Logic.get_search_join(Type.TITLE_ONE,Data_Logic.get_search(Type.DATA_PRODUCT,{},{},1,0),{title:'join_field'});
+                //let option = {joins:[join_search_1]};
                 //let foreign_search_1 = Data_Logic.get_search_foreign(Type.TITLE_ITEMS,Type.DATA_BLANK,Type.FIELD_PARENT_ID,Type.FIELD_ID,{title:'cool'});
                 //let option = {foreigns:[foreign_search_1]};
 
-                //let group_search_1 = Data_Logic.get_search_group({image:{show:true}});
-                //Log.w('group_search_1',group_search_1);
+                let group_search_1 = Data_Logic.get_search_group({image:{show:true}});
                 //let group_search_1 = Data_Logic.get_search_group({title:{group_43815:0,group_83574:1}});
                 //let group_search_2 = Data_Logic.get_search_group({title:{group_924:0},field:{title:1,title_url:1}});
-                //let option = {groups:[group_search_1]};
+                let option = {groups:[group_search_1]};
 
                 //let option = {stat:{user_id:user.id,type:Type.STAT_VIEW,unique:false}};
                 //---
@@ -126,9 +125,7 @@ describe('connect', function(){ this.timeout(25000);
 
                 //---
                 if(print_test){;
-                    Log.w('99_option',option);
                     Log.w('99_biz_data',biz_data);
-                    Log.w('99_biz_data.count',biz_data.items.length);
                     //Log.w('99_biz_data_parents',biz_data.items[0]);
                     //Log.w('99_biz_data_parents',biz_data.items[0].groups[0]);
 
