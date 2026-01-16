@@ -1878,7 +1878,7 @@ class Portal {
                             call();
                         }
                     }).catch(err => {
-                        Log.error('Data-Portal-Get',err);
+                        Log.error('Data-Portal-Delete-Cache',err);
                         error=Log.append(error,err);
                     });
                      }else{
@@ -1895,17 +1895,22 @@ class Portal {
                             call();
                         }
                     }).catch(err => {
-                        Log.error('Data-Blank',err);
+                        Log.error('Data-Portal-Get',err);
                         error=Log.append(error,err);
                     });
 				},
 				//field_values
-				async function(call){
+				function(call){
 					if(option.field_value && data.id){
 						data = Field_Logic.get_item_field_values(data);
-					}
+                        call();
+					}else{
+                        call();
+                    }
 				},
 				//9_get_item_join
+				function(call){
+                }
 				function(call){
 					if(option.joins){
 	                    let join_search_items = [];
@@ -1938,7 +1943,7 @@ class Portal {
                                             }
                                             resolve();
                                         }).catch(err => {
-                                            Log.error('Data-Blank',err);
+                                            Log.error('Data-Portal-Get-Joins-Items',err);
                                             error=Log.append(error,err);
                                         });
                                     });
@@ -1956,10 +1961,10 @@ get_count_item_list_adapter(database,search.data_type,search.filter).then(([biz_
                                                 error=Log.append(error,biz_error);
                                             }else{
 									            data[Str.get_title_url(search_item.title)] = biz_data.count;
+                                                resolve();
                                             }
-                                            resolve();
                                         }).catch(err => {
-                                            Log.error('Data-Blank',err);
+                                            Log.error('Data-Portal-Get-Joins-Count',err);
                                             error=Log.append(error,err);
                                         });
                                     });
@@ -1978,10 +1983,10 @@ get_count_item_list_adapter(database,search.data_type,search.filter).then(([biz_
                                                 error=Log.append(error,biz_error);
                                             }else{
 									            data[Str.get_title_url(search_item.title)] = items.length>0 ? items[0] : Data_Logic.get_not_found(search_item.search.data_type,0);
+                                                resolve();
                                             }
-                                            resolve();
                                         }).catch(err => {
-                                            Log.error('Data-Blank',err);
+                                            Log.error('Data-Portal-Get-Joins-One',err);
                                             error=Log.append(error,err);
                                         });
                                     });
@@ -2029,52 +2034,45 @@ get_count_item_list_adapter(database,search.data_type,search.filter).then(([biz_
 									group_query.$and.push(query_field);
                         		}
                     		}
-							//add_parent_id
-							let query_field = {};
-							query_field[Type.FIELD_PARENT_ID] = data.id;
-							group_query.$and.push(query_field);
-							if(group_query.$or.length <= 0){
-								delete group_query.$or;
-							}
-							let item_group_join_option = {field:search_item.field};
-							if(search_item.image.show){
-								item_group_join_option['foreigns'] = [Data_Logic.get_search_foreign(Type.TITLE_LIST,Type.DATA_IMAGE,Type.FIELD_PARENT_ID,Type.FIELD_ID)];
-							}
-							let search = Data_Logic.get_search(Type.DATA_GROUP,group_query,{},search_item.page_current,search_item.page_size);
-                            get_item_list_adapter(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,item_group_join_option).then(([biz_error,items,item_count,page_count])=>{
-                                if(biz_error){
-                                    error=Log.append(error,biz_error);
-                                }else{
-		                            for(const group of items){
-										data[Str.get_title_url(group.title_url)] = group;
-									}
-									data.groups = items.length>0?items:[];
-                                    call();
-                                }
-                            }).catch(err => {
-                                Log.error('Data-Blank',err);
-                                error=Log.append(error,err);
+                            function get_data() {
+                                return new Promise((resolve) => {
+							        let query_field = {};
+							        query_field[Type.FIELD_PARENT_ID] = data.id;
+							        group_query.$and.push(query_field);
+							        if(group_query.$or.length <= 0){
+								        delete group_query.$or;
+							        }
+							        let item_group_join_option = {field:search_item.field};
+							        if(search_item.image.show){
+								        item_group_join_option['foreigns'] = [Data_Logic.get_search_foreign(Type.TITLE_LIST,Type.DATA_IMAGE,Type.FIELD_PARENT_ID,Type.FIELD_ID)];
+							        }
+							        let search = Data_Logic.get_search(Type.DATA_GROUP,group_query,{},search_item.page_current,search_item.page_size);
+                                    get_item_list_adapter(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,item_group_join_option).then(([biz_error,items,item_count,page_count])=>{
+                                    if(biz_error){
+                                        error=Log.append(error,biz_error);
+                                    }else{
+		                                for(const group of items){
+										    data[Str.get_title_url(group.title_url)] = group;
+									    }
+									    data.groups = items.length>0?items:[];
+                                        resolve();
+                                    }
+                                    }).catch(err => {
+                                        Log.error('Data-Portal-Get-Group',err);
+                                        error=Log.append(error,err);
+                                    });
                             });
-
-                            /*
-							const [biz_error,biz_data] = await Portal.search(database,item_group_join_search.data_type,item_group_join_search.filter,item_group_join_search.sort_by,item_group_join_search.page_current,item_group_join_search.page_size,item_group_join_option);
-									if(biz_error){
-										error=Log.append(error,biz_error);
-									}else{
-										for(const group of biz_data.items){
-											data[Str.get_title_url(group.title_url)] = group;
-										}
-										data.groups = biz_data.items.length>0?biz_data.items:[];
-									}
-							}
-                            */
+                            }
+                            get_data().then((value) => {
+                                call();
+                            })
 					}
                     }else{
                         call();
                     }
 				},
 				//9_get_item_foreigns
-				async function(call){
+				function(call){
 					if(data.id && option.foreigns){
 						let search_items = [];
 						for(const item of option.foreigns){
@@ -2092,37 +2090,73 @@ get_count_item_list_adapter(database,search.data_type,search.filter).then(([biz_
 						for(const search_item of search_items){
 							let foreign_option = {field:search_item.field};
 							if(search_item.type == Type.TITLE_ITEMS){
-								let query = {};
-								query[search_item.foreign_field] = data[search_item.parent_field];
-								let search = Data_Logic.get_search(search_item.foreign_data_type,query,{},1,0);
-								const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,foreign_option);
-								if(biz_error){
-									error=Log.append(error,biz_error);
-								}else{
-									data[search_item.title] = biz_data.items.length>0?biz_data.items:[];
-								}
+                                function get_data() {
+                                    return new Promise((resolve) => {
+								        let query = {};
+								        query[search_item.foreign_field] = data[search_item.parent_field];
+								        let search = Data_Logic.get_search(search_item.foreign_data_type,query,{},1,0);
+								        get_item_list_adapter(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option).then(([biz_error,items,item_count,page_count])=>{
+                                            if(biz_error){
+									            error=Log.append(error,biz_error);
+								            }else{
+									            data[search_item.title] = items.length>0?items:[];
+                                                resolve();
+								            }
+                                        }).catch(err => {
+                                            Log.error('Data-Portal-Get-Foreigns-Items',err);
+                                            error=Log.append(error,err);
+                                        });
+                                    });
+                                }
+                                get_data().then((value) => {
+                                    call();
+                                })
 							}
-							else if(search_item.type == Type.TITLE_COUNT){
-								let query = {};
-								query[search_item.foreign_field] = data[search_item.parent_field];
-								let search = Data_Logic.get_search(search_item.foreign_data_type,query,{},1,0);
-								const [biz_error,biz_data] = await Portal.count(database,search.data_type,search.filter);
-								if(biz_error){
-									error=Log.append(error,biz_error);
-								}else{
-									data[search_item.title] = biz_data?biz_data:0;
-								}
+                            else if(search_item.type == Type.TITLE_COUNT){
+                                function get_data() {
+                                    return new Promise((resolve) => {
+								        let query = {};
+								        query[search_item.foreign_field] = data[search_item.parent_field];
+								        let search = Data_Logic.get_search(search_item.foreign_data_type,query,{},1,0);
+								        get_count_item_list_adapter(database,search.data_type,search.filter).then(([biz_error,biz_data])=>{
+                                            if(biz_error){
+									            error=Log.append(error,biz_error);
+								            }else{
+									               data[Str.get_title_url(search_item.title)] = biz_data.count;
+                                                   resolve();
+								            }
+                                        }).catch(err => {
+                                            Log.error('Data-Portal-Get-Foreigns-Count',err);
+                                            error=Log.append(error,err);
+                                        });
+                                    });
+                                }
+                                get_data().then((value) => {
+                                    call();
+                                })
 							}
-							else if(search_item.type == Type.TITLE_ONE){
-								let query = {};
-								query[search_item.foreign_field] = data[search_item.parent_field];
-								let search = Data_Logic.get_search(search_item.foreign_data_type,query,{},1,0);
-								const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,foreign_option);
-								if(biz_error){
-									error=Log.append(error,biz_error);
-								}else{
-									data[search_item.title] = biz_data.items.length>0 ? biz_data.items[0] : Data_Logic.get_not_found(search_item.foreign_data_type,0);
-								}
+                            else if(search_item.type == Type.TITLE_ONE){
+                                function get_data() {
+                                    return new Promise((resolve) => {
+								        let query = {};
+								        query[search_item.foreign_field] = data[search_item.parent_field];
+								        let search = Data_Logic.get_search(search_item.foreign_data_type,query,{},1,0);
+								        get_item_list_adapter(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option).then(([biz_error,items,item_count,page_count])=>{
+                                            if(biz_error){
+									            error=Log.append(error,biz_error);
+								            }else{
+									            data[Str.get_title_url(search_item.title)] = items.length>0 ? items[0] : Data_Logic.get_not_found(search_item.search.data_type,0);
+resolve();
+								            }
+                                        }).catch(err => {
+                                            Log.error('Data-Portal-Get-Foreigns-One',err);
+                                            error=Log.append(error,err);
+                                        });
+                                    });
+                                }
+                                get_data().then((value) => {
+                                    call();
+                                })
 							}
 						}
 					}
@@ -2142,10 +2176,9 @@ get_count_item_list_adapter(database,search.data_type,search.filter).then(([biz_
 				},
                 */
 			]).then(result => {
-                Log.w('aaaaaa',data);
-				//callback([error,data]);
+				callback([error,data]);
 			}).catch(err => {
-				Log.error("ERROR-PORTAL-GET-2",err);
+				Log.error("ERROR-PORTAL-GET",err);
 				callback([error,{}]);
 			});
 		});
@@ -2253,7 +2286,7 @@ get_count_item_list_adapter(database,search.data_type,search.filter).then(([biz_
     */
 
 	//9_items_join //9_get_items_join //9_joins 9_get_data_joins //9_data_joins
-	static blank = (database) => {
+	static get_data_joins = (database) => {
 		return new Promise((callback) => {
 			let error = null;
 			let data = Data_Logic.get(Type.DATA_BLANK,0);
@@ -2280,7 +2313,7 @@ get_count_item_list_adapter(database,search.data_type,search.filter).then(([biz_
 			let data = {data_type:data_type,item_count:0,page_count:1,filter:{},items:[]};
 			option = option ? option : {};
 			async.series([
-				async function(call){
+				function(call){
 					let search = Data_Logic.get_search(data_type,filter,sort_by,page_current,page_size);
                     const [biz_error,items,item_count,page_count] = await get_item_list_adapter(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option);
 					if(biz_error){
@@ -2294,7 +2327,7 @@ get_count_item_list_adapter(database,search.data_type,search.filter).then(([biz_
 					}
 				},
 				//9_get_items_foreign
-				async function(call){
+				function(call){
 					if(option.foreigns && data.items.length>0){
 						const [biz_error,biz_data] = await Portal.get_data_foreigns(database,data,option);
 						if(!biz_error){
@@ -2303,7 +2336,7 @@ get_count_item_list_adapter(database,search.data_type,search.filter).then(([biz_
 					}
 				},
 				//9_get_items_join
-				async function(call){
+				function(call){
 					if(option.joins){
 						const [biz_error,biz_data] = await Portal.get_data_joins(database,data,option);
 						if(!biz_error){
@@ -2371,7 +2404,6 @@ get_count_item_list_adapter(database,search.data_type,search.filter).then(([biz_
 			let error=null;
 			option = option ? option : {};
 			async.series([
-				//9_get_items
 				 function(call){
 					let search = Data_Logic.get_search(data_type,filter,sort_by,page_current,page_size);
                     get_item_list_adapter(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option).then(([biz_error,items,item_count,page_count])=>{
@@ -2390,7 +2422,7 @@ get_count_item_list_adapter(database,search.data_type,search.filter).then(([biz_
                     });
 				},
 				//9_get_items_distinct
-				async function(call){
+				function(call){
 					if(option.distinct && data.items.length>0){
 						data.items = data.items.filter((obj, index, self) =>
 							index === self.findIndex((t) => t[option.distinct.field] === obj[option.distinct.field])
@@ -2399,26 +2431,98 @@ get_count_item_list_adapter(database,search.data_type,search.filter).then(([biz_
 						data.items = Obj.sort_list_by_field(data.items,option.distinct.field,distinct_sort_by);
 					}
 				},
-				//9_get_items_foreign
-				async function(call){
-					if(option.foreigns && data.items.length>0){
-						const [biz_error,biz_data] = await Portal.get_data_foreigns(database,data,option);
-						if(!biz_error){
-							data = biz_data;
-						}
-					}
-				},
-				//9_get_items_join
-				async function(call){
+	            //9_get_items_join
+				function(call){
 					if(option.joins){
-						const [biz_error,biz_data] = await Portal.get_data_joins(database,data,option);
-						if(!biz_error){
-							data = biz_data;
+	                    let join_search_items = [];
+						for(const join_item of option.joins){
+							join_search_items.push({
+								type : join_item.type ?  join_item.type : Type.TITLE_LIST,
+								search : join_item.search ? join_item.search : Data_Logic.get_search(Type.DATA_BLANK,{},{},1,0),
+								field : join_item.field ? join_item.field : null,
+								title : join_item.title ? join_item.title : Str.get_title_url(Type.get_title(join_item.foreign_data_type,{plural:true})),
+								page_current : join_item.page_current ? join_item.page_current : 1,
+								page_size : join_item.page_size ? join_item.page_size : 0,
+								items : []
+							});
 						}
-					}
-				},
-				//9_get_items_group
-				async function(call){
+                        for(const search_item of join_search_items){
+						    if(search_item.type == Type.TITLE_ITEMS){
+                                function get_data() {
+                                    return new Promise((resolve) => {
+                                        let search = Data_Logic.get_search(search_item.search.data_type,search_item.search.filter,search_item.search.sort_by,search_item.search.page_current,search_item.search.page_size);
+							            let join_option = search_item.field ? search_item.field : {};
+                                        get_item_list_adapter(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,join_option).then(([biz_error,items,item_count,page_count])=>{
+                                            if(biz_error){
+                                                error=Log.append(error,biz_error);
+                                            }else{
+									            let title = Str.get_title_url(search_item.title);
+									            data[title+'_item_count'] = item_count;
+									            data[title+'_page_count'] = page_count;
+									            data[title+'_search'] = search;
+									            data[title] = items;
+                                            }
+                                            resolve();
+                                        }).catch(err => {
+                                            Log.error('Data-Portal-Search-Joins-Items',err);
+                                            error=Log.append(error,err);
+                                        });
+                                    });
+                                }
+                                get_data().then((value) => {
+                                    call();
+                                })
+                            }
+                            if(search_item.type == Type.TITLE_COUNT){
+                                function get_data() {
+                                    return new Promise((resolve) => {
+                                        let search = Data_Logic.get_search(search_item.search.data_type,search_item.search.filter,search_item.search.sort_by,search_item.search.page_current,search_item.search.page_size);
+get_count_item_list_adapter(database,search.data_type,search.filter).then(([biz_error,biz_data])=>{
+                                            if(biz_error){
+                                                error=Log.append(error,biz_error);
+                                            }else{
+									            data[Str.get_title_url(search_item.title)] = biz_data.count;
+                                                resolve();
+                                            }
+                                        }).catch(err => {
+                                            Log.error('Data-Portal-Search-Joins-Count',err);
+                                            error=Log.append(error,err);
+                                        });
+                                    });
+                                }
+                                get_data().then((value) => {
+                                    call();
+                                })
+                            }
+                            if(search_item.type == Type.TITLE_ONE){
+                                function get_data() {
+                                    return new Promise((resolve) => {
+                                        let search = Data_Logic.get_search(search_item.search.data_type,search_item.search.filter,search_item.search.sort_by,search_item.search.page_current,search_item.search.page_size);
+							            let join_option = search_item.field ? search_item.field : {};
+                                        get_item_list_adapter(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,join_option).then(([biz_error,items,item_count,page_count])=>{
+                                            if(biz_error){
+                                                error=Log.append(error,biz_error);
+                                            }else{
+									            data[Str.get_title_url(search_item.title)] = items.length>0 ? items[0] : Data_Logic.get_not_found(search_item.search.data_type,0);
+                                                resolve();
+                                            }
+                                        }).catch(err => {
+                                            Log.error('Data-Portal-Search-Joins-One',err);
+                                            error=Log.append(error,err);
+                                        });
+                                    });
+                                }
+                                get_data().then((value) => {
+                                    call();
+                                })
+                            }
+                          }
+					}else{
+                       call();
+                    }
+		        },
+		        //9_get_items_group
+				function(call){
 					if(option.groups && data.items.length>0){
 						let search_items = [];
 					for(const item of option.groups){
@@ -2447,7 +2551,6 @@ get_count_item_list_adapter(database,search.data_type,search.filter).then(([biz_
 									group_query.$and.push(query_field);
                         		}
                     		}
-							//add_parents_id
 							for(const item of data.items){
 								let query_field = {};
 								query_field[Type.FIELD_PARENT_ID] = item.id;
@@ -2481,6 +2584,16 @@ get_count_item_list_adapter(database,search.data_type,search.filter).then(([biz_
 							}
 					}
 				},
+				//9_get_items_foreign
+				async function(call){
+					if(option.foreigns && data.items.length>0){
+						const [biz_error,biz_data] = await Portal.get_data_foreigns(database,data,option);
+						if(!biz_error){
+							data = biz_data;
+						}
+					}
+				},
+
 			]).then(result => {
 				callback([error,data]);
 			}).catch(err => {
