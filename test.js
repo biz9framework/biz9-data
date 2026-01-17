@@ -81,16 +81,17 @@ describe('connect', function(){ this.timeout(25000);
                 //let option = {distinct:{field:'title',sort_by:Type.TITLE_SORT_BY_DESC},field:{title:1,title_url:1}};
 
                 //let option = {field:{id:1,title:1,title_url:1}};
-                let join_search_1 = Data_Logic.get_search_join(Type.TITLE_ITEMS,Data_Logic.get_search(Type.DATA_PRODUCT,{},{},1,0),{title:'apple'});
-                let join_search_2 = Data_Logic.get_search_join(Type.TITLE_ITEMS,Data_Logic.get_search(Type.DATA_BLANK,{},{},1,0),{title:'cool'});
-                let option = {joins:[join_search_1,join_search_2]};
+                //let join_search_1 = Data_Logic.get_search_join(Type.TITLE_ITEMS,Data_Logic.get_search(Type.DATA_PRODUCT,{},{},1,0),{title:'apple'});
+                //let join_search_2 = Data_Logic.get_search_join(Type.TITLE_ONE,Data_Logic.get_search(Type.DATA_BLANK,{},{},1,0),{title:'cool'});
+                //let option = {joins:[join_search_1,join_search_2]};
 
-                //let foreign_search_1 = Data_Logic.get_search_foreign(Type.TITLE_ITEMS,Type.DATA_BLANK,Type.FIELD_PARENT_ID,Type.FIELD_ID,{title:'cool'});
-                //let option = {foreigns:[foreign_search_1]};
+                let foreign_search_1 = Data_Logic.get_search_foreign(Type.TITLE_ONE,Type.DATA_BLANK,Type.FIELD_PARENT_ID,Type.FIELD_ID,{title:'cool'});
+                let option = {foreigns:[foreign_search_1]};
 
                 //let group_search_1 = Data_Logic.get_search_group({image:{show:true}});
-                //let group_search_1 = Data_Logic.get_search_group({title:{group_43815:0,group_83574:1}});
-                //let group_search_2 = Data_Logic.get_search_group({title:{group_924:0},field:{title:1,title_url:1}});
+                //let group_search_2 = Data_Logic.get_search_group({title:{group_43815:0,group_302:1}});
+                //let group_search_3 = Data_Logic.get_search_group({title:{group_924:0},field:{title:1,title_url:1}});
+                //let option = {groups:[group_search_1]};
                 //let option = {groups:[group_search_1]};
 
                 //let option = {stat:{user_id:user.id,type:Type.STAT_VIEW,unique:false}};
