@@ -1,0 +1,174 @@
+-------------------------------- BiZ9 START - 1-9-2026 -----------------------------------------------------------
+-- Blank
+----------------------------------------------
+--- blank
+---- blank_
+----------------------------------------------
+-------------------------------- BiZ9 START - 1-18-2026 -----------------------------------------------------------
+-- Data ForeignZ
+----------------------------------------------
+---
+	if(search_item.type == Type.TITLE_ITEMS){
+												let query = {};
+												query[search_item.foreign_field] = data_item[search_item.parent_field];
+												let search = Data_Logic.get_search(search_item.foreign_data_type,query,{},1,0);
+												data_item[search_item.title] = [];
+                                                console.log('here');
+                                                console.log(search);
+                                                console.log('aaaaaaaa');
+                                                console.log(foreign_option);
+                                                console.log('bbbbbb');
+
+											    get_item_list_adapter(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,foreign_option).then(([biz_error,items,item_count,page_count])=>{
+                                                    console.log(biz_error);
+                                                    console.log('bbbbbbb');
+                                                    console.log(items);
+
+                                                    if(biz_error){
+													    error=Log.append(error,biz_error);
+												    }else{
+													    for(const sub_data_item of items){
+														    data_item[search_item.title].push(sub_data_item);
+													    }
+                                                        resolve();
+												    }
+                                                }).catch(err => {
+                                                    console.log('errrr');
+                                                    Log.error('Data-Portal-Get-Foreign-Items',err);
+                                                    error=Log.append(error,err);
+                                                });
+
+											}
+
+
+---
+	let query = {};
+												query[search_item.foreign_field] = data_item[search_item.parent_field];
+												let search = Data_Logic.get_search(search_item.foreign_data_type,query,{},1,1);
+											    get_item_list_adapter(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,foreign_option).then(([biz_error,items,item_count,page_count])=>{
+                                                    if(biz_error){
+													    error=Log.append(error,biz_error);
+												    }else{
+													    data_item[search_item.title] = items.length ? items[0] : Data_Logic.get_not_found(search_item.foreign_data_type,0);
+                                                        resolve();
+												    }
+                                                }).catch(err => {
+                                                    Log.error('Data-Portal-Get-Foreigns-One',err);
+                                                    error=Log.append(error,err);
+                                                });
+
+--- blank
+---- blank_
+			let query = {};
+												query[search_item.foreign_field] = data_item[search_item.parent_field];
+												let search = Data_Logic.get_search(search_item.foreign_data_type,query,{},1,0);
+
+											    get_count_item_list_adapter(database,search.data_type,search.filter).then(([biz_error,biz_data])=>{
+                                                if(biz_error){
+													error=Log.append(error,biz_error);
+												}else{
+													data_item[search_item.title] = biz_data.count;
+                                                    resolve();
+												}
+                                                }).catch(err => {
+                                                    Log.error('Data-Portal-Get-Foreigns-Count',err);
+                                                    error=Log.append(error,err);
+                                                });
+
+----------------------------------------------
+
+
+-------------------------------- BiZ9 START - 1-16-2025 -----------------------------------------------------------
+-- To DO
+----------------------------------------------
+--- Item
+---- Get Joins -- done
+---- Get Groups -- done
+---- Get Foreigns -- done
+--- Items
+---- Get Joins  -- done
+---- Get Groups -- done
+---- Get Foreigns --now
+
+
+----------------------------------------------
+
+
+
+-------------------------------- BiZ9 START - 1-16-2026 -----------------------------------------------------------
+-- Blank
+----------------------------------------------
+--- get_foreigns
+if(search_item.type == Type.TITLE_ITEMS){
+    let query = {};
+    query[search_item.foreign_field] = data_item[search_item.parent_field];
+    let search = Data_Logic.get_search(search_item.foreign_data_type,query,{},1,0);
+    data_item[search_item.title] = [];
+    get_item_list_adapter(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,foreign_option).then(([biz_error,items,item_count,page_count])=>{
+            if(biz_error){
+            error=Log.append(error,biz_error);
+            }else{
+            for(const sub_data_item of items){
+            data_item[search_item.title].push(sub_data_item);
+            }
+            }
+            }).catch(err => {
+                Log.error('Data-Foreigns',err);
+                error=Log.append(error,err);
+                });
+}else if(search_item.type == Type.TITLE_COUNT){
+    let query = {};
+    query[search_item.foreign_field] = data_item[search_item.parent_field];
+    let search = Data_Logic.get_search(search_item.foreign_data_type,query,{},1,0);
+    const [biz_error,biz_data] = await Portal.count(database,search.data_type,search.filter);
+    if(biz_error){
+        error=Log.append(error,biz_error);
+    }else{
+        data_item[search_item.title] = biz_data;
+    }
+}else if(search_item.type == Type.TITLE_ONE){
+    let query = {};
+    query[search_item.foreign_field] = data_item[search_item.parent_field];
+    let search = Data_Logic.get_search(search_item.foreign_data_type,query,{},1,1);
+    const [biz_error,items,item_count,page_count] = await get_item_list_adapter(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,foreign_option);
+    if(biz_error){
+        error=Log.append(error,biz_error);
+    }else{
+        data_item[search_item.title] = items.length ? items[0] : Data_Logic.get_not_found(search_item.foreign_data_type,0);
+    }
+}
+
+----------------------------------------------
+
+
+
+-------------------------------- BiZ9 END  - 12-13-2025 -----------------------------------------------------------
+
+-------------------------------- BiZ9 START - 12-13-2025 -----------------------------------------------------------
+-- GROUPZ
+----------------------------------------------
+--- DataType
+---- Group
+--- FieldZ
+---- id
+---- parent_id
+---- parent_data_type
+---------------------------
+-- DataType
+--- Sub_Group
+-- FieldZ
+---- id
+---- group_id
+---------------------------
+-- Option
+----------------------------------------------
+--- title
+---- blank = all
+---- {get_group:true, group:[array]}
+----------------------------------------------
+
+
+
+
+-------------------------------- BiZ9 END  - 12-13-2025 -----------------------------------------------------------
+
