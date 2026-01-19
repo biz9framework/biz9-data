@@ -2257,14 +2257,14 @@ class Portal {
                                         });
 									}
  									else if(search_item.type == Type.TITLE_COUNT){
-										query[search_item.foreign_field] = data_item[search_item.parent_field];
+											query[search_item.foreign_field] = data_item[search_item.parent_field];
 											let search = Data_Logic.get_search(search_item.foreign_data_type,query,{},1,0);
 											get_count_item_list_adapter(database,search.data_type,search.filter).then(([biz_error,biz_data])=>{
                                                 if(biz_error){
 													error=Log.append(error,biz_error);
 												}else{
 													data_item[search_item.title] = biz_data.count;
-                                                    resolve();
+                                                    resolve2();
 												}
                                           }).catch(err => {
                                            	Log.error('Data-Portal-Get-Foreigns-Count',err);
@@ -2553,7 +2553,6 @@ class Portal {
                     cache = data;
                 },
 				 function(call){
-					console.log('1111111111');
 					let search = Data_Logic.get_search(data_type,filter,sort_by,page_current,page_size);
                     get_item_list_adapter(database,cache,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option).then(([biz_error,items,item_count,page_count])=>{
                         if(biz_error){
@@ -2572,13 +2571,14 @@ class Portal {
 				},
 				//9_get_items_distinct
 				function(call){
-					console.log('222222222222222222');
 					if(option.distinct && data.items.length>0){
 						data.items = data.items.filter((obj, index, self) =>
 							index === self.findIndex((t) => t[option.distinct.field] === obj[option.distinct.field])
 						);
 						let distinct_sort_by = option.distinct.sort_by ? option.distinct.sort_by : Type.TITLE_SORT_BY_ASC;
 						data.items = Obj.sort_list_by_field(data.items,option.distinct.field,distinct_sort_by);
+	    				data.item_count=data.items.length;
+
                         call();
 					}else{
                         call();
@@ -2586,7 +2586,6 @@ class Portal {
 				},
 	            //9_get_items_join
 				function(call){
-	console.log('333333333');
 		            if(option.joins){
                     Portal.get_data_joins(database,cache,data,option).then(([biz_error,biz_data])=>{
                         if(biz_error){
@@ -2605,10 +2604,7 @@ class Portal {
 		        },
                 //9_get_items_foreigns
 				function(call){
-console.log('44444444');
 		            if(option.foreigns && data.items.length > 0){
-console.log('555');
-Log.w('44_data',data.items.length);
                         Portal.get_data_foreigns(database,cache,data,option).then(([biz_error,biz_data])=>{
                         if(biz_error){
                             error=Log.append(error,biz_error);
@@ -2627,7 +2623,6 @@ Log.w('44_data',data.items.length);
 		        },
 		        //9_get_items_group
 				function(call){
-console.log('55555555555555');
 					if(option.groups && data.items.length>0){
 						let search_items = [];
 					for(const item of option.groups){

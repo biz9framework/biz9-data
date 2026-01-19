@@ -79,11 +79,11 @@ describe('connect', function(){ this.timeout(25000);
                 //let join_search_2 = Data_Logic.get_search_join(Type.TITLE_ONE,Data_Logic.get_search(Type.DATA_BLANK,{},{},1,0),{title:'cool'});
                 //let option = {joins:[join_search_1]};
 
-                //let foreign_search_3 = Data_Logic.get_search_foreign(Type.TITLE_COUNT,Type.DATA_PRODUCT,Type.FIELD_CATEGORY,Type.FIELD_TITLE,{field:{id:1},title:'product_count'});
-                //let option = {foreigns:[foreign_search_3],distinct:{field:'title'},field:{title:1,title_url:1,product_count:1}};
+                let foreign_search_3 = Data_Logic.get_search_foreign(Type.TITLE_COUNT,Type.DATA_PRODUCT,Type.FIELD_CATEGORY,Type.FIELD_TITLE,{field:{id:1},title:'product_count'});
+                let option = {foreigns:[foreign_search_3],distinct:{field:'title'},field:{title:1,title_url:1,product_count:1}};
 
-                let foreign_search_1 = Data_Logic.get_search_foreign(Type.TITLE_ITEMS,Type.DATA_IMAGE,Type.FIELD_PARENT_ID,Type.FIELD_ID,{title:'cool'});
-                let option = {foreigns:[foreign_search_1],distinct:{field:'title'},field:{title:1,title_url:1,product_count:1}};
+                //let foreign_search_1 = Data_Logic.get_search_foreign(Type.TITLE_ITEMS,Type.DATA_IMAGE,Type.FIELD_PARENT_ID,Type.FIELD_ID,{title:'cool'});
+                //let option = {foreigns:[foreign_search_1],distinct:{field:'title'},field:{title:1,title_url:1,product_count:1}};
 
                 //let group_search_1 = Data_Logic.get_search_group({image:{show:true}});
                 //let group_search_2 = Data_Logic.get_search_group({title:{group_882:0,group_39:1},image:{show:true}});
