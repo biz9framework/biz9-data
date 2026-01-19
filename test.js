@@ -48,8 +48,8 @@ describe('connect', function(){ this.timeout(25000);
                 //let parent = Data_Logic.get(new_data_type,0,{test:true});
                 //Log.w('parent',parent);
                 //let parent = Data_Logic.get(new_data_type,0,{test:true,title:'Apple 4'});
-                let parent = Data_Logic.get(new_data_type,id);
-                //let parent_list = Data_Logic.get(new_data_type,0,{test:true,count:9});
+                //let parent = Data_Logic.get(new_data_type,id);
+                let parent_list = Data_Logic.get(new_data_type,0,{test:true,count:9});
                 //-->
                 //let group = Data_Logic.get(Type.DATA_GROUP,0,{test:true,generate_title:true,parent:parent});
                 let group = Data_Logic.get(Type.DATA_GROUP,'786');
@@ -63,7 +63,8 @@ describe('connect', function(){ this.timeout(25000);
                 //
                 //let user = Data_Logic.get(Type.DATA_USER,0,{test:true,generate_title:true});
                 //let user = Data_Logic.get(Type.DATA_USER,'54b31f02-afb4-4fa7-9835-f923da7a6749');
-                //let user = Data_Logic.get(Type.DATA_USER,0,{test:true,data:{email:'ceo@bossappz.com',password:'123456789Ab!'}});
+                //let user = Data_Logic.get(Type.DATA_USER,0,{data:{email:'ceo@bossappz.com',password:'123456789Ab!'}});
+                let user = Data_Logic.get(Type.DATA_USER,0,{test:true,data:{email:'ceo@bossappz.com',password:'123456789Ab!'}});
                 //Log.w('user',user);
                 //-->
                 //let favorite = Favorite_Logic.get(parent.data_type,parent.id,user.id);
@@ -78,8 +79,11 @@ describe('connect', function(){ this.timeout(25000);
                 //let join_search_2 = Data_Logic.get_search_join(Type.TITLE_ONE,Data_Logic.get_search(Type.DATA_BLANK,{},{},1,0),{title:'cool'});
                 //let option = {joins:[join_search_1]};
 
+                //let foreign_search_3 = Data_Logic.get_search_foreign(Type.TITLE_COUNT,Type.DATA_PRODUCT,Type.FIELD_CATEGORY,Type.FIELD_TITLE,{field:{id:1},title:'product_count'});
+                //let option = {foreigns:[foreign_search_3],distinct:{field:'title'},field:{title:1,title_url:1,product_count:1}};
+
                 let foreign_search_1 = Data_Logic.get_search_foreign(Type.TITLE_ITEMS,Type.DATA_IMAGE,Type.FIELD_PARENT_ID,Type.FIELD_ID,{title:'cool'});
-                let option = {foreigns:[foreign_search_1]};
+                let option = {foreigns:[foreign_search_1],distinct:{field:'title'},field:{title:1,title_url:1,product_count:1}};
 
                 //let group_search_1 = Data_Logic.get_search_group({image:{show:true}});
                 //let group_search_2 = Data_Logic.get_search_group({title:{group_882:0,group_39:1},image:{show:true}});
@@ -89,7 +93,9 @@ describe('connect', function(){ this.timeout(25000);
 
                 //let option = {stat:{user_id:user.id,type:Type.STAT_VIEW,unique:false}};
                 //---
-                let search = Data_Logic.get_search(Type.DATA_GROUP,{},{date_create:-1},1,0);
+                //let search = Data_Logic.get_search(Type.DATA_GROUP,{},{date_create:-1},1,0);
+                //
+                let search = Data_Logic.get_search(Type.DATA_CATEGORY,{category:Type.DATA_PRODUCT},{title:1},1,0);
                 //---
                 const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option);
                 //const [biz_error,biz_data] = await Portal.search_simple(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option);
@@ -115,7 +121,7 @@ describe('connect', function(){ this.timeout(25000);
                 //const [error,biz_data] = await Portal.delete(database,parent.data_type,parent.id,option);
                 //const [biz_error,biz_data] = await Portal.delete_search(database,search.data_type,search.filter,option);
                 //---
-                //const [error,biz_data] = await User_Data.login(database,user,option);
+                //iconst [error,biz_data] = await User_Data.login(database,user,option);
                 //const [error,biz_data] = await User_Data.register(database,user,option);
                 //---
                 //const [biz_error,biz_data] = await Review_Data.get(database,Type.DATA_PRODUCT,'1',{date_create:-1},1,12);
