@@ -1981,10 +1981,14 @@ class Portal {
 								    delete group_query.$or;
 							    }
 							    let item_group_join_option = {field:search_item.field};
+                                console.log('aaaaaaa');
 							    if(search_item.image.show){
+                                    console.log('bbbbbbbb');
 								    item_group_join_option['foreigns'] = [Data_Logic.get_search_foreign(Type.TITLE_LIST,Type.DATA_IMAGE,Type.FIELD_PARENT_ID,Type.FIELD_ID)];
 							    }
 							    let search = Data_Logic.get_search(Type.DATA_GROUP,group_query,{},search_item.page_current,search_item.page_size);
+                                Log.w('search',search);
+                                Log.w('item_group_join_option',item_group_join_option);
                                 get_item_list_adapter(database,cache,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,item_group_join_option).then(([biz_error,items,item_count,page_count])=>{
                                     if(biz_error){
                                         error=Log.append(error,biz_error);
@@ -2052,7 +2056,7 @@ class Portal {
                                     let query = {};
 								    query[search_item.foreign_field] = data[search_item.parent_field];
 								    let search = Data_Logic.get_search(search_item.foreign_data_type,query,{},1,0);
-								    get_count_item_list_adapter(database,cache,search.data_type,search.filter).then(([biz_error,biz_data])=>{
+								    get_count_item_list_adapter(database,search.data_type,search.filter).then(([biz_error,biz_data])=>{
                                         if(biz_error){
 									        error=Log.append(error,biz_error);
 								        }else{
@@ -2117,52 +2121,6 @@ class Portal {
 			});
 		});
 	};
-	//9_items_foreigns //9_get_items_foreigns  9_get_data_foreigns //9_data_foreigns 9_foreigns
-	static get_data_foreigns_old= (database,data,option) => {
-		return new Promise((callback) => {
-			let error = null;
-			let foreign_search_items = [];
-			async.series([
-				function(call){
-					for(const foreign_item of option.foreigns){
-						for(const data_item of data.items){
-							foreign_search_items.push({
-								type : foreign_item.type ? foreign_item.type : Type.TITLE_ITEMS,
-								foreign_data_type : foreign_item.foreign_data_type,
-								foreign_field : foreign_item.foreign_field,
-								parent_field : foreign_item.parent_field,
-								parent_value : data_item[foreign_item.parent_field],
-								field : foreign_item.field ? foreign_item.field : null,
-								title : foreign_item.title ? foreign_item.title : foreign_item.foreign_data_type,
-								page_current : foreign_item.page_current ? foreign_item.page_current : 1,
-								page_size : foreign_item.page_size ? foreign_item.page_size : 0,
-									items : []
-							});
-						}
-					}
-						for(const search_item of foreign_search_items){
-							let query = { $or: [] };
-							for(const data_item of data.items){
-								let query_field = {};
-								query_field[search_item.foreign_field] = search_item.parent_value;
-								query.$or.push(query_field);
-							};
-							let search = Data_Logic.get_search(search_item.foreign_data_type,query,{},1,0);
-							let foreign_option = search_item.field ? search_item.field : {};
-						}
-
-
-                    //Log.w('22_data',data);
-                    //call();
-			},
-			]).then(result => {
-				//callback([error,data]);
-			}).catch(err => {
-				Log.error("Blank-Get",err);
-				callback([error,[]]);
-			});
-        });
-    };
 	//9_items_group //9_get_items_group //9_groups 9_get_data_groups //9_data_groups
 	static get_data_groups = (database,cache,data,option) => {
 		return new Promise((callback) => {
@@ -2287,30 +2245,39 @@ class Portal {
 								error=Log.append(error,biz_error);
 							}else{
 								search_item.items = items;
-								if(foreign_search_items.length> 0){
-										for(const data_item of data.items){
-											if(search_item.type == Type.TITLE_ITEMS){
-												let query = {};
-												query[search_item.foreign_field] = data_item[search_item.parent_field];
-												let search = Data_Logic.get_search(search_item.foreign_data_type,query,{},1,0);
-												data_item[search_item.title] = [];
-											    get_item_list_adapter(database,cache,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,foreign_option).then(([biz_error,items,item_count,page_count])=>{
-                                                    if(biz_error){
-													    error=Log.append(error,biz_error);
-												    }else{
-													    for(const sub_data_item of items){
-														    data_item[search_item.title].push(sub_data_item);
-													    }
-                                                        resolve();
-												    }
-                                                }).catch(err => {
-                                                    console.log('errrr');
-                                                    Log.error('Data-Portal-Get-Foreign-Items',err);
-                                                    error=Log.append(error,err);
-                                                });
-										    }
-										}
-								}
+							    function get_item_data(data_item) {
+                                    return new Promise((resolve2) => {
+                                    //start
+								    if(search_item.type == Type.TITLE_ITEMS){
+										let query = {};
+										query[search_item.foreign_field] = data_item[search_item.parent_field];
+										let search = Data_Logic.get_search(search_item.foreign_data_type,query,{},1,0);
+										data_item[search_item.title] = [];
+										get_item_list_adapter(database,cache,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,foreign_option).then(([biz_error,items,item_count,page_count])=>{
+                                            if(biz_error){
+											    error=Log.append(error,biz_error);
+											}else{
+												for(const sub_data_item of items){
+												    data_item[search_item.title].push(sub_data_item);
+												}
+                                                resolve2(data_item);
+											}
+                                        }).catch(err => {
+                                            Log.error('Data-Portal-Get-Foreign-Items',err);
+                                            error=Log.append(error,err);
+                                        });
+									}
+                                    //end
+                                    });
+                                }
+                                const run = async () => {
+                                    for(const data_item of data.items){
+                                        await get_item_data(data_item);
+                                    }
+                                }
+                                run().then(() => {
+                                    resolve();
+                                });
                             }
 								}).catch(err => {
                                     Log.error('Data-Portal-Get-Foreigns-Items',err);
@@ -2377,7 +2344,8 @@ class Portal {
                                 else if(search_item.type == Type.TITLE_COUNT){
                                     let search = Data_Logic.get_search(search_item.search.data_type,search_item.search.filter,search_item.search.sort_by,search_item.search.page_current,search_item.search.page_size);
 							        let join_option = search_item.field ? search_item.field : {};
-                                    get_count_item_list_adapter(database,cache,search.data_type,search.filter).then(([biz_error,biz_data])=>{
+                                    get_count_item_list_adapter(database,search.data_type,search.filter).then(([biz_error,biz_data])=>{
+                                        console.log(biz_data);
                                         if(biz_error){
                                                 error=Log.append(error,biz_error);
                                             }else{
@@ -2615,7 +2583,7 @@ class Portal {
                 //9_get_items_foreigns
 				function(call){
 		            if(option.foreigns && data.items.length > 0){
-                        Portal.get_data_foreigns(database,data,option).then(([biz_error,biz_data])=>{
+                        Portal.get_data_foreigns(database,cache,data,option).then(([biz_error,biz_data])=>{
                         if(biz_error){
                             error=Log.append(error,biz_error);
                         }else{
@@ -2632,6 +2600,7 @@ class Portal {
 		        },
 		        //9_get_items_group
 				function(call){
+					Log.w('rrrrrrrr',data);
 					if(option.groups && data.items.length>0){
 						let search_items = [];
 					for(const item of option.groups){
