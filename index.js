@@ -473,9 +473,9 @@ class Order_Data {
 			}),order_items:[],order_sub_items:[]};
 			async.series([
                 async function(call) {
-                    const [error,data] = await get_cache(database.data_config);
-                    cache = data;
-                },
+              		const [biz_error,biz_data] = await get_cache(database.data_config);
+                    cache = biz_data;
+				  },
 				//post - order
 				async function(call){
 					for(const key in order) {
@@ -832,17 +832,18 @@ class Cart_Data {
 	//9_cart_post
 	static post = async (database,cart,option) => {
 		return new Promise((callback) => {
+			let error = null;
 			let data = {};
 			let cache = {};
-			let error = null;
 			option = option ? option : {};
-			data.cart = Data_Logic.get(Type.DATA_CART,cart.id,{cart_number:cart.cart_number,parent_data_type:cart.parent_data_type,user_id:cart.user_id,grand_total: 0});
+			data.cart = Data_Logic.get(Type.DATA_CART,cart.id,{data:{cart_number:cart.cart_number,user_id:cart.user_id,grand_total:0}});
 			data.cart_items = [];
 			data.cart_sub_items = [];
 			async.series([
                 async function(call) {
-                    const [error,data] = await get_cache(database.data_config);
-                    cache = data;
+                    const [biz_error,biz_data] = await get_cache(database.data_config);
+                    cache = biz_data;
+					Log.w('data',data);
                 },
 				//post - cart
 				async function(call){
@@ -858,14 +859,18 @@ class Cart_Data {
 							data.cart[key] = cart[key];
 						}
 					}
+					Log.w('www',data);
+					/*
 					const [biz_error,biz_data] = await Portal.post(database,Type.DATA_CART,data.cart);
 					if(biz_error){
 						error=Log.append(error,biz_error);
 					}else{
 						data.cart = biz_data;
 					}
+*/
 				},
 				//post - cart items
+				/*
 				async function(call){
 					if(cart.cart_items.length>0){
 						for(const cart_item of cart.cart_items){
@@ -983,8 +988,9 @@ class Cart_Data {
 						data.cart = biz_data;
 					}
 				},
+				*/
 			]).then(result => {
-				callback([error,data.cart]);
+				//callback([error,data.cart]);
 			}).catch(err => {
 				Log.error("CartData-Cart-Item-Update",err);
 				callback([error,[]]);
@@ -1875,9 +1881,9 @@ class Portal {
 			option = option ? option : {};
 			async.series([
                 async function(call) {
-                    const [error,data] = await get_cache(database.data_config);
-                    cache = data;
-                },
+                	const [biz_error,biz_data] = await get_cache(database.data_config);
+                    cache = biz_data;
+				 },
 				function(call){
                      if(option.cache_delete){
                     delete_item_cache(database,cache,data.data_type,data.id,option).then(([biz_error,biz_data])=>{
@@ -2423,9 +2429,9 @@ class Portal {
 			option = option ? option : {};
 			async.series([
                 async function(call) {
-                    const [error,data] = await get_cache(database.data_config);
-                    cache = data;
-                },
+              		const [biz_error,biz_data] = await get_cache(database.data_config);
+                    cache = biz_data;
+				 },
 				function(call){
 					let search = Data_Logic.get_search(data_type,filter,sort_by,page_current,page_size);
                     get_item_list_adapter(database,cache,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option).then(([biz_error,items,item_count,page_count])=>{
@@ -2549,9 +2555,9 @@ class Portal {
 			option = option ? option : {};
 			async.series([
                 async function(call) {
-                    const [error,data] = await get_cache(database.data_config);
-                    cache = data;
-                },
+                	const [biz_error,biz_data] = await get_cache(database.data_config);
+                    cache = biz_data;
+				},
 				 function(call){
 					let search = Data_Logic.get_search(data_type,filter,sort_by,page_current,page_size);
                     get_item_list_adapter(database,cache,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option).then(([biz_error,items,item_count,page_count])=>{
@@ -2716,8 +2722,8 @@ class Portal {
 			option = option ? option : {};
 			async.series([
                 async function(call) {
-                    const [error,data] = await get_cache(database.data_config);
-                    cache = data;
+                    const [biz_error,biz_data] = await get_cache(database.data_config);
+                    cache = biz_data;
                 },
          	    //clean
         		function(call){
@@ -2852,8 +2858,8 @@ class Portal {
 			option = option ? option : {};
 			async.series([
 				async function(call){
-                    const [error,data] = await get_cache(database.data_config);
-                    cache = data;
+              		const [biz_error,biz_data] = await get_cache(database.data_config);
+                    cache = biz_data;
                 },
 				async function(call){
 					const [biz_error,biz_data] = await delete_item_adapter(database,cache,data_type,id);
@@ -2915,9 +2921,9 @@ class Portal {
 			let error = null;
 			async.series([
                 async function(call) {
-                    const [error,data] = await get_cache(database.data_config);
-                    cache = data;
-                },
+                	const [biz_error,biz_data] = await get_cache(database.data_config);
+                    cache = biz_data;
+				 },
 				async function(call){
 					const [biz_error,biz_data] = await post_item_list_adapter(database,cache,data_items);
 					if(biz_error){
@@ -3010,9 +3016,9 @@ class Portal {
 			let data = {};
 			async.series([
                 async function(call) {
-                    const [error,data] = await get_cache(database.data_config);
-                    cache = data;
-                },
+                	const [biz_error,biz_data] = await get_cache(database.data_config);
+                    cache = biz_data;
+				 },
 				async function(call){
 					const [biz_error,biz_data] = await get_count_item_list_adapter(database,cache,data_type,filter);
 					if(biz_error){
@@ -3157,9 +3163,9 @@ class Stat_Data {
 			field_result_ok = false;
 			async.series([
                 async function(call) {
-                    const [error,data] = await get_cache(database.data_config);
-                    cache = data;
-                },
+                    const [biz_error,biz_data] = await get_cache(database.data_config);
+                    cache = biz_data;
+               },
 				async function(call){
 					for(const key in stat) {
 						if(Str.check_is_null(data[key])){
@@ -3344,9 +3350,9 @@ class Blank_Data {
             let option = {};
 			async.series([
                 async function(call) {
-                    const [error,data] = await get_cache(database.data_config);
-                    cache = data;
-                },
+               		const [biz_error,biz_data] = await get_cache(database.data_config);
+                    cache = biz_data;
+				 },
                 //await
 				async function(call){
 					const [biz_error,biz_data] = await get_item_adapter(database,cache,data.data_type,data.id,option);

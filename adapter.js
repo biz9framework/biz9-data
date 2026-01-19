@@ -375,6 +375,7 @@ const delete_item_list_adapter = (database,cache,data_type,filter,option) => {
 }
 const delete_item_cache=(database,cache,data_type,id,option)=>{
     return new Promise((callback)=>{
+        let error = null;
         let cache_key_list = '';
         let cache_string_list = '';
         let item_data = Data_Logic.get(data_type,id);
