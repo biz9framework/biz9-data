@@ -10,7 +10,7 @@ const {Type,Data_Logic,Cart_Logic} = require("/home/think1/www/doqbox/biz9-frame
 - connect
 */
 /* --- TEST CONFIG START --- */
-const APP_ID = 'test-stage-jan19';
+const APP_ID = 'test-stage-jan20';
 /* --- TEST CONFIG END --- */
 
 /* --- DATA CONFIG START --- */
@@ -67,9 +67,9 @@ describe('connect', function(){ this.timeout(25000);
                 //-- USER  END --//
                 //-->
                 //-- CART  START --//
-                let user = Data_Logic.get(Type.USER,Num.get_id(),{test:true});
-                /*
                 // -- post-start --//
+                /*
+                let user = Data_Logic.get(Type.USER,Num.get_id(),{test:true});
                 let cart_product_1 = Data_Logic.get(Type.DATA_PRODUCT,Num.get_id(),{test:true});
                 let cart_sub_item_product_1 = Data_Logic.get(Type.DATA_PRODUCT,Num.get_id(),{test:true});
                 let cart = Cart_Logic.get(user.id,{cart_code:'CA'});
@@ -83,13 +83,12 @@ describe('connect', function(){ this.timeout(25000);
                 cart_item_2.cart_sub_items.push(cart_sub_item_2);
                 cart.cart_items.push(cart_item_1);
                 cart.cart_items.push(cart_item_2);
-                //const [biz_error,biz_data] = await Cart_Data.post(database,cart);
-                // -- post-end --//
+                const [biz_error,biz_data] = await Cart_Data.post(database,cart);
                 */
-                // -- get-end --//
-                let cart = Data_Logic.get(Type.DATA_CART,'836');
+                // -- post-end --//
+                // -- get-start --//
+                let cart = Data_Logic.get(Type.DATA_CART,'CA-88475');
                 const [error,biz_data] = await Cart_Data.get(database,cart.id);
-                //Log.w('www',biz_data);
                 // -- get-end --//
                 //-- CART  END --//
                 //-->
@@ -111,9 +110,15 @@ describe('connect', function(){ this.timeout(25000);
                 //let foreign_search_3 = Data_Logic.get_search_foreign(Type.TITLE_COUNT,Type.DATA_PRODUCT,Type.FIELD_CATEGORY,Type.FIELD_TITLE,{field:{id:1},title:'product_count'});
                 //let option = {foreigns:[foreign_search_3],distinct:{field:'title'},field:{title:1,title_url:1,product_count:1}};
 
-                //let foreign_search_1 = Data_Logic.get_search_foreign(Type.TITLE_ITEMS,Type.DATA_IMAGE,Type.FIELD_PARENT_ID,Type.FIELD_ID,{title:'cool'});
-                //let option = {foreigns:[foreign_search_1],distinct:{field:'title'},field:{title:1,title_url:1,product_count:1}};
-
+                //--- FOREIGN -- START -- //
+                /*
+                let foreign_search_1 = Data_Logic.get_search_foreign(Type.TITLE_COUNT,Type.DATA_PRODUCT,Type.FIELD_CATEGORY,Type.FIELD_TITLE,{title:'cool'});
+                let option = {foreigns:[foreign_search_1],distinct:{field:'title'}};
+                let search = Data_Logic.get_search(Type.DATA_CATEGORY,{},{date_create:-1},1,0);
+                const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option);
+                */
+                //--- FOREIGN -- END -- //
+                //
                 //let group_search_1 = Data_Logic.get_search_group({image:{show:true}});
                 //let group_search_2 = Data_Logic.get_search_group({title:{group_882:0,group_39:1},image:{show:true}});
                 //let group_search_3 = Data_Logic.get_search_group({title:{group_924:0},field:{title:1,title_url:1}});
@@ -134,7 +139,7 @@ describe('connect', function(){ this.timeout(25000);
                 //---
                 //---
                 //const [error,biz_data] = await Portal.get(database,parent.data_type,parent.id,option);
-                //const [error,biz_data] = await Portal.get(database,group.data_type,group.id,option);
+               //const [error,biz_data] = await Portal.get(database,group.data_type,group.id,option);
                 //const [error,biz_data] = await Portal.get(database,group.data_type,group.id);
                 //const [error,biz_data] = await Page_Data.get(database,id,option);
                 //--- POST -- START -- //

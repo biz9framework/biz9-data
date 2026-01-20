@@ -190,6 +190,7 @@ const get_item_adapter = (database,cache,data_type,id,option) => {
                         data = biz_data[0];
                     }else{
                         data = Data_Logic.get_not_found(data_type,id);
+                        data.id_field = option.id_field ? option.id_field : Type.FIELD_ID;
                     }
                 }
             },

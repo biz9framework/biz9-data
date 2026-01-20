@@ -1872,14 +1872,14 @@ class Portal {
 		});
 	};
 	//9_items_foreigns //9_get_items_foreigns //9_joins 9_get_data_foreigns //9_data_foreigns
-	static get_data_foreigns = (database,cache,data,option) => {
+	static get_data_foreigns = (database,cache,data_items,option) => {
 		return new Promise((callback) => {
 			let error = null;
 			async.series([
 	            function(call){
                    	let foreign_search_items = [];
 					for(const foreign_item of option.foreigns){
-						for(const data_item of data.items){
+						for(const data_item of data_items){
 							foreign_search_items.push({
 								type : foreign_item.type ? foreign_item.type : Type.TITLE_ITEMS,
 								foreign_data_type : foreign_item.foreign_data_type,
@@ -1897,14 +1897,14 @@ class Portal {
 				    function get_data(search_item) {
                         return new Promise((resolve) => {
 	                        let query = { $or: [] };
-					            for(const data_item of data.items){
+					            for(const data_item of data_items){
 					                let query_field = {};
 						                query_field[search_item.foreign_field] = search_item.parent_value;
 						                query.$or.push(query_field);
 					            };
 					            let search = Data_Logic.get_search(search_item.foreign_data_type,query,{},1,0);
 					            let foreign_option = search_item.field ? search_item.field : {};
-							    for(const data_item of data.items){
+							    for(const data_item of data_items){
 								    let query_field = {};
 								    query_field[search_item.foreign_field] = search_item.parent_value;
 								    query.$or.push(query_field);
@@ -1971,7 +1971,7 @@ class Portal {
                                     });
                                 }
                                 const run = async () => {
-                                    for(const data_item of data.items){
+                                    for(const data_item of data_items){
                                         await get_item_data(data_item);
                                     }
                                 }
@@ -1995,7 +1995,7 @@ class Portal {
                     });
                 },
 			]).then(result => {
-				callback([error,data]);
+				callback([error,data_items]);
 			}).catch(err => {
 				Log.error("Blank-Get",err);
 				callback([error,[]]);
@@ -2146,11 +2146,11 @@ class Portal {
 					if(option.foreigns){
                         function get_data() {
                             return new Promise((resolve) => {
-                                Portal.get_data_foreigns(database,data,option).then(([biz_error,biz_data])=>{
+                                Portal.get_data_foreigns(database,data.items,option).then(([biz_error,biz_data])=>{
                                     if(biz_error){
                                         error=Log.append(error,biz_error);
                                     }else{
-                                        data = biz_data;
+                                        data.items = biz_data;
                                         resolve();
                                     }
                                 }).catch(err => {
@@ -2284,11 +2284,11 @@ class Portal {
                 //9_get_items_foreigns
 				function(call){
 		            if(option.foreigns && data.items.length > 0){
-                        Portal.get_data_foreigns(database,cache,data,option).then(([biz_error,biz_data])=>{
+                        Portal.get_data_foreigns(database,cache,data.items,option).then(([biz_error,biz_data])=>{
                         if(biz_error){
                             error=Log.append(error,biz_error);
                         }else{
-                            data = biz_data;
+                            data.items = biz_data;
                             call();
                         }
                     }).catch(err => {
@@ -3069,6 +3069,7 @@ class Cart_Data  {
 							}
 
 							post_cart_item[Type.FIELD_CART_ID] = data.cart.id;
+							post_cart_item[Type.FIELD_CART_NUMBER] = data.cart.cart_number;
 							post_cart_item.temp_row_id = cart_item.temp_row_id;
 							data.cart_items.push(post_cart_item);
 						}
@@ -3102,6 +3103,7 @@ class Cart_Data  {
 								}
 								post_cart_sub_item[Type.FIELD_CART_ITEM_ID] =data.cart_items.find(item_find => item_find.temp_row_id === cart_item.temp_row_id).id,
 								post_cart_sub_item[Type.FIELD_CART_ID] = data.cart.id;
+								post_cart_sub_item[Type.FIELD_CART_NUMBER] = data.cart.cart_number;
 								data.cart_sub_items.push(post_cart_sub_item);
 							}
 						}
@@ -3192,16 +3194,31 @@ class Cart_Data  {
 			async.series([
 				//get_cart
 				async function(call){
-					/let option = { id_field:Type.FIELD_CART_NUMBER };
-                 	//let foreign_search = Data_Logic.get_search_foreign(Type.TITLE_ITEMS,Type.DATA_CART_ITEM,Type.FIELD_CART_ID,Type.FIELD_ID,{title:'cool'});
-                	//let option = {foreigns:[foreign_search_1],distinct:{field:'title'},field:{title:1,title_url:1,product_count:1}};
+                 	let foreign_cart_item = Data_Logic.get_search_foreign(Type.TITLE_ITEMS,Type.DATA_CART_ITEM,Type.FIELD_CART_ID,Type.FIELD_ID);
+                	//let join_cart_sub_item = Data_Logic.get_search_join(Type.TITLE_ITEMS,Data_Logic.get_search(Type.DATA_CART_SUB_ITEM,{cart_number:cart_number},{},1,0));
+					let option = { id_field:Type.FIELD_CART_NUMBER,foreigns:[foreign_cart_item] };
 					const [biz_error,biz_data] = await Portal.get(database,Type.DATA_CART,cart_number,option);
-					Log.w('aaaa',biz_data);
+					Log.w('get_cart_1',biz_data);
 					if(biz_error){
 						error=Log.append(error,biz_error);
 					}else{
 						data.cart = biz_data;
 					}
+				},
+				function(call){
+					let foreign_cart_sub_item = Data_Logic.get_search_foreign(Type.TITLE_ITEMS,Type.DATA_CART_SUB_ITEM,Type.FIELD_CART_ITEM_ID,Type.FIELD_ID);
+					let option_cart_sub_item = { foreigns:[foreign_cart_sub_item] };
+                    Portal.get_data_foreigns(database,data.cart.cart_items,option_cart_sub_item).then(([biz_error,biz_data])=>{
+                    		if(biz_error){
+                                 error=Log.append(error,biz_error);
+                             }else{
+                                  data.cart.cart_items = biz_data;
+								 call();
+                             }
+                 	}).catch(err => {
+                    	Log.error('Data-Portal-Search-Simple-Foreigns',err);
+                        error=Log.append(error,err);
+                    });
 				},
 				/*
 				async function(call){
