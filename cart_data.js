@@ -1,7 +1,12 @@
 const async = require('async');
 const {Scriptz}=require("biz9-scriptz");
+const {get_cache} = require('./redis/base.js');
+const {Data,Database,Portal} = require(".index.js");
 
-class Cart_Data {
+const {Log,Str,Num,Obj}=require("/home/think1/www/doqbox/biz9-framework/biz9-utility/code");
+const {Type,Favorite_Logic,Stat_Logic,Review_Logic,Data_Logic,Product_Logic,Demo_Logic,Category_Logic,Cart_Logic,Order_Logic,Field_Logic}=require("/home/think1/www/doqbox/biz9-framework/biz9-logic/code");
+
+class Cart_Data_Logic  {
 	//9_cart_post
 	static post = async (database,cart,option) => {
 		return new Promise((callback) => {
@@ -16,31 +21,27 @@ class Cart_Data {
                 async function(call) {
                     const [biz_error,biz_data] = await get_cache(database.data_config);
                     cache = biz_data;
-					Log.w('data',data);
                 },
 				//post - cart
 				async function(call){
 					for(const key in cart) {
-						if(Str.check_is_null(data.cart[key])
+						if(!Obj.check_is_array(cart[key]) && Obj.check_is_object(cart[key])
 							&& key != Type.FIELD_ID && key != Type.FIELD_DATA_TYPE
-							&& key != Type.PARENT_ITEM && key != Type.USER
-							&& key != Type.CART_ITEMS && key != Type.CART_SUB_ITEMS
-							&& key != Type.ORDER_ITEMS && key != Type.ORDER_SUB_ITEMS
 							&& key != Type.FIELD_SOURCE && key != Type.FIELD_SOURCE_ID
-							&& key != Type.TITLE_STAT_ITEMS && key != Type.TITLE_STAT_SUB_ITEMS
-							&& key != Type.FIELD_DATE_CREATE && key != Type.FIELD_DATE_SAVE){
+							&& key != Type.FIELD_DATE_CREATE && key != Type.FIELD_DATE_SAVE)
+                        {
 							data.cart[key] = cart[key];
 						}
 					}
-					Log.w('www',data);
-					/*
+                    Log.w('post_me',data.cart);
+                    Log.w('portal',Portal);
 					const [biz_error,biz_data] = await Portal.post(database,Type.DATA_CART,data.cart);
 					if(biz_error){
 						error=Log.append(error,biz_error);
 					}else{
 						data.cart = biz_data;
+                        Log.w('my_data',data.cart);
 					}
-*/
 				},
 				//post - cart items
 				/*
@@ -329,6 +330,6 @@ class Cart_Data {
 	};
 }
 module.exports = {
-	Cart_Data,
+	Cart_Data_Logic,
 }
 

@@ -1,7 +1,7 @@
 const async = require('async');
 const assert = require('node:assert');
 
-const {Data,Database,Portal,User_Data,Page_Data,Product_Data,Review_Data} = require(".");
+const {Data,Database,Portal,User_Data,Page_Data,Product_Data,Review_Data,Cart_Data} = require(".");
 
 const {Log,Num,Str} = require("biz9-utility");
 const {Type,Data_Logic,Cart_Logic} = require("/home/think1/www/doqbox/biz9-framework/biz9-logic/code");
@@ -68,20 +68,29 @@ describe('connect', function(){ this.timeout(25000);
                 //-->
                 //-- CART  START --//
                 let user = Data_Logic.get(Type.USER,Num.get_id(),{test:true});
+                /*
+                // -- post-start --//
                 let cart_product_1 = Data_Logic.get(Type.DATA_PRODUCT,Num.get_id(),{test:true});
                 let cart_sub_item_product_1 = Data_Logic.get(Type.DATA_PRODUCT,Num.get_id(),{test:true});
                 let cart = Cart_Logic.get(user.id,{cart_code:'CA'});
-                let cart_item = Cart_Logic.get_cart_item(cart_product_1.data_type,cart_product_1.id,1,cart_product_1.cost,{cart_code:'CA'});
-                cart_item.id = Num.get_id();
-                let cart_sub_item = Cart_Logic.get_cart_sub_item(cart_item.id,Type.TITLE_CART_SUB_TYPE_STANDARD,1,cart_sub_item_product_1.cost);
-                const [biz_error,biz_data] = await Cart_Data.post(database,cart);
-                //Log.w('product',product);
-                //Log.w('cart_sub_items',Cart_Logic.get_cart_sub_items());
-                //Log.w('cart_item',cart_item);
-                //Log.w('cart_sub_item',cart_sub_item);
-                //Log.w('cart',cart);
-
-
+                let cart_item_1 = Cart_Logic.get_cart_item(cart_product_1.data_type,cart_product_1.id,1,cart_product_1.cost,{cart_code:'CA'});
+                let cart_item_2 = Cart_Logic.get_cart_item(cart_product_1.data_type,cart_product_1.id,1,cart_product_1.cost,{cart_code:'CA'});
+                cart_item_1.id = Num.get_id();
+                cart_item_2.id = Num.get_id();
+                let cart_sub_item_1 = Cart_Logic.get_cart_sub_item(cart_item_1.id,Type.TITLE_CART_SUB_TYPE_STANDARD,1,cart_sub_item_product_1.cost);
+                let cart_sub_item_2 = Cart_Logic.get_cart_sub_item(cart_item_2.id,Type.TITLE_CART_SUB_TYPE_STANDARD,1,cart_sub_item_product_1.cost);
+                cart_item_1.cart_sub_items.push(cart_sub_item_1);
+                cart_item_2.cart_sub_items.push(cart_sub_item_2);
+                cart.cart_items.push(cart_item_1);
+                cart.cart_items.push(cart_item_2);
+                //const [biz_error,biz_data] = await Cart_Data.post(database,cart);
+                // -- post-end --//
+                */
+                // -- get-end --//
+                let cart = Data_Logic.get(Type.DATA_CART,'836');
+                const [error,biz_data] = await Cart_Data.get(database,cart.id);
+                //Log.w('www',biz_data);
+                // -- get-end --//
                 //-- CART  END --//
                 //-->
                 //-->
@@ -123,7 +132,6 @@ describe('connect', function(){ this.timeout(25000);
                 //---
                 //const [biz_error,biz_data] = await Portal.count(database,search.data_type,search.filter);
                 //---
-                //const [error,biz_data] = await Portal.copy(database,parent.data_type,parent.id,option);
                 //---
                 //const [error,biz_data] = await Portal.get(database,parent.data_type,parent.id,option);
                 //const [error,biz_data] = await Portal.get(database,group.data_type,group.id,option);
