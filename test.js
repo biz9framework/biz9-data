@@ -160,7 +160,7 @@ describe('connect', function(){ this.timeout(25000);
                 //
 
                 //--- FOREIGN -- START -- //
-                let foreign_search_1 = Data_Logic.get_search_foreign(Type.SEARCH_ITEMS,Type.DATA_PRODUCT,Type.FIELD_CATEGORY,Type.FIELD_TITLE,{title:'cool'});
+                let foreign_search_1 = Data_Logic.get_search_foreign(Type.SEARCH_ONE,Type.DATA_PRODUCT,Type.FIELD_CATEGORY,Type.FIELD_TITLE,{title:'cool'});
                 let option = {foreigns:[foreign_search_1],distinct:{field:'title'}};
                 let search = Data_Logic.get_search(Type.DATA_CATEGORY,{},{date_create:-1},1,0);
                 const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option);
