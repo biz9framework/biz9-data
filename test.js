@@ -43,13 +43,19 @@ describe('connect', function(){ this.timeout(25000);
                 let id = '484';
                 //let id = 'home22';
                 let print_test = true;
-
                 //-->
+                //-- GET  START --//
+                /*
+                //let option = {id_field:Type.FIELD_CART_NUMBER};
                 //let parent = Data_Logic.get(new_data_type,0,{test:true});
                 //Log.w('parent',parent);
                 //let parent = Data_Logic.get(new_data_type,0,{test:true,title:'Apple 4'});
-                //let parent = Data_Logic.get(new_data_type,id);
+                let parent = Data_Logic.get(Type.DATA_CART,'CA-88475');
+                //const [error,biz_data] = await Portal.get(database,parent.data_type,parent.id,option);
                 //let parent_list = Data_Logic.get(new_data_type,0,{test:true,count:9});
+                //const [error,biz_data] = await Portal.get(database,parent.data_type,parent.id,option);
+                */
+                //-- GET  END --//
                 //-->
                 //let group = Data_Logic.get(Type.DATA_GROUP,0,{test:true,generate_title:true,parent:parent});
                 //let group = Data_Logic.get(Type.DATA_GROUP,'786');
@@ -68,7 +74,6 @@ describe('connect', function(){ this.timeout(25000);
                 //-->
                 //-- CART  START --//
                 // -- post-start --//
-                /*
                 let user = Data_Logic.get(Type.USER,Num.get_id(),{test:true});
                 let cart_product_1 = Data_Logic.get(Type.DATA_PRODUCT,Num.get_id(),{test:true});
                 let cart_sub_item_product_1 = Data_Logic.get(Type.DATA_PRODUCT,Num.get_id(),{test:true});
@@ -84,11 +89,12 @@ describe('connect', function(){ this.timeout(25000);
                 cart.cart_items.push(cart_item_1);
                 cart.cart_items.push(cart_item_2);
                 const [biz_error,biz_data] = await Cart_Data.post(database,cart);
-                */
                 // -- post-end --//
                 // -- get-start --//
+                /*
                 let cart = Data_Logic.get(Type.DATA_CART,'CA-88475');
                 const [error,biz_data] = await Cart_Data.get(database,cart.id);
+                */
                 // -- get-end --//
                 //-- CART  END --//
                 //-->

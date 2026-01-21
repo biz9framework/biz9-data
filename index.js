@@ -653,13 +653,18 @@ class Order_Data {
 	//9_order_get
 	static get = (database,order_number,option) => {
 		return new Promise((callback) => {
+      		let error = null;
+            let cache = {};
 			let data = {order:Data_Logic.get(Type.DATA_ORDER,0,{order_number:order_number,grand_total:0,order_items:[],user:Data_Logic.get_new(Type.DATA_USER,0)})};
 			let order_parent_item_query = { $or: [] };
 			let order_sub_item_query = { $or: [] };
-			let error = null;
 			let order_sub_items = [];
 			option = option ? option : {};
 			async.series([
+          		async function(call) {
+                	const [biz_error,biz_data] = await get_cache(database.data_config);
+                    cache = biz_data;
+				 },
 				//get_order
 				async function(call){
 					let filter = { order_number: order_number };
@@ -2146,7 +2151,7 @@ class Portal {
 					if(option.foreigns){
                         function get_data() {
                             return new Promise((resolve) => {
-                                Portal.get_data_foreigns(database,data.items,option).then(([biz_error,biz_data])=>{
+                                Portal.get_data_foreigns(database,cache,data.items,option).then(([biz_error,biz_data])=>{
                                     if(biz_error){
                                         error=Log.append(error,biz_error);
                                     }else{
@@ -3165,6 +3170,7 @@ class Cart_Data  {
 						}
 					}
 				},
+				*/
 				//get - cart
 				async function(call){
 					const [biz_error,biz_data] = await Cart_Data.get(database,data.cart.cart_number);
@@ -3174,7 +3180,6 @@ class Cart_Data  {
 						data.cart = biz_data;
 					}
 				},
-				*/
 			]).then(result => {
 				callback([error,data.cart]);
 			}).catch(err => {
@@ -3186,19 +3191,23 @@ class Cart_Data  {
 	//9_cart_get
 	static get = (database,cart_number) => {
 		return new Promise((callback) => {
+			let error = null;
+			let cache = {};
 			let data = {cart:Data_Logic.get(Type.DATA_CART,0,{data:{cart_number:cart_number,cart_items:[],user:Data_Logic.get_new(Type.DATA_USER,0)}})};
 			let cart_parent_item_query = { $or: [] };
 			let cart_sub_item_query = { $or: [] };
-			let error = null;
 			let cart_sub_items = [];
 			async.series([
+ 				async function(call) {
+              		const [biz_error,biz_data] = await get_cache(database.data_config);
+                    cache = biz_data;
+				 },
 				//get_cart
 				async function(call){
                  	let foreign_cart_item = Data_Logic.get_search_foreign(Type.TITLE_ITEMS,Type.DATA_CART_ITEM,Type.FIELD_CART_ID,Type.FIELD_ID);
-                	//let join_cart_sub_item = Data_Logic.get_search_join(Type.TITLE_ITEMS,Data_Logic.get_search(Type.DATA_CART_SUB_ITEM,{cart_number:cart_number},{},1,0));
-					let option = { id_field:Type.FIELD_CART_NUMBER,foreigns:[foreign_cart_item] };
-					const [biz_error,biz_data] = await Portal.get(database,Type.DATA_CART,cart_number,option);
-					Log.w('get_cart_1',biz_data);
+                 	let foreign_user = Data_Logic.get_search_foreign(Type.TITLE_ONE,Type.DATA_USER,Type.FIELD_USER_ID,Type.ID,{title:'user'});
+					let cart_option = { id_field:Type.FIELD_CART_NUMBER,foreigns:[foreign_cart_item,foreign_user] };
+					const [biz_error,biz_data] = await Portal.get(database,Type.DATA_CART,cart_number,cart_option);
 					if(biz_error){
 						error=Log.append(error,biz_error);
 					}else{
@@ -3208,11 +3217,11 @@ class Cart_Data  {
 				function(call){
 					let foreign_cart_sub_item = Data_Logic.get_search_foreign(Type.TITLE_ITEMS,Type.DATA_CART_SUB_ITEM,Type.FIELD_CART_ITEM_ID,Type.FIELD_ID);
 					let option_cart_sub_item = { foreigns:[foreign_cart_sub_item] };
-                    Portal.get_data_foreigns(database,data.cart.cart_items,option_cart_sub_item).then(([biz_error,biz_data])=>{
+                    Portal.get_data_foreigns(database,cache,data.cart.cart_items,option_cart_sub_item).then(([biz_error,biz_data])=>{
                     		if(biz_error){
                                  error=Log.append(error,biz_error);
                              }else{
-                                  data.cart.cart_items = biz_data;
+                                 data.cart.cart_items = biz_data;
 								 call();
                              }
                  	}).catch(err => {
@@ -3220,87 +3229,9 @@ class Cart_Data  {
                         error=Log.append(error,err);
                     });
 				},
-				/*
-				async function(call){
-					const [biz_error,biz_data] = await Portal.get(database,Type.DATA_USER,data.cart.user_id);
-					data.cart.user=biz_data;
-				},
-				//get_cart_items
-				async function(call){
-					if(!Str.check_is_null(data.cart.id)){
-						let filter = { cart_number:cart_number };
-						let search = Data_Logic.get_search(Type.DATA_CART_ITEM,filter,{},1,0);
-						const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,{});
-						if(biz_error){
-							error=Log.append(error,biz_error);
-						}else{
-							data.cart.cart_items = biz_data.items;
-						}
-					}
-				},
-				//get_cart_items - parent_items
-				async function(call){
-					if(!Str.check_is_null(data.cart.id)){
-						data.cart.cart_items.forEach(cart_item => {
-							let query_field = {};
-							query_field[Type.FIELD_ID] = cart_item.parent_id;
-							cart_parent_item_query.$or.push(query_field);
-						});
-						let search = Data_Logic.get_search(data.cart.parent_data_type,cart_parent_item_query,{},1,0);
-						const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size);
-						if(biz_error){
-							error=Log.append(error,biz_error);
-						}else{
-							data.cart.cart_items.forEach(cart_item => {
-								cart_item.parent_item = biz_data.items.find(item_find => item_find.id === cart_item.parent_id) ? biz_data.items.find(item_find => item_find.id === cart_item.parent_id):Data_Logic.get_not_found(cart_item.parent_data_type,cart_item.parent_id);
-							});
-						}
-					}
-				},
-				//get_cart_sub_items
-				async function(call){
-					if(!Str.check_is_null(data.cart.id)){
-						let filter = { cart_number: cart_number };
-						let search = Data_Logic.get_search(Type.DATA_CART_SUB_ITEM,filter,{},1,0);
-						const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,{});
-						if(biz_error){
-							error=Log.append(error,biz_error);
-						}else{
-							cart_sub_items = biz_data.items;
-						}
-					}
-				},
-				//get_cart_sub_items - parent_sub_items
-				async function(call){
-					if(!Str.check_is_null(data.cart.id)){
-						cart_sub_items.forEach(cart_sub_item => {
-							let query_field = {};
-							query_field[Type.FIELD_ID] = cart_sub_item.parent_id;
-							cart_sub_item_query.$or.push(query_field);
-						});
-						let search = Data_Logic.get_search(Type.DATA_PRODUCT,cart_sub_item_query,{},1,0);
-						const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size);
-						if(biz_error){
-							error=Log.append(error,biz_error);
-						}else{
-							cart_sub_items.forEach(cart_sub_item => {
-								cart_sub_item.parent_item = biz_data.items.find(item_find => item_find.id === cart_sub_item.parent_id) ? biz_data.items.find(item_find => item_find.id === cart_sub_item.parent_id):Data_Logic.get_not_found(cart_sub_item.parent_data_type,cart_sub_item.parent_id);
-							});
-						}
-					}
-				},
-				// cart_items - cart_sub_items - bind
-				async function(call){
-					data.cart.cart_items.forEach(cart_item => {
-						cart_item.cart_sub_items = [];
-						let item_filter = cart_sub_items.filter(item_find=>item_find.cart_item_id===cart_item.id);
-						cart_item.cart_sub_items = [...item_filter, ...cart_item.cart_sub_items];
-					});
-				},
 				async function(call){
 					data.cart = Cart_Logic.get_total(data.cart);
 				},
-				*/
 			]).then(result => {
 				callback([error,data.cart]);
 			}).catch(err => {
