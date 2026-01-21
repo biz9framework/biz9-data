@@ -1,10 +1,10 @@
 const async = require('async');
 const assert = require('node:assert');
 
-const {Data,Database,Portal,User_Data,Page_Data,Product_Data,Review_Data,Cart_Data} = require(".");
+const {Data,Database,Portal,User_Data,Page_Data,Product_Data,Review_Data,Cart_Data,Order_Data} = require(".");
 
 const {Log,Num,Str} = require("biz9-utility");
-const {Type,Data_Logic,Cart_Logic} = require("/home/think1/www/doqbox/biz9-framework/biz9-logic/code");
+const {Type,Data_Logic,Cart_Logic,Order_Logic} = require("/home/think1/www/doqbox/biz9-framework/biz9-logic/code");
 /*
  * availble tests
 - connect
@@ -42,7 +42,7 @@ describe('connect', function(){ this.timeout(25000);
                 let new_data_type = Type.DATA_PRODUCT;
                 let id = '484';
                 //let id = 'home22';
-                let print_test = true;
+                let print_test = false;
                 //-->
                 //-- GET  START --//
                 /*
@@ -72,8 +72,9 @@ describe('connect', function(){ this.timeout(25000);
                 //Log.w('user',user);
                 //-- USER  END --//
                 //-->
-                //-- CART  START --//
+                //-- CART START --//
                 // -- post-start --//
+                /*
                 let user = Data_Logic.get(Type.USER,Num.get_id(),{test:true});
                 let cart_product_1 = Data_Logic.get(Type.DATA_PRODUCT,Num.get_id(),{test:true});
                 let cart_sub_item_product_1 = Data_Logic.get(Type.DATA_PRODUCT,Num.get_id(),{test:true});
@@ -82,22 +83,33 @@ describe('connect', function(){ this.timeout(25000);
                 let cart_item_2 = Cart_Logic.get_cart_item(cart_product_1.data_type,cart_product_1.id,1,cart_product_1.cost,{cart_code:'CA'});
                 cart_item_1.id = Num.get_id();
                 cart_item_2.id = Num.get_id();
-                let cart_sub_item_1 = Cart_Logic.get_cart_sub_item(cart_item_1.id,Type.TITLE_CART_SUB_TYPE_STANDARD,1,cart_sub_item_product_1.cost);
-                let cart_sub_item_2 = Cart_Logic.get_cart_sub_item(cart_item_2.id,Type.TITLE_CART_SUB_TYPE_STANDARD,1,cart_sub_item_product_1.cost);
+                let cart_sub_item_1 = Cart_Logic.get_cart_sub_item(cart_item_1.id,Type.CART_SUB_TYPE_STANDARD,1,cart_sub_item_product_1.cost);
+                let cart_sub_item_2 = Cart_Logic.get_cart_sub_item(cart_item_2.id,Type.CART_SUB_TYPE_STANDARD,1,cart_sub_item_product_1.cost);
                 cart_item_1.cart_sub_items.push(cart_sub_item_1);
                 cart_item_2.cart_sub_items.push(cart_sub_item_2);
                 cart.cart_items.push(cart_item_1);
                 cart.cart_items.push(cart_item_2);
-                const [biz_error,biz_data] = await Cart_Data.post(database,cart);
+                [cart_error,cart] = await Cart_Data.post(database,cart);
+                */
+                // -- get-start --//
+                //let cart_product = Data_Logic.get(Type.DATA_CART,'CA-88475');
+                //const [error,cart] = await Cart_Data.get(database,cart_product.id);
+                //Log.w('33_cart',cart);
+                // -- get-end --//
+                //-- CART END --//
+                //-->
+                //-- ORDER START --//
+                //
+                // -- post-start --//
+                //let order_product = Order_Logic.get(cart,{order_code:'OR'});
+                //const [error_order,order] = await Order_Data.post(database,order_product);
                 // -- post-end --//
                 // -- get-start --//
-                /*
-                let cart = Data_Logic.get(Type.DATA_CART,'CA-88475');
-                const [error,biz_data] = await Cart_Data.get(database,cart.id);
-                */
+                let order_product = Data_Logic.get(Type.DATA_ORDER,'OR-34952');
+                const [error,biz_data] = await Order_Data.get(database,order_product.id);
+                //Log.w('33_order',biz_data);
                 // -- get-end --//
-                //-- CART  END --//
-                //-->
+                //-- ORDER END --//
                 //-->
                 //
                //-->
