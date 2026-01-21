@@ -10,7 +10,7 @@ const {Type,Data_Logic,Cart_Logic,Order_Logic} = require("/home/think1/www/doqbo
 - connect
 */
 /* --- TEST CONFIG START --- */
-const APP_ID = 'test-stage-jan20';
+const APP_ID = 'test-stage-jan21';
 /* --- TEST CONFIG END --- */
 
 /* --- DATA CONFIG START --- */
@@ -42,7 +42,7 @@ describe('connect', function(){ this.timeout(25000);
                 let new_data_type = Type.DATA_PRODUCT;
                 let id = '484';
                 //let id = 'home22';
-                let print_test = false;
+                let print_test = true;
                 //-->
                 //-- GET  START --//
                 /*
@@ -105,12 +105,34 @@ describe('connect', function(){ this.timeout(25000);
                 //const [error_order,order] = await Order_Data.post(database,order_product);
                 // -- post-end --//
                 // -- get-start --//
+                /*
                 let order_product = Data_Logic.get(Type.DATA_ORDER,'OR-34952');
                 const [error,biz_data] = await Order_Data.get(database,order_product.id);
                 //Log.w('33_order',biz_data);
+                */
                 // -- get-end --//
                 //-- ORDER END --//
                 //-->
+                //-- PROJECT-500 START --//
+                /*
+                // -- home-start -- //
+                let key = Type.PAGE_PRODUCT;
+                let product_title_url = 'product_554';
+                let data_type = Type.DATA_PAGE;
+
+                //id
+                let id_field = Type.FIELD_TITLE_URL;
+                //join_product = product_554
+                let join_product = Data_Logic.get_search(Type.SEARCH_ONE,Data_Logic.get_search(Type.DATA_USER,{title_url:product_title_url},{},1,0));
+                let = option = {id_field,joins:[join_product]};
+
+                const [error,biz_data] = await Portal.get(database,data_type,key,option);
+                // -- home-end -- //
+                // */
+                //-- PROJECT-500 END --//
+
+
+
                 //
                //-->
                 //let favorite = Favorite_Logic.get(parent.data_type,parent.id,user.id);
@@ -121,20 +143,27 @@ describe('connect', function(){ this.timeout(25000);
                 //let option = {distinct:{field:'title',sort_by:Type.TITLE_SORT_BY_DESC},field:{title:1,title_url:1}};
 
                 //let option = {field:{id:1,title:1,title_url:1}};
-                //let join_search_1 = Data_Logic.get_search_join(Type.TITLE_ONE,Data_Logic.get_search(Type.DATA_BLANK,{},{},1,0),{title:'apple'});
                 //let join_search_2 = Data_Logic.get_search_join(Type.TITLE_ONE,Data_Logic.get_search(Type.DATA_BLANK,{},{},1,0),{title:'cool'});
-                //let option = {joins:[join_search_1]};
 
                 //let foreign_search_3 = Data_Logic.get_search_foreign(Type.TITLE_COUNT,Type.DATA_PRODUCT,Type.FIELD_CATEGORY,Type.FIELD_TITLE,{field:{id:1},title:'product_count'});
                 //let option = {foreigns:[foreign_search_3],distinct:{field:'title'},field:{title:1,title_url:1,product_count:1}};
 
-                //--- FOREIGN -- START -- //
+                //--- JOIN -- START -- //
                 /*
-                let foreign_search_1 = Data_Logic.get_search_foreign(Type.TITLE_COUNT,Type.DATA_PRODUCT,Type.FIELD_CATEGORY,Type.FIELD_TITLE,{title:'cool'});
+                let join_search_1 = Data_Logic.get_search_join(Type.SEARCH_ITEMS,Data_Logic.get_search(Type.DATA_CATEGORY,{},{},1,3),{title:'cool',field:{title:1}});
+                let option = {joins:[join_search_1]};
+                let search = Data_Logic.get_search(Type.DATA_CATEGORY,{category:Type.DATA_PRODUCT},{title:1},1,0);
+                //const [error,biz_data] = await Portal.get(database,Type.DATA_PRODUCT,'927',option);
+                const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option);
+                */
+                //--- JOIN -- END -- //
+                //
+
+                //--- FOREIGN -- START -- //
+                let foreign_search_1 = Data_Logic.get_search_foreign(Type.SEARCH_ITEMS,Type.DATA_PRODUCT,Type.FIELD_CATEGORY,Type.FIELD_TITLE,{title:'cool'});
                 let option = {foreigns:[foreign_search_1],distinct:{field:'title'}};
                 let search = Data_Logic.get_search(Type.DATA_CATEGORY,{},{date_create:-1},1,0);
                 const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option);
-                */
                 //--- FOREIGN -- END -- //
                 //
                 //let group_search_1 = Data_Logic.get_search_group({image:{show:true}});
@@ -143,35 +172,6 @@ describe('connect', function(){ this.timeout(25000);
                 //let option = {groups:[group_search_1]};
                 //let option = {groups:[group_search_2]};
 
-                //let option = {stat:{user_id:user.id,type:Type.STAT_VIEW,unique:false}};
-                //---
-                //let search = Data_Logic.get_search(Type.DATA_GROUP,{},{date_create:-1},1,0);
-                //
-                //let search = Data_Logic.get_search(Type.DATA_CATEGORY,{category:Type.DATA_PRODUCT},{title:1},1,0);
-                //---
-                //const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option);
-                //const [biz_error,biz_data] = await Portal.search_simple(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option);
-                //const [biz_error,biz_data] = await Product_Data.search(database,search.filter,search.sort_by,search.page_current,search.page_size,option);
-                //---
-                //const [biz_error,biz_data] = await Portal.count(database,search.data_type,search.filter);
-                //---
-                //---
-                //const [error,biz_data] = await Portal.get(database,parent.data_type,parent.id,option);
-               //const [error,biz_data] = await Portal.get(database,group.data_type,group.id,option);
-                //const [error,biz_data] = await Portal.get(database,group.data_type,group.id);
-                //const [error,biz_data] = await Page_Data.get(database,id,option);
-                //--- POST -- START -- //
-                //const [error,biz_data] = await Portal.post(database,parent.data_type,parent,option?option:{});
-                //const [error,biz_data] = await Portal.post(database,group.data_type,group);
-                //const [error,biz_data] = await Portal.post(database,blank.data_type,blank);
-                //const [error,biz_data] = await Portal.post(database,user.data_type,user);
-                //const [error,biz_data] = await Portal.post(database,image.data_type,image);
-                //--- POST -- END -- //
-                //---
-                //const [error,biz_data] = await Portal.post_items(database,parent_list);
-                //---
-                //const [error,biz_data] = await Portal.delete(database,parent.data_type,parent.id,option);
-                //const [biz_error,biz_data] = await Portal.delete_search(database,search.data_type,search.filter,option);
                 //---
                 //iconst [error,biz_data] = await User_Data.login(database,user,option);
                 //const [error,biz_data] = await User_Data.register(database,user,option);

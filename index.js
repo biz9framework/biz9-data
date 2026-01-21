@@ -650,7 +650,6 @@ class Order_Data {
 				},
 				*/
 			]).then(result => {
-				Log.w('rrrrr',data.order);
 				callback([error,data.order]);
 			}).catch(err => {
 				Log.error("OrderData-Order-Item-Update",err);
@@ -674,8 +673,8 @@ class Order_Data {
 				 },
 				//get_order
 				async function(call){
-                 	let foreign_order_item = Data_Logic.get_search_foreign(Type.TITLE_ITEMS,Type.DATA_ORDER_ITEM,Type.FIELD_ORDER_ID,Type.FIELD_ID);
-                 	let foreign_user = Data_Logic.get_search_foreign(Type.TITLE_ONE,Type.DATA_USER,Type.FIELD_ID,Type.FIELD_USER_ID,{title:'user'});
+                 	let foreign_order_item = Data_Logic.get_search_foreign(Type.SEARCH_ITEMS,Type.DATA_ORDER_ITEM,Type.FIELD_ORDER_ID,Type.FIELD_ID);
+                 	let foreign_user = Data_Logic.get_search_foreign(Type.SEARCH_ONE,Type.DATA_USER,Type.FIELD_ID,Type.FIELD_USER_ID,{title:'user'});
 					let order_option = { id_field:Type.FIELD_ORDER_NUMBER,foreigns:[foreign_order_item,foreign_user] };
 					const [biz_error,biz_data] = await Portal.get(database,Type.DATA_ORDER,order_number,order_option);
 					if(biz_error){
@@ -685,10 +684,9 @@ class Order_Data {
 					}
 				},
 				function(call){
-					let foreign_order_sub_item = Data_Logic.get_search_foreign(Type.TITLE_ITEMS,Type.DATA_ORDER_SUB_ITEM,Type.FIELD_ORDER_ITEM_ID,Type.FIELD_ID);
+					let foreign_order_sub_item = Data_Logic.get_search_foreign(Type.SEARCH_ITEMS,Type.DATA_ORDER_SUB_ITEM,Type.FIELD_ORDER_ITEM_ID,Type.FIELD_ID);
 					let option_order_sub_item = { foreigns:[foreign_order_sub_item] };
                     Portal.get_data_foreigns(database,cache,data.order.order_items,option_order_sub_item).then(([biz_error,biz_data])=>{
-						Log.w('rrrrr',biz_data);
                     		if(biz_error){
                                  error=Log.append(error,biz_error);
                              }else{
@@ -704,8 +702,7 @@ class Order_Data {
 					data.order = Order_Logic.get_total(data.order);
 				},
 			]).then(result => {
-				Log.w('343_order',data.order);
-				//callback([error,data.order]);
+				callback([error,data.order]);
 			}).catch(err => {
 				Log.error("Order-Get",err);
 				callback([error,[]]);
@@ -926,7 +923,7 @@ class Review_Data {
 				async function(call){
 					let query = {parent_id:parent_id,parent_data_type:parent_data_type};
 					let search = Data_Logic.get_search(Type.DATA_REVIEW,query,sort_by,page_current,page_size);
-                    let foreign_user = Data_Logic.get_search_foreign(Type.TITLE_ONE,Type.DATA_USER,Type.FIELD_ID,Type.FIELD_USER_ID,{title:'user'});
+                    let foreign_user = Data_Logic.get_search_foreign(Type.SEARCH_ONE,Type.DATA_USER,Type.FIELD_ID,Type.FIELD_USER_ID,{title:'user'});
 					let option = {foreigns:[foreign_user]};
 					const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option);
 
@@ -1452,7 +1449,7 @@ class Portal {
  		 *  Group
 			-- groups / type. obj. group_search / ex. [
 					{
-						type:Type.Type.TITLE_ITEMS,Type.TITLE_COUNT,
+						type:Type.Type.SEARCH_ITEMS,Type.SEARCH_ONE,
 						field:{field_show_1:1,field_hide_2:0},
 						title:{group_show_1:1,group_hide_2:0},
 						page_current:1,
@@ -1461,7 +1458,7 @@ class Portal {
 		 *  Foreign
 			-- foreigns / type. obj. foreign_search / ex. [
 					{
-						type:Type.Type.TITLE_ITEMS,Type.TITLE_COUNT,
+						type:Type.Type.SEARCH_ITEMS,Type.SEARCH_ONE,
 						foreign_data_type:Type.DATA_PRODUCT,
 						foreign_field:'id',
 						parent_field:'parent_id',
@@ -1473,7 +1470,7 @@ class Portal {
 		*  Join
 			-- joins / type. obj. join_search / ex. [
 					{
-						type:Type.Type.TITLE_ITEMS,Type.TITLE_COUNT
+						type:Type.Type.SEARCH_ITEMS,Type.SEARCH_ONE
 						search:search_obj,
 						title:'field_title',
 						page_current:1,
@@ -1600,7 +1597,7 @@ class Portal {
 							    }
 							    let item_group_join_option = {field:search_item.field};
 							    if(search_item.image.show){
-								    item_group_join_option['foreigns'] = [Data_Logic.get_search_foreign(Type.TITLE_LIST,Type.DATA_IMAGE,Type.FIELD_PARENT_ID,Type.FIELD_ID)];
+								    item_group_join_option['foreigns'] = [Data_Logic.get_search_foreign(Type.SEARCH_ITEMS,Type.DATA_IMAGE,Type.FIELD_PARENT_ID,Type.FIELD_ID)];
 							    }
 							    let search = Data_Logic.get_search(Type.DATA_GROUP,group_query,{},search_item.page_current,search_item.page_size);
                                 get_item_list_adapter(database,cache,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,item_group_join_option).then(([biz_error,items,item_count,page_count])=>{
@@ -1637,12 +1634,12 @@ class Portal {
 	                    let foreign_search_items = [];
 						for(const item of option.foreigns){
 								foreign_search_items.push({
-									type : item.type ? item.type : Type.TITLE_ITEMS,
+									type : item.type ? item.type : Type.SEARCH_ITEMS,
 									foreign_data_type : item.foreign_data_type,
 									foreign_field : item.foreign_field,
 									parent_field : item.parent_field,
 									field : item.field ? item.field : {},
-									title : item.title ? item.title : Str.get_title_url(Type.get_title(item.foreign_data_type,{plural:true})),
+									title : item.title ? item.title : Str.get_title_url(Data_Logic.get_data_type_by_type(item.foreign_data_type,{plural:true})),
 									page_current: item.page_current ? item.page_current : 1,
 									page_size: item.page_size ? item.page_size : 0,
 								});
@@ -1650,7 +1647,7 @@ class Portal {
                         function get_data(search_item) {
                             return new Promise((resolve) => {
 	                            let foreign_option = {field:search_item.field};
-								if(search_item.type == Type.TITLE_ITEMS){
+								if(search_item.type == Type.SEARCH_ITEMS){
                                     let query = {};
 								    query[search_item.foreign_field] = data[search_item.parent_field];
 								    let search = Data_Logic.get_search(search_item.foreign_data_type,query,{},1,0);
@@ -1666,7 +1663,7 @@ class Portal {
                                         error=Log.append(error,err);
                                     });
                                 }
-                                else if(search_item.type == Type.TITLE_COUNT){
+                                else if(search_item.type == Type.SEARCH_ONE){
                                     let query = {};
 								    query[search_item.foreign_field] = data[search_item.parent_field];
 								    let search = Data_Logic.get_search(search_item.foreign_data_type,query,{},1,0);
@@ -1682,7 +1679,7 @@ class Portal {
                                             error=Log.append(error,err);
                                         });
                                 }
-                                else if(search_item.type == Type.TITLE_ONE){
+                                else if(search_item.type == Type.SEARCH_ONE){
                                     let query = {};
 								    query[search_item.foreign_field] = data[search_item.parent_field];
 								    let search = Data_Logic.get_search(search_item.foreign_data_type,query,{},1,0);
@@ -1775,7 +1772,7 @@ class Portal {
 							}
 							let item_group_join_option = {field:search_item.field};
 							if(search_item.image.show){
-								item_group_join_option['foreigns'] = [Data_Logic.get_search_foreign(Type.TITLE_LIST,Type.DATA_IMAGE,Type.FIELD_PARENT_ID,Type.FIELD_ID)];
+								item_group_join_option['foreigns'] = [Data_Logic.get_search_foreign(Type.SEARCH_ITEMS,Type.DATA_IMAGE,Type.FIELD_PARENT_ID,Type.FIELD_ID)];
 							}
 	                        let item_group_join_search = Data_Logic.get_search(Type.DATA_GROUP,group_query,{},search_item.page_current,search_item.page_size);
 						    get_item_list_adapter(database,cache,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,join_option).then(([biz_error,items,item_count,page_count])=>{
@@ -1825,7 +1822,7 @@ class Portal {
 					for(const foreign_item of option.foreigns){
 						for(const data_item of data_items){
 							foreign_search_items.push({
-								type : foreign_item.type ? foreign_item.type : Type.TITLE_ITEMS,
+								type : foreign_item.type ? foreign_item.type : Type.SEARCH_ITEMS,
 								foreign_data_type : foreign_item.foreign_data_type,
 								foreign_field : foreign_item.foreign_field,
 								parent_field : foreign_item.parent_field,
@@ -1861,7 +1858,7 @@ class Portal {
 							    function get_item_data(data_item) {
                                     return new Promise((resolve2) => {
 									let query = {};
-								    if(search_item.type == Type.TITLE_ITEMS){
+								    if(search_item.type == Type.SEARCH_ITEMS){
 										query[search_item.foreign_field] = data_item[search_item.parent_field];
 										let search = Data_Logic.get_search(search_item.foreign_data_type,query,{},1,0);
 										data_item[search_item.title] = [];
@@ -1879,7 +1876,7 @@ class Portal {
                                             error=Log.append(error,err);
                                         });
 									}
- 									else if(search_item.type == Type.TITLE_COUNT){
+ 									else if(search_item.type == Type.SEARCH_COUNT){
 											query[search_item.foreign_field] = data_item[search_item.parent_field];
 											let search = Data_Logic.get_search(search_item.foreign_data_type,query,{},1,0);
 											get_count_item_list_adapter(database,search.data_type,search.filter).then(([biz_error,biz_data])=>{
@@ -1894,7 +1891,7 @@ class Portal {
                                             error=Log.append(error,err);
                                           });
 									}
-									else if(search_item.type == Type.TITLE_ONE){
+									else if(search_item.type == Type.SEARCH_ONE){
 										query[search_item.foreign_field] = data_item[search_item.parent_field];
 										let search = Data_Logic.get_search(search_item.foreign_data_type,query,{},1,0);
 										data_item[search_item.title] = [];
@@ -1956,19 +1953,19 @@ class Portal {
                     let join_search_items = [];
 					for(const join_item of option.joins){
 					    join_search_items.push({
-							type : join_item.type ?  join_item.type : Type.TITLE_LIST,
+							type : join_item.type ?  join_item.type : Type.SEARCH_ITEMS,
 							search : join_item.search ? join_item.search : Data_Logic.get_search(Type.DATA_BLANK,{},{},1,0),
 							field : join_item.field ? join_item.field : null,
-							title : join_item.title ? join_item.title : Str.get_title_url(Type.get_title(join_item.foreign_data_type,{plural:true})),
+							title : join_item.title ? join_item.title : Str.get_title_url(Data_Logic.get_data_type_by_type(join_item.search.data_type,{plural:true})),
 							page_current : join_item.page_current ? join_item.page_current : 1,
 							page_size : join_item.page_size ? join_item.page_size : 0,
 						});
 					}
                     function get_data(search_item) {
                         return new Promise((resolve) => {
-						        if(search_item.type == Type.TITLE_ITEMS){
+						        if(search_item.type == Type.SEARCH_ITEMS){
                                     let search = Data_Logic.get_search(search_item.search.data_type,search_item.search.filter,search_item.search.sort_by,search_item.search.page_current,search_item.search.page_size);
-							        let join_option = search_item.field ? search_item.field : {};
+									let join_option = {field:search_item.field};
                                     get_item_list_adapter(database,cache,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,join_option).then(([biz_error,items,item_count,page_count])=>{
                                         if(biz_error){
                                                 error=Log.append(error,biz_error);
@@ -1985,9 +1982,9 @@ class Portal {
                                             error=Log.append(error,err);
                                         });
                                 }
-                                else if(search_item.type == Type.TITLE_COUNT){
+                                else if(search_item.type == Type.SEARCH_COUNT){
                                     let search = Data_Logic.get_search(search_item.search.data_type,search_item.search.filter,search_item.search.sort_by,search_item.search.page_current,search_item.search.page_size);
-							        let join_option = search_item.field ? search_item.field : {};
+  									let join_option = {field:search_item.field};
                                     get_count_item_list_adapter(database,search.data_type,search.filter).then(([biz_error,biz_data])=>{
                                         if(biz_error){
                                                 error=Log.append(error,biz_error);
@@ -2000,9 +1997,9 @@ class Portal {
                                             error=Log.append(error,err);
                                         });
                                 }
-                                else if(search_item.type == Type.TITLE_ONE){
+                                else if(search_item.type == Type.SEARCH_ONE){
                                     let search = Data_Logic.get_search(search_item.search.data_type,search_item.search.filter,search_item.search.sort_by,search_item.search.page_current,search_item.search.page_size);
-							            let join_option = search_item.field ? search_item.field : {};
+							            let join_option = {field:search_item.field};
                                         get_item_list_adapter(database,cache,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,join_option).then(([biz_error,items,item_count,page_count])=>{
                                             if(biz_error){
                                                 error=Log.append(error,biz_error);
@@ -2132,7 +2129,7 @@ class Portal {
 		*  Foreign
 			-- foreigns / type. obj items / ex. [
 					{
-						type:Type.Type.TITLE_ITEMS,Type.TITLE_COUNT,Type.TITLE_ONE
+						type:Type.Type.SEARCH_ITEMS,Type.SEARCH_ONE,Type.SEARCH_ONE
 						foreign_data_type:Type.DATA_ITEM,
 						foreign_field:'id',
 						parent_field:'parent_id',
@@ -2142,7 +2139,7 @@ class Portal {
 		*  Join
 			-- joins / type. obj. join_search / ex. [
 					{
-						type:Type.Type.TITLE_ITEMS,Type.TITLE_COUNT
+						type:Type.Type.SEARCH_ITEMS,Type.SEARCH_ONE
 						search:search_obj,
 						title:'field_title',
 						page_current:1,
@@ -2151,7 +2148,7 @@ class Portal {
 	    *  Group
 			-- groups / type. obj. group_search / ex. [
 					{
-						type:Type.Type.TITLE_ITEMS,Type.TITLE_COUNT,
+						type:Type.Type.SEARCH_ITEMS,Type.SEARCH_ONE,
 						field:{field_show_1:1,field_hide_2:0},
 						title:{group_show_1:1,group_hide_2:0},
 						page_current:1,
@@ -2284,7 +2281,7 @@ class Portal {
 							}
 							let item_group_join_option = {field:search_item.field};
 							if(search_item.image.show){
-								item_group_join_option['foreigns'] = [Data_Logic.get_search_foreign(Type.TITLE_LIST,Type.DATA_IMAGE,Type.FIELD_PARENT_ID,Type.FIELD_ID)];
+								item_group_join_option['foreigns'] = [Data_Logic.get_search_foreign(Type.SEARCH_ITEMS,Type.DATA_IMAGE,Type.FIELD_PARENT_ID,Type.FIELD_ID)];
 							}
 							let item_group_join_search = Data_Logic.get_search(Type.DATA_GROUP,group_query,{},search_item.page_current,search_item.page_size);
 
@@ -3142,8 +3139,8 @@ class Cart_Data  {
 				 },
 				//get_cart
 				async function(call){
-                 	let foreign_cart_item = Data_Logic.get_search_foreign(Type.TITLE_ITEMS,Type.DATA_CART_ITEM,Type.FIELD_CART_ID,Type.FIELD_ID);
-                 	let foreign_user = Data_Logic.get_search_foreign(Type.TITLE_ONE,Type.DATA_USER,Type.FIELD_ID,Type.FIELD_USER_ID,{title:'user'});
+                 	let foreign_cart_item = Data_Logic.get_search_foreign(Type.SEARCH_ITEMS,Type.DATA_CART_ITEM,Type.FIELD_CART_ID,Type.FIELD_ID);
+                 	let foreign_user = Data_Logic.get_search_foreign(Type.SEARCH_ONE,Type.DATA_USER,Type.FIELD_ID,Type.FIELD_USER_ID,{title:'user'});
 					let cart_option = { id_field:Type.FIELD_CART_NUMBER,foreigns:[foreign_cart_item,foreign_user] };
 					const [biz_error,biz_data] = await Portal.get(database,Type.DATA_CART,cart_number,cart_option);
 					if(biz_error){
@@ -3153,7 +3150,7 @@ class Cart_Data  {
 					}
 				},
 				function(call){
-					let foreign_cart_sub_item = Data_Logic.get_search_foreign(Type.TITLE_ITEMS,Type.DATA_CART_SUB_ITEM,Type.FIELD_CART_ITEM_ID,Type.FIELD_ID);
+					let foreign_cart_sub_item = Data_Logic.get_search_foreign(Type.SEARCH_ITEMS,Type.DATA_CART_SUB_ITEM,Type.FIELD_CART_ITEM_ID,Type.FIELD_ID);
 					let option_cart_sub_item = { foreigns:[foreign_cart_sub_item] };
                     Portal.get_data_foreigns(database,cache,data.cart.cart_items,option_cart_sub_item).then(([biz_error,biz_data])=>{
                     		if(biz_error){
