@@ -148,6 +148,21 @@ const get_item_list_adapter = (database,cache,data_type,filter,sort_by,page_curr
                     }
                 }
             },
+			//distinct
+			function(call){
+				if(option.distinct){
+                    console.log(option);
+					item_data_list = item_data_list.filter((obj, index, self) =>
+						index === self.findIndex((t) => t[option.distinct.field] === obj[option.distinct.field])
+					);
+						let distinct_sort_by = option.distinct.sort_by ? option.distinct.sort_by : Type.TITLE_SORT_BY_ASC;
+						item_data_list = Obj.sort_list_by_field(item_data_list,option.distinct.field,distinct_sort_by);
+	    				item_count=item_data_list.length;
+                        call();
+					}else{
+                        call();
+                    }
+				},
             function(call) {
                 page_count = !Str.check_is_null(Math.round(item_count/page_size+1)) ? Math.round(item_count/page_size+1) : 0;
                 page_count = page_count == "Infinity" || Str.check_is_null(page_count) ? 1 : page_count;

@@ -1487,7 +1487,7 @@ class Portal {
 					};
 		 */
 		return new Promise((callback) => {
-			let error = null;
+			let error= null;
 			let cache = {};
 			let data = Data_Logic.get(data_type,0);
 			let stat_view = Data_Logic.get(Type.DATA_STAT,0);
@@ -1948,33 +1948,35 @@ class Portal {
 	static get_data_joins = (database,cache,data,option) => {
 		return new Promise((callback) => {
 			let error = null;
+            let join_search_items = [];
 			async.series([
 	            function(call){
-                    let join_search_items = [];
 					for(const join_item of option.joins){
 					    join_search_items.push({
 							type : join_item.type ?  join_item.type : Type.SEARCH_ITEMS,
 							search : join_item.search ? join_item.search : Data_Logic.get_search(Type.DATA_BLANK,{},{},1,0),
 							field : join_item.field ? join_item.field : null,
+							distinct : join_item.distinct ? join_item.distinct : null,
 							title : join_item.title ? join_item.title : Str.get_title_url(Data_Logic.get_data_type_by_type(join_item.search.data_type,{plural:true})),
-							page_current : join_item.page_current ? join_item.page_current : 1,
-							page_size : join_item.page_size ? join_item.page_size : 0,
+							foreigns : join_item.foreigns ? join_item.foreigns : [],
+							items : []
 						});
 					}
                     function get_data(search_item) {
+ 						data[search_item.title] = [];
                         return new Promise((resolve) => {
 						        if(search_item.type == Type.SEARCH_ITEMS){
                                     let search = Data_Logic.get_search(search_item.search.data_type,search_item.search.filter,search_item.search.sort_by,search_item.search.page_current,search_item.search.page_size);
-									let join_option = {field:search_item.field};
+									let join_option = {field:search_item.field,distinct:search_item.distinct};
                                     get_item_list_adapter(database,cache,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,join_option).then(([biz_error,items,item_count,page_count])=>{
+
                                         if(biz_error){
                                                 error=Log.append(error,biz_error);
                                             }else{
-									            let title = Str.get_title_url(search_item.title);
-									            data[title+'_item_count'] = item_count;
-									            data[title+'_page_count'] = page_count;
-									            data[title+'_search'] = search;
-									            data[title] = items;
+									            data[search_item.title+'_item_count'] = item_count;
+									            data[search_item.title+'_page_count'] = page_count;
+									            data[search_item.title+'_search'] = search;
+									            data[search_item.title] = items;
                                             }
                                             resolve();
                                         }).catch(err => {
@@ -2004,7 +2006,9 @@ class Portal {
                                             if(biz_error){
                                                 error=Log.append(error,biz_error);
                                             }else{
-									            data[Str.get_title_url(search_item.title)] = items.length>0 ? items[0] : Data_Logic.get_not_found(search_item.search.data_type,0);
+									            let one_item = items.length>0 ? items[0] : Data_Logic.get_not_found(search_item.search.data_type,0);
+									            data[Str.get_title_url(search_item.title)] = one_item;
+     											search_item.items = [one_item];
                                                 resolve();
                                             }
                                         }).catch(err => {
@@ -2017,6 +2021,38 @@ class Portal {
                     const run = async () => {
                         for(const search_item of join_search_items){
                             await get_data(search_item);
+                        }
+                    }
+                    run().then(() => {
+                        call();
+                    });
+                },
+				//foreign
+ 			    function(call){
+                    function get_data(search_item,data) {
+                        return new Promise((resolve) => {
+								let join_foreign_option = {foreigns:search_item.foreigns};
+								Portal.get_data_foreigns(database,cache,data,join_foreign_option).then(([biz_error,biz_data])=>{
+                                    if(biz_error){
+                                        error=Log.append(error,biz_error);
+                                    }else{
+                                        data = biz_data;
+                                        resolve();
+                                    }
+                                }).catch(err => {
+                                    Log.error('Data-Portal-Get-Joins-Foreigns',err);
+                                        error=Log.append(error,err);
+                                });
+                        });
+                    }
+					const run = async () => {
+                        for(const search_item of join_search_items){
+							if(search_item.foreigns){
+ 								for(const data_item of data[search_item.title]){
+                            		await get_data(search_item,[data_item]);
+								}
+
+							}
                         }
                     }
                     run().then(() => {
@@ -2124,7 +2160,7 @@ class Portal {
 	       - distinct / type. obj.
 					{
 						field:'title'
-						sort_by:Type.TITLE_SORT_BY_ASC,
+						sort_by:Type.SEARCH_SORT_BY_ASC,
 					};
 		*  Foreign
 			-- foreigns / type. obj items / ex. [
@@ -2189,22 +2225,7 @@ class Portal {
                         error=Log.append(error,err);
                     });
 				},
-				//9_get_items_distinct
-				function(call){
-					if(option.distinct && data.items.length>0){
-						data.items = data.items.filter((obj, index, self) =>
-							index === self.findIndex((t) => t[option.distinct.field] === obj[option.distinct.field])
-						);
-						let distinct_sort_by = option.distinct.sort_by ? option.distinct.sort_by : Type.TITLE_SORT_BY_ASC;
-						data.items = Obj.sort_list_by_field(data.items,option.distinct.field,distinct_sort_by);
-	    				data.item_count=data.items.length;
-
-                        call();
-					}else{
-                        call();
-                    }
-				},
-	            //9_get_items_join
+	         //9_get_items_join
 				function(call){
 		            if(option.joins){
                     Portal.get_data_joins(database,cache,data,option).then(([biz_error,biz_data])=>{

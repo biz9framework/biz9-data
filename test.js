@@ -39,9 +39,6 @@ describe('connect', function(){ this.timeout(25000);
             },
             async function(call){
                 //-->
-                let new_data_type = Type.DATA_PRODUCT;
-                let id = '484';
-                //let id = 'home22';
                 let print_test = true;
                 //-->
                 //-- GET  START --//
@@ -114,25 +111,27 @@ describe('connect', function(){ this.timeout(25000);
                 //-- ORDER END --//
                 //-->
                 //-- PROJECT-500 START --//
-                /*
                 // -- home-start -- //
-                let key = Type.PAGE_PRODUCT;
-                let product_title_url = 'product_554';
+                let id = Type.PAGE_HOME;
                 let data_type = Type.DATA_PAGE;
-
                 //id
                 let id_field = Type.FIELD_TITLE_URL;
-                //join_product = product_554
-                let join_product = Data_Logic.get_search(Type.SEARCH_ONE,Data_Logic.get_search(Type.DATA_USER,{title_url:product_title_url},{},1,0));
-                let = option = {id_field,joins:[join_product]};
+                //joins
+                //products-popular
+                let join_product_popular = Data_Logic.get_search_join(Type.SEARCH_ITEMS,Data_Logic.get_search(Type.DATA_PRODUCT,{},{view_count:-1},1,12),{title:'popular_products'});
+                let join_product_latest = Data_Logic.get_search_join(Type.SEARCH_ITEMS,Data_Logic.get_search(Type.DATA_PRODUCT,{},{date_create:-1},1,12),{title:'latest_products'});
+                let join_product_rating = Data_Logic.get_search_join(Type.SEARCH_ITEMS,Data_Logic.get_search(Type.DATA_PRODUCT,{},{rating_avg:-1},1,12),{title:'top_products'});
+                let join_product_trending = Data_Logic.get_search_join(Type.SEARCH_ITEMS,Data_Logic.get_search(Type.DATA_PRODUCT,{},{view_count:-1},1,12),{title:'trending_products'});
 
-                const [error,biz_data] = await Portal.get(database,data_type,key,option);
+                let join_foreign_category_product = Data_Logic.get_search_foreign(Type.SEARCH_COUNT,Type.DATA_PRODUCT,Type.FIELD_CATEGORY,Type.FIELD_TITLE,{title:'product_count'});
+                let join_category = Data_Logic.get_search_join(Type.SEARCH_ITEMS,Data_Logic.get_search(Type.DATA_CATEGORY,{},{view_count:-1},1,12),{title:'categorys',distinct:{field:Type.FIELD_TITLE,sort_by:Type.SEARCH_SORT_BY_ASC},foreigns:[join_foreign_category_product]});
+                let = option = {id_field,joins:[join_product_popular,join_product_latest,join_product_rating,join_product_trending,join_category]};
+                //let = option = {id_field,joins:[join_category]};
+                const [error,biz_data] = await Portal.get(database,data_type,id,option);
                 // -- home-end -- //
-                // */
                 //-- PROJECT-500 END --//
 
-
-
+                //let product_title_url = 'product_554';
                 //
                //-->
                 //let favorite = Favorite_Logic.get(parent.data_type,parent.id,user.id);
@@ -143,14 +142,14 @@ describe('connect', function(){ this.timeout(25000);
                 //let option = {distinct:{field:'title',sort_by:Type.TITLE_SORT_BY_DESC},field:{title:1,title_url:1}};
 
                 //let option = {field:{id:1,title:1,title_url:1}};
-                //let join_search_2 = Data_Logic.get_search_join(Type.TITLE_ONE,Data_Logic.get_search(Type.DATA_BLANK,{},{},1,0),{title:'cool'});
+                //let join_search_2 = Data_Logic.get_search_join(Type.SEARCH_ONE,Data_Logic.get_search(Type.DATA_BLANK,{},{},1,0),{title:'cool'});
 
-                //let foreign_search_3 = Data_Logic.get_search_foreign(Type.TITLE_COUNT,Type.DATA_PRODUCT,Type.FIELD_CATEGORY,Type.FIELD_TITLE,{field:{id:1},title:'product_count'});
+                //let foreign_search_3 = Data_Logic.get_search_foreign(Type.SEARCH_COUNT,Type.DATA_PRODUCT,Type.FIELD_CATEGORY,Type.FIELD_TITLE,{field:{id:1},title:'product_count'});
                 //let option = {foreigns:[foreign_search_3],distinct:{field:'title'},field:{title:1,title_url:1,product_count:1}};
 
                 //--- JOIN -- START -- //
                 /*
-                let join_search_1 = Data_Logic.get_search_join(Type.SEARCH_ITEMS,Data_Logic.get_search(Type.DATA_CATEGORY,{},{},1,3),{title:'cool',field:{title:1}});
+                let join_search_1 = Data_Logic.get_search_join(Type.SEARCH_COUNT,Data_Logic.get_search(Type.DATA_CATEGORY,{},{},1,0),{title:'my_count'});
                 let option = {joins:[join_search_1]};
                 let search = Data_Logic.get_search(Type.DATA_CATEGORY,{category:Type.DATA_PRODUCT},{title:1},1,0);
                 //const [error,biz_data] = await Portal.get(database,Type.DATA_PRODUCT,'927',option);
@@ -160,10 +159,12 @@ describe('connect', function(){ this.timeout(25000);
                 //
 
                 //--- FOREIGN -- START -- //
+                /*
                 let foreign_search_1 = Data_Logic.get_search_foreign(Type.SEARCH_ONE,Type.DATA_PRODUCT,Type.FIELD_CATEGORY,Type.FIELD_TITLE,{title:'cool'});
                 let option = {foreigns:[foreign_search_1],distinct:{field:'title'}};
                 let search = Data_Logic.get_search(Type.DATA_CATEGORY,{},{date_create:-1},1,0);
                 const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option);
+                */
                 //--- FOREIGN -- END -- //
                 //
                 //let group_search_1 = Data_Logic.get_search_group({image:{show:true}});
