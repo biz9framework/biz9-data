@@ -125,9 +125,12 @@ describe('connect', function(){ this.timeout(25000);
 
                 let join_foreign_category_product_count = Data_Logic.get_search_foreign(Type.SEARCH_COUNT,Type.DATA_PRODUCT,Type.FIELD_CATEGORY,Type.FIELD_TITLE,{title:'product_count'});
                 let join_foreign_category_product_items = Data_Logic.get_search_foreign(Type.SEARCH_ITEMS,Type.DATA_PRODUCT,Type.FIELD_CATEGORY,Type.FIELD_TITLE,{title:'product_items',page_current:1,page_size:12});
+
                 let join_category = Data_Logic.get_search_join(Type.SEARCH_ITEMS,Data_Logic.get_search(Type.DATA_CATEGORY,{},{view_count:-1},1,12),{title:'categorys',distinct:{field:Type.FIELD_TITLE,sort_by:Type.SEARCH_SORT_BY_ASC},foreigns:[join_foreign_category_product_count, join_foreign_category_product_items]});
-                let = option = {id_field,joins:[join_product_popular,join_product_latest,join_product_rating,join_product_trending,join_category]};
-                //let = option = {id_field,joins:[join_category]};
+
+                let join_blog_post = Data_Logic.get_search_join(Type.SEARCH_ITEMS,Data_Logic.get_search(Type.DATA_BLOG_POST,{},{view_count:-1},1,12),{title:'blog_items'});
+
+                let = option = {id_field,joins:[join_product_popular,join_product_latest,join_product_rating,join_product_trending,join_category,join_blog_post]};
                 const [error,biz_data] = await Portal.get(database,data_type,id,option);
                 // -- home-end -- //
                 //-- PROJECT-500 END --//
