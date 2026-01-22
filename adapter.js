@@ -151,7 +151,6 @@ const get_item_list_adapter = (database,cache,data_type,filter,sort_by,page_curr
 			//distinct
 			function(call){
 				if(option.distinct){
-                    console.log(option);
 					item_data_list = item_data_list.filter((obj, index, self) =>
 						index === self.findIndex((t) => t[option.distinct.field] === obj[option.distinct.field])
 					);

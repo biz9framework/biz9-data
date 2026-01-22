@@ -1843,7 +1843,7 @@ class Portal {
 						                query_field[search_item.foreign_field] = search_item.parent_value;
 						                query.$or.push(query_field);
 					            };
-					            let search = Data_Logic.get_search(search_item.foreign_data_type,query,{},1,0);
+					            let search = Data_Logic.get_search(search_item.foreign_data_type,query,{},search_item.page_current,search_item.page_size);
 					            let foreign_option = search_item.field ? search_item.field : {};
 							    for(const data_item of data_items){
 								    let query_field = {};
@@ -1969,7 +1969,6 @@ class Portal {
                                     let search = Data_Logic.get_search(search_item.search.data_type,search_item.search.filter,search_item.search.sort_by,search_item.search.page_current,search_item.search.page_size);
 									let join_option = {field:search_item.field,distinct:search_item.distinct};
                                     get_item_list_adapter(database,cache,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,join_option).then(([biz_error,items,item_count,page_count])=>{
-
                                         if(biz_error){
                                                 error=Log.append(error,biz_error);
                                             }else{

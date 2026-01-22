@@ -130,7 +130,8 @@ describe('connect', function(){ this.timeout(25000);
 
                 let join_blog_post = Data_Logic.get_search_join(Type.SEARCH_ITEMS,Data_Logic.get_search(Type.DATA_BLOG_POST,{},{view_count:-1},1,12),{title:'blog_items'});
 
-                let = option = {id_field,joins:[join_product_popular,join_product_latest,join_product_rating,join_product_trending,join_category,join_blog_post]};
+                //let = option = {id_field,{title:'my_cool'},joins:[join_product_popular,join_product_latest,join_product_rating,join_product_trending,join_category,join_blog_post]};
+                let = option = {id_field,title:'my_cool'};
                 const [error,biz_data] = await Portal.get(database,data_type,id,option);
                 // -- home-end -- //
                 //-- PROJECT-500 END --//
