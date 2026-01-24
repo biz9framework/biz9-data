@@ -2346,7 +2346,7 @@ class Portal {
 		/* option params
 		 * Fields
 		   - overwrite / type. bool / ex. true,false / default. false -- post brand new obj.deleteing old.
-		   - get_update_data / type. bool / ex. true,false / default. false -- get update item aka recently saved item.
+		   - reset / type. bool / ex. true,false / default. false -- get update item aka recently saved item.
 		   - clean / type. bool / ex. true,false / default. false -- checks and removes any list, groups, etc.
 		   - delete_cache / type. bool / ex. true,false / default. false -- clear cache.
 		   */
@@ -2408,20 +2408,20 @@ class Portal {
                         error=Log.append(error,err);
                     });
 				},
-				//get_save_data
+				//reset
 				function(call){
-					if(option.get_update_data && data.id){
-                        get(database,data_type,data.id,option).then(([biz_error,biz_data])=>{
-                            if(biz_error){
-                                error=Log.append(error,biz_error);
-                            }else{
-                           	    data = biz_data;
-                                call();
-                            }
-                            }).catch(err => {
-                                Log.error('Data--Post-Get',err);
-                                error=Log.append(error,err);
-                            });
+					if(option.reset && data.id){
+                    	get_item_adapter(database,cache,data.data_type,data.id).then(([biz_error,biz_data])=>{
+                        	if(biz_error){
+                            	error=Log.append(error,biz_error);
+                        	}else{
+                   	        	data = biz_data;
+                            	call();
+                        	}
+                    	}).catch(err => {
+                        	Log.error('Data-Portal-Get-Reset',err);
+                        	error=Log.append(error,err);
+                    	});
 					}else{
                         call();
                     }
@@ -3291,10 +3291,10 @@ class Blank_Data {
                 //plain
 	            function(call){
                     get_item_adapter(database,cache,data.data_type,data.id,option).then(([biz_error,biz_data])=>{
+                         //logic
                         if(biz_error){
                             error=Log.append(error,biz_error);
                         }else{
-                            //data logic here
                             call();
                         }
                     }).catch(err => {
@@ -3306,6 +3306,7 @@ class Blank_Data {
                 function(call){
                     function get_data() {
                         return new Promise((resolve) => {
+							//logic
                             resolve();
                         });
                     }

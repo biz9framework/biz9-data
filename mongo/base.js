@@ -52,7 +52,6 @@ const get_item = (database,data_type,id,option) => {
             database.collection(data_type).findOne({id:id}).then((data) => {
                 if(data){
                     data = data;
-                    delete data['_id'];
                 }
                 callback([error,data]);
             }).catch(error => {
@@ -87,9 +86,6 @@ const post_item = (database,data_type,item,option) => {
             item[Type.FIELD_DATE_SAVE] = DateTime.get_new();
             if(check_database(database)){
                 database.collection(data_type).insertOne(item).then((data) => {
-                    if(data){
-                        delete item['_id'];
-                    }
                     callback([error,item]);
                 }).catch(error => {
                     Log.error("DATA-MONGO-BASE-UPDATE-ITEM-BASE-ERROR",error);
@@ -98,21 +94,18 @@ const post_item = (database,data_type,item,option) => {
             }
         }else{
             item.date_save = DateTime.get_new();
-            if(!option.overwrite_data){
+            if(!option.overwrite){
+                Log.w('aaaaa',item);
                 database.collection(data_type).updateOne({id:item.id},{$set: item}).then((data) => {
-                    if(data){
-                        delete item['_id'];
-                    }
                     callback([error,item]);
                 }).catch(error => {
                     Log.error("DATA-MONGO-BASE-UPDATE-ITEM-BASE-ERROR",error);
                     callback([error,null]);
                 });
             }else{
+                Log.w('bbbbbbbb',item);
+                delete item['_id'];
                 database.collection(data_type).replaceOne({id:item.id},item).then((data) => {
-                    if(data){
-                        delete item['_id'];
-                    }
                     callback([error,item]);
                 }).catch(error => {
                     Log.error("DATA-MONGO-BASE-UPDATE-ITEM-BASE-ERROR",error);
@@ -210,7 +203,7 @@ const get_id_list = (database,data_type,filter,sort_by,page_current,page_size,op
                 if(check_database(database)){
                     page_current = parseInt(page_current);
                     page_size = parseInt(page_size);
-                    database.collection(data_type).find(filter).sort(sort_by).collation({locale:"en_US",numericOrdering:true}).skip(page_current>0?((page_current-1)*page_size):0).limit(page_size).project({id:1,data_type:1,_id:0}).toArray().then((data) => {
+                    database.collection(data_type).find(filter).sort(sort_by).collation({locale:"en_US",numericOrdering:true}).skip(page_current>0?((page_current-1)*page_size):0).limit(page_size).project({id:1,data_type:1,_id:1}).toArray().then((data) => {
                         if(data){
                             data_list = data;
                         }
