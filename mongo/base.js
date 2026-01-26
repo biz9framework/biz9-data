@@ -51,6 +51,7 @@ const get_item = (database,data_type,id,option) => {
         if(check_database(database)){
             database.collection(data_type).findOne({id:id}).then((data) => {
                 if(data){
+                    delete data['_id'];
                     data = data;
                 }
                 callback([error,data]);
@@ -86,6 +87,7 @@ const post_item = (database,data_type,item,option) => {
             item[Type.FIELD_DATE_SAVE] = DateTime.get_new();
             if(check_database(database)){
                 database.collection(data_type).insertOne(item).then((data) => {
+                    delete item['_id'];
                     callback([error,item]);
                 }).catch(error => {
                     Log.error("DATA-MONGO-BASE-UPDATE-ITEM-BASE-ERROR",error);
@@ -95,7 +97,7 @@ const post_item = (database,data_type,item,option) => {
         }else{
             item.date_save = DateTime.get_new();
             if(!option.overwrite){
-                Log.w('aaaaa',item);
+                delete item['_id'];
                 database.collection(data_type).updateOne({id:item.id},{$set: item}).then((data) => {
                     callback([error,item]);
                 }).catch(error => {
@@ -103,7 +105,6 @@ const post_item = (database,data_type,item,option) => {
                     callback([error,null]);
                 });
             }else{
-                Log.w('bbbbbbbb',item);
                 delete item['_id'];
                 database.collection(data_type).replaceOne({id:item.id},item).then((data) => {
                     callback([error,item]);

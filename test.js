@@ -10,7 +10,7 @@ const {Type,Data_Logic,Cart_Logic,Order_Logic} = require("/home/think1/www/doqbo
 - connect
 */
 /* --- TEST CONFIG START --- */
-const APP_ID = 'test-stage-jan21';
+const APP_ID = 'test-stage-jan25';
 /* --- TEST CONFIG END --- */
 
 /* --- DATA CONFIG START --- */
@@ -61,6 +61,12 @@ describe('connect', function(){ this.timeout(25000);
                 //let blank = Data_Logic.get(Type.DATA_BLANK,id);
                 //let image = Data_Logic.get(Type.DATA_IMAGE,0,{test:true,parent:group});
                 //-->
+                //--- SUB_VALUE -- START -- //
+                let parent = Data_Logic.get(Type.DATA_PAGE,'549');
+                let option = {sub_value:true};
+                const [biz_error,biz_data] = await Portal.get(database,parent.data_type,parent.id,option);
+                //--- SUB_VALUE -- END -- //
+
                 //-- USER  START --//
                 //let user = Data_Logic.get(Type.DATA_USER,0,{test:true,generate_title:true});
                 //let user = Data_Logic.get(Type.DATA_USER,'498');
@@ -111,6 +117,7 @@ describe('connect', function(){ this.timeout(25000);
                 //-- ORDER END --//
                 //-->
                 //-- PROJECT-500 START --//
+                /*
                 // -- home-start -- //
                 let id = Type.PAGE_HOME;
                 let data_type = Type.DATA_PAGE;
@@ -134,6 +141,7 @@ describe('connect', function(){ this.timeout(25000);
                 let = option = {id_field,title:'my_cool'};
                 const [error,biz_data] = await Portal.get(database,data_type,id,option);
                 // -- home-end -- //
+                */
                 //-- PROJECT-500 END --//
 
                 //let product_title_url = 'product_554';

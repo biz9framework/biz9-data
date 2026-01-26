@@ -101,6 +101,7 @@ const post_item_adapter=(database,cache,data_type,item_data,option) => {
         let error = null;
         async.series([
             async function(call){
+                Log.w('44_post_item_adapter',item_data);
                 const [biz_error,biz_data] = await post_item(database,data_type,item_data,option);
             },
             function(call){
@@ -143,6 +144,7 @@ const get_item_list_adapter = (database,cache,data_type,filter,sort_by,page_curr
                     for(const item of item_id_list) {
                         [error,data] = await get_item_cache_db(database,cache,data_type,item.id,option);
                         if(data){
+                            delete data['_id'];
                             item_data_list.push(data);
                         }
                     }
@@ -201,6 +203,7 @@ const get_item_adapter = (database,cache,data_type,id,option) => {
                     let page_size=0;
                     const [biz_error,biz_data] = await get_item_list_adapter(database,cache,data_type,query_field,{},page_current,page_size,option);
                     if(biz_data.length>0){
+                        delete biz_data['_id'];
                         data = biz_data[0];
                     }else{
                         data = Data_Logic.get_not_found(data_type,id);
@@ -294,6 +297,7 @@ const get_item_cache_db = (database,cache,data_type,id,option) => {
                     //db
                     const [error,data] = await get_item(database,data_type,id);
                     if(data){
+                        delete data['_id'];
                         item_data = data;
                         const [error,data2] = await post_cache_item(cache,data_type,id,data);
                         item_data[Type.FIELD_SOURCE] = Type.TITLE_SOURCE_DATABASE;

@@ -1444,8 +1444,8 @@ class Portal {
 		   - cache_delete / type. bool / ex. true/false / default. false
 		 * Fields
 		   - field / type. obj / ex. {field_show_1:1,field_hide_2:0} / default. throw error
- 		* Field Values ( Page Edit )
-		   - field_value / type. bool / ex. true/false / default. throw error
+ 		* Sub Values ( Page Edit )
+		   - sub_value / type. bool / ex. true/false / default. throw error
  		 *  Group
 			-- groups / type. obj. group_search / ex. [
 					{
@@ -1530,8 +1530,11 @@ class Portal {
 				},
 				//field_values
 				function(call){
-					if(option.field_value && data.id){
-						data = Field_Logic.get_item_field_values(data);
+					if(option.sub_value && data.id){
+						if(!option.foreigns){
+							option.foreigns = [];
+						}
+						option.foreigns.push(Data_Logic.get_search_foreign(Type.SEARCH_ITEMS,Type.DATA_SUB_VALUE,Type.Field_PARENT_ID,Type.FIELD_ID));
                         call();
 					}else{
                         call();
@@ -1630,7 +1633,9 @@ class Portal {
 				},
 				//9_get_item_foreigns
 				function(call){
+					console.log('aaaaaaaa');
 	                if(data.id && option.foreigns){
+						Log.w('www',option);
 	                    let foreign_search_items = [];
 						for(const item of option.foreigns){
 								foreign_search_items.push({
@@ -2361,18 +2366,19 @@ class Portal {
                 },
          	    //clean
         		function(call){
-					if(option.clean == true){
+					if(option.clean){
+					let new_data = {};
             		for(const field in data){
-                		if(Obj.check_is_array(data[field])){
-                    		delete data[field];
-                		}
-						if(!Obj.check_is_value(data[field])){
-                    		delete data[field];
-                		}
-						if(Str.check_if_str_exist(field,'_item_count') || Str.check_if_str_exist(field,'_page_count')){
-                    		delete data[field];
-						}
+						if(!Obj.check_is_array(data[field]) &&
+							!Obj.check_is_array(data[field]) &&
+							Obj.check_is_value(data[field]) &&
+							!Str.check_if_str_exist(field,'_item_count') &&
+							!Str.check_if_str_exist(field,'_page_count'))
+						{
+							new_data[field] = data[field];
             		}
+					}
+						data = new_data;
                         call();
 					}else{
                         call();
@@ -2380,7 +2386,7 @@ class Portal {
         		},
 				//delete cache item
 				function(call){
-					if(option.overwrite == true || option.delete_cache){
+					if(option.overwrite || option.delete_cache){
                         delete_item_cache(database,cache,data_type,data.id).then(([biz_error,biz_data])=>{
                             if(biz_error){
                                 error=Log.append(error,biz_error);
