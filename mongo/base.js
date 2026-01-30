@@ -143,6 +143,7 @@ const post_bulk_base = (database,data_type,data_list) => {
 }
 const delete_item = (database,data_type,id,option) => {
     return new Promise((callback) => {
+        let error = null;
         let data = null;
         if(check_database(database)){
             database.collection(data_type).deleteMany({id:id}).then((data) => {

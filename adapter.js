@@ -252,6 +252,7 @@ const post_cache_item = (cache,data_type,id,item_data) => {
 }
 const delete_item_adapter = (database,cache,data_type,id,option) => {
     return new Promise((callback) => {
+        let error = null;
         let data = Data_Logic.get(data_type,id);
         data[Type.FIELD_RESULT_OK_DELETE] = false;
         data[Type.FIELD_RESULT_OK_DELETE_CACHE] = false;
@@ -428,6 +429,7 @@ const delete_item_cache=(database,cache,data_type,id,option)=>{
 }
 const delete_item_cache_db = (database,cache,data_type,id) => {
     return new Promise((callback) => {
+        let error = null;
         let cache_key_list = '';
         let cache_string_list = '';
         let data = Data_Logic.get(data_type,id);

@@ -144,7 +144,7 @@ class Blog_Post_Data {
 						data.item_count = biz_data.item_count;
 						data.page_count = biz_data.page_count;
 						data.search = biz_data.search;
-						data.blog_posts = biz_data.items;
+						data.blog_posts = biz_data[TYPE.FIELD_ITEMS];
 					}
 				},
 			]).then(result => {
@@ -194,7 +194,7 @@ class Category_Data { //9_category_get
 						data.item_count = biz_data.item_count;
 						data.page_count = biz_data.page_count;
 						data.search = biz_data.search;
-						data.categorys = biz_data.items;
+						data.categorys = biz_data[Type.FIELD_ITEMS];
 					}
 				},
 			]).then(result => {
@@ -245,7 +245,7 @@ class Content_Data {
 						data.item_count = biz_data.item_count;
 						data.page_count = biz_data.page_count;
 						data.search = biz_data.search;
-						data.contents = biz_data.items;
+						data.contents = biz_data[Type.FIELD_ITEMS];
 					}
 				},
 			]).then(result => {
@@ -296,7 +296,7 @@ class Page_Data {
 						data.item_count = biz_data.item_count;
 						data.page_count = biz_data.page_count;
 						data.search =Type.search;
-						data.pages = biz_data.items;
+						data.pages = biz_data[Type.FIELD_ITEMS];
 					}
 				},
 			]).then(result => {
@@ -347,7 +347,7 @@ class Template_Data {
 						data.item_count = biz_data.item_count;
 						data.page_count = biz_data.page_count;
 						data.search = biz_data.search;
-						data.templates = biz_data.items;
+						data.templates = biz_data[Type.FIELD_ITEMS];
 					}
 				},
 			]).then(result => {
@@ -396,7 +396,7 @@ class Gallery_Data {
 						data.item_count = biz_data.item_count;
 						data.page_count = biz_data.page_count;
 						data.search = biz_data.search;
-						data.gallerys = biz_data.items;
+						data.gallerys = biz_data[Type.FIELD_ITEMS];
 					}
 				},
 			]).then(result => {
@@ -446,7 +446,7 @@ class Event_Data {
 						data.item_count = biz_data.item_count;
 						data.page_count = biz_data.page_count;
 						data.search = biz_data.search;
-						data.events = biz_data.items;
+						data.events = biz_data[Type.FIELD_ITEMS];
 					}
 				},
 			]).then(result => {
@@ -902,7 +902,7 @@ class Review_Data {
 						data.item_count = biz_data.item_count;
 						data.page_count = biz_data.page_count;
 						data.search = biz_data.search;
-						data.reviews = biz_data.items;
+						data.reviews = biz_data[Type.FIELD_ITEMS];
 					}
 				},
 			]).then(result => {
@@ -934,7 +934,7 @@ class Review_Data {
 						data.item_count=biz_data.item_count;
 						data.page_count=biz_data.page_count;
 						data.search=biz_data.search;
-						data.reviews=biz_data.items;
+						data.reviews=biz_data[Type.FIELD_ITEMS];
 					}
                     */
 				},
@@ -1081,11 +1081,11 @@ class User_Data {
 					if(biz_error){
 						biz_error=Log.append(error,biz_error);
 					}else{
-						if(Str.check_is_null(data.id) && biz_data.items.length<=0){
+						if(Str.check_is_null(data.id) && biz_data[Type.FIELD_ITEMS].length<=0){
 							data[Type.FIELD_RESULT_OK_EMAIL] = true;
-						}else if(biz_data.items.length>0){
-							if(data.id == biz_data.items[0].id){
-								data[Type.FIELD_RESULT_OK_EMAIL]  = true;
+						}else if(biz_data[Type.FIELD_ITEMS].length>0){
+							if(data.id == biz_data[Type.FIELD_ITEMS][0].id){
+								data[Type.FIELD_RESULT_OK_EMAIL] = true;
 							}
 						}else{
 							data[Type.FIELD_RESULT_OK_EMAIL] = true;
@@ -1099,10 +1099,10 @@ class User_Data {
 					if(biz_error){
 						biz_error=Log.append(error,biz_error);
 					}else{
-						if(Str.check_is_null(data.id) && biz_data.items.length<=0){
+						if(Str.check_is_null(data.id) && biz_data[Type.FIELD_ITEMS].length<=0){
 							data[Type.FIELD_RESULT_OK_TITLE] = true;
-						}else if(biz_data.items.length>0){
-							if(data.id == biz_data.items[0].id){
+						}else if(biz_data[Type.FIELD_ITEMS].length>0){
+							if(data.id == biz_data[Type.FIELD_ITEMS][0].id){
 								data[Type.FIELD_RESULT_OK_TITLE] = true;
 							}
 						}else{
@@ -1266,8 +1266,8 @@ class User_Data {
 					if(biz_error){
 						error=Log.append(error,biz_error);
 					}else{
-						if(biz_data.items.length>0){
-							data = biz_data.items[0];
+						if(biz_data[Type.FIELD_ITEMS].length>0){
+							data = biz_data[Type.FIELD_ITEMS][0];
 							data[Type.FIELD_RESULT_OK_USER] = true;
 						}
 					}
@@ -1767,7 +1767,7 @@ class Portal {
 									group_query.$and.push(query_field);
                         		}
                     		}
-							for(const item of data.items){
+							for(const item of data[Type.FIELD_ITEMS]){
 								let query_field = {};
 								query_field[Type.FIELD_PARENT_ID] = item.id;
 								group_query.$and.push(query_field);
@@ -1784,9 +1784,9 @@ class Portal {
                                 if(biz_error){
 								    error=Log.append(error,biz_error);
 								}else{
-								    for(const data_item of data.items){
+								    for(const data_item of data[Type.FIELD_ITEMS]){
 									    data_item.groups = [];
-										    for(const group of biz_data.items){
+										    for(const group of biz_data[Type.FIELD_ITEMS]){
 												if(data_item.id == group.parent_id){
 													if(!data_item[Str.get_title_url(group.title)]){
 														data_item[Str.get_title_url(group.title)] = [];
@@ -1859,7 +1859,7 @@ class Portal {
                                     if(biz_error){
 								error=Log.append(error,biz_error);
 							}else{
-								search_item.items = items;
+								search_item[Type.FIELD_ITEMS] = items;
 							    function get_item_data(data_item) {
                                     return new Promise((resolve2) => {
 									let query = {};
@@ -2012,7 +2012,7 @@ class Portal {
                                             }else{
 									            let one_item = items.length>0 ? items[0] : Data_Logic.get_not_found(search_item.search.data_type,0);
 									            data[Str.get_title_url(search_item.title)] = one_item;
-     											search_item.items = [one_item];
+     											search_item[Type.FIELD_ITEMS] = [one_item];
                                                 resolve();
                                             }
                                         }).catch(err => {
@@ -2096,7 +2096,7 @@ class Portal {
 						    data.page_count=page_count;
 						    data.search=search;
 						    data.filter=filter;
-						    data.items=items;
+						    data[Type.FIELD_ITEMS]=items;
 					        call();
                         }
                     }).catch(err => {
@@ -2127,11 +2127,11 @@ class Portal {
 					if(option.foreigns){
                         function get_data() {
                             return new Promise((resolve) => {
-                                Portal.get_data_foreigns(database,cache,data.items,option).then(([biz_error,biz_data])=>{
+                                Portal.get_data_foreigns(database,cache,data[Type.FIELD_ITEMS],option).then(([biz_error,biz_data])=>{
                                     if(biz_error){
                                         error=Log.append(error,biz_error);
                                     }else{
-                                        data.items = biz_data;
+                                        data[Type.FIELD_ITEMS] = biz_data;
                                         resolve();
                                     }
                                 }).catch(err => {
@@ -2221,7 +2221,7 @@ class Portal {
    						    data.item_count=item_count;
 						    data.page_count=page_count;
 						    data.search=search;
-						    data.items=items;
+						    data[Type.FIELD_ITEMS]=items;
 	                    }
                         call();
                     }).catch(err => {
@@ -2229,7 +2229,7 @@ class Portal {
                         error=Log.append(error,err);
                     });
 				},
-	         //9_get_items_join
+	         	//9_get_items_join
 				function(call){
 		            if(option.joins){
                     Portal.get_data_joins(database,cache,data,option).then(([biz_error,biz_data])=>{
@@ -2249,12 +2249,12 @@ class Portal {
 		        },
                 //9_get_items_foreigns
 				function(call){
-		            if(option.foreigns && data.items.length > 0){
-                        Portal.get_data_foreigns(database,cache,data.items,option).then(([biz_error,biz_data])=>{
+		            if(option.foreigns && data[Type.FIELD_ITEMS].length > 0){
+                        Portal.get_data_foreigns(database,cache,data[Type.FIELD_ITEMS],option).then(([biz_error,biz_data])=>{
                         if(biz_error){
                             error=Log.append(error,biz_error);
                         }else{
-                            data.items = biz_data;
+                            data[Type.FIELD_ITEMS] = biz_data;
                             call();
                         }
                     }).catch(err => {
@@ -2268,7 +2268,7 @@ class Portal {
 		        },
 		        //9_get_items_group
 				function(call){
-					if(option.groups && data.items.length>0){
+					if(option.groups && data[Type.FIELD_ITEMS].length>0){
 						let search_items = [];
 					for(const item of option.groups){
 						search_items.push({
@@ -2296,7 +2296,7 @@ class Portal {
 									group_query.$and.push(query_field);
                         		}
                     		}
-							for(const item of data.items){
+							for(const item of data[Type.FIELD_ITEMS]){
 								let query_field = {};
 								query_field[Type.FIELD_PARENT_ID] = item.id;
 								group_query.$and.push(query_field);
@@ -2315,9 +2315,9 @@ class Portal {
 									if(biz_error){
 										error=Log.append(error,biz_error);
 									}else{
-										for(const data_item of data.items){
+										for(const data_item of data[Type.FIELD_ITEMS]){
 											data_item.groups = [];
-											for(const group of biz_data.items){
+											for(const group of biz_data[Type.FIELD_ITEMS]){
 												if(data_item.id == group.parent_id){
 													if(!data_item[Str.get_title_url(group.title)]){
 														data_item[Str.get_title_url(group.title)] = [];
@@ -2330,7 +2330,7 @@ class Portal {
                                         call();
 									}
                     }).catch(err => {
-                        Log.error('Data-Blank',err);
+                        Log.error('Data-Portal-Search-Groups',err);
                         error=Log.append(error,err);
                     });
 							}
@@ -2338,10 +2338,10 @@ class Portal {
                         call();
                     }
 				},
-						]).then(result => {
+			]).then(result => {
 				callback([error,data]);
 			}).catch(err => {
-				Log.error('DATA-SEARCH-ERROR-7',err);
+				Log.error('DATA-PORTAL-SEARCH-ERROR',err);
 				callback([err,[]]);
 			});
 		});
@@ -2588,24 +2588,29 @@ class Portal {
 		return new Promise((callback) => {
 			let error = null;
 			let data = Data_Logic.get(data_type,0,{data:{filter:filter}});
+			let cache = {};
 			data[Type.FIELD_RESULT_OK_DELETE] = false;
 			let delete_item_query = { $or: [] };
 			option = option ? option : {};
 			async.series([
+     			async function(call) {
+                	const [biz_error,biz_data] = await get_cache(database.data_config);
+                    cache = biz_data;
+				},
 				async function(call){
 					let search = Data_Logic.get_search(data_type,filter,{},1,0);
 					let parent_option = {};
-					const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search,search.page_size,search.parent_option);
+					const [biz_error,biz_data] = await Portal.search_simple(database,cache,search.data_type,search.filter,search.sort_by,search.page_current,search,search.page_size,search.parent_option);
 					if(biz_error){
 						error=Log.append(error,biz_error);
 					}else{
-						if(biz_data.items.length>0){
+						if(biz_data[Type.FIELD_ITEMS].length>0){
 						let query = { $or: [] };
-						for(const data_item of biz_data.items){
+						for(const data_item of biz_data[Type.FIELD_ITEMS]){
 							let query_field = {};
 							query_field[Type.FIELD_PARENT_ID] = data_item.id
 							delete_item_query.$or.push(query_field);
-							const [biz_error,biz_data] = await Data.delete(database,data_type,data_item.id);
+							const [biz_error,biz_data] = await delete_item_adapter(database,cache,data_type,data_item.id);
 						};
 						}
 						data[Type.FIELD_RESULT_OK_DELETE] = true;
@@ -2917,7 +2922,7 @@ class Stat_Data {
 						data.item_count = biz_data.item_count;
 						data.page_count = biz_data.page_count;
 						data.search = biz_data.search;
-						data.stats = biz_data.items;
+						data.stats = biz_data[Type.FIELD_ITEMS];
 					}
 				},
 			]).then(result => {
@@ -2968,7 +2973,7 @@ class Service_Data {
 						data.item_count = biz_data.item_count;
 						data.page_count = biz_data.page_count;
 						data.search = biz_data.search;
-						data.services = biz_data.items;
+						data.services = biz_data[Type.FIELD_ITEMS];
 					}
 				},
 			]).then(result => {

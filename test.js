@@ -10,7 +10,7 @@ const {Type,Data_Logic,Cart_Logic,Order_Logic} = require("/home/think1/www/doqbo
 - connect
 */
 /* --- TEST CONFIG START --- */
-const APP_ID = 'test-stage-jan25';
+const APP_ID = 'test-stage-jan29';
 /* --- TEST CONFIG END --- */
 
 /* --- DATA CONFIG START --- */
@@ -62,9 +62,11 @@ describe('connect', function(){ this.timeout(25000);
                 //let image = Data_Logic.get(Type.DATA_IMAGE,0,{test:true,parent:group});
                 //-->
                 //--- SUB_VALUE -- START -- //
+                /*
                 let parent = Data_Logic.get(Type.DATA_PAGE,'549');
                 let option = {sub_value:true};
                 const [biz_error,biz_data] = await Portal.get(database,parent.data_type,parent.id,option);
+                */
                 //--- SUB_VALUE -- END -- //
 
                 //-- USER  START --//
@@ -116,6 +118,15 @@ describe('connect', function(){ this.timeout(25000);
                 // -- get-end --//
                 //-- ORDER END --//
                 //-->
+
+                //-- DELETE START --//
+                /*
+                let query =  {parent_id: "571",parent_data_type: "page_biz",type: "items",group_id: "74347"}
+                let search = Data_Logic.get_search(Type.DATA_SUB_VALUE,query,{},1,0);
+                const [biz_error,biz_data] = await Portal.delete_search(database,search.data_type,search.filter);
+                */
+                //-- DELETE END --//
+
                 //-- PROJECT-500 START --//
                 /*
                 // -- home-start -- //
