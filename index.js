@@ -1528,18 +1528,7 @@ class Portal {
                         error=Log.append(error,err);
                     });
 				},
-				//field_values
-				function(call){
-					if(option.sub_value && data.id){
-						if(!option.foreigns){
-							option.foreigns = [];
-						}
-						option.foreigns.push(Data_Logic.get_search_foreign(Type.SEARCH_ITEMS,Type.DATA_SUB_VALUE,Type.Field_PARENT_ID,Type.FIELD_ID));
-                        call();
-					}else{
-                        call();
-                    }
-				},
+			/*
                 //9_get_item_join
 				function(call){
                     if(option.joins){
@@ -1631,11 +1620,22 @@ class Portal {
                         call();
                     }
 				},
+				*/
+				 //sub_value
+                 function(call){
+                 	if(option.sub_value && data.id){
+                    	if(!option.foreigns){
+                        	option.foreigns = [];
+                        }
+                        option.foreigns.push(Data_Logic.get_search_foreign(Type.SEARCH_ITEMS,Type.DATA_SUB_VALUE,Type.Field_PARENT_ID,Type.FIELD_ID));
+                        call();
+                    }else{
+                        call();
+                    }
+                },
 				//9_get_item_foreigns
 				function(call){
-					console.log('aaaaaaaa');
 	                if(data.id && option.foreigns){
-						Log.w('www',option);
 	                    let foreign_search_items = [];
 						for(const item of option.foreigns){
 								foreign_search_items.push({
@@ -1714,6 +1714,36 @@ class Portal {
                         call();
                     }
                 },
+				function(call){
+					if(option.sub_value && data.id){
+						let group_sub_value_list = [];
+						let item_match_list = data.sub_values.filter(item_find => item_find[Type.FIELD_TYPE] === Type.SUB_VALUE_ITEMS);
+						//Log.w('11_item_match',item_match_list);
+						//Log.w('11_item_match_count',item_match_list.length);
+						//for(const group_match of item_match_list){
+							//Log.w('group_id',group_match.id);
+							//Log.w('group_match',group_match);
+						//}
+						let group_full_list = [];
+						let group_distinct_list = Obj.get_distinct(data.sub_values,Type.FIELD_GROUP_ID);
+						//Log.w('22_group_distinct_list',group_distinct_list);
+						for(const sub_item of group_distinct_list){
+							Log.w('33_sub_item',sub_item);
+							let group_sub_match = data.sub_values.filter(item_find => item_find[Type.FIELD_GROUP_ID] === sub_item.group_id);
+							group_full_list = [...group_full_list, ...group_sub_match];
+							Log.w('group_sub_match',group_full_list);
+							//Log.w('33_sub_item_group_id',sub_item.group_id);
+							//let group_match_list =
+						}
+
+						//Log.w('11_sub_value_full', data.sub_values);
+						//Log.w('11_group_distinc_list', group_distinct_list);
+						//Log.w('11_item_match_len_list', item_match_list.length);
+
+					}
+				},
+
+
                 /*
 				//post-stat
 				async function(call){

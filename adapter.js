@@ -40,9 +40,9 @@ const post_item_list_adapter=(database,cache,item_data_list,option)=>{
             function(call){
                 async.forEachOf(item_data_list,(item,key,go)=>{
                     for(property in item[key]){
-                        if(row!='id'&&row!='data_type'){
-                            if(!item[key][row]){
-                                delete item[key][row];
+                        if(property!=Type.FIELD_ID&&property!=Type.FIELD_DATA_TYPE){
+                            if(!item[key][property]){
+                                delete item[key][property];
                             }
                         }
                     }
@@ -101,7 +101,6 @@ const post_item_adapter=(database,cache,data_type,item_data,option) => {
         let error = null;
         async.series([
             async function(call){
-                Log.w('44_post_item_adapter',item_data);
                 const [biz_error,biz_data] = await post_item(database,data_type,item_data,option);
             },
             function(call){

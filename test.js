@@ -10,7 +10,7 @@ const {Type,Data_Logic,Cart_Logic,Order_Logic} = require("/home/think1/www/doqbo
 - connect
 */
 /* --- TEST CONFIG START --- */
-const APP_ID = 'test-stage-jan29';
+const APP_ID = 'test-stage-feb3';
 /* --- TEST CONFIG END --- */
 
 /* --- DATA CONFIG START --- */
@@ -39,19 +39,15 @@ describe('connect', function(){ this.timeout(25000);
             },
             async function(call){
                 //-->
-                let print_test = true;
+                let print_test = false;
                 //-->
                 //-- GET  START --//
-                /*
-                //let option = {id_field:Type.FIELD_CART_NUMBER};
-                //let parent = Data_Logic.get(new_data_type,0,{test:true});
+                let option = {sub_value:true};
+                let parent = Data_Logic.get(Type.DATA_PAGE,949);
                 //Log.w('parent',parent);
-                //let parent = Data_Logic.get(new_data_type,0,{test:true,title:'Apple 4'});
-                let parent = Data_Logic.get(Type.DATA_CART,'CA-88475');
-                //const [error,biz_data] = await Portal.get(database,parent.data_type,parent.id,option);
+                const [error,biz_data] = await Portal.get(database,parent.data_type,parent.id,option);
                 //let parent_list = Data_Logic.get(new_data_type,0,{test:true,count:9});
                 //const [error,biz_data] = await Portal.get(database,parent.data_type,parent.id,option);
-                */
                 //-- GET  END --//
                 //-->
                 //let group = Data_Logic.get(Type.DATA_GROUP,0,{test:true,generate_title:true,parent:parent});
