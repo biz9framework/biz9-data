@@ -84,10 +84,10 @@ describe('connect', function(){ this.timeout(25000);
                 //-- GET  END --//
                 //-- DELETE  START --//
                 let option = {};
-                let parent = Data_Logic.get(Type.DATA_PRODUCT,'995');
-                const [error,biz_data] = await Portal.delete(database,parent.data_type,parent.id,option);
-                //let search = Data_Logic.get_search(Type.DATA_PRODUCT,{},{},1,0);
-                //const [error,biz_data] = await Portal.delete_search(database,search.data_type,search.filter);
+                //let parent = Data_Logic.get(Type.DATA_PRODUCT,'383');
+                //const [error,biz_data] = await Portal.delete(database,parent.data_type,parent.id,option);
+                let search = Data_Logic.get_search(Type.DATA_PRODUCT,{},{},1,0);
+                const [error,biz_data] = await Portal.delete_search(database,search.data_type,search.filter);
                 //-- DELETE  END --//
                 //-- COPY  START --//
                 //let parent = Data_Logic.get(Type.DATA_PRODUCT,'929');
@@ -308,9 +308,9 @@ describe('post_app', function(){ this.timeout(25000);
         console.log('CONNECT-DONE');
         if(print_test){;
             Log.w('USER ID',user.id);
+            Log.w('PARENT ID',parent.id);
             Log.w('GROUP ID',group.id);
             Log.w('GROUP IMAGE Count',image.length);
-            Log.w('PARENT ID',parent.id);
         }
         done();
     });
