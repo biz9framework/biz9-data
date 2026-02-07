@@ -84,9 +84,9 @@ describe('connect', function(){ this.timeout(25000);
                 //-- GET  END --//
                 //-- DELETE  START --//
                 let option = {};
-                let parent = Data_Logic.get(Type.DATA_PRODUCT,'81');
-                //let search = Data_Logic.get_search(Type.DATA_PRODUCT,{},{},1,0);
+                let parent = Data_Logic.get(Type.DATA_PRODUCT,'995');
                 const [error,biz_data] = await Portal.delete(database,parent.data_type,parent.id,option);
+                //let search = Data_Logic.get_search(Type.DATA_PRODUCT,{},{},1,0);
                 //const [error,biz_data] = await Portal.delete_search(database,search.data_type,search.filter);
                 //-- DELETE  END --//
                 //-- COPY  START --//

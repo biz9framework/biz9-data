@@ -2500,16 +2500,13 @@ class Portal {
 			data[Type.FIELD_RESULT_OK_GROUP_DELETE] = false;
 			data[Type.FIELD_RESULT_OK_GROUP_IMAGE_DELETE] = false;
 			option = !Obj.check_is_empty(option) ? option : {delete_group:true,delete_image:true};
-			Log.w('wwwww',option);
 			let delete_group_list = [];
 			async.series([
 				async function(call){
-					console.log('111111');
               		const [biz_error,biz_data] = await get_cache(database.data_config);
                     cache = biz_data;
                 },
 				async function(call){
-					console.log('2222222');
 					const [biz_error,biz_data] = await delete_item_adapter(database,cache,data_type,id);
 					if(biz_error){
 						error=Log.append(error,biz_error);
@@ -2522,26 +2519,21 @@ class Portal {
 					}
 				},
 				async function(call){
-					console.log('33333');
-					console.log(option);
 					if(option.delete_group){
-						console.log('bbbbbbbb');
 						data[Type.FIELD_RESULT_OK_GROUP_DELETE] = false;
 						let filter = {parent_id:data.id};
 						let data_type = Type.DATA_GROUP;
-						/*
 						const [biz_error,biz_data] = await Portal.delete_search(database,data_type,filter);
 						if(biz_error){
 							error=Log.append(error,biz_error);
 						}else{
 							if(biz_data[Type.FIELD_RESULT_OK_DELETE]){
 								data[Type.FIELD_RESULT_OK_GROUP_DELETE] = true;
+								data[Type.FIELD_RESULT_OK_GROUP_IMAGE_DELETE] = true;
 							}
 						}
-						*/
 					}
 				},
-				/*
 				async function(call){
 					if(option.delete_image){
 						data[Type.FIELD_RESULT_OK_IMAGE_DELETE] = false;
@@ -2557,45 +2549,8 @@ class Portal {
 						}
 					}
 				},
-				//get_group_ids
-				async function(call){
-					console.log('11111111');
-					if(option.delete_group){
-						let data_type = Type.DATA_GROUP;
-						let search = Data_Logic.get_search(data_type,{parent_id:id},{},1,0,{field:{id:1,title:1,data_type:1}});
-						const [biz_error,biz_data] = await Portal.search_simple(database,cache,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,search.option);
-					if(biz_error){
-							error=Log.append(error,biz_error);
-						}else{
-							console.log('222222222');
-							delete_group_list = biz_data.items;
-						}
-					}
-					Log.w('33333',delete_group_list);
-				},
-				//delete_group_photo
-				async function(call){
-					if(option.delete_group && delete_group_list.length > 0){
-						let query = { $or: [] };
-						let delete_group_photo_query = { $or: [] };
-						for(const data_item of delete_group_list){
-							let query_field = {};
-							query_field[Type.FIELD_PARENT_ID] = data_item.id
-							delete_group_photo_query.$or.push(query_field);
-						};
-						let data_type = Type.DATA_IMAGE;
-						let search = Data_Logic.get_search(data_type,delete_group_photo_query,{},1,0);
-						const [biz_error,biz_data] = await delete_item_list_adapter(database,cache,data_type,search.filter);
-						if(biz_error){
-							error=Log.append(error,biz_error);
-						}else{
-							data[Type.FIELD_RESULT_OK_GROUP_IMAGE_DELETE] = true;
-						}
-					}
-				},
-				*/
 				]).then(result => {
-				//callback([error,data]);
+				callback([error,data]);
 			}).catch(err => {
 				Log.error("Delete-Item",err);
 				callback([err,{}]);
