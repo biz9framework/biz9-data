@@ -1,0 +1,49 @@
+{
+  "name": "biz9-data",
+  "version": "2.5.428",
+  "description": "The BiZ9-Data-Server Package is an object-relational mapper (ORM) that lets you build a clean, portable, reusable, and high-level data access layer with Node.js for data driven applications. The package consists of create, read, update and destroy (CRUD) methods to handle data access and manipulations. The framework is fast and used for rapid application development for scaling applications from 0 to millions of records seamlessly and effortless. New data is written and persisted to the MongoDB tables/collections. Fetching data is obtained from the server cache memory using Redis. Using MongoDB with Redis speeds up the overall application tremendously. This framework is used as a [data access component] for mobile and website applications. It is best suited to be used as a package within Express.js. It can also be utilized for other Javascript based applications.",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/biz9framework/biz9-data.git"
+  },
+  "author": "Certified CoderZ",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/biz9framework/biz9-data/issues"
+  },
+  "homepage": "https://github.com/biz9framework/biz9-data#readme",
+  "dependencies": {
+    "array-sort": "^1.0.0",
+    "async": "^3.2.6",
+    "biz9-logic": "^10.0.25",
+    "biz9-scriptz": "^5.8.12",
+    "biz9-utility": "^4.4.12",
+    "bluebird": "^3.7.2",
+    "dayjs": "^1.11.18",
+    "ip2location-io-nodejs": "^1.1.1",
+    "ip2location-nodejs": "^9.6.3",
+    "mongodb": "^6.11.0",
+    "pretty-date": "^0.2.0",
+    "redis": "^4.7.0"
+  },
+  "keywords": [
+    "Nodejs",
+    "MongoDB",
+    "Redis",
+    "Moment",
+    "Pretty-Date",
+    "Array-Sort",
+    "Async",
+    "Promise",
+    "Await",
+    "Javascript",
+    "Asynchronous"
+  ]
+}
