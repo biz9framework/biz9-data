@@ -2,6 +2,7 @@ const async = require('async');
 const assert = require('node:assert');
 
 const {Data,Database,Portal,User_Data,Page_Data,Product_Data,Review_Data,Cart_Data,Order_Data} = require(".");
+const {get_cache} = require('./redis/base.js');
 
 const {Log,Num,Str} = require("biz9-utility");
 const {Type,Data_Logic,Cart_Logic,Order_Logic} = require("/home/think1/www/doqbox/biz9-framework/biz9-logic/code");
@@ -30,6 +31,7 @@ const DATA_CONFIG ={
 describe('connect', function(){ this.timeout(25000);
     it("_connect", function(done){
         let error=null;
+        let cache=null;
         let database = {};
         let data = {};
         async.series([
@@ -37,10 +39,26 @@ describe('connect', function(){ this.timeout(25000);
                 const [biz_error,biz_data] = await Database.get(DATA_CONFIG);
                 database = biz_data;
             },
+            /*
+		    async function(call) {
+                	const [biz_error,biz_data] = await get_cache(database.data_config);
+                    cache = biz_data;
+			},
+            */
             async function(call){
                 //-->
                 let print_test = true;
                 //-->
+                //-- SEARCH START --//
+                /*
+                let search = Data_Logic.get_search(Type.DATA_PRODUCT,{},{},1,0,{field:{title:1,id:1}});
+                const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,search.option);
+                //const [biz_error,biz_data] = await Portal.search_simple(database,cache,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,search.option);
+                Log.w('22_biz_data',biz_data);
+                */
+                //-- SEARCH  END --//
+
+
                 //-- POST_ITEMS START --//
                 /*
                 let option = {};
@@ -54,32 +72,29 @@ describe('connect', function(){ this.timeout(25000);
                 //-- POST_ITEMS  END --//
 
                 //-- GET  START --//
+                //let option = {groups:[Data_Logic.get_search_group({image:true})]};
                 /*
-                //let option = {id_field:Type.FIELD_TITLE_URL,stat:{print:false,type:Type.STAT_VIEW,user_id:12}};
-                let option = {groups:[Data_Logic.get_search_group({image:true})]};
-                Log.w('option',option);
-                Log.w('option',option.groups);
-                let parent = Data_Logic.get(Type.DATA_PRODUCT,'929');
-                //Log.w('parent',parent);
+                let option = {field:{title:1,id:1}};
+                let parent = Data_Logic.get(Type.DATA_PRODUCT,'552');
+                Log.w('parent',parent);
                 const [error,biz_data] = await Portal.get(database,parent.data_type,parent.id,option);
                 //let parent_list = Data_Logic.get(new_data_type,0,{test:true,count:9});
                 //const [error,biz_data] = await Portal.get(database,parent.data_type,parent.id,option);
                 */
                 //-- GET  END --//
-                //-- COPY  START --//
                 //-- DELETE  START --//
                 let option = {};
                 let parent = Data_Logic.get(Type.DATA_PRODUCT,'953');
                 let search = Data_Logic.get_search(Type.DATA_PRODUCT,{},{},1,0);
                 //const [error,biz_data] = await Portal.delete(database,parent.data_type,parent.id,option);
                 const [error,biz_data] = await Portal.delete_search(database,parent.data_type,search.filter);
-                //-- DELETE  START --//
+                //-- DELETE  END --//
+                //-- COPY  START --//
                 //let parent = Data_Logic.get(Type.DATA_PRODUCT,'929');
                 //const [error,biz_data] = await Portal.copy(database,parent.data_type,parent.id);
                 //let parent_list = Data_Logic.get(new_data_type,0,{test:true,count:9});
                 //const [error,biz_data] = await Portal.get(database,parent.data_type,parent.id,option);
                 //-- COPY  END --//
-
                 //--- SUB_VALUE -- START -- //
                 /*
                 let parent = Data_Logic.get(Type.DATA_PAGE,'549');
@@ -137,14 +152,6 @@ describe('connect', function(){ this.timeout(25000);
                 // -- get-end --//
                 //-- ORDER END --//
                 //-->
-
-                //-- DELETE START --//
-                /*
-                let query =  {parent_id: "571",parent_data_type: "page_biz",type: "items",group_id: "74347"}
-                let search = Data_Logic.get_search(Type.DATA_SUB_VALUE,query,{},1,0);
-                const [biz_error,biz_data] = await Portal.delete_search(database,search.data_type,search.filter);
-                */
-                //-- DELETE END --//
 
                 //-- PROJECT-500 START --//
                 /*

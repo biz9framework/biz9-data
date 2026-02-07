@@ -2083,7 +2083,7 @@ class Portal {
 			let error = null;
 			let cache = {};
 			let data = {data_type:data_type,item_count:0,page_count:1,filter:{},items:[]};
-			option = option ? option : {};
+			option = option ?? {};
 			async.series([
                 async function(call) {
               		const [biz_error,biz_data] = await get_cache(database.data_config);
@@ -2498,7 +2498,10 @@ class Portal {
 			data[Type.FIELD_RESULT_OK_DELETE] = false;
 			data[Type.FIELD_RESULT_OK_DELETE_CACHE] = false;
 			data[Type.FIELD_RESULT_OK_DELETE_DATABASE] = false;
-			option = option ? option : {delete_group:true,delete_image:true};
+			data[Type.FIELD_RESULT_OK_GROUP_DELETE] = false;
+			data[Type.FIELD_RESULT_OK_GROUP_IMAGE_DELETE] = false;
+			option = option ?? {delete_group:true,delete_image:true};
+			let delete_group_list = [];
 			async.series([
 				async function(call){
               		const [biz_error,biz_data] = await get_cache(database.data_config);
@@ -2543,6 +2546,39 @@ class Portal {
 							if(biz_data[Type.FIELD_RESULT_OK_DELETE]){
 								data[Type.FIELD_RESULT_OK_IMAGE_DELETE] = true;
 							}
+						}
+					}
+				},
+				//get_group_ids
+				async function(call){
+					if(option.delete_group){
+						let data_type = Type.DATA_GROUP;
+						let search = Data_Logic.get_search(data_type,{parent_id:id},{},1,0,{field:{id:1,title:1,data_type:1}});
+						const [biz_error,biz_data] = await Portal.search_simple(database,cache,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,search.option);
+					if(biz_error){
+							error=Log.append(error,biz_error);
+						}else{
+							delete_group_list = biz_data.items;
+						}
+					}
+				},
+				//delete_group_photo
+				async function(call){
+					if(option.delete_group && delete_group_list.length > 0){
+						let query = { $or: [] };
+						let delete_group_photo_query = { $or: [] };
+						for(const data_item of delete_group_list){
+							let query_field = {};
+							query_field[Type.FIELD_PARENT_ID] = data_item.id
+							delete_group_photo_query.$or.push(query_field);
+						};
+						let data_type = Type.DATA_IMAGE;
+						let search = Data_Logic.get_search(data_type,delete_group_photo_query,{},1,0);
+						const [biz_error,biz_data] = await delete_item_list_adapter(database,cache,data_type,search.filter);
+						if(biz_error){
+							error=Log.append(error,biz_error);
+						}else{
+							data[Type.FIELD_RESULT_OK_GROUP_IMAGE_DELETE] = true;
 						}
 					}
 				},
@@ -2593,6 +2629,7 @@ class Portal {
 			let data = Data_Logic.get(data_type,0,{data:{filter:filter}});
 			let cache = {};
 			data[Type.FIELD_RESULT_OK_DELETE] = false;
+			data[Type.FIELD_RESULT_OK_GROUP_IMAGE_DELETE] = false;
 			let delete_item_query = { $or: [] };
 			let delete_group_list = [];
 			option = option ? option : {delete_group:true,delete_image:true};
@@ -2602,9 +2639,8 @@ class Portal {
                     cache = biz_data;
 				},
 				async function(call){
-					let search = Data_Logic.get_search(data_type,filter,{},1,0);
-					let parent_option = {};
-					const [biz_error,biz_data] = await Portal.search_simple(database,cache,search.data_type,search.filter,search.sort_by,search.page_current,search,search.page_size,search.parent_option);
+					let search = Data_Logic.get_search(data_type,filter,{},1,0,{});
+					const [biz_error,biz_data] = await Portal.search_simple(database,cache,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,search.option);
 					if(biz_error){
 						error=Log.append(error,biz_error);
 					}else{
@@ -2614,28 +2650,45 @@ class Portal {
 							let query_field = {};
 							query_field[Type.FIELD_PARENT_ID] = data_item.id
 							delete_item_query.$or.push(query_field);
-							//const [biz_error,biz_data] = await delete_item_adapter(database,cache,data_type,data_item.id);
+							const [biz_error,biz_data] = await delete_item_adapter(database,cache,data_type,data_item.id);
 						};
 						}
 						data[Type.FIELD_RESULT_OK_DELETE] = true;
 				}
 				},
-				//get_group
+				//get_group_ids
 				async function(call){
 					if(option.delete_group && delete_item_query.$or.length > 0){
 						let data_type = Type.DATA_GROUP;
-						let search = Data_Logic.get_search(data_type,delete_item_query,{},1,0,{field:{id:1,title:1}});
-						Log.w('3344_this_serarch',search.filter);
-						const [biz_error,biz_data] = await Portal.search_simple(database,cache,search.data_type,search.filter,search.sort_by,search.page_current,search,search.page_size,search.parent_option);
+						let search = Data_Logic.get_search(data_type,{},{},1,0,{field:{id:1,title:1,data_type:1}});
+						const [biz_error,biz_data] = await Portal.search_simple(database,cache,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,search.option);
 					if(biz_error){
 							error=Log.append(error,biz_error);
 						}else{
-							Log.w('delete_group_list',biz_data);
+							delete_group_list = biz_data.items;
 						}
 					}
 				},
-
-				/*
+				//delete_group_photo
+				async function(call){
+					if(option.delete_group && delete_group_list.length > 0){
+						let query = { $or: [] };
+						let delete_group_photo_query = { $or: [] };
+						for(const data_item of delete_group_list){
+							let query_field = {};
+							query_field[Type.FIELD_PARENT_ID] = data_item.id
+							delete_group_photo_query.$or.push(query_field);
+						};
+						let data_type = Type.DATA_IMAGE;
+						let search = Data_Logic.get_search(data_type,delete_group_photo_query,{},1,0);
+						const [biz_error,biz_data] = await delete_item_list_adapter(database,cache,data_type,search.filter);
+						if(biz_error){
+							error=Log.append(error,biz_error);
+						}else{
+							data[Type.FIELD_RESULT_OK_GROUP_IMAGE_DELETE] = true;
+						}
+					}
+				},
 				async function(call){
 					if(option.delete_group && delete_item_query.$or.length > 0){
 						data[Type.FIELD_RESULT_OK_GROUP_DELETE] = false;
@@ -2662,9 +2715,8 @@ class Portal {
 					}
 					}
 				},
-				*/
 			]).then(result => {
-				//callback([error,data]);
+				callback([error,data]);
 			}).catch(err => {
 				Log.error("Delete-List-Data",err);
 				callback([err,[]]);

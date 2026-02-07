@@ -185,7 +185,7 @@ const get_item_adapter = (database,cache,data_type,id,option) => {
             option = {};
         }
         let data = Data_Logic.get(data_type,id);
-        option = option ? option : {};
+        option = option ?? {};
         async.series([
             async function(call) {
                 if(!option.id_field){
