@@ -82,12 +82,20 @@ describe('connect', function(){ this.timeout(25000);
                 //const [error,biz_data] = await Portal.get(database,parent.data_type,parent.id,option);
                 */
                 //-- GET  END --//
+                // -- POST-START --//
+                let parent = Data_Logic.get(Type.DATA_PRODUCT,0,{test:true});
+                const [biz_error,biz_data] = await Portal.post(database,Type.DATA_PRODUCT,parent);
+
+                // -- POST-END --//
+
                 //-- DELETE  START --//
+                /*
                 let option = {};
                 //let parent = Data_Logic.get(Type.DATA_PRODUCT,'383');
                 //const [error,biz_data] = await Portal.delete(database,parent.data_type,parent.id,option);
                 let search = Data_Logic.get_search(Type.DATA_PRODUCT,{},{},1,0);
                 const [error,biz_data] = await Portal.delete_search(database,search.data_type,search.filter);
+                */
                 //-- DELETE  END --//
                 //-- COPY  START --//
                 //let parent = Data_Logic.get(Type.DATA_PRODUCT,'929');
@@ -139,11 +147,7 @@ describe('connect', function(){ this.timeout(25000);
                 //-->
                 //-- ORDER START --//
                 //
-                // -- post-start --//
-                //let order_product = Order_Logic.get(cart,{order_code:'OR'});
-                //const [error_order,order] = await Order_Data.post(database,order_product);
-                // -- post-end --//
-                // -- get-start --//
+               // -- get-start --//
                 /*
                 let order_product = Data_Logic.get(Type.DATA_ORDER,'OR-34952');
                 const [error,biz_data] = await Order_Data.get(database,order_product.id);

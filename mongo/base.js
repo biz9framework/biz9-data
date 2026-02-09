@@ -5,8 +5,8 @@
  * Data - Mongo - Base
  */
 const async = require('async');
-const {Num,Log,Str,Obj,DateTime} = require("biz9-utility");
-const {Type} = require("biz9-logic");
+const {Num,Log,Str,Obj,DateTime} = require("/home/think1/www/doqbox/biz9-framework/biz9-utility/code");
+const {Type} = require("/home/think1/www/doqbox/biz9-framework/biz9-logic/code");
 const {MongoClient} = require("mongodb");
 let client_db = {};
 const get_database = (data_config,option) => {

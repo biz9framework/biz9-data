@@ -8,7 +8,7 @@ const async = require('async');
 const {get_database,delete_database,check_database,get_id_list,post_item,get_item,delete_item,delete_item_list,get_count_item_list}= require("./mongo/base.js");
 const {delete_cache,get_cache_value,post_cache_value,delete_cache_value} = require('./redis/base.js');
 const {Type,Data_Logic}=require("/home/think1/www/doqbox/biz9-framework/biz9-logic/code");
-const {Log,Str,Num,Obj}=require("biz9-utility");
+const {Log,Str,Num,Obj}=require("/home/think1/www/doqbox/biz9-framework/biz9-utility/code");
 const  get_database_adapter=(data_config,option)=>{
     return new Promise((callback) => {
         async function main() {
