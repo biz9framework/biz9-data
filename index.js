@@ -460,6 +460,10 @@ class Event_Data {
 }
 class Order_Data {
 	//9_order_post
+	// -- ORDER-POST-START -- //
+	// - Order_Logic.get(cart);
+	// -- ORDER-POST-END -- //
+
 	static post = async (database,order,order_payments,option) => {
 		return new Promise((callback) => {
             let error = null;
@@ -559,6 +563,10 @@ class Order_Data {
 						}
 					}
 				},
+				async function(call){
+					Log.w('22_data',data);
+
+				},
 
 				//post - order_payments
 				/*
@@ -650,7 +658,7 @@ class Order_Data {
 				},
 				*/
 			]).then(result => {
-				callback([error,data.order]);
+				//callback([error,data.order]);
 			}).catch(err => {
 				Log.error("OrderData-Order-Item-Update",err);
 				callback([error,[]]);
@@ -1648,6 +1656,7 @@ class Portal {
 						}
                         function get_data(search_item) {
                             return new Promise((resolve) => {
+								console.log('aaaaaaaa');
 	                            let foreign_option = {field:search_item.field};
 								if(search_item.type == Type.SEARCH_ITEMS){
                                     let query = {};
@@ -1665,7 +1674,8 @@ class Portal {
                                         error=Log.append(error,err);
                                     });
                                 }
-                                else if(search_item.type == Type.SEARCH_ONE){
+                                else if(search_item.type == Type.SEARCH_COUNT){
+									console.log('bbbbbbbbbb');
                                     let query = {};
 								    query[search_item.foreign_field] = data[search_item.parent_field];
 								    let search = Data_Logic.get_search(search_item.foreign_data_type,query,{},1,0);
@@ -1684,7 +1694,7 @@ class Portal {
                                 else if(search_item.type == Type.SEARCH_ONE){
                                     let query = {};
 								    query[search_item.foreign_field] = data[search_item.parent_field];
-								    let search = Data_Logic.get_search(search_item.foreign_data_type,query,{},1,0);
+								    let search = Data_Logic.get_search(search_item.foreign_data_type,query,{},1,1);
 								    get_item_list_adapter(database,cache,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option).then(([biz_error,items,item_count,page_count])=>{
                                         if(biz_error){
 									        error=Log.append(error,biz_error);
@@ -3038,6 +3048,10 @@ class Service_Data {
 }
 class Cart_Data  {
 	//9_cart_post
+	// -- CART -- //
+	// --- Cart_Logic.get_cart_item(parent_data_type,parent_id,quanity,cost)
+	// --- Cart_Logic.get_cart_sub_item(cart_item_id,type,quanity,cost)
+
 	static post = async (database,cart,option) => {
 		return new Promise((callback) => {
 			let error = null;
@@ -3194,7 +3208,8 @@ class Cart_Data  {
 					if(biz_error){
 						error=Log.append(error,biz_error);
 					}else{
-						data.cart = biz_data;
+						Log.w('44_cart',biz_data);
+						//data.cart = biz_data;
 					}
 				},
 			]).then(result => {
@@ -3228,6 +3243,7 @@ class Cart_Data  {
 					if(biz_error){
 						error=Log.append(error,biz_error);
 					}else{
+						Log.w('33_get_cart',biz_data);
 						data.cart = biz_data;
 					}
 				},

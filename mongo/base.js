@@ -209,7 +209,7 @@ const get_id_list = (database,data_type,filter,sort_by,page_current,page_size,op
                 if(check_database(database)){
                     page_current = parseInt(page_current);
                     page_size = parseInt(page_size);
-                    database.collection(data_type).find(filter).sort(sort_by).collation({locale:"en_US",numericOrdering:true}).skip(page_current>0?((page_current-1)*page_size):0).limit(page_size).project({id:1,data_type:1,_id:1}).toArray().then((data) => {
+                    database.collection(data_type).find(filter).sort(sort_by).collation({locale:"en_US",numericOrdering:true}).skip(page_current>0?((page_current-1)*page_size):0).limit(page_size).project({id:1,data_type:1,_id:0}).toArray().then((data) => {
                         if(data){
                             data_list = data;
                         }

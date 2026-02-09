@@ -11,7 +11,7 @@ const {Type,Data_Logic,Cart_Logic,Order_Logic} = require("/home/think1/www/doqbo
 - connect
 */
 /* --- TEST CONFIG START --- */
-const APP_ID = 'test-stage-feb7';
+const APP_ID = 'test-stage-feb9';
 /* --- TEST CONFIG END --- */
 
 /* --- DATA CONFIG START --- */
@@ -28,8 +28,8 @@ const DATA_CONFIG ={
 };
 /* --- DATA CONFIG END --- */
 //9_connect - 9_test_connect
-describe('connect', function(){ this.timeout(25000);
-    it("_connect", function(done){
+describe('old_connect', function(){ this.timeout(25000);
+    it("_oldconnect", function(done){
         let error=null;
         let cache=null;
         let database = {};
@@ -72,20 +72,21 @@ describe('connect', function(){ this.timeout(25000);
                 //-- POST_ITEMS  END --//
 
                 //-- GET  START --//
-                //let option = {groups:[Data_Logic.get_search_group({image:true})]};
                 /*
-                let option = {field:{title:1,id:1}};
-                let parent = Data_Logic.get(Type.DATA_PRODUCT,'552');
-                Log.w('parent',parent);
+                //let option = {groups:[Data_Logic.get_search_group({image:true})]};
+                //let option = {field:{title:1,id:1}};
+                let option = {};
+                let parent = Data_Logic.get(Type.DATA_PRODUCT,'355');
                 const [error,biz_data] = await Portal.get(database,parent.data_type,parent.id,option);
                 //let parent_list = Data_Logic.get(new_data_type,0,{test:true,count:9});
                 //const [error,biz_data] = await Portal.get(database,parent.data_type,parent.id,option);
                 */
                 //-- GET  END --//
                 // -- POST-START --//
+                /*
                 let parent = Data_Logic.get(Type.DATA_PRODUCT,0,{test:true});
                 const [biz_error,biz_data] = await Portal.post(database,Type.DATA_PRODUCT,parent);
-
+                */
                 // -- POST-END --//
 
                 //-- DELETE  START --//
@@ -120,8 +121,8 @@ describe('connect', function(){ this.timeout(25000);
                 //-- USER  END --//
                 //-->
                 //-- CART START --//
-                // -- post-start --//
                 /*
+                // -- post-start --//
                 let user = Data_Logic.get(Type.USER,Num.get_id(),{test:true});
                 let cart_product_1 = Data_Logic.get(Type.DATA_PRODUCT,Num.get_id(),{test:true});
                 let cart_sub_item_product_1 = Data_Logic.get(Type.DATA_PRODUCT,Num.get_id(),{test:true});
@@ -137,23 +138,30 @@ describe('connect', function(){ this.timeout(25000);
                 cart.cart_items.push(cart_item_1);
                 cart.cart_items.push(cart_item_2);
                 [cart_error,cart] = await Cart_Data.post(database,cart);
-                */
+                Log.w('99_cart',cart);
+                // -- post-end --//
                 // -- get-start --//
-                //let cart_product = Data_Logic.get(Type.DATA_CART,'CA-88475');
-                //const [error,cart] = await Cart_Data.get(database,cart_product.id);
-                //Log.w('33_cart',cart);
+                let cart_product = Data_Logic.get(Type.DATA_CART,'CA-15090');
+                const [error,cart] = await Cart_Data.get(database,cart_product.id);
+                Log.w('44_cart',cart);
                 // -- get-end --//
+                */
                 //-- CART END --//
                 //-->
                 //-- ORDER START --//
-                //
-               // -- get-start --//
                 /*
+                //
+                // -- post-start --//
+                let order_product = Order_Logic.get
+                [cart_error,cart] = await Order_Data.post(database,order);
+                Log.w('99_cart',cart);
+                // -- get-start --//
+               // -- get-start --//
                 let order_product = Data_Logic.get(Type.DATA_ORDER,'OR-34952');
                 const [error,biz_data] = await Order_Data.get(database,order_product.id);
                 //Log.w('33_order',biz_data);
-                */
                 // -- get-end --//
+                */
                 //-- ORDER END --//
                 //-->
 
@@ -316,6 +324,56 @@ describe('post_app', function(){ this.timeout(25000);
             Log.w('GROUP ID',group.id);
             Log.w('GROUP IMAGE Count',image.length);
         }
+        done();
+    });
+    });
+});
+//9_connect_order - 9_test_connect_order
+describe('connect', function(){ this.timeout(25000);
+    it("_connect", function(done){
+        let error=null;
+        let database = {};
+        let data = {};
+        async.series([
+            async function(call){
+                const [biz_error,biz_data] = await Database.get(DATA_CONFIG);
+                database = biz_data;
+            },
+            async function(call){
+                //-- CART START --//
+                // -- post-start --//
+                /*
+                let user = Data_Logic.get(Type.USER,Num.get_id(),{test:true});
+                let cart_product_1 = Data_Logic.get(Type.DATA_PRODUCT,Num.get_id(),{test:true});
+                let cart_sub_item_product_1 = Data_Logic.get(Type.DATA_PRODUCT,Num.get_id(),{test:true});
+                let cart = Cart_Logic.get(user.id,{cart_code:'CA'});
+                let cart_item_1 = Cart_Logic.get_cart_item(cart_product_1.data_type,cart_product_1.id,1,cart_product_1.cost,{cart_code:'CA'});
+                let cart_item_2 = Cart_Logic.get_cart_item(cart_product_1.data_type,cart_product_1.id,1,cart_product_1.cost,{cart_code:'CA'});
+                cart_item_1.id = Num.get_id();
+                cart_item_2.id = Num.get_id();
+                let cart_sub_item_1 = Cart_Logic.get_cart_sub_item(cart_item_1.id,Type.CART_SUB_TYPE_STANDARD,1,cart_sub_item_product_1.cost);
+                let cart_sub_item_2 = Cart_Logic.get_cart_sub_item(cart_item_2.id,Type.CART_SUB_TYPE_STANDARD,1,cart_sub_item_product_1.cost);
+                cart_item_1.cart_sub_items.push(cart_sub_item_1);
+                cart_item_2.cart_sub_items.push(cart_sub_item_2);
+                cart.cart_items.push(cart_item_1);
+                cart.cart_items.push(cart_item_2);
+                [cart_error,cart] = await Cart_Data.post(database,cart);
+                Log.w('99_cart',cart);
+                */
+                // -- post-end --//
+                // -- get-start --//
+                let cart_product = Data_Logic.get(Type.DATA_CART,'CA-15090');
+                const [error,cart] = await Cart_Data.get(database,cart_product.id);
+                Log.w('44_cart',cart);
+                // -- get-end --//
+                //-- CART END --//
+            },
+            async function(call){
+
+             },
+],
+    function(error, result){
+        console.log('CONNECT-DONE');
         done();
     });
     });
