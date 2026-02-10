@@ -338,7 +338,7 @@ describe('connect', function(){ this.timeout(25000);
                 //-- CART-GET END --//
                 cart = Data_Logic.get(Type.DATA_CART,'CA-32126');
                 const [biz_error,biz_data] = await Cart_Data.get(database,cart.id);
-                //Log.w('33_cart',biz_data);
+                Log.w('55_cart',biz_data);
                 cart = biz_data;
                 //-- CART-GET END --//
             },

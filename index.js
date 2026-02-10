@@ -1631,98 +1631,15 @@ class Portal {
                         call();
                     }
                 },
-				//9_get_item_foreigns
-				/*
-				function(call){
-	                if(data.id && option.foreigns){
-	                    let foreign_search_items = [];
-						for(const item of option.foreigns){
-								foreign_search_items.push({
-									type : item.type ? item.type : Type.SEARCH_ITEMS,
-									foreign_data_type : item.foreign_data_type,
-									foreign_field : item.foreign_field,
-									parent_field : item.parent_field,
-									field : item.field ? item.field : {},
-									title : item.title ? item.title : Str.get_title_url(Data_Logic.get_data_type_by_type(item.foreign_data_type,{plural:true})),
-									page_current: item.page_current ? item.page_current : 1,
-									page_size: item.page_size ? item.page_size : 0,
-								});
-						}
-                        function get_data(search_item) {
-                            return new Promise((resolve) => {
-	                            let foreign_option = {field:search_item.field};
-								if(search_item.type == Type.SEARCH_ITEMS){
-                                    let query = {};
-								    query[search_item.foreign_field] = data[search_item.parent_field];
-								    let search = Data_Logic.get_search(search_item.foreign_data_type,query,{},1,0);
-								    get_item_list_adapter(database,cache,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option).then(([biz_error,items,item_count,page_count])=>{
-                                        if(biz_error){
-									        error=Log.append(error,biz_error);
-								        }else{
-									        data[search_item.title] = items.length>0?items:[];
-                                            resolve();
-								        }
-                                    }).catch(err => {
-                                        Log.error('Data-Portal-Get-Foreigns-Items',err);
-                                        error=Log.append(error,err);
-                                    });
-                                }
-                                else if(search_item.type == Type.SEARCH_COUNT){
-									console.log('bbbbbbbbbb');
-                                    let query = {};
-								    query[search_item.foreign_field] = data[search_item.parent_field];
-								    let search = Data_Logic.get_search(search_item.foreign_data_type,query,{},1,0);
-								    get_count_item_list_adapter(database,cache,search.data_type,search.filter).then(([biz_error,biz_data])=>{
-                                        if(biz_error){
-									        error=Log.append(error,biz_error);
-								        }else{
-									        data[Str.get_title_url(search_item.title)] = biz_data.count;
-                                            resolve();
-								        }
-                                        }).catch(err => {
-                                            Log.error('Data-Portal-Get-Foreigns-Count',err);
-                                            error=Log.append(error,err);
-                                        });
-                                }
-                                else if(search_item.type == Type.SEARCH_ONE){
-                                    let query = {};
-								    query[search_item.foreign_field] = data[search_item.parent_field];
-								    let search = Data_Logic.get_search(search_item.foreign_data_type,query,{},1,1);
-								    get_item_list_adapter(database,cache,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option).then(([biz_error,items,item_count,page_count])=>{
-                                        if(biz_error){
-									        error=Log.append(error,biz_error);
-								        }else{
-									        data[Str.get_title_url(search_item.title)] = items.length>0 ? items[0] : Data_Logic.get_not_found(search_item.foreign_data_type,data[search_item.parent_field]);
-                                            resolve();
-								        }
-                                        }).catch(err => {
-                                            Log.error('Data-Portal-Get-Foreigns-One',err);
-                                            error=Log.append(error,err);
-                                        });
-                                }
-                            });
-                        }
-                        const run = async () => {
-                            for(const search_item of foreign_search_items){
-                                await get_data(search_item);
-                            }
-                        }
-                        run().then(() => {
-                            call();
-                        });
-                    }else{
-                        call();
-                    }
-                },
-				*/
-				async function(call){
+			function(call){
  					if(option.foreigns && data.id){
     				Portal.get_data_foreigns(database,cache,[data],option).then(([biz_error,biz_data])=>{
                         if(biz_error){
                             error=Log.append(error,biz_error);
                         }else{
-							console.log('here');
-                        }
+							data = biz_data;
+						}
+						call();
                     }).catch(err => {
                         Log.error('Data-Portal-Search-Foreigns',err);
                         error=Log.append(error,err);
@@ -1842,14 +1759,14 @@ class Portal {
 			let error = null;
 			let data = Data_Logic.get(Type.DATA_BLANK,0);
             let option = {};
-			console.log('rrrrr');
    			return new Promise((resolve) => { //here_3
-	                        let query = { $or: [] };
+	                        	let query = { $or: [] };
 					            for(const data_item of data_items){
 					                let query_field = {};
 						                query_field[search_item.foreign_field] = search_item.parent_value;
 						                query.$or.push(query_field);
 					            };
+
 					            let search = Data_Logic.get_search(search_item.foreign_data_type,query,{},search_item.page_current,search_item.page_size);
 					            let foreign_option = search_item.field ? search_item.field : {};
 							    for(const data_item of data_items){
@@ -1862,27 +1779,20 @@ class Portal {
 								error=Log.append(error,biz_error);
 							}else{
 								search_item[Type.FIELD_ITEMS] = items;
-							    function get_item_data(data_item) {
-									console.log('22222222');
+							    function get_item_data_here(data_item) {
                                     return new Promise((resolve2) => {
 									let query = {};
-										console.log('333333');
-										console.log(search_item);
 								    if(search_item.type == Type.SEARCH_ITEMS){
-										console.log('4444444');
-										console.log('5555555');
 										query[search_item.foreign_field] = data_item[search_item.parent_field];
 										let search = Data_Logic.get_search(search_item.foreign_data_type,query,{},1,0);
 										data_item[search_item.title] = [];
 										get_item_list_adapter(database,cache,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,foreign_option).then(([biz_error,items,item_count,page_count])=>{
-											console.log('5555555555');
                                             if(biz_error){
 											    error=Log.append(error,biz_error);
 											}else{
 												for(const sub_data_item of items){
 												    data_item[search_item.title].push(sub_data_item);
 												}
-												console.log('6666666');
                                                 resolve2(data_item);
 											}
                                         }).catch(err => {
@@ -1926,19 +1836,16 @@ class Portal {
                                     });
                                 }
 								//here_bottom
-								console.log('hhhhhhhhh');
                                 const run = async () => {
-									console.log('1111111');
                                     for(const data_item of data_items){
-                                        await get_item_data(data_item);
-										console.log('77777777');
+                                        await get_item_data_here(data_item);
                                     }
                                 }
                                 run().then(() => {
-									console.log('88888888');
                                     resolve(data_items);
                                 });
-                            }
+
+                            }//here_now/
 								}).catch(err => {
                                     Log.error('Data-Portal-Get-Foreigns-Items',err);
                                     error=Log.append(error,err);
@@ -1970,106 +1877,8 @@ class Portal {
 							});
 						}
 					}
-					//here_1
-					/*
-				    function get_data(search_item) {
-                        return new Promise((resolve) => { //here_3
-	                        let query = { $or: [] };
-					            for(const data_item of data_items){
-					                let query_field = {};
-						                query_field[search_item.foreign_field] = search_item.parent_value;
-						                query.$or.push(query_field);
-					            };
-					            let search = Data_Logic.get_search(search_item.foreign_data_type,query,{},search_item.page_current,search_item.page_size);
-					            let foreign_option = search_item.field ? search_item.field : {};
-							    for(const data_item of data_items){
-								    let query_field = {};
-								    query_field[search_item.foreign_field] = search_item.parent_value;
-								    query.$or.push(query_field);
-							    };
-                                get_item_list_adapter(database,cache,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,foreign_option).then(([biz_error,items,item_count,page_count])=>{
-                                    if(biz_error){
-								error=Log.append(error,biz_error);
-							}else{
-								search_item[Type.FIELD_ITEMS] = items;
-							    function get_item_data(data_item) {
-                                    return new Promise((resolve2) => {
-									let query = {};
-								    if(search_item.type == Type.SEARCH_ITEMS){
-										query[search_item.foreign_field] = data_item[search_item.parent_field];
-										let search = Data_Logic.get_search(search_item.foreign_data_type,query,{},1,0);
-										data_item[search_item.title] = [];
-										get_item_list_adapter(database,cache,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,foreign_option).then(([biz_error,items,item_count,page_count])=>{
-                                            if(biz_error){
-											    error=Log.append(error,biz_error);
-											}else{
-												for(const sub_data_item of items){
-												    data_item[search_item.title].push(sub_data_item);
-												}
-                                                resolve2(data_item);
-											}
-                                        }).catch(err => {
-                                            Log.error('Data-Portal-Get-Foreign-Items',err);
-                                            error=Log.append(error,err);
-                                        });
-									}
- 									else if(search_item.type == Type.SEARCH_COUNT){
-											query[search_item.foreign_field] = data_item[search_item.parent_field];
-											let search = Data_Logic.get_search(search_item.foreign_data_type,query,{},1,0);
-											get_count_item_list_adapter(database,search.data_type,search.filter).then(([biz_error,biz_data])=>{
-                                                if(biz_error){
-													error=Log.append(error,biz_error);
-												}else{
-													data_item[search_item.title] = biz_data.count;
-                                                    resolve2();
-												}
-                                          }).catch(err => {
-                                           	Log.error('Data-Portal-Get-Foreigns-Count',err);
-                                            error=Log.append(error,err);
-                                          });
-									}
-									else if(search_item.type == Type.SEARCH_ONE){
-										query[search_item.foreign_field] = data_item[search_item.parent_field];
-										let search = Data_Logic.get_search(search_item.foreign_data_type,query,{},1,0);
-										data_item[search_item.title] = [];
-										get_item_list_adapter(database,cache,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,foreign_option).then(([biz_error,items,item_count,page_count])=>{
-                                            if(biz_error){
-											    error=Log.append(error,biz_error);
-											}else{
-												for(const sub_data_item of items){
-													data_item[search_item.title] = items.length ? items[0] : Data_Logic.get_not_found(search_item.foreign_data_type,0);
-												}
-                                                resolve2(data_item);
-											}
-                                        }).catch(err => {
-                                            Log.error('Data-Portal-Get-Foreign-Items',err);
-                                            error=Log.append(error,err);
-                                        });
-									}
-                                    });
-                                }
-								//here_bottom
-                                const run = async () => {
-                                    for(const data_item of data_items){
-                                        await get_item_data(data_item);
-                                    }
-                                }
-                                run().then(() => {
-                                    resolve();
-                                });
-                            }
-								}).catch(err => {
-                                    Log.error('Data-Portal-Get-Foreigns-Items',err);
-                                    error=Log.append(error,err);
-                                });
-                        }); //here_4
-
-                    }
-					*/
-					//here2
-                    const run = async () => {
+					const run = async () => {
                         for(const search_item of foreign_search_items){
-                            //await get_data(search_item); //old
                             await Portal.get_data_foreign_search(database,cache,data_items,search_item);
                         }
                     }
@@ -2077,13 +1886,6 @@ class Portal {
                         call();
                     });
                 },
-				function(call){
-					console.log('hrererfe');
-					//Log.w('33_final_data',data_items);
-					console.log(option);
-					call();
-		 		},
-
 			]).then(result => {
 				callback([error,data_items]);
 			}).catch(err => {
@@ -3340,8 +3142,7 @@ class Cart_Data  {
 					if(biz_error){
 						error=Log.append(error,biz_error);
 					}else{
-						Log.w('44_cart',biz_data);
-						//data.cart = biz_data;
+						data.cart = biz_data;
 					}
 				},
 			]).then(result => {
@@ -3369,8 +3170,7 @@ class Cart_Data  {
 				//get_cart
 				async function(call){
                  	let foreign_cart_item_parent = Data_Logic.get_search_foreign(Type.SEARCH_ONE,Type.DATA_PRODUCT,Type.FIELD_ID,Type.FIELD_PARENT_ID,{title:'parent'});
-                 	let foreign_cart_item = Data_Logic.get_search_foreign(Type.SEARCH_ITEMS,Type.DATA_CART_ITEM,Type.FIELD_CART_ID,Type.FIELD_ID,{foreigns:[foreign_cart_item_parent]});
-					Log.w('11_foreign_cart_item',foreign_cart_item);
+                 	let foreign_cart_item = Data_Logic.get_search_foreign(Type.SEARCH_COUNT,Type.DATA_CART_ITEM,Type.FIELD_CART_ID,Type.FIELD_ID,{foreigns:[foreign_cart_item_parent]});
                  	let foreign_user = Data_Logic.get_search_foreign(Type.SEARCH_ONE,Type.DATA_USER,Type.FIELD_ID,Type.FIELD_USER_ID,{title:'user'});
 					let cart_option = { id_field:Type.FIELD_CART_NUMBER,foreigns:[foreign_cart_item,foreign_user] };
 					const [biz_error,biz_data] = await Portal.get(database,Type.DATA_CART,cart_number,cart_option);
@@ -3401,7 +3201,7 @@ class Cart_Data  {
 				},
 				*/
 			]).then(result => {
-				//callback([error,data.cart]);
+				callback([error,data.cart]);
 			}).catch(err => {
 				Log.error("Cart-Get",err);
 				callback([error,[]]);
