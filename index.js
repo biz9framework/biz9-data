@@ -1529,7 +1529,6 @@ class Portal {
 				},
                 //9_get_item_join
 				function(call){
-					console.log('ccccccccc');
                     if(option.joins){
                     Portal.get_data_joins(database,cache,data,option).then(([biz_error,biz_data])=>{
                         if(biz_error){
@@ -1548,7 +1547,6 @@ class Portal {
                 },
 				//9_get_item_groups
 	            function(call){
-					console.log('ddddddddd');
 	                if(option.groups){
 						data.groups = [];
 					}
@@ -1634,7 +1632,6 @@ class Portal {
                     }
                 },
 			function(call){
-				console.log('eeeee');
  					if(option.foreigns && data.id){
     				Portal.get_data_foreigns(database,cache,[data],option).then(([biz_error,biz_data])=>{
                         if(biz_error){
@@ -1863,14 +1860,15 @@ class Portal {
 	//9_items_foreigns //9_get_items_foreigns //9_foreigns 9_get_data_foreigns //9_data_foreigns
 	static get_data_foreigns = (database,cache,data_items,option) => {
 		return new Promise((callback) => {
-
  			 function get_foreign_search_item(data_item,foreign_item){
-				 Log.w('11_check_data_item',data_item);
-				 Log.w('22_check_foreign_item',foreign_item);
-				 Log.w('33a','data_item[foreign_item.parent_field]');
-				 Log.w('33b',data_item[foreign_item.parent_field]);
-				 Log.w('33_correct',data_item['id']);
-				 Log.w('44',foreign_item.parent_field);
+				 Log.w('111',data_item);
+				 Log.w('222',foreign_item);
+				 /*
+				 Log.w('333',foreign_item.parent_field);
+				 Log.w('333',foreign_item.parent_field);
+				 Log.w('444',data_item[foreign_item.parent_field]);
+				 Log.w('555',data_item['id']);
+				 */
 					return {
 								type : foreign_item.type ? foreign_item.type : Type.SEARCH_ITEMS,
 								foreign_data_type : foreign_item.foreign_data_type,
@@ -1905,30 +1903,30 @@ class Portal {
                         call();
                     });
                 },
+				/*
  				function(call){
-					let a = 0;
-					let b = 0;
-					let c = 0;
 					for(const foreign_search_item of foreign_search_items){
-						a = a +1;
+						console.log('aaa');
 						//Log.w('33_foreign_item',foreign_search_item);
 						//Log.w('33_foreign_item',foreign_search_item);
 						for(const foreign_search_item_foreign of foreign_search_item.foreigns){
-						b = b +1;
-							//Log.w('aaa',foreign_search_item_foreign);
-    						for(const data_item of data_item[foreign_search_item.title]){
-							c = c +1;
-								//Log.w('44_foreign_search_title',foreign_search_item.title);
+							//let data_items = data_items
+							console.log('bbb');
+							Log.w('aaa',foreign_search_item);
+							Log.w('bbb',data_items);
+    						for(const data_item of data_items){
+								Log.w('cccc',data_item);
 								//Log.w('44_foreign_search_item_foreign',foreign_search_item_foreign);
 								//Log.w('44_data_item',data_item[foreign_search_item.title]);
 								//Log.w('44_foreign_search_item_foreign',foreign_search_item_foreign);
 								//Log.w('44_get_foreign_search_item',get_foreign_search_item(data_item[foreign_search_item.title],foreign_search_item_foreign));
-								foreign_search_foreign_items.push(get_foreign_search_item(data_item,foreign_search_item_foreign));
+								//get_foreign_search_item(data_item[foreign_search_item.title],foreign_search_item_foreign);
+								//foreign_search_foreign_items.push(get_foreign_search_item(data_item,foreign_search_item_foreign));
 							}
 						}
 					}
-					Log.w('55_foreign_search_foreign_items',foreign_search_foreign_items);
-					/*
+					//console.log('11111done');
+					//Log.w('55_foreign_search_foreign_items',foreign_search_foreign_items);
 					const run = async () => {
                         for(const search_item of foreign_search_items){
                             await Portal.get_data_foreign_search(database,cache,data_items,search_item);
@@ -1937,8 +1935,8 @@ class Portal {
                     run().then(() => {
                         call();
                     });
-					*/
                 },
+				*/
 
 
 			]).then(result => {
