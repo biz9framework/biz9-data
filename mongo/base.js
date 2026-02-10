@@ -50,8 +50,11 @@ const get_item = (database,data_type,id,option) => {
     return new Promise((callback) => {
         let error = null;
         let data = null;
+        if(!id){
+            id = '0';
+        }
         if(check_database(database)){
-            database.collection(data_type).findOne({id:id}).then((data) => {
+            database.collection(data_type).findOne({id:String(id)}).then((data) => {
                 if(data){
                     delete data['_id'];
                     data = data;

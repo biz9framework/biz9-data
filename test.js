@@ -60,32 +60,34 @@ describe('old_connect', function(){ this.timeout(25000);
 
 
                 //-- POST_ITEMS START --//
-                /*
-                let option = {};
-                let image = Data_Logic.get(Type.DATA_PRODUCT,0,{test:true,count:3});
-                Log.w('33_image',image);
+                //let option = {};
+                //let image = Data_Logic.get(Type.DATA_PRODUCT,0,{test:true,count:3});
+                //Log.w('33_image',image);
                 //Log.w('parent',parent);
                 //const [error,biz_data] = await Portal.post_items(database,image);
                 //let parent_list = Data_Logic.get(new_data_type,0,{test:true,count:9});
                 //const [error,biz_data] = await Portal.get(database,parent.data_type,parent.id,option);
-                */
                 //-- POST_ITEMS  END --//
 
                 //-- GET  START --//
-                /*
                 //let option = {groups:[Data_Logic.get_search_group({image:true})]};
                 //let option = {field:{title:1,id:1}};
-                let option = {};
-                let parent = Data_Logic.get(Type.DATA_PRODUCT,'355');
-                const [error,biz_data] = await Portal.get(database,parent.data_type,parent.id,option);
-                //let parent_list = Data_Logic.get(new_data_type,0,{test:true,count:9});
+                let foreign_search_1 = Data_Logic.get_search_foreign(Type.SEARCH_ITEMS,Type.DATA_GROUP,Type.FIELD_PARENT_ID,Type.FIELD_ID,{title:'groups_cool'});
+                let option = {foreigns:[foreign_search_1]};
+
+                let parent = Data_Logic.get(Type.DATA_PRODUCT,'150');
                 //const [error,biz_data] = await Portal.get(database,parent.data_type,parent.id,option);
-                */
+                //let parent_list = Data_Logic.get(new_data_type,0,{test:true,count:9});
+                const [error,biz_data] = await Portal.get(database,parent.data_type,parent.id,option);
                 //-- GET  END --//
                 // -- POST-START --//
                 /*
-                let parent = Data_Logic.get(Type.DATA_PRODUCT,0,{test:true});
-                const [biz_error,biz_data] = await Portal.post(database,Type.DATA_PRODUCT,parent);
+                //let parent = Data_Logic.get(Type.DATA_PRODUCT,0,{test:true});
+                let parent = Data_Logic.get(Type.DATA_PRODUCT,'150');
+                let group = Data_Logic.get(Type.DATA_GROUP,0,{test:true,parent:parent});
+                //let image = Data_Logic.get(Type.DATA_IMAGE,0,{test:true,parent:parent});
+                //const [biz_error,biz_data] = await Portal.post(database,Type.DATA_PRODUCT,parent);
+                const [biz_error,biz_data] = await Portal.post(database,Type.DATA_GROUP,group);
                 */
                 // -- POST-END --//
 
@@ -336,10 +338,12 @@ describe('connect', function(){ this.timeout(25000);
             },
             async function(call){
                 //-- CART-GET END --//
+                /*
                 cart = Data_Logic.get(Type.DATA_CART,'CA-32126');
                 const [biz_error,biz_data] = await Cart_Data.get(database,cart.id);
                 Log.w('55_cart',biz_data);
                 cart = biz_data;
+                */
                 //-- CART-GET END --//
             },
             async function(call){

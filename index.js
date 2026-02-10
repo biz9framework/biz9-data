@@ -1529,6 +1529,7 @@ class Portal {
 				},
                 //9_get_item_join
 				function(call){
+					console.log('ccccccccc');
                     if(option.joins){
                     Portal.get_data_joins(database,cache,data,option).then(([biz_error,biz_data])=>{
                         if(biz_error){
@@ -1547,6 +1548,7 @@ class Portal {
                 },
 				//9_get_item_groups
 	            function(call){
+					console.log('ddddddddd');
 	                if(option.groups){
 						data.groups = [];
 					}
@@ -1632,6 +1634,7 @@ class Portal {
                     }
                 },
 			function(call){
+				console.log('eeeee');
  					if(option.foreigns && data.id){
     				Portal.get_data_foreigns(database,cache,[data],option).then(([biz_error,biz_data])=>{
                         if(biz_error){
@@ -1644,6 +1647,8 @@ class Portal {
                         Log.error('Data-Portal-Search-Foreigns',err);
                         error=Log.append(error,err);
                     });
+					}else{
+						call();
 					}
 				},
 				async function(call){
@@ -1666,6 +1671,7 @@ class Portal {
 					}
 				},
 			]).then(result => {
+				console.log('fffff');
 				callback([error,data]);
 			}).catch(err => {
 				Log.error("ERROR-PORTAL-GET",err);
@@ -1879,6 +1885,7 @@ class Portal {
 					}
 					const run = async () => {
                         for(const search_item of foreign_search_items){
+							Log.w('sss',search_item);
                             await Portal.get_data_foreign_search(database,cache,data_items,search_item);
                         }
                     }
