@@ -1861,8 +1861,8 @@ class Portal {
 	static get_data_foreigns = (database,cache,data_items,option) => {
 		return new Promise((callback) => {
  			 function get_foreign_search_item(data_item,foreign_item){
-				 Log.w('111',data_item);
-				 Log.w('222',foreign_item);
+				 //Log.w('111',data_item);
+				 //Log.w('222',foreign_item);
 				 /*
 				 Log.w('333',foreign_item.parent_field);
 				 Log.w('333',foreign_item.parent_field);
@@ -1902,6 +1902,23 @@ class Portal {
                     run().then(() => {
                         call();
                     });
+                },
+				function(call){
+					console.log('1111111');
+					for(const foreign_search_item of foreign_search_items){
+						for(const foreign_search_item_foreign of foreign_search_item.foreigns){
+							Log.w('111',foreign_search_item_foreign);
+							for(const data_item of data_items){
+								for(const sub_data_item of data_item[foreign_search_item.title]){
+									console.log('dddd');
+									console.log(sub_data_item);
+										foreign_search_foreign_items.push(get_foreign_search_item(sub_data_item,foreign_search_item_foreign));
+								}
+							}
+						}
+					}
+					Log.w('aaaaaaa',foreign_search_foreign_items);
+
                 },
 				/*
  				function(call){
