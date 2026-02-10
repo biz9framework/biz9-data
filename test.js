@@ -111,7 +111,6 @@ describe('old_connect', function(){ this.timeout(25000);
                 const [biz_error,biz_data] = await Portal.get(database,parent.data_type,parent.id,option);
                 */
                 //--- SUB_VALUE -- END -- //
-
                 //-- USER  START --//
                 //let user = Data_Logic.get(Type.DATA_USER,0,{test:true,generate_title:true});
                 //let user = Data_Logic.get(Type.DATA_USER,'498');
@@ -119,35 +118,6 @@ describe('old_connect', function(){ this.timeout(25000);
                 //let user = Data_Logic.get(Type.DATA_USER,0,{test:true,data:{email:'ceo@bossappz.com',password:'123456789Ab!'}});
                 //Log.w('user',user);
                 //-- USER  END --//
-                //-->
-                //-- CART START --//
-                /*
-                // -- post-start --//
-                let user = Data_Logic.get(Type.USER,Num.get_id(),{test:true});
-                let cart_product_1 = Data_Logic.get(Type.DATA_PRODUCT,Num.get_id(),{test:true});
-                let cart_sub_item_product_1 = Data_Logic.get(Type.DATA_PRODUCT,Num.get_id(),{test:true});
-                let cart = Cart_Logic.get(user.id,{cart_code:'CA'});
-                let cart_item_1 = Cart_Logic.get_cart_item(cart_product_1.data_type,cart_product_1.id,1,cart_product_1.cost,{cart_code:'CA'});
-                let cart_item_2 = Cart_Logic.get_cart_item(cart_product_1.data_type,cart_product_1.id,1,cart_product_1.cost,{cart_code:'CA'});
-                cart_item_1.id = Num.get_id();
-                cart_item_2.id = Num.get_id();
-                let cart_sub_item_1 = Cart_Logic.get_cart_sub_item(cart_item_1.id,Type.CART_SUB_TYPE_STANDARD,1,cart_sub_item_product_1.cost);
-                let cart_sub_item_2 = Cart_Logic.get_cart_sub_item(cart_item_2.id,Type.CART_SUB_TYPE_STANDARD,1,cart_sub_item_product_1.cost);
-                cart_item_1.cart_sub_items.push(cart_sub_item_1);
-                cart_item_2.cart_sub_items.push(cart_sub_item_2);
-                cart.cart_items.push(cart_item_1);
-                cart.cart_items.push(cart_item_2);
-                [cart_error,cart] = await Cart_Data.post(database,cart);
-                Log.w('99_cart',cart);
-                // -- post-end --//
-                // -- get-start --//
-                let cart_product = Data_Logic.get(Type.DATA_CART,'CA-15090');
-                const [error,cart] = await Cart_Data.get(database,cart_product.id);
-                Log.w('44_cart',cart);
-                // -- get-end --//
-                */
-                //-- CART END --//
-                //-->
                 //-- ORDER START --//
                 /*
                 //
@@ -334,14 +304,15 @@ describe('connect', function(){ this.timeout(25000);
         let error=null;
         let database = {};
         let data = {};
+        let cart = null;
+        let order = null;
         async.series([
             async function(call){
                 const [biz_error,biz_data] = await Database.get(DATA_CONFIG);
                 database = biz_data;
             },
             async function(call){
-                //-- CART START --//
-                // -- post-start --//
+                //-- CART-POST START --//
                 /*
                 let user = Data_Logic.get(Type.USER,Num.get_id(),{test:true});
                 let cart_product_1 = Data_Logic.get(Type.DATA_PRODUCT,Num.get_id(),{test:true});
@@ -358,18 +329,29 @@ describe('connect', function(){ this.timeout(25000);
                 cart.cart_items.push(cart_item_1);
                 cart.cart_items.push(cart_item_2);
                 [cart_error,cart] = await Cart_Data.post(database,cart);
+                //cart = cart;
                 Log.w('99_cart',cart);
                 */
-                // -- post-end --//
-                // -- get-start --//
-                let cart_product = Data_Logic.get(Type.DATA_CART,'CA-15090');
-                const [error,cart] = await Cart_Data.get(database,cart_product.id);
-                Log.w('44_cart',cart);
-                // -- get-end --//
-                //-- CART END --//
+                //-- CART-POST END --//
             },
             async function(call){
-
+                //-- CART-GET END --//
+                cart = Data_Logic.get(Type.DATA_CART,'CA-32126');
+                const [biz_error,biz_data] = await Cart_Data.get(database,cart.id);
+                //Log.w('33_cart',biz_data);
+                cart = biz_data;
+                //-- CART-GET END --//
+            },
+            async function(call){
+                //-- ORDER-POST START --//
+                /*
+                order = Order_Logic.get(cart,{order_code:Type.ORDER_CODE});
+                 let order_payment = Order_Logic.get_order_payment(order.order_number,Type.PAYMENT_METHOD_CASH,'1.00',{transaction_code:'TR'});
+                Log.w('22_order_payment',order_payment);
+                const [biz_error,biz_data] = await Order_Data.post(database,order,[]);
+                Log.w('33_biz_data',biz_data);
+                */
+                //-- ORDER-POST END --//
              },
 ],
     function(error, result){

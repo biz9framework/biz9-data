@@ -563,13 +563,7 @@ class Order_Data {
 						}
 					}
 				},
-				async function(call){
-					Log.w('22_data',data);
-
-				},
-
 				//post - order_payments
-				/*
 				async function(call){
 					if(order_payments.length>0){
 						const [biz_error,biz_data] = await post_item_list_adapter(database,cache,order_payments);
@@ -580,6 +574,7 @@ class Order_Data {
 						}
 					}
 				},
+				/*
 				//post_stat_order
 				async function(call){
 					if(data.order.id && option.post_stat){
@@ -647,7 +642,6 @@ class Order_Data {
 				},
 				*/
 				//get - order
-				/*
 				async function(call){
 					const [biz_error,biz_data] = await Order_Data.get(database,data.order.order_number,option);
 					if(biz_error){
@@ -656,9 +650,8 @@ class Order_Data {
 						data.order = biz_data;
 					}
 				},
-				*/
 			]).then(result => {
-				//callback([error,data.order]);
+				callback([error,data.order]);
 			}).catch(err => {
 				Log.error("OrderData-Order-Item-Update",err);
 				callback([error,[]]);
@@ -1639,6 +1632,7 @@ class Portal {
                     }
                 },
 				//9_get_item_foreigns
+				/*
 				function(call){
 	                if(data.id && option.foreigns){
 	                    let foreign_search_items = [];
@@ -1656,7 +1650,6 @@ class Portal {
 						}
                         function get_data(search_item) {
                             return new Promise((resolve) => {
-								console.log('aaaaaaaa');
 	                            let foreign_option = {field:search_item.field};
 								if(search_item.type == Type.SEARCH_ITEMS){
                                     let query = {};
@@ -1721,6 +1714,21 @@ class Portal {
                         call();
                     }
                 },
+				*/
+				async function(call){
+ 					if(option.foreigns && data.id){
+    				Portal.get_data_foreigns(database,cache,[data],option).then(([biz_error,biz_data])=>{
+                        if(biz_error){
+                            error=Log.append(error,biz_error);
+                        }else{
+							console.log('here');
+                        }
+                    }).catch(err => {
+                        Log.error('Data-Portal-Search-Foreigns',err);
+                        error=Log.append(error,err);
+                    });
+					}
+				},
 				async function(call){
 					if(option.sub_value && data.id){
 						data.sub_values = Data_Logic.get_sub_value_items(data.sub_values);;
@@ -1829,7 +1837,116 @@ class Portal {
 			});
 		});
 	};
-	//9_items_foreigns //9_get_items_foreigns //9_joins 9_get_data_foreigns //9_data_foreigns
+	//9_get_data_foreigns_search
+	static get_data_foreign_search = (database,cache,data_items,search_item) => {
+			let error = null;
+			let data = Data_Logic.get(Type.DATA_BLANK,0);
+            let option = {};
+			console.log('rrrrr');
+   			return new Promise((resolve) => { //here_3
+	                        let query = { $or: [] };
+					            for(const data_item of data_items){
+					                let query_field = {};
+						                query_field[search_item.foreign_field] = search_item.parent_value;
+						                query.$or.push(query_field);
+					            };
+					            let search = Data_Logic.get_search(search_item.foreign_data_type,query,{},search_item.page_current,search_item.page_size);
+					            let foreign_option = search_item.field ? search_item.field : {};
+							    for(const data_item of data_items){
+								    let query_field = {};
+								    query_field[search_item.foreign_field] = search_item.parent_value;
+								    query.$or.push(query_field);
+							    };
+                                get_item_list_adapter(database,cache,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,foreign_option).then(([biz_error,items,item_count,page_count])=>{
+                                    if(biz_error){
+								error=Log.append(error,biz_error);
+							}else{
+								search_item[Type.FIELD_ITEMS] = items;
+							    function get_item_data(data_item) {
+									console.log('22222222');
+                                    return new Promise((resolve2) => {
+									let query = {};
+										console.log('333333');
+										console.log(search_item);
+								    if(search_item.type == Type.SEARCH_ITEMS){
+										console.log('4444444');
+										console.log('5555555');
+										query[search_item.foreign_field] = data_item[search_item.parent_field];
+										let search = Data_Logic.get_search(search_item.foreign_data_type,query,{},1,0);
+										data_item[search_item.title] = [];
+										get_item_list_adapter(database,cache,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,foreign_option).then(([biz_error,items,item_count,page_count])=>{
+											console.log('5555555555');
+                                            if(biz_error){
+											    error=Log.append(error,biz_error);
+											}else{
+												for(const sub_data_item of items){
+												    data_item[search_item.title].push(sub_data_item);
+												}
+												console.log('6666666');
+                                                resolve2(data_item);
+											}
+                                        }).catch(err => {
+                                            Log.error('Data-Portal-Get-Foreign-Items',err);
+                                            error=Log.append(error,err);
+                                        });
+									}
+ 									else if(search_item.type == Type.SEARCH_COUNT){
+											query[search_item.foreign_field] = data_item[search_item.parent_field];
+											let search = Data_Logic.get_search(search_item.foreign_data_type,query,{},1,0);
+											get_count_item_list_adapter(database,search.data_type,search.filter).then(([biz_error,biz_data])=>{
+                                                if(biz_error){
+													error=Log.append(error,biz_error);
+												}else{
+													data_item[search_item.title] = biz_data.count;
+                                                    resolve2();
+												}
+                                          }).catch(err => {
+                                           	Log.error('Data-Portal-Get-Foreigns-Count',err);
+                                            error=Log.append(error,err);
+                                          });
+									}
+									else if(search_item.type == Type.SEARCH_ONE){
+										query[search_item.foreign_field] = data_item[search_item.parent_field];
+										let search = Data_Logic.get_search(search_item.foreign_data_type,query,{},1,0);
+										data_item[search_item.title] = [];
+										get_item_list_adapter(database,cache,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,foreign_option).then(([biz_error,items,item_count,page_count])=>{
+                                            if(biz_error){
+											    error=Log.append(error,biz_error);
+											}else{
+												for(const sub_data_item of items){
+													data_item[search_item.title] = items.length ? items[0] : Data_Logic.get_not_found(search_item.foreign_data_type,0);
+												}
+                                                resolve2(data_item);
+											}
+                                        }).catch(err => {
+                                            Log.error('Data-Portal-Get-Foreign-Items',err);
+                                            error=Log.append(error,err);
+                                        });
+									}
+                                    });
+                                }
+								//here_bottom
+								console.log('hhhhhhhhh');
+                                const run = async () => {
+									console.log('1111111');
+                                    for(const data_item of data_items){
+                                        await get_item_data(data_item);
+										console.log('77777777');
+                                    }
+                                }
+                                run().then(() => {
+									console.log('88888888');
+                                    resolve(data_items);
+                                });
+                            }
+								}).catch(err => {
+                                    Log.error('Data-Portal-Get-Foreigns-Items',err);
+                                    error=Log.append(error,err);
+                                });
+                        }); //here_4
+	};
+
+	//9_items_foreigns //9_get_items_foreigns //9_foreigns 9_get_data_foreigns //9_data_foreigns
 	static get_data_foreigns = (database,cache,data_items,option) => {
 		return new Promise((callback) => {
 			let error = null;
@@ -1848,12 +1965,15 @@ class Portal {
 								title : foreign_item.title ? foreign_item.title : foreign_item.foreign_data_type,
 								page_current : foreign_item.page_current ? foreign_item.page_current : 1,
 								page_size : foreign_item.page_size ? foreign_item.page_size : 0,
+								foreigns : foreign_item.foreigns ? foreign_item.foreigns : 0,
 								items : []
 							});
 						}
 					}
+					//here_1
+					/*
 				    function get_data(search_item) {
-                        return new Promise((resolve) => {
+                        return new Promise((resolve) => { //here_3
 	                        let query = { $or: [] };
 					            for(const data_item of data_items){
 					                let query_field = {};
@@ -1928,6 +2048,7 @@ class Portal {
 									}
                                     });
                                 }
+								//here_bottom
                                 const run = async () => {
                                     for(const data_item of data_items){
                                         await get_item_data(data_item);
@@ -1941,17 +2062,28 @@ class Portal {
                                     Log.error('Data-Portal-Get-Foreigns-Items',err);
                                     error=Log.append(error,err);
                                 });
-                        });
+                        }); //here_4
+
                     }
+					*/
+					//here2
                     const run = async () => {
                         for(const search_item of foreign_search_items){
-                            await get_data(search_item);
+                            //await get_data(search_item); //old
+                            await Portal.get_data_foreign_search(database,cache,data_items,search_item);
                         }
                     }
                     run().then(() => {
                         call();
                     });
                 },
+				function(call){
+					console.log('hrererfe');
+					//Log.w('33_final_data',data_items);
+					console.log(option);
+					call();
+		 		},
+
 			]).then(result => {
 				callback([error,data_items]);
 			}).catch(err => {
@@ -3236,17 +3368,19 @@ class Cart_Data  {
 				 },
 				//get_cart
 				async function(call){
-                 	let foreign_cart_item = Data_Logic.get_search_foreign(Type.SEARCH_ITEMS,Type.DATA_CART_ITEM,Type.FIELD_CART_ID,Type.FIELD_ID);
+                 	let foreign_cart_item_parent = Data_Logic.get_search_foreign(Type.SEARCH_ONE,Type.DATA_PRODUCT,Type.FIELD_ID,Type.FIELD_PARENT_ID,{title:'parent'});
+                 	let foreign_cart_item = Data_Logic.get_search_foreign(Type.SEARCH_ITEMS,Type.DATA_CART_ITEM,Type.FIELD_CART_ID,Type.FIELD_ID,{foreigns:[foreign_cart_item_parent]});
+					Log.w('11_foreign_cart_item',foreign_cart_item);
                  	let foreign_user = Data_Logic.get_search_foreign(Type.SEARCH_ONE,Type.DATA_USER,Type.FIELD_ID,Type.FIELD_USER_ID,{title:'user'});
 					let cart_option = { id_field:Type.FIELD_CART_NUMBER,foreigns:[foreign_cart_item,foreign_user] };
 					const [biz_error,biz_data] = await Portal.get(database,Type.DATA_CART,cart_number,cart_option);
 					if(biz_error){
 						error=Log.append(error,biz_error);
 					}else{
-						Log.w('33_get_cart',biz_data);
 						data.cart = biz_data;
 					}
 				},
+				/*
 				function(call){
 					let foreign_cart_sub_item = Data_Logic.get_search_foreign(Type.SEARCH_ITEMS,Type.DATA_CART_SUB_ITEM,Type.FIELD_CART_ITEM_ID,Type.FIELD_ID);
 					let option_cart_sub_item = { foreigns:[foreign_cart_sub_item] };
@@ -3265,8 +3399,9 @@ class Cart_Data  {
 				async function(call){
 					data.cart = Cart_Logic.get_total(data.cart);
 				},
+				*/
 			]).then(result => {
-				callback([error,data.cart]);
+				//callback([error,data.cart]);
 			}).catch(err => {
 				Log.error("Cart-Get",err);
 				callback([error,[]]);
