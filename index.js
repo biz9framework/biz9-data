@@ -1762,6 +1762,36 @@ class Portal {
 			let error = null;
 			let data = Data_Logic.get(Type.DATA_BLANK,0);
             let option = {};
+   			return new Promise((resolve) => {
+				let query = { $or: [] };
+				for(const data_item of data_items){
+					let query_field = {};
+						query_field[search_item.foreign_field] = search_item.parent_value;
+						query.$or.push(query_field);
+				};
+
+				let search = Data_Logic.get_search(search_item.foreign_data_type,query,{},search_item.page_current,search_item.page_size);
+				let foreign_option = search_item.field ? search_item.field : {};
+				get_item_list_adapter(database,cache,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,foreign_option).then(([biz_error,items,item_count,page_count])=>{
+					if(biz_error){
+						error=Log.append(error,biz_error);
+					}else{
+						search_item.items = items;
+ 						if(search_item.type == Type.SEARCH_ITEMS){
+							for(const data_item of data_items){
+								data_item[search_item.title] = [].concat(search_item.items.filter(item => item[search_item.foreign_field] === search_item.parent_value));
+							}
+						}
+					}
+					Log.w('22_done',data_items);
+					resolve(data_items);
+				});
+			});
+	};
+	static get_data_foreign_search_old = (database,cache,data_items,search_item) => {
+			let error = null;
+			let data = Data_Logic.get(Type.DATA_BLANK,0);
+            let option = {};
    			return new Promise((resolve) => { //here_3
 	                        	let query = { $or: [] };
 					            for(const data_item of data_items){
@@ -1777,6 +1807,9 @@ class Portal {
 								    query_field[search_item.foreign_field] = search_item.parent_value;
 								    query.$or.push(query_field);
 							    };
+
+
+				/*
                                 get_item_list_adapter(database,cache,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,foreign_option).then(([biz_error,items,item_count,page_count])=>{
                                     if(biz_error){
 										error=Log.append(error,biz_error);
@@ -1851,6 +1884,7 @@ class Portal {
                                     Log.error('Data-Portal-Get-Foreigns-Items',err);
                                     error=Log.append(error,err);
                                 });
+				*/
                         }); //here_4
 	};
 
@@ -1889,9 +1923,27 @@ class Portal {
                         }
                     }
                     run().then(() => {
+						Log.w('33_data_items',data_items);
                         call();
                     });
                 },
+				function(call){
+					for(const foreign_search_item of foreign_search_items){
+						for(const foreign_search_item_foreign of foreign_search_item.foreigns){
+							Log.w('44',foreign_search_item.title);
+							Log.w('55',foreign_search_item_foreign);
+							/*
+							for(const data_item of data_items){
+								for(const sub_data_item of data_item[foreign_search_item.title]){
+										foreign_search_foreign_items.push(get_foreign_search_item(sub_data_item,foreign_search_item_foreign));
+								}
+							}
+							*/
+						}
+					}
+				},
+
+				/*
 				function(call){
 					for(const foreign_search_item of foreign_search_items){
 						for(const foreign_search_item_foreign of foreign_search_item.foreigns){
@@ -1903,7 +1955,6 @@ class Portal {
 						}
 					}
 					call();
-					/*
 					const run = async () => {
                         for(const sub_search_item of foreign_search_foreign_items){
 							for(const sub_data_item of data_items){
@@ -1918,10 +1969,7 @@ class Portal {
 						//Log.w('my_data',data_items);
                         call();
                     });
-					*/
-
                 },
-				/*
  				function(call){
 					for(const foreign_search_item of foreign_search_items){
 						console.log('aaa');

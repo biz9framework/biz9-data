@@ -28,8 +28,8 @@ const DATA_CONFIG ={
 };
 /* --- DATA CONFIG END --- */
 //9_connect - 9_test_connect
-describe('old_connect', function(){ this.timeout(25000);
-    it("_oldconnect", function(done){
+describe('connect', function(){ this.timeout(25000);
+    it("_connect", function(done){
         let error=null;
         let cache=null;
         let database = {};
@@ -47,7 +47,7 @@ describe('old_connect', function(){ this.timeout(25000);
             */
             async function(call){
                 //-->
-                let print_test = false;
+                let print_test = true;
                 //-->
                 //-- SEARCH START --//
                 /*
@@ -69,21 +69,22 @@ describe('old_connect', function(){ this.timeout(25000);
                 const [error,biz_data] = await Portal.get(database,parent.data_type,parent.id,option);
                 //Log.w('33_biz_data',biz_data);
                 //Log.w('44_parent',parent.groups_cool);
-
                 //-- GET  END --//
                 //546
                 //941
                 // -- POST-START --//
+                /*
                 //let parent = Data_Logic.get(Type.DATA_PRODUCT,0,{test:true});
-                //let parent = Data_Logic.get(Type.DATA_PRODUCT,'398');
-                //let group = Data_Logic.get(Type.DATA_GROUP,0,{test:true,parent:parent});
+                let parent = Data_Logic.get(Type.DATA_PRODUCT,'398');
+                //const [biz_error,biz_data] = await Portal.post(database,Type.DATA_PRODUCT,parent);
+                let group = Data_Logic.get(Type.DATA_GROUP,0,{test:true,parent:parent});
+                const [biz_error,biz_data] = await Portal.post(database,Type.DATA_GROUP,group);
                 //let group = Data_Logic.get(Type.DATA_GROUP,'43',{test:true,parent:parent});
                 //let image = Data_Logic.get(Type.DATA_IMAGE,0,{test:true,parent:parent});
                 //let blank = Data_Logic.get(Type.DATA_BLANK,0,{test:true,parent:group});
-                //const [biz_error,biz_data] = await Portal.post(database,Type.DATA_PRODUCT,parent);
-                //const [biz_error,biz_data] = await Portal.post(database,Type.DATA_GROUP,group);
                 //const [biz_error,biz_data] = await Portal.post(database,Type.DATA_IMAGE,image);
                 //const [biz_error,biz_data] = await Portal.post(database,Type.DATA_BLANK,blank);
+                */
                 // -- POST-END --//
 
                 //-- POST_ITEMS START --//
@@ -307,8 +308,8 @@ describe('post_app', function(){ this.timeout(25000);
     });
 });
 //9_connect_order - 9_test_connect_order
-describe('connect', function(){ this.timeout(25000);
-    it("_connect", function(done){
+describe('old_connect', function(){ this.timeout(25000);
+    it("_oldconnect", function(done){
         let error=null;
         let database = {};
         let data = {};
