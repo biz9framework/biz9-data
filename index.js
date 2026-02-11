@@ -1631,7 +1631,7 @@ class Portal {
                         call();
                     }
                 },
-			function(call){
+				function(call){
  					if(option.foreigns && data.id){
     				Portal.get_data_foreigns(database,cache,[data],option).then(([biz_error,biz_data])=>{
                         if(biz_error){
@@ -1779,13 +1779,10 @@ class Portal {
 							    };
                                 get_item_list_adapter(database,cache,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,foreign_option).then(([biz_error,items,item_count,page_count])=>{
                                     if(biz_error){
-								error=Log.append(error,biz_error);
-							}else{
-								search_item[Type.FIELD_ITEMS] = items;
+										error=Log.append(error,biz_error);
+									}else{
+										search_item[Type.FIELD_ITEMS] = items;
 
-							    function get_item_data_here(data_item) {
-                                    return new Promise((resolve2) => {
-									let query = {};
 								    if(search_item.type == Type.SEARCH_ITEMS){
 										query[search_item.foreign_field] = data_item[search_item.parent_field];
 										let search = Data_Logic.get_search(search_item.foreign_data_type,query,{},1,0);
@@ -1837,9 +1834,9 @@ class Portal {
                                             error=Log.append(error,err);
                                         });
 									}
-                                    });
-                                }
 								//here_bottom
+								//Log.w('11_rund_this_data',data_items);
+								//Log.w('22_rund_this_data',search_item.items);
                                 const run = async () => {
                                     for(const data_item of data_items){
                                         await get_item_data_here(data_item);
@@ -1861,14 +1858,6 @@ class Portal {
 	static get_data_foreigns = (database,cache,data_items,option) => {
 		return new Promise((callback) => {
  			 function get_foreign_search_item(data_item,foreign_item){
-				 //Log.w('111',data_item);
-				 //Log.w('222',foreign_item);
-				 /*
-				 Log.w('333',foreign_item.parent_field);
-				 Log.w('333',foreign_item.parent_field);
-				 Log.w('444',data_item[foreign_item.parent_field]);
-				 Log.w('555',data_item['id']);
-				 */
 					return {
 								type : foreign_item.type ? foreign_item.type : Type.SEARCH_ITEMS,
 								foreign_data_type : foreign_item.foreign_data_type,
@@ -1896,7 +1885,7 @@ class Portal {
 					}
 					const run = async () => {
                         for(const search_item of foreign_search_items){
-                            await Portal.get_data_foreign_search(database,cache,data_items,search_item);
+                           data_items = await Portal.get_data_foreign_search(database,cache,data_items,search_item);
                         }
                     }
                     run().then(() => {
@@ -1904,20 +1893,32 @@ class Portal {
                     });
                 },
 				function(call){
-					console.log('1111111');
 					for(const foreign_search_item of foreign_search_items){
 						for(const foreign_search_item_foreign of foreign_search_item.foreigns){
-							Log.w('111',foreign_search_item_foreign);
 							for(const data_item of data_items){
 								for(const sub_data_item of data_item[foreign_search_item.title]){
-									console.log('dddd');
-									console.log(sub_data_item);
 										foreign_search_foreign_items.push(get_foreign_search_item(sub_data_item,foreign_search_item_foreign));
 								}
 							}
 						}
 					}
-					Log.w('aaaaaaa',foreign_search_foreign_items);
+					call();
+					/*
+					const run = async () => {
+                        for(const sub_search_item of foreign_search_foreign_items){
+							for(const sub_data_item of data_items){
+								//Log.w('33_data_item',sub_data_item);
+								//Log.w('33_sub_search_item',sub_search_item);
+                            	data_items = await Portal.get_data_foreign_search(database,cache,[sub_data_item],sub_search_item);
+								//Log.w('44_biz_data',data_items);
+							}
+                        }
+                    }
+                    run().then(() => {
+						//Log.w('my_data',data_items);
+                        call();
+                    });
+					*/
 
                 },
 				/*
@@ -1957,6 +1958,7 @@ class Portal {
 
 
 			]).then(result => {
+				Log.w('aaaaaa',data_items);
 				callback([error,data_items]);
 			}).catch(err => {
 				Log.error("Blank-Get",err);
