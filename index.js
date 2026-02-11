@@ -1757,6 +1757,77 @@ class Portal {
 			});
 		});
 	};
+	static get_search_data = (database,cache,data_items,search_item) => {
+		return new Promise((callback) => {
+			let error = null;
+			let query = { $or: [] };
+ 			let foreign_search_foreign_items = [];
+            let option = {};
+			for(const data_item of data_items){
+				let query_field = {};
+				query_field[search_item.foreign_field] = search_item.parent_value;
+				query.$or.push(query_field);
+			};
+			//
+			if(search_item.type == Type.SEARCH_ITEMS){
+				let search = Data_Logic.get_search(search_item.foreign_data_type,query,{},search_item.page_current,search_item.page_size);
+				let foreign_option = search_item.field ? search_item.field : {};
+				get_item_list_adapter(database,cache,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,foreign_option).then(([biz_error,items,item_count,page_count])=>{
+					if(biz_error){
+						error=Log.append(error,biz_error);
+					}else{
+						search_item.items = items;
+						for(const data_item of data_items){
+							data_item[search_item.title] =[];
+							let match_items =  search_item.items.filter(item => item[search_item.foreign_field] === data_item[search_item.parent_field]);
+							data_item[search_item.title] = match_items;
+						}
+					}
+						callback(data_items);
+						});
+					}
+					else if(search_item.type == Type.SEARCH_COUNT){
+						let search = Data_Logic.get_search(search_item.foreign_data_type,query,{},search_item.page_current,search_item.page_size);
+						let foreign_option = search_item.field ? search_item.field : {field:{id:1,title:1}};
+						foreign_option.field[search_item.foreign_field] = 1;
+						get_item_list_adapter(database,cache,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,foreign_option).then(([biz_error,items,item_count,page_count])=>{
+							if(biz_error){
+								error=Log.append(error,biz_error);
+							}else{
+								search_item.items = items;
+								for(const data_item of data_items){
+									data_item[search_item.title] =[];
+									let match_items =  search_item.items.filter(item => item[search_item.foreign_field] === data_item[search_item.parent_field]);
+									data_item[search_item.title] = match_items.length;
+								}
+							}
+						callback(data_items);
+						});
+					}
+					if(search_item.type == Type.SEARCH_ONE){
+						let search = Data_Logic.get_search(search_item.foreign_data_type,query,{},search_item.page_current,search_item.page_size);
+						let foreign_option = search_item.field ? search_item.field : {};
+						get_item_list_adapter(database,cache,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,foreign_option).then(([biz_error,items,item_count,page_count])=>{
+							if(biz_error){
+								error=Log.append(error,biz_error);
+							}else{
+								search_item.items = items;
+								for(const data_item of data_items){
+									data_item[search_item.title] =[];
+									let match_items =  search_item.items.filter(item => item[search_item.foreign_field] === data_item[search_item.parent_field]);
+									data_item[search_item.title] = match_items;
+									data_item[search_item.title] = items.length ? match_items[0] : Data_Logic.get_not_found(search_item.foreign_data_type,0);
+								}
+							}
+						callback(data_items);
+						});
+					}
+		}).catch(err => {
+			Log.error("Blank-Get",err);
+			callback([error,[]]);
+		});
+
+	};
 	//9_get_data_foreigns_search //9_foreigns
 	static get_data_foreign_search = (database,cache,data_items,search_item) => {
    			return new Promise((callback) => {
@@ -1765,6 +1836,15 @@ class Portal {
  			let foreign_search_foreign_items = [];
             let option = {};
 			async.series([
+ 				async function(call) {
+					console.log('cool_doo_weee');
+         			const biz_data = await Portal.get_search_data(database,cache,data_items,search_item);
+					Log.w('aaaaaaa',biz_data);
+
+				},
+
+				//start here
+				/*
                  function(call) {
 					query = { $or: [] };
 					for(const data_item of data_items){
@@ -1809,39 +1889,61 @@ class Portal {
 							call();
 						});
 					}
+					//
+					if(search_item.type == Type.SEARCH_ONE){
+						let search = Data_Logic.get_search(search_item.foreign_data_type,query,{},search_item.page_current,search_item.page_size);
+						let foreign_option = search_item.field ? search_item.field : {};
+						get_item_list_adapter(database,cache,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,foreign_option).then(([biz_error,items,item_count,page_count])=>{
+							if(biz_error){
+								error=Log.append(error,biz_error);
+							}else{
+								search_item.items = items;
+								for(const data_item of data_items){
+									data_item[search_item.title] =[];
+									let match_items =  search_item.items.filter(item => item[search_item.foreign_field] === data_item[search_item.parent_field]);
+									data_item[search_item.title] = match_items;
+									data_item[search_item.title] = items.length ? match_items[0] : Data_Logic.get_not_found(search_item.foreign_data_type,0);
+								}
+							}
+							call();
+						});
+					}
 				},
- 				 function(call){
-					 	Log.w('44_data_items',data_items);
-					 //console.log('hre');
-				 },
-				/*
+				//end
  				 async function(call){
-					 console.log('bbbbbbb');
-					for(const sub_foreign_item of search_item.foreigns){
-						for(const data_item of data_items){
-							for(const sub_data_item of data_item[search_item.title]){
-								foreign_search_foreign_items.push(Portal.get_foreign_search_item(sub_data_item,sub_foreign_item));
+					 console.log('bbbbbbbb');
+					 if(search_item.type == Type.SEARCH_ITEMS){
+						for(const sub_foreign_item of search_item.foreigns){
+							for(const data_item of data_items){
+								for(const sub_data_item of data_item[search_item.title]){
+									foreign_search_foreign_items.push(Portal.get_foreign_search_item(sub_data_item,sub_foreign_item));
+								}
 							}
 						}
-					}
 					const run = async () => {
                         for(const sub_search_item of foreign_search_foreign_items){
 							for(const data_item of data_items){
+								Log.w('33_sub_search_item',sub_search_item);
 								for(const sub_data_item of data_item[search_item.title]){
-                           			data_item[search_item.title] = await Portal.get_data_foreign_search(database,cache,data_item[search_item.title],sub_search_item);
+									console.log('start');
+									console.log('start');
+                           			cool = await Portal.get_data_foreign_search(database,cache,data_item[search_item.title],sub_search_item);
+                           			//data_item[search_item.title] = await Portal.get_data_foreign_search(database,cache,data_item[search_item.title],sub_search_item);
+									console.log('ssss');
+									console.log(cool);
+									console.log('tttt');
 								}
 							}
                         }
                     }
                     run().then(() => {
-						console.log('done');
                         call();
                     });
+					 }
                 },
 				*/
-
 			]).then(result => {
-				console.log('dddddddddd');
+				Log.w('44_results',data_items);
 				//callback([error,data]);
 			}).catch(err => {
 				Log.error("Get-Data-Foreign-Search",err);
