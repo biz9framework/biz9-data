@@ -1855,13 +1855,19 @@ class Portal {
 						}
 						for(const sub_search_item of foreign_search_foreign_items){
 							for(const data_item of data_items){
-								await get_search_data(database,cache,data_item[search_item.title],sub_search_item);
+								for(const sub_data_item of data_item[search_item.title]){
+									const biz_data = await get_search_data(database,cache,data_item[search_item.title],sub_search_item);
+									Log.w('wqqq',biz_data);
+								}
 							}
 						}
 				}
                 },
 			]).then(result => {
-				callback([error,data_items]);
+				//Log.w('data_items',data_items);
+				//Log.w('data_items',data_items[0]);
+				//Log.w('data_items',data_items[0].groups_cool);
+				//callback([error,data_items]);
 			}).catch(err => {
 				Log.error("Get-Data-Foreign-Search",err);
 				callback([error,[]]);
