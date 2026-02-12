@@ -1670,7 +1670,7 @@ class Portal {
 					}
 				},
 			]).then(result => {
-				//callback([error,data]);
+				callback([error,data]);
 			}).catch(err => {
 				Log.error("ERROR-PORTAL-GET",err);
 				callback([error,{}]);
@@ -1758,7 +1758,10 @@ class Portal {
 			});
 		});
 	};
-	static get_search_data = (database,cache,data_items,search_item) => {
+
+	//9_get_data_foreigns_search //9_foreigns
+	static get_data_foreign_search = (database,cache,data_items,search_item) => {
+		const get_search_data = (database,cache,data_items,search_item) => {
 		return new Promise((callback) => {
 			let error = null;
 			let query = { $or: [] };
@@ -1828,8 +1831,6 @@ class Portal {
 			callback([error,[]]);
 		});
 	};
-	//9_get_data_foreigns_search //9_foreigns
-	static get_data_foreign_search = (database,cache,data_items,search_item) => {
    			return new Promise((callback) => {
 			let error = null;
 			let query = {};
@@ -1840,7 +1841,7 @@ class Portal {
 			async.series([
  				async function(call) {
 					//here2
-         			const biz_data = await Portal.get_search_data(database,cache,data_items,search_item);
+         			const biz_data = await get_search_data(database,cache,data_items,search_item);
 					data_items = biz_data;
 				},
  				 async function(call){
@@ -1852,43 +1853,15 @@ class Portal {
 								}
 							}
 						}
-					const run = async () => {
 						for(const sub_search_item of foreign_search_foreign_items){
 							for(const data_item of data_items){
-								//for(const sub_data_item of data_item[search_item.title]){
-										//const biz_data = await Portal.get_search_data(database,cache,data_item[search_item.title],sub_search_item);
- 										async.forEachOf(data_item[search_item.title],(sub_data_item,key,go)=>{
-											(async () => {
-												const biz_data = await Portal.get_search_data(database,cache,data_item[search_item.title],sub_search_item);
-												//console.log(biz_data);
-												cool.push('biz_data');
-											})();
-											console.log('aaaaa');
-											//console.log(biz_data);
-       										go();
-
-                						}, error => {
-                						});
-
-											//data_item[search_item.title] = biz_data;
-											//data_item[search_item.title] = [];
-											//data_items[data_item[search_item.title]].push('aaaaaa');
-											//Log.w('ddddd',data_item[search_item.title]);
-								//}
+								await get_search_data(database,cache,data_item[search_item.title],sub_search_item);
 							}
 						}
-                    }
-                    run().then(() => {
-						cool = cool;
-                        call();
-                    });
-					 }
+				}
                 },
 			]).then(result => {
-				//Log.w('ffff',data_items);
-				//Log.w('apple',data_items[0]);
-				//callback([error,data_items]);
-				Log.w('cool',cool);
+				callback([error,data_items]);
 			}).catch(err => {
 				Log.error("Get-Data-Foreign-Search",err);
 				callback([error,[]]);
@@ -1919,20 +1892,15 @@ class Portal {
             let foreign_search_items = [];
             let foreign_search_foreign_items = [];
 			async.series([
-	           function(call){
+	           async function(call){
 					for(const foreign_item of option.foreigns){
 						for(const data_item of data_items){
 							foreign_search_items.push(Portal.get_foreign_search_item(data_item,foreign_item));
 						}
 					}
-					const run = async () => {
-                        for(const search_item of foreign_search_items){
-                           data_items = await Portal.get_data_foreign_search(database,cache,data_items,search_item);
-                        }
+      				for(const search_item of foreign_search_items){
+                    	data_items = await Portal.get_data_foreign_search(database,cache,data_items,search_item);
                     }
-                    run().then(() => {
-                        call();
-                    });
                 },
 			]).then(result => {
 				callback([error,data_items]);
@@ -2026,7 +1994,7 @@ class Portal {
                     });
                 },
 				//foreign
- 			    function(call){
+ 			    async function(call){
                     function get_data(search_item,data) {
                         return new Promise((resolve) => {
 								let join_foreign_option = {foreigns:search_item.foreigns};
@@ -2043,19 +2011,14 @@ class Portal {
                                 });
                         });
                     }
-					const run = async () => {
-                        for(const search_item of join_search_items){
+					//need to test.. remived the run function
+					for(const search_item of join_search_items){
 							if(search_item.foreigns){
  								for(const data_item of data[search_item.title]){
                             		await get_data(search_item,[data_item]);
 								}
-
 							}
-                        }
-                    }
-                    run().then(() => {
-                        call();
-                    });
+                     }
                 },
 			]).then(result => {
 				callback([error,data]);
