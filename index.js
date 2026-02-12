@@ -1631,16 +1631,14 @@ class Portal {
                         call();
                     }
                 },
+				//9_foreigns
 				function(call){
  					if(option.foreigns && data.id){
-
     				Portal.get_data_foreigns(database,cache,[data],option).then(([biz_error,biz_data])=>{
                         if(biz_error){
                             error=Log.append(error,biz_error);
                         }else{
-							Log.w('here1',biz_data);
-							Log.w('here2',biz_data[1]);
-							Log.w('here2',biz_data[1][0]);
+							Log.w('here3',biz_data[1][0]);
 							//data = biz_data[0];
 						}
 						call();
@@ -1837,9 +1835,12 @@ class Portal {
 			let query = {};
  			let foreign_search_foreign_items = [];
             let option = {};
+			let fuck = null;
 			async.series([
  				async function(call) {
+					//here2
          			const biz_data = await Portal.get_search_data(database,cache,data_items,search_item);
+					data_items = biz_data;
 				},
  				 async function(call){
 					 if(search_item.type == Type.SEARCH_ITEMS){
@@ -1851,22 +1852,59 @@ class Portal {
 							}
 						}
 					const run = async () => {
+						return new Promise((callback) => {
+
+						console.log('aaa');
                         for(const sub_search_item of foreign_search_foreign_items){
+							console.log('bbb');
 							for(const data_item of data_items){
+								console.log('ccc');
 								for(const sub_data_item of data_item[search_item.title]){
-                           			const biz_data = await Portal.get_search_data(database,cache,data_item[search_item.title],sub_search_item);
-                           			sub_data_item[sub_search_item.title] = await Portal.get_data_foreign_search(database,cache,data_item[search_item.title],sub_search_item);
+									console.log('ddd');
+									sub_data_item['what'] = 'jamica';
+									//Log.w('11_sub_data_item',sub_data_item);
+                           			//sub_data_item[sub_search_item.title] = await Portal.get_search_data(database,cache,data_item[search_item.title],sub_search_item);
+									//Log.w('fffffss',sub_data_item);
+									//here
+									//need to merge liek the one right abouve here... for sub data item = right here.. same loop format add data back then next.
+									Portal.get_search_data(database,cache,data_item[search_item.title],sub_search_item).then(([biz_error,biz_data])=>{
+										 sub_data_item[sub_search_item.title]  = biz_data;
+									});
+
+									//sub_data_item[sub_search_item.title] = biz_data;
+									//data_item['cool'] = 'bean';
+									//return data_items;
+									//sub_data_item['what2']=biz_data;
+									//Log.w('66_data',sub_search_item.title);
+									//Log.w('my_sub_data',sub_data_item);
+									//Log.w('data_item',data_item);
+									//Log.w('my_title',sub_data_item[sub_search_item.title]);
+									//here1
+                           			//sub_data_item[sub_search_item.title] = await Portal.get_data_foreign_search(database,cache,data_item[search_item.title],sub_search_item);
 								}
 							}
                         }
+							callback();
+						}).catch(err => {
+							Log.error("Blank-Get",err);
+							callback([error,[]]);
+						});
                     }
                     run().then(() => {
+						Log.w('111',data_items);
+						Log.w('222',data_items[0]);
+						Log.w('222',data[0]);
+						Log.w('333',data[0].groups_cool);
+						//data_items = data;
                         call();
                     });
 					 }
                 },
 			]).then(result => {
-				callback([error,data_items]);
+				//Log.w('dddd',data_items);
+				//Log.w('apple',data_items[0]);
+				Log.w('ffff',fuck);
+				//callback([error,data_items]);
 			}).catch(err => {
 				Log.error("Get-Data-Foreign-Search",err);
 				callback([error,[]]);
@@ -1889,7 +1927,8 @@ class Portal {
 			items : []
 		}
 	};
-	//9_items_foreigns //9_get_items_foreigns //9_foreigns 9_get_data_foreigns //9_data_foreigns
+	//9_foreigns
+	//here2
 	static get_data_foreigns = (database,cache,data_items,option) => {
 		return new Promise((callback) => {
 			let error = null;
@@ -2276,7 +2315,6 @@ class Portal {
 								delete group_query.$or;
 							}
 							let item_group_join_option = {field:search_item.field};
-							//here2
 							if(search_item.image){
 								item_group_join_option['foreigns'] = [Data_Logic.get_search_foreign(Type.SEARCH_ITEMS,Type.DATA_IMAGE,Type.FIELD_PARENT_ID,Type.FIELD_ID)];
 							}

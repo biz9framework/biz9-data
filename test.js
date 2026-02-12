@@ -11,7 +11,7 @@ const {Type,Data_Logic,Cart_Logic,Order_Logic} = require("/home/think1/www/doqbo
 - connect
 */
 /* --- TEST CONFIG START --- */
-const APP_ID = 'test-stage-feb10';
+const APP_ID = 'test-stage-feb11';
 /* --- TEST CONFIG END --- */
 
 /* --- DATA CONFIG START --- */
@@ -47,7 +47,35 @@ describe('connect', function(){ this.timeout(25000);
             */
             async function(call){
                 //-->
-                let print_test = false;
+                let print_test = true;
+                // -- POST-START --//
+                /*
+                //let parent = Data_Logic.get(Type.DATA_PRODUCT,0,{test:true});
+                let parent = Data_Logic.get(Type.DATA_PRODUCT,'952');
+                //const [biz_error,biz_data] = await Portal.post(database,Type.DATA_PRODUCT,parent);
+                //let group = Data_Logic.get(Type.DATA_GROUP,0,{test:true,parent:parent});
+                let group = Data_Logic.get(Type.DATA_GROUP,'349',{test:true,parent:parent});
+                //const [biz_error,biz_data] = await Portal.post(database,Type.DATA_GROUP,group);
+                let blank = Data_Logic.get(Type.DATA_BLANK,0,{test:true,parent:group});
+                const [biz_error,biz_data] = await Portal.post(database,Type.DATA_BLANK,blank);
+                */
+                // -- POST-END --//
+                //
+                //-- GET  START --//
+                //let option = {groups:[Data_Logic.get_search_group({image:true})]};
+                //let option = {field:{title:1,id:1}};
+                let foreign_sub_blank_search_1 = Data_Logic.get_search_foreign(Type.SEARCH_ITEMS,Type.DATA_BLANK,Type.FIELD_PARENT_ID,Type.FIELD_ID,{title:'group_blanks'});
+                let foreign_search_1 = Data_Logic.get_search_foreign(Type.SEARCH_ITEMS,Type.DATA_GROUP,Type.FIELD_PARENT_ID,Type.FIELD_ID,{title:'groups_cool',foreigns:[foreign_sub_blank_search_1]});
+                //let foreign_search_2 = Data_Logic.get_search_foreign(Type.SEARCH_COUNT,Type.DATA_IMAGE,Type.FIELD_PARENT_ID,Type.FIELD_ID,{title:'images_cool'});
+                let option = {foreigns:[foreign_search_1]};
+                //let option = {};
+                let parent = Data_Logic.get(Type.DATA_PRODUCT,'952');
+                const [error,biz_data] = await Portal.get(database,parent.data_type,parent.id,option);
+                Log.w('88_biz_data',biz_data);
+                //Log.w('44_parent',parent.groups_cool);
+                //-- GET  END --//
+
+
                 //-->
                 //-- SEARCH START --//
                 /*
@@ -57,35 +85,9 @@ describe('connect', function(){ this.timeout(25000);
                 Log.w('22_biz_data',biz_data);
                 */
                 //-- SEARCH  END --//
-                //-- GET  START --//
-                //let option = {groups:[Data_Logic.get_search_group({image:true})]};
-                //let option = {field:{title:1,id:1}};
-                let foreign_sub_blank_search_1 = Data_Logic.get_search_foreign(Type.SEARCH_ITEMS,Type.DATA_BLANK,Type.FIELD_PARENT_ID,Type.FIELD_ID,{title:'group_blanks'});
-                let foreign_search_1 = Data_Logic.get_search_foreign(Type.SEARCH_ITEMS,Type.DATA_GROUP,Type.FIELD_PARENT_ID,Type.FIELD_ID,{title:'groups_cool',foreigns:[foreign_sub_blank_search_1]});
-                //let foreign_search_2 = Data_Logic.get_search_foreign(Type.SEARCH_COUNT,Type.DATA_IMAGE,Type.FIELD_PARENT_ID,Type.FIELD_ID,{title:'images_cool'});
-                let option = {foreigns:[foreign_search_1]};
-                //let option = {};
-                let parent = Data_Logic.get(Type.DATA_PRODUCT,'398');
-                const [error,biz_data] = await Portal.get(database,parent.data_type,parent.id,option);
-                Log.w('88_biz_data',biz_data);
-                //Log.w('44_parent',parent.groups_cool);
-                //-- GET  END --//
-                //546
+               //546
                 //941
-                // -- POST-START --//
-                /*
-                //let parent = Data_Logic.get(Type.DATA_PRODUCT,0,{test:true});
-                let parent = Data_Logic.get(Type.DATA_PRODUCT,'398');
-                //const [biz_error,biz_data] = await Portal.post(database,Type.DATA_PRODUCT,parent);
-                //let group = Data_Logic.get(Type.DATA_GROUP,0,{test:true,parent:parent});
-                let group = Data_Logic.get(Type.DATA_GROUP,'655',{test:true,parent:parent});
-                //const [biz_error,biz_data] = await Portal.post(database,Type.DATA_GROUP,group);
-                let blank = Data_Logic.get(Type.DATA_BLANK,0,{test:true,parent:group});
-                const [biz_error,biz_data] = await Portal.post(database,Type.DATA_BLANK,blank);
-                */
-                // -- POST-END --//
-
-                //-- POST_ITEMS START --//
+                               //-- POST_ITEMS START --//
                 //let option = {};
                 //let image = Data_Logic.get(Type.DATA_PRODUCT,0,{test:true,count:3});
                 //Log.w('33_image',image);
