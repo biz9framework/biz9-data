@@ -10,6 +10,7 @@ const {Scriptz}=require("biz9-scriptz");
 const {Log,Str,Num,Obj,DateTime}=require("/home/think1/www/doqbox/biz9-framework/biz9-utility/code");
 const {Type,Favorite_Logic,Stat_Logic,Review_Logic,Data_Logic,Product_Logic,Demo_Logic,Category_Logic,Cart_Logic,Order_Logic,Field_Logic}=require("/home/think1/www/doqbox/biz9-framework/biz9-logic/code");
 const {get_cache} = require('./redis/base.js');
+const {Foreigns} = require('./foreigns.js');
 const {get_database_adapter,check_database_adapter,delete_database_adapter,post_item_adapter,post_item_list_adapter,get_item_adapter,delete_item_adapter,get_item_list_adapter,delete_item_list_adapter,get_count_item_list_adapter,delete_item_cache }  = require('./adapter.js');
 
 class Database {
@@ -687,7 +688,7 @@ class Order_Data {
 				function(call){
 					let foreign_order_sub_item = Data_Logic.get_search_foreign(Type.SEARCH_ITEMS,Type.DATA_ORDER_SUB_ITEM,Type.FIELD_ORDER_ITEM_ID,Type.FIELD_ID);
 					let option_order_sub_item = { foreigns:[foreign_order_sub_item] };
-                    Portal.get_data_foreigns(database,cache,data.order.order_items,option_order_sub_item).then(([biz_error,biz_data])=>{
+                    Foreigns.get_data(database,cache,data.order.order_items,option_order_sub_item).then(([biz_error,biz_data])=>{
                     		if(biz_error){
                                  error=Log.append(error,biz_error);
                              }else{
@@ -1631,10 +1632,11 @@ class Portal {
                         call();
                     }
                 },
-				//9_foreigns
+				//9_foreigns //9_get_foreigns //here20
 				function(call){
  					if(option.foreigns && data.id){
-    				Portal.get_data_foreigns(database,cache,[data],option).then(([biz_error,biz_data])=>{
+    				Foreigns.get_data(database,cache,[data],option).then(([biz_error,biz_data])=>{
+						/*
                         if(biz_error){
                             error=Log.append(error,biz_error);
                         }else{
@@ -1642,6 +1644,7 @@ class Portal {
 							//data = biz_data[0];
 						}
 						call();
+						*/
                     }).catch(err => {
                         Log.error('Data-Portal-Search-Foreigns',err);
                         error=Log.append(error,err);
@@ -1784,6 +1787,7 @@ class Portal {
 						for(const data_item of data_items){
 							data_item[search_item.title] =[];
 							let match_items =  search_item.items.filter(item => item[search_item.foreign_field] === data_item[search_item.parent_field]);
+							data_item[search_item.title] =
 							data_item[search_item.title] = match_items;
 						}
 					}
@@ -1875,49 +1879,7 @@ class Portal {
 			//end
 			});
 	};
-	static get_foreign_search_item = (data_item,foreign_item) => {
-		return {
-			type : foreign_item.type ? foreign_item.type : Type.SEARCH_ITEMS,
-			foreign_data_type : foreign_item.foreign_data_type,
-			foreign_field : foreign_item.foreign_field,
-			parent_field : foreign_item.parent_field,
-			parent_value : data_item[foreign_item.parent_field],
-			field : foreign_item.field ? foreign_item.field : null,
-			title : foreign_item.title ? foreign_item.title : foreign_item.foreign_data_type,
-			page_current : foreign_item.page_current ? foreign_item.page_current : 1,
-			page_size : foreign_item.page_size ? foreign_item.page_size : 0,
-			foreigns : foreign_item.foreigns ? foreign_item.foreigns : 0,
-			items : []
-		}
-	};
-	//9_foreigns
-	//here2
-	static get_data_foreigns = (database,cache,data_items,option) => {
-		return new Promise((callback) => {
-			let error = null;
-            let foreign_search_items = [];
-            let foreign_search_foreign_items = [];
-			async.series([
-	           async function(call){
-					for(const foreign_item of option.foreigns){
-						for(const data_item of data_items){
-							foreign_search_items.push(Portal.get_foreign_search_item(data_item,foreign_item));
-						}
-					}
-      				for(const search_item of foreign_search_items){
-                    	data_items = await Portal.get_data_foreign_search(database,cache,data_items,search_item);
-                    }
-                },
-			]).then(result => {
-				callback([error,data_items]);
-			}).catch(err => {
-				Log.error("Blank-Get",err);
-				callback([error,[]]);
-			});
-		});
-	};
-
-	//9_items_join //9_get_items_join //9_joins 9_get_data_joins //9_data_joins
+//9_items_join //9_get_items_join //9_joins 9_get_data_joins //9_data_joins
 	static get_data_joins = (database,cache,data,option) => {
 		return new Promise((callback) => {
 			let error = null;
@@ -2004,7 +1966,7 @@ class Portal {
                     function get_data(search_item,data) {
                         return new Promise((resolve) => {
 								let join_foreign_option = {foreigns:search_item.foreigns};
-								Portal.get_data_foreigns(database,cache,data,join_foreign_option).then(([biz_error,biz_data])=>{
+								Foreigns.get_data(database,cache,data,join_foreign_option).then(([biz_error,biz_data])=>{
                                     if(biz_error){
                                         error=Log.append(error,biz_error);
                                     }else{
@@ -2090,7 +2052,7 @@ class Portal {
 					if(option.foreigns){
                         function get_data() {
                             return new Promise((resolve) => {
-                                Portal.get_data_foreigns(database,cache,data[Type.FIELD_ITEMS],option).then(([biz_error,biz_data])=>{
+                                Foreigns.get_data(database,cache,data[Type.FIELD_ITEMS],option).then(([biz_error,biz_data])=>{
                                     if(biz_error){
                                         error=Log.append(error,biz_error);
                                     }else{
@@ -2213,7 +2175,7 @@ class Portal {
                 //9_get_items_foreigns
 				function(call){
 		            if(option.foreigns && data[Type.FIELD_ITEMS].length > 0){
-                        Portal.get_data_foreigns(database,cache,data[Type.FIELD_ITEMS],option).then(([biz_error,biz_data])=>{
+                        Foreigns.get_data(database,cache,data[Type.FIELD_ITEMS],option).then(([biz_error,biz_data])=>{
                         if(biz_error){
                             error=Log.append(error,biz_error);
                         }else{
