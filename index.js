@@ -1639,10 +1639,9 @@ class Portal {
                         if(biz_error){
                             error=Log.append(error,biz_error);
                         }else{
-							Log.w('rrr',biz_data);
-
+							data = biz_data;
 						}
-						//call();
+						call();
                     }).catch(err => {
                         Log.error('Data-Portal-Search-Foreign',err);
                         error=Log.append(error,err);
