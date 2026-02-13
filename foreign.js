@@ -48,7 +48,7 @@ class Foreign {
                 function(call){
                         function run_data(search_item) {
                             return new Promise((resolve) => {
-	                        let search = Data_Logic.get_search(search_item.foreign_data_type,search_item.foreign_query,{},search_item.page_current,search_item.page_size);
+	                        let search = Data_Logic.get_search(search_item.foreign_data_type,search_item.query,{},search_item.page_current,search_item.page_size);
 				            let foreign_option = search_item.field ? search_item.field : {};
                             get_item_list_adapter(database,cache,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option).then(([biz_error,items,item_count,page_count])=>{
                                 resolve(items);
@@ -65,7 +65,8 @@ class Foreign {
 					            for(const data_item of search_item.items){
 				                    let query_field = {};
 				                    query_field[foreign_search_item.foreign_field] = data_item[foreign_search_item.parent_field];
-				                    foreign_search_item.foreign_query.$or.push(query_field);
+				                    foreign_search_item.query.$or.push(query_field);
+                                    search_item.foreign_query.$or.push(query_field);
 					            }
                                 const biz_data = await run_data(foreign_search_item);
                                 for(const item of biz_data){
@@ -103,7 +104,7 @@ class Foreign {
 			items : [],
 			foreigns_items : [],
 			query : { $or: [] },
-			foreign_query : { $or: [] }
+			foreign_query : { $or: [] },
         }
 	};
 	//9_get_data_foreigns_search

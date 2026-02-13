@@ -1639,6 +1639,7 @@ class Portal {
                         if(biz_error){
                             error=Log.append(error,biz_error);
                         }else{
+							Log.w('rrr',biz_data);
 
 						}
 						//call();
