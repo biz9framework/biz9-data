@@ -1,10 +1,10 @@
 const async = require('async');
 const {Log,Str,Num,Obj,DateTime}=require("/home/think1/www/doqbox/biz9-framework/biz9-utility/code");
 const {Type,Data_Logic}=require("/home/think1/www/doqbox/biz9-framework/biz9-logic/code");
-const {get_item_list_adapter}  = require('./adapter.js');
+const {get_item_list_adapter,get_count_item_list_adapter}  = require('./adapter.js');
 class Foreign {
     static get_data = (database,cache,data_items,option) => {
-        return new Promise((callback) => {
+       return new Promise((callback) => {
             let error = null;
             let foreign_data_items = [];
             const foreign_search_items = [];
@@ -20,23 +20,20 @@ class Foreign {
                         }
                         foreign_search_items.push(foreign_item);
                     }
-                    function run_data(search_item) {
-                        return new Promise((resolve) => {
-                            let search = Data_Logic.get_search(search_item.foreign_data_type,search_item.query,{},search_item.page_current,search_item.page_size);
-                            let foreign_option = search_item.field ? search_item.field : {};
-                            get_item_list_adapter(database,cache,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option).then(([biz_error,items,item_count,page_count])=>{
-                                resolve(items);
-                            }).catch(err => {
-                                Log.error('Foreign-Get-Data',err);
-                                error=Log.append(error,err);
-                            });
-                        });
-                    }
+                    //foreign_1a
                     const run = async () => {
                         for(const search_item of foreign_search_items){
-                            const biz_data = await run_data(search_item);
-                            for(const item of biz_data){
-                                search_item.items.push(item);
+                            if(search_item.type == Type.SEARCH_ITEMS){
+                                const biz_data = await get_items_data(search_item);
+                                for(const item of biz_data){
+                                    search_item.items.push(item);
+                                }
+                            }else if(search_item.type == Type.SEARCH_COUNT){
+                                const biz_data = await get_count_data(search_item);
+                                search_item.data = biz_data ? biz_data : 0;
+                            }else if(search_item.type == Type.SEARCH_ONE){
+                                const biz_data = await get_items_data(search_item);
+                                search_item.data = biz_data[0] ? biz_data[0].id : Data_Logic.get_not_found(search_item.foreign_data_type,0);
                             }
                         }
                     };
@@ -70,7 +67,14 @@ class Foreign {
                                 const biz_data = await run_data(foreign_search_item);
                                 for(const data_item of search_item.items){
                                     const match_items = biz_data.filter(item_find => item_find[foreign_search_item.foreign_field] === data_item[foreign_search_item.parent_field]);
-                                    data_item[foreign_search_item.title] = match_items;
+                                    if(search_item.type == Type.SEARCH_ITEMS){
+                                        data_item[foreign_search_item.title] = match_items;
+                                    }else if(search_item.type == Type.SEARCH_COUNT){
+                                        data_item[foreign_search_item.title] = biz_data;
+                                    }else if(search_item.type == Type.SEARCH_ONE){
+                                        data_item[foreign_search_item.title] = biz_data;
+                                    }
+
                                 }
                             }
                         }
@@ -83,8 +87,13 @@ class Foreign {
                 function(call){
                     for(const foreign_search of foreign_search_items){
                         for(const data_item of data_items){
-                            const match_items = foreign_search.items.filter(item_find => item_find[foreign_search.foreign_field] === data_item[foreign_search.parent_field]);
-                            data_item[foreign_search.title] = match_items;
+
+                            if(foreign_search.type == Type.SEARCH_ITEMS){
+                                const match_items = foreign_search.items.filter(item_find => item_find[foreign_search.foreign_field] === data_item[foreign_search.parent_field]);
+                                data_item[foreign_search.title] = match_items;
+                            }else if(foreign_search.type == Type.SEARCH_COUNT){
+                                data_item[foreign_search.title] = foreign_search.data;
+                            }
                         }
                     }
                     call();
@@ -92,13 +101,41 @@ class Foreign {
             ]).then(result => {
                 callback([error,data_items]);
             }).catch(err => {
-                Log.error("Blank-Get",err);
+                Log.error("Foreign-Get",err);
                 callback([error,[]]);
             });
         });
+        function get_items_data(search_item) {
+            return new Promise((resolve) => {
+                let search = Data_Logic.get_search(search_item.foreign_data_type,search_item.query,{},search_item.page_current,search_item.page_size);
+                let foreign_option = search_item.field ? search_item.field : {};
+                get_item_list_adapter(database,cache,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option).then(([biz_error,items,item_count,page_count])=>{
+                    resolve(items);
+                }).catch(err => {
+                    Log.error('Foreign-Get-Data',err);
+                    error=Log.append(error,err);
+                });
+            });
+        }
+        function get_count_data(search_item) {
+            return new Promise((resolve) => {
+                let search = Data_Logic.get_search(search_item.foreign_data_type,search_item.query,{},search_item.page_current,search_item.page_size);
+                get_count_item_list_adapter(database,search.data_type,search.filter).then(([biz_error,biz_data])=>{
+                    resolve(biz_data.count);
+                }).catch(err => {
+                    Log.error('Foreign-Get-Data',err);
+                    error=Log.append(error,err);
+                });
+            });
+        }
+
+
     };
     //9_search 9_get_search
     static get_search = (foreign_item) => {
+        if(foreign_item.type == Type.SEARCH_COUNT){
+            foreign_item.page_size = 1;
+        }
         return {
             type : foreign_item.type ? foreign_item.type : Type.SEARCH_ITEMS,
             foreign_data_type : foreign_item.foreign_data_type,
@@ -116,7 +153,7 @@ class Foreign {
         }
     };
     //9_get_data_foreigns_search
-    static get_foreign_search_data = (database,cache,data_items,search_item) => {
+    static get_foreign_search_data_old = (database,cache,data_items,search_item) => {
         const get_search_data = (database,cache,data_items,search_item) => {
             return new Promise((callback) => {
                 let error = null;

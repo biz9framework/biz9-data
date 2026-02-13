@@ -68,7 +68,8 @@ describe('connect', function(){ this.timeout(25000);
                 //let option = {field:{title:1,id:1}};
                 let foreign_sub_blank_search_1 = Data_Logic.get_search_foreign(Type.SEARCH_ITEMS,Type.DATA_BLANK,Type.FIELD_PARENT_ID,Type.FIELD_ID,{title:'group_blanks'});
                 let foreign_sub_blank_search_2 = Data_Logic.get_search_foreign(Type.SEARCH_ITEMS,Type.DATA_IMAGE,Type.FIELD_PARENT_ID,Type.FIELD_ID,{title:'group_images'});
-                let foreign_search_1 = Data_Logic.get_search_foreign(Type.SEARCH_ITEMS,Type.DATA_GROUP,Type.FIELD_PARENT_ID,Type.FIELD_ID,{title:'groups_cool',foreigns:[foreign_sub_blank_search_1,foreign_sub_blank_search_2]});
+                let foreign_search_1 = Data_Logic.get_search_foreign(Type.SEARCH_ONE,Type.DATA_GROUP,Type.FIELD_PARENT_ID,Type.FIELD_ID,{title:'groups_cool',foreigns:[]});
+                //foreign_sub_blank_search_1,foreign_sub_blank_search_2
                 //let foreign_search_2 = Data_Logic.get_search_foreign(Type.SEARCH_COUNT,Type.DATA_IMAGE,Type.FIELD_PARENT_ID,Type.FIELD_ID,{title:'images_cool'});
                 let option = {foreigns:[foreign_search_1]};
                 //let option = {};
@@ -76,22 +77,24 @@ describe('connect', function(){ this.timeout(25000);
                 const [error,biz_data] = await Portal.get(database,parent.data_type,parent.id,option);
                 Log.w('88_biz_data',biz_data);
                 //Log.w('88_biz_data',biz_data[0].groups_cool);
+                //Log.w('88_biz_data',biz_data[1].groups_cool);
                 //Log.w('88_biz_data',biz_data[0].groups_cool[0]);
-                Log.w('88_biz_data',biz_data[0].groups_cool[1]);
                 //-- GET  END --//
 
 
                 //-->
                 //-- SEARCH START --//
                 /*
-                let search = Data_Logic.get_search(Type.DATA_PRODUCT,{},{},1,0,{field:{title:1,id:1}});
+                let foreign_sub_blank_search_1 = Data_Logic.get_search_foreign(Type.SEARCH_ITEMS,Type.DATA_BLANK,Type.FIELD_PARENT_ID,Type.FIELD_ID,{title:'group_blanks'});
+                let foreign_sub_blank_search_2 = Data_Logic.get_search_foreign(Type.SEARCH_ITEMS,Type.DATA_IMAGE,Type.FIELD_PARENT_ID,Type.FIELD_ID,{title:'group_images'});
+                let foreign_search_1 = Data_Logic.get_search_foreign(Type.SEARCH_ITEMS,Type.DATA_GROUP,Type.FIELD_PARENT_ID,Type.FIELD_ID,{title:'groups_cool',foreigns:[foreign_sub_blank_search_1,foreign_sub_blank_search_2]});
+                let option = {foreigns:[foreign_search_1]};
+                let search = Data_Logic.get_search(Type.DATA_PRODUCT,{},{},1,0,{));
                 const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,search.option);
                 //const [biz_error,biz_data] = await Portal.search_simple(database,cache,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,search.option);
                 Log.w('22_biz_data',biz_data);
                 */
                 //-- SEARCH  END --//
-               //546
-                //941
                                //-- POST_ITEMS START --//
                 //let option = {};
                 //let image = Data_Logic.get(Type.DATA_PRODUCT,0,{test:true,count:3});
