@@ -10,7 +10,7 @@ const {Scriptz}=require("biz9-scriptz");
 const {Log,Str,Num,Obj,DateTime}=require("/home/think1/www/doqbox/biz9-framework/biz9-utility/code");
 const {Type,Favorite_Logic,Stat_Logic,Review_Logic,Data_Logic,Product_Logic,Demo_Logic,Category_Logic,Cart_Logic,Order_Logic,Field_Logic}=require("/home/think1/www/doqbox/biz9-framework/biz9-logic/code");
 const {get_cache} = require('./redis/base.js');
-const {Foreigns} = require('./foreigns.js');
+const {Foreign} = require('./foreign.js');
 const {get_database_adapter,check_database_adapter,delete_database_adapter,post_item_adapter,post_item_list_adapter,get_item_adapter,delete_item_adapter,get_item_list_adapter,delete_item_list_adapter,get_count_item_list_adapter,delete_item_cache }  = require('./adapter.js');
 
 class Database {
@@ -688,7 +688,7 @@ class Order_Data {
 				function(call){
 					let foreign_order_sub_item = Data_Logic.get_search_foreign(Type.SEARCH_ITEMS,Type.DATA_ORDER_SUB_ITEM,Type.FIELD_ORDER_ITEM_ID,Type.FIELD_ID);
 					let option_order_sub_item = { foreigns:[foreign_order_sub_item] };
-                    Foreigns.get_data(database,cache,data.order.order_items,option_order_sub_item).then(([biz_error,biz_data])=>{
+                    Foreign.get_data(database,cache,data.order.order_items,option_order_sub_item).then(([biz_error,biz_data])=>{
                     		if(biz_error){
                                  error=Log.append(error,biz_error);
                              }else{
@@ -696,7 +696,7 @@ class Order_Data {
 								 call();
                              }
                  	}).catch(err => {
-                    	Log.error('Data-Portal-Search-Simple-Foreigns',err);
+                    	Log.error('Data-Portal-Search-Simple-Foreign',err);
                         error=Log.append(error,err);
                     });
 				},
@@ -1635,18 +1635,15 @@ class Portal {
 				//9_foreigns //9_get_foreigns //here20
 				function(call){
  					if(option.foreigns && data.id){
-    				Foreigns.get_data(database,cache,[data],option).then(([biz_error,biz_data])=>{
-						/*
+    				Foreign.get_data(database,cache,[data],option).then(([biz_error,biz_data])=>{
                         if(biz_error){
                             error=Log.append(error,biz_error);
                         }else{
-							Log.w('here3',biz_data[1][0]);
-							//data = biz_data[0];
+
 						}
-						call();
-						*/
+						//call();
                     }).catch(err => {
-                        Log.error('Data-Portal-Search-Foreigns',err);
+                        Log.error('Data-Portal-Search-Foreign',err);
                         error=Log.append(error,err);
                     });
 					}else{
@@ -1966,7 +1963,7 @@ class Portal {
                     function get_data(search_item,data) {
                         return new Promise((resolve) => {
 								let join_foreign_option = {foreigns:search_item.foreigns};
-								Foreigns.get_data(database,cache,data,join_foreign_option).then(([biz_error,biz_data])=>{
+								Foreign.get_data(database,cache,data,join_foreign_option).then(([biz_error,biz_data])=>{
                                     if(biz_error){
                                         error=Log.append(error,biz_error);
                                     }else{
@@ -1974,7 +1971,7 @@ class Portal {
                                         resolve();
                                     }
                                 }).catch(err => {
-                                    Log.error('Data-Portal-Get-Joins-Foreigns',err);
+                                    Log.error('Data-Portal-Get-Joins-Foreign',err);
                                         error=Log.append(error,err);
                                 });
                         });
@@ -2052,7 +2049,7 @@ class Portal {
 					if(option.foreigns){
                         function get_data() {
                             return new Promise((resolve) => {
-                                Foreigns.get_data(database,cache,data[Type.FIELD_ITEMS],option).then(([biz_error,biz_data])=>{
+                                Foreign.get_data(database,cache,data[Type.FIELD_ITEMS],option).then(([biz_error,biz_data])=>{
                                     if(biz_error){
                                         error=Log.append(error,biz_error);
                                     }else{
@@ -2060,7 +2057,7 @@ class Portal {
                                         resolve();
                                     }
                                 }).catch(err => {
-                                    Log.error('Data-Portal-Search-Simple-Foreigns',err);
+                                    Log.error('Data-Portal-Search-Simple-Foreign',err);
                                         error=Log.append(error,err);
                                 });
                             });
@@ -2175,7 +2172,7 @@ class Portal {
                 //9_get_items_foreigns
 				function(call){
 		            if(option.foreigns && data[Type.FIELD_ITEMS].length > 0){
-                        Foreigns.get_data(database,cache,data[Type.FIELD_ITEMS],option).then(([biz_error,biz_data])=>{
+                        Foreign.get_data(database,cache,data[Type.FIELD_ITEMS],option).then(([biz_error,biz_data])=>{
                         if(biz_error){
                             error=Log.append(error,biz_error);
                         }else{
@@ -2183,7 +2180,7 @@ class Portal {
                             call();
                         }
                     }).catch(err => {
-                        Log.error('Data-Portal-Search-Foreigns',err);
+                        Log.error('Data-Portal-Search-Foreign',err);
                         error=Log.append(error,err);
                     });
 
@@ -3170,7 +3167,7 @@ class Cart_Data  {
 								 call();
                              }
                  	}).catch(err => {
-                    	Log.error('Data-Portal-Search-Simple-Foreigns',err);
+                    	Log.error('Data-Portal-Search-Simple-Foreign',err);
                         error=Log.append(error,err);
                     });
 				},
