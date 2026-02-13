@@ -2,49 +2,50 @@ const async = require('async');
 const {Log,Str,Num,Obj,DateTime}=require("/home/think1/www/doqbox/biz9-framework/biz9-utility/code");
 const {Type,Data_Logic}=require("/home/think1/www/doqbox/biz9-framework/biz9-logic/code");
 const {get_item_list_adapter}  = require('./adapter.js');
-
 class Foreigns {
 	static get_data = (database,cache,data_items,option) => {
 		return new Promise((callback) => {
 			let error = null;
             let foreign_data_items = [];
-            let foreign_search_items = [];
+            const foreign_search_items = [];
 			async.series([
-	           async function(call){
-                   console.log('aaaaaa');
+	           function(call){
 					for(const option_foreign of option.foreigns){
                         let foreign_item = Foreigns.get_search(option_foreign);
 					    for(const data_item of data_items){
 				            let query_field = {};
 				            query_field[foreign_item.foreign_field] = data_item[foreign_item.parent_field];
-                            Log.w('query_field',query_field);
 				            foreign_item.query.$or.push(query_field);
 					    }
                         foreign_search_items.push(foreign_item);
 					}
-	                for(const search_item of foreign_search_items){
+                    function run_data(search_item) {
+                        return new Promise((resolve) => {
 	                    let search = Data_Logic.get_search(search_item.foreign_data_type,search_item.query,{},search_item.page_current,search_item.page_size);
 				        let foreign_option = search_item.field ? search_item.field : {};
-
-                        Log.w('sss',search);
-
                         get_item_list_adapter(database,cache,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option).then(([biz_error,items,item_count,page_count])=>{
+                            resolve(items);
                         }).catch(err => {
-                            Log.error('Data-Portal-Search-Simple-Items',err);
+                            Log.error('Foreigns-Get-Data',err);
                             error=Log.append(error,err);
                         });
-
+                        });
                     }
-
-                   /*
-                   Log.w('foreign_search_items',foreign_search_items);
-      				for(const search_item of foreign_search_items){
-                    	data_items = await Foreigns.get_foreign_search_data(database,cache,data_items,search_item);
-                    }
-                    */
+                    const run = async () => {
+                        for(const search_item of foreign_search_items){
+                            const biz_data = await run_data(search_item);
+                            for(const item of biz_data){
+                                search_item.items.push(item);
+                            }
+                        }
+                    };
+                    run().then(() => {
+                        call();
+                    })
                 },
                 async function(call){
- 		                 },
+                    Log.w('bbbb',foreign_search_items);
+ 		        },
 			]).then(result => {
                 //Log.w('data_items',data_items);
 				//callback([error,data_items]);
@@ -68,6 +69,7 @@ class Foreigns {
 			page_size : foreign_item.page_size ? foreign_item.page_size : 0,
 			foreigns : foreign_item.foreigns ? foreign_item.foreigns : 0,
 			items : [],
+			foreigns_items : [],
 			query : { $or: [] }
         }
 	};
