@@ -3235,7 +3235,7 @@ class Cart_Data  {
 	};
 }
 class Blank_Data {
-	//9_blank
+//9_blank
 	static blank_more = (database) => {
 		return new Promise((callback) => {
 			let error = null;
@@ -3311,6 +3311,22 @@ class Blank_Data {
 			});
 			//end
 		});
+	function blank_more_more_more() {
+       	return new Promise((callback) => {
+			let error = null;
+			let data = null;
+			async.series([
+                async function(call) {
+				 },
+			]).then(result => {
+				callback();
+			}).catch(err => {
+				Log.error("Blank-Get",err);
+				callback([error,[]]);
+			});
+		});
+    }
+
 	};
 }
 module.exports = {
