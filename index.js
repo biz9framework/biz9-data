@@ -3317,6 +3317,10 @@ class Blank_Data {
 			let data = null;
 			async.series([
                 async function(call) {
+      				(async () => {
+                    	const biz_data = await get_items_data(search_item);
+                            callback(search_item);
+                   })();
 				 },
 			]).then(result => {
 				callback();

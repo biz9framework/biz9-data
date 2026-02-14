@@ -4,7 +4,7 @@ const {Type,Data_Logic}=require("/home/think1/www/doqbox/biz9-framework/biz9-log
 const {get_item_list_adapter,get_count_item_list_adapter}  = require('./adapter.js');
 class Foreign {
     static get_data = (database,cache,data_items,option) => {
-       return new Promise((callback) => {
+        return new Promise((callback) => {
             let error = null;
             let foreign_data_items = [];
             const foreign_search_items = [];
@@ -20,27 +20,46 @@ class Foreign {
                         }
                         foreign_search_items.push(foreign_item);
                     }
-                    //foreign_1a //changijng
-                    const run_data = async () => {
-                        for(const search_item of foreign_search_items){
+                    //foreign_1a
+                    const run_data = async (database,cache,search_item) => {
+                            const biz_data = await get_search_item_data(database,cache,search_item);
                             if(search_item.type == Type.SEARCH_ITEMS){
-                                const biz_data = await get_items_data(search_item);
+                                const biz_data = await get_items_data(database,cache,search_item);
+                                Log.w('sssss',biz_data);
+                                //Log.w('sssss',biz_data.length);
+                                /*
                                 for(const item of biz_data){
                                     search_item.items.push(item);
                                 }
+                                */
+                                Log.w('rrrr',search_item);
                             }else if(search_item.type == Type.SEARCH_COUNT){
-                                const biz_data = await get_count_data(search_item);
+                                const biz_data = await get_count_data(database,cache,search_item);
                                 search_item.data = biz_data ? biz_data : 0;
                             }else if(search_item.type == Type.SEARCH_ONE){
                                 search_item.page_size = 1;
-                                const biz_data = await get_items_data(search_item);
+                                const biz_data = await get_items_data(database,cache,search_item);
                                 search_item.data = biz_data[0].id ? biz_data[0] : Data_Logic.get_not_found(search_item.foreign_data_type,0);
                             }
-                        }
                     };
+                    const run = async (database,cache) => {
+                        for(const search_item of foreign_search_items){
+                            await run_data(database,cache,search_item);
+                        }
+                    }
+                     run(database,cache).then(() => {
+                         //Log.w('rrr',foreign_search_items);
+                         //Log.w('rrr',foreign_search_items[0].items);
+                        //call();
+                    });
+
+                    /*
                     run_data().then(() => {
-                        call();
+                        Log.w('aaaa',foreign_search_items);
+                        Log.w('aaaa',foreign_search_items[0]);
+                        //call();
                     })
+                    */
                 },
                 //foreign_2
                 function(call){
@@ -62,13 +81,11 @@ class Foreign {
                         });
                     }
                     */
-                    const run_data2 = async (search_item) => {
-                                                };
-	                function run_data(search_item) {
-       	                return new Promise((callback) => {
-			                let error = null;
-			                let data = null;
-			                async.series([
+                    function run_data(search_item) {
+                        return new Promise((callback) => {
+                            let error = null;
+                            let data = null;
+                            async.series([
                                 async function(call) {
                                     if(search_item.type == Type.SEARCH_ITEMS){
                                         const biz_data = await get_items_data(search_item);
@@ -84,13 +101,13 @@ class Foreign {
                                         search_item.data = biz_data[0].id ? biz_data[0] : Data_Logic.get_not_found(search_item.foreign_data_type,0);
                                     }
                                 },
-			                    ]).then(result => {
-				                    callback(search_item);
-			                    }).catch(err => {
-				                    Log.error("Blank-Get",err);
-				                    callback([error,[]]);
-			                    });
-		                    });
+                            ]).then(result => {
+                                callback(search_item);
+                            }).catch(err => {
+                                Log.error("Blank-Get",err);
+                                callback([error,[]]);
+                            });
+                        });
                     };
                     const run = async () => {
                         for(const search_item of foreign_search_items){
@@ -102,7 +119,6 @@ class Foreign {
                                     foreign_search_item.query.$or.push(query_field);
                                 }
                                 const biz_data = await run_data(foreign_search_item);
-                                Log.w('ffff',biz_data);
                                 //Log.w('ddd',foreign_search_item);
                                 /*
                                 for(const data_item of search_item.items){
@@ -147,11 +163,10 @@ class Foreign {
                 callback([error,[]]);
             });
         });
-        function get_items_data(search_item) {
+        function get_items_data(database,cache,search_item) {
             return new Promise((resolve) => {
                 let search = Data_Logic.get_search(search_item.foreign_data_type,search_item.query,search_item.sort_by,search_item.page_current,search_item.page_size);
                 let foreign_option = search_item.field ? search_item.field : {};
-                Log.w('my_search',search);
                 get_item_list_adapter(database,cache,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option).then(([biz_error,items,item_count,page_count])=>{
                     resolve(items);
                 }).catch(err => {
@@ -160,42 +175,75 @@ class Foreign {
                 });
             });
         }
-        function get_count_data(search_item) {
+        function get_count_data(database,search_item) {
             return new Promise((resolve) => {
                 let search = Data_Logic.get_search(search_item.foreign_data_type,search_item.query,search_item.sort_by,search_item.page_current,search_item.page_size);
+                Log.w('fffffff',search);
+                Log.w('fffffff',search.filter);
+                /*
                 get_count_item_list_adapter(database,search.data_type,search.filter).then(([biz_error,biz_data])=>{
                     resolve(biz_data.count);
                 }).catch(err => {
                     Log.error('Foreign-Get-Data',err);
                     error=Log.append(error,err);
                 });
+                */
             });
         }
-    function run_data_old(foreign_search_items) {
-       	return new Promise((callback) => {
-			let error = null;
-			async.series([
-                async function(call) {
-                     				 },
-			]).then(result => {
-				callback(foreign_search_items);
-			}).catch(err => {
-				Log.error("Blank-Get",err);
-				callback([error,[]]);
-			});
-		});
-    }
+        function get_search_item_data(database,cache,search_item) {
+            return new Promise((callback) => {
+                let error = null;
+                let data = null;
+                async.series([
+                    async function(call) {
+                        if(search_item.type == Type.SEARCH_ITEMS){
+                            const biz_data = await get_items_data(database,cache,search_item);
+                            for(const item of biz_data){
+                                search_item.items.push(item);
+                            }
+                        }else if(search_item.type == Type.SEARCH_COUNT){
+                            console.log('1111111');
+                            const biz_data = await get_count_data(search_item);
+                            search_item.data = biz_data.count ? biz_data.count : 0;
+                        }else if(search_item.type == Type.SEARCH_ONE){
+                            search_item.page_size = 1;
+                            const biz_data = await get_items_data(search_item);
+                            search_item.data = biz_data[0].id ? biz_data[0] : Data_Logic.get_not_found(search_item.foreign_data_type,0);
+                        }
+                    },
+                ]).then(result => {
+                    callback(search_item);
+                }).catch(err => {
+                    Log.error("Foreign-Get-Search-Item-Data",err);
+                    callback([error,[]]);
+                });
+            });
+        }
+        function run_data_old(foreign_search_items) {
+            return new Promise((callback) => {
+                let error = null;
+                async.series([
+                    async function(call) {
+                    },
+                ]).then(result => {
+                    callback(foreign_search_items);
+                }).catch(err => {
+                    Log.error("Blank-Get",err);
+                    callback([error,[]]);
+                });
+            });
+        }
 
-};
-/*
-	static async run_data(foreign_search_items) {
-		return new Promise((callback) => {
+    };
+    /*
+    static async run_data(foreign_search_items) {
+        return new Promise((callback) => {
                    callback(foreign_search_items);
-			}).catch(err => {
-				Log.error("Blank-Get",err);
-				callback([error,[]]);
-			});
-	};
+            }).catch(err => {
+                Log.error("Blank-Get",err);
+                callback([error,[]]);
+            });
+    };
     */
 
     //9_search 9_get_search
