@@ -2,6 +2,85 @@
 -- Blank
 -------------------------------- BiZ9 END - 2-9-2026 -------------------------------------------------------------
 
+-------------------------------- BiZ9 START - 2-15-2026 -----------------------------------------------------------
+-- Group Items BackUp
+ //9_get_items_group
+				function(call){
+					if(option.groups && data[Type.FIELD_ITEMS].length>0){
+						let search_items = [];
+					for(const item of option.groups){
+						search_items.push({
+								field : item.field ? item.field : {},
+								title : item.title ? item.title : {}, // {groupShow:1,groupHide:0},{0:all}
+								image : item.image ? item.image : false,
+								page_current : item.page_current ? item.page_current : 1,
+								page_size : item.page_current ? item.page_current : 0,
+							});
+						}
+						for(const search_item of search_items){
+							let group_list = [];
+							let hide_group_list = [];
+							let group_query = {$or:[],$and:[]};
+							for(const field in search_item.title) {
+                        		let new_item = {};
+                        		new_item[field] = search_item.title[field];
+                        		if(new_item[field]){
+									let query_field = {};
+									query_field[Type.FIELD_TITLE_URL] = field;
+									group_query.$or.push(query_field);
+                        		}else{
+									let query_field = {};
+									query_field[Type.FIELD_TITLE_URL] = {$ne:field};
+									group_query.$and.push(query_field);
+                        		}
+                    		}
+							for(const item of data[Type.FIELD_ITEMS]){
+								let query_field = {};
+								query_field[Type.FIELD_PARENT_ID] = item.id;
+								group_query.$and.push(query_field);
+							}
+							if(group_query.$or.length <= 0){
+								delete group_query.$or;
+							}
+							let item_group_join_option = {field:search_item.field};
+							if(search_item.image){
+								item_group_join_option['foreigns'] = [Data_Logic.get_search_foreign(Type.SEARCH_ITEMS,Type.DATA_IMAGE,Type.FIELD_PARENT_ID,Type.FIELD_ID)];
+							}
+							let item_group_join_search = Data_Logic.get_search(Type.DATA_GROUP,group_query,{},search_item.page_current,search_item.page_size);
+                            Portal.search_simple(database,item_group_join_search.data_type,item_group_join_search.filter,item_group_join_search.sort_by,item_group_join_search.page_current,item_group_join_search.page_size,item_group_join_option).then(([biz_error,biz_data])=>{
+
+									if(biz_error){
+										error=Log.append(error,biz_error);
+									}else{
+										for(const data_item of data[Type.FIELD_ITEMS]){
+											data_item.groups = [];
+											for(const group of biz_data[Type.FIELD_ITEMS]){
+												if(data_item.id == group.parent_id){
+													if(!data_item[Str.get_title_url(group.title)]){
+														data_item[Str.get_title_url(group.title)] = [];
+													}
+													data_item[Str.get_title_url(group.title)].push(group);
+													data_item.groups.push(group);
+												}
+											}
+										}
+                                        call();
+									}
+                    }).catch(err => {
+                        Log.error('Data-Portal-Search-Groups',err);
+                        error=Log.append(error,err);
+                    });
+							}
+					}else{
+                        call();
+                    }
+				},
+
+-------------------------------- BiZ9 END - 2-15-2026 -------------------------------------------------------------
+
+
+
+
 -------------------------------- BiZ9 START - 2-14-2026 -----------------------------------------------------------
 -- Bk FOreigns 1
  //foreign_2

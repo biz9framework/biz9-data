@@ -11,6 +11,7 @@ const {Log,Str,Num,Obj,DateTime}=require("/home/think1/www/doqbox/biz9-framework
 const {Type,Favorite_Logic,Stat_Logic,Review_Logic,Data_Logic,Product_Logic,Demo_Logic,Category_Logic,Cart_Logic,Order_Logic,Field_Logic}=require("/home/think1/www/doqbox/biz9-framework/biz9-logic/code");
 const {get_cache} = require('./redis/base.js');
 const {Foreign} = require('./foreign.js');
+const {Group} = require('./group.js');
 const {get_database_adapter,check_database_adapter,delete_database_adapter,post_item_adapter,post_item_list_adapter,get_item_adapter,delete_item_adapter,get_item_list_adapter,delete_item_list_adapter,get_count_item_list_adapter,delete_item_cache }  = require('./adapter.js');
 
 class Database {
@@ -685,6 +686,7 @@ class Order_Data {
 						data.order = biz_data;
 					}
 				},
+				//9_foreigns //9_get_foreigns get_order_foreigns
 				function(call){
 					let foreign_order_sub_item = Data_Logic.get_search_foreign(Type.SEARCH_ITEMS,Type.DATA_ORDER_SUB_ITEM,Type.FIELD_ORDER_ITEM_ID,Type.FIELD_ID);
 					let option_order_sub_item = { foreigns:[foreign_order_sub_item] };
@@ -1546,79 +1548,23 @@ class Portal {
                         call();
                     }
                 },
-				//9_get_item_groups
-	            function(call){
-	                if(option.groups){
-						data.groups = [];
-					}
-					if(data.id && option.groups){
-						let group_search_items = [];
-	                    for(const item of option.groups){
-						    group_search_items.push({
-								field : item.field ? item.field : {},
-								title : item.title ? item.title : {}, // {groupShow:1,groupHide:0},{0:all}
-								image : item.image ? item.image : false,
-								page_current : item.page_current ? item.page_current : 1,
-								page_size : item.page_size ? item.page_size : 0,
-							});
+				//9_group //9_get_group get_item_group
+				function(call){
+ 					if(option.groups && data.id){
+    				Group.get_data(database,cache,[data],option).then(([biz_error,biz_data])=>{
+                        if(biz_error){
+                            error=Log.append(error,biz_error);
+                        }else{
+							data = biz_data[0];
 						}
-                        function get_data(search_item) {
-                            return new Promise((resolve) => {
-                                let group_list = [];
-							    let hide_group_list = [];
-							    let group_query = {$or:[],$and:[]};
-							    for(const field in search_item.title) {
-                        		    let new_item = {};
-                        		    new_item[field] = search_item.title[field];
-                        		    if(new_item[field]){
-									    let query_field = {};
-									    query_field[Type.FIELD_TITLE_URL] = field;
-									    group_query.$and.push(query_field);
-                        		    }else{
-									    let query_field = {};
-									    query_field[Type.FIELD_TITLE_URL] = {$ne:field};
-									    group_query.$and.push(query_field);
-                        		    }
-                    		    }
-                                let query_field = {};
-							    query_field[Type.FIELD_PARENT_ID] = data.id;
-							    group_query.$and.push(query_field);
-							    if(group_query.$or.length <= 0){
-								    delete group_query.$or;
-							    }
-							    let item_group_join_option = {field:search_item.field};
-							    if(search_item.image){
-								    item_group_join_option['foreigns'] = [Data_Logic.get_search_foreign(Type.SEARCH_ITEMS,Type.DATA_IMAGE,Type.FIELD_PARENT_ID,Type.FIELD_ID)];
-							    }
-								item_group_join_option = {foreigns:[Data_Logic.get_search_foreign(Type.SEARCH_ITEMS,Type.DATA_IMAGE,Type.FIELD_PARENT_ID,Type.FIELD_ID)]};
-							    let search = Data_Logic.get_search(Type.DATA_GROUP,group_query,{},search_item.page_current,search_item.page_size);
- 								Portal.search_simple(database,cache,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,item_group_join_option).then(([biz_error,biz_data])=>{
-                                    if(biz_error){
-                                        error=Log.append(error,biz_error);
-                                    }else{
-		                                for(const group of biz_data.items){
-										    data[Str.get_title_url(group.title_url)] = group;
-									    }
-									    data.groups = biz_data.items.length>0?biz_data.items:[];
-                                        resolve();
-                                    }
-                                }).catch(err => {
-                                    Log.error('Data-Portal-Get-Group',err);
-                                    error=Log.append(error,err);
-                                });
-                            });
-                        }
-                        const run = async () => {
-                        for(const search_item of group_search_items){
-                            await get_data(search_item);
-                        }
-                    }
-                    run().then(() => {
-                        call();
+						call();
+                    }).catch(err => {
+                        Log.error('Data-Portal-Item-Group',err);
+                        error=Log.append(error,err);
                     });
-                    }else{
-                        call();
-                    }
+					}else{
+						call();
+					}
 				},
 				 //sub_value
                  function(call){
@@ -1632,7 +1578,7 @@ class Portal {
                         call();
                     }
                 },
-				//9_foreigns //9_get_foreigns
+				//9_foreigns //9_get_foreigns get_item_foreign
 				function(call){
  					if(option.foreigns && data.id){
     				Foreign.get_data(database,cache,[data],option).then(([biz_error,biz_data])=>{
@@ -1840,34 +1786,25 @@ class Portal {
                         call();
                     });
                 },
-				//foreign
- 			    async function(call){
-                    function get_data(search_item,data) {
-                        return new Promise((resolve) => {
-								let join_foreign_option = {foreigns:search_item.foreigns};
-								Foreign.get_data(database,cache,data,join_foreign_option).then(([biz_error,biz_data])=>{
-                                    if(biz_error){
-                                        error=Log.append(error,biz_error);
-                                    }else{
-                                        data = biz_data;
-                                        resolve();
-                                    }
-                                }).catch(err => {
-                                    Log.error('Data-Portal-Get-Joins-Foreign',err);
-                                        error=Log.append(error,err);
-                                });
-                        });
+				//9_foreigns //9_get_foreigns get_join_foreign
+				function(call){
+		            if(option.foreigns && data[Type.FIELD_ITEMS].length > 0){
+                        Foreign.get_data(database,cache,data[Type.FIELD_ITEMS],option).then(([biz_error,biz_data])=>{
+                        if(biz_error){
+                            error=Log.append(error,biz_error);
+                        }else{
+                            data[Type.FIELD_ITEMS] = biz_data;
+                            call();
+                        }
+                    }).catch(err => {
+                        Log.error('Data-Portal-Search-Foreign',err);
+                        error=Log.append(error,err);
+                    });
+                    }else{
+                        call();
                     }
-					//need to test.. remived the run function
-					for(const search_item of join_search_items){
-							if(search_item.foreigns){
- 								for(const data_item of data[search_item.title]){
-                            		await get_data(search_item,[data_item]);
-								}
-							}
-                     }
-                },
-			]).then(result => {
+		        },
+		        			]).then(result => {
 				callback([error,data]);
 			}).catch(err => {
 				Log.error("Blank-Get",err);
@@ -1926,32 +1863,25 @@ class Portal {
                        call();
                     }
 				},
-                //9_get_simple_search_items_foreigns
+               	//9_foreigns //9_get_foreigns get_simple_search_foreign
 				function(call){
-					if(option.foreigns){
-                        function get_data() {
-                            return new Promise((resolve) => {
-                                Foreign.get_data(database,cache,data[Type.FIELD_ITEMS],option).then(([biz_error,biz_data])=>{
-                                    if(biz_error){
-                                        error=Log.append(error,biz_error);
-                                    }else{
-                                        data[Type.FIELD_ITEMS] = biz_data;
-                                        resolve();
-                                    }
-                                }).catch(err => {
-                                    Log.error('Data-Portal-Search-Simple-Foreign',err);
-                                        error=Log.append(error,err);
-                                });
-                            });
-                        }
-                        get_data().then((value) => {
+		            if(option.foreigns && data[Type.FIELD_ITEMS].length > 0){
+                        Foreign.get_data(database,cache,data[Type.FIELD_ITEMS],option).then(([biz_error,biz_data])=>{
+                        if(biz_error){
+                            error=Log.append(error,biz_error);
+                        }else{
+                            data[Type.FIELD_ITEMS] = biz_data;
                             call();
-                        })
-	                }else{
-                       call();
+                        }
+                    }).catch(err => {
+                        Log.error('Data-Portal-Search-Foreign',err);
+                        error=Log.append(error,err);
+                    });
+                    }else{
+                        call();
                     }
-				},
-			]).then(result => {
+		        },
+		        			]).then(result => {
 				callback([error,data]);
 			}).catch(err => {
 				Log.error("Count-List-Data",err);
@@ -2051,7 +1981,7 @@ class Portal {
                         call();
                     }
 		        },
-                //9_get_items_foreigns
+               	//9_foreigns //9_get_foreigns get_items_foreign
 				function(call){
 		            if(option.foreigns && data[Type.FIELD_ITEMS].length > 0){
                         Foreign.get_data(database,cache,data[Type.FIELD_ITEMS],option).then(([biz_error,biz_data])=>{
@@ -2065,7 +1995,6 @@ class Portal {
                         Log.error('Data-Portal-Search-Foreign',err);
                         error=Log.append(error,err);
                     });
-
                     }else{
                         call();
                     }
@@ -3210,8 +3139,6 @@ class Blank_Data {
 			});
 		});
     }
-
-
 	};
 }
 module.exports = {

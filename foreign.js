@@ -11,7 +11,6 @@ class Foreign {
                 function(call){
                     for(const option_foreign of option.foreigns){
                         let foreign_item = Foreign.get_search(option_foreign);
-                        //here1
                         for(const data_item of data_items){
                             let query_field = {};
                             query_field[foreign_item.foreign_field] = data_item[foreign_item.parent_field];
@@ -19,8 +18,7 @@ class Foreign {
                         }
                         foreign_search_items.push(foreign_item);
                     }
-                    const run_me = async (database,cache,search_item) => {
-                        //for(const search_item of foreign_search_items){
+                    const run_data = async (database,cache,search_item) => {
                             await get_search_item_data(database,cache,search_item);
                             for(const data_item of data_items){
                                 if(search_item.type == Type.SEARCH_ITEMS){
@@ -33,17 +31,15 @@ class Foreign {
                                     data_item[search_item.title] = search_item.items[0];
                                 }
                             }
-                        //}
                     }
                     const run = async (database,cache) => {
                         for(const search_item of foreign_search_items){
-                            await run_me(database,cache,search_item);
+                            await run_data(database,cache,search_item);
                         }
                     }
                     run(database,cache).then(() => {
                         call();
                     });
-
                 },
             ]).then(result => {
                 callback([error,data_items]);
@@ -64,7 +60,6 @@ class Foreign {
                 });
             });
         }
-        //here2
         function get_count_data(database,search_item) {
             return new Promise((resolve) => {
                 let data = [];
@@ -96,7 +91,6 @@ class Foreign {
                 let data = null;
                 async.series([
                     async function(call) {
-                        //here3
                         search_item = await run_search_item_data(database,cache,search_item);
                     },
                     function(call){
