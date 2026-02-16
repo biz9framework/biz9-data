@@ -49,15 +49,20 @@ class Foreign {
             });
         });
         function get_items_data(database,cache,search_item) {
+
             return new Promise((resolve) => {
                 let search = Data_Logic.get_search(search_item.foreign_data_type,search_item.query,search_item.sort_by,search_item.page_current,search_item.page_size);
                 let foreign_option = search_item.field ? search_item.field : {};
+                if(search_item.query.$or.length>0){
                 get_item_list_adapter(database,cache,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option).then(([biz_error,items,item_count,page_count])=>{
                     resolve(items);
                 }).catch(err => {
                     Log.error('Foreign-Get-Data',err);
                     error=Log.append(error,err);
                 });
+                }else{
+                    resolve([]);
+                }
             });
         }
         function get_count_data(database,search_item) {

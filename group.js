@@ -45,8 +45,6 @@ class Group {
                 },
                 function(call){
                     const run_data = async (database,cache,search_item) => {
-                        let search = Data_Logic.get_search(Type.DATA_GROUP,search_item.query,{},search_item.page_current,search_item.page_size);
-                        let option = {};
                         const biz_data = await get_search_item_data(database,cache,search_item);
                         return biz_data;
                     };
@@ -54,6 +52,7 @@ class Group {
                         for(const search_item of group_search_items){
                             const biz_data =  await run_data(database,cache,search_item);
                         }
+
                     };
                     run(database,cache).then(() => {
                         call();
@@ -90,7 +89,9 @@ class Group {
                 async.series([
                     async function(call) {
                         const biz_data = await get_items_data(database,cache,search_item);
-                        search_item = biz_data;
+                        for(const item of biz_data.items){
+                            search_item.items.push(item);
+                        }
                     },
                 ]).then(result => {
                     callback(search_item);
@@ -117,7 +118,7 @@ class Group {
                         });
                     },
                     function(call) {
-                        if(search_item.image){
+                        if(search_item.image && search_item.items.length>0){
                             let foreign_image = Data_Logic.get_search_foreign(Type.SEARCH_ITEMS,Type.DATA_IMAGE,Type.FIELD_PARENT_ID,Type.FIELD_ID);
                             let option = {foreigns:[foreign_image]};
                             Foreign.get_data(database,cache,search_item.items,option).then(([biz_error,biz_data])=>{
