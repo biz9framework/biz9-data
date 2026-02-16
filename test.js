@@ -50,24 +50,25 @@ describe('connect', function(){ this.timeout(25000);
                 let print_test = false;
                 // -- POST-START --//
                 /*
-                //let parent = Data_Logic.get(Type.DATA_PRODUCT,0,{test:true});
-                let parent = Data_Logic.get(Type.DATA_PRODUCT,'36');
-                //const [biz_error,biz_data] = await Portal.post(database,Type.DATA_PRODUCT,parent);
+                let parent = Data_Logic.get(Type.DATA_PRODUCT,0,{test:true});
+                //let parent = Data_Logic.get(Type.DATA_PRODUCT,'36');
+                const [biz_error,biz_data] = await Portal.post(database,Type.DATA_PRODUCT,parent);
                 //let group = Data_Logic.get(Type.DATA_GROUP,0,{test:true,parent:parent});
-                let group = Data_Logic.get(Type.DATA_GROUP,'420',{test:true,parent:parent});
+                //let group = Data_Logic.get(Type.DATA_GROUP,'420',{test:true,parent:parent});
                 //const [biz_error,biz_data] = await Portal.post(database,Type.DATA_GROUP,group);
                 //let blank = Data_Logic.get(Type.DATA_BLANK,0,{test:true,parent:parent});
                 //const [biz_error,biz_data] = await Portal.post(database,Type.DATA_BLANK,blank);
-                let image = Data_Logic.get(Type.DATA_IMAGE,0,{test:true,parent:group});
-                const [biz_error,biz_data] = await Portal.post(database,Type.DATA_IMAGE,image);
+                //let image = Data_Logic.get(Type.DATA_IMAGE,0,{test:true,parent:group});
+                //const [biz_error,biz_data] = await Portal.post(database,Type.DATA_IMAGE,image);
                 */
                 // -- POST-END --//
                 //-- GET  START --//
+                /*
                 //let option = {field:{title:1,id:1}};
                 //let foreign_sub_blank_search_1 = Data_Logic.get_search_foreign(Type.SEARCH_ITEMS,Type.DATA_BLANK,Type.FIELD_PARENT_ID,Type.FIELD_ID,{title:'foreign_blank'});
                 //let foreign_sub_blank_search_2 = Data_Logic.get_search_foreign(Type.SEARCH_ONE,Type.DATA_BLANK,Type.FIELD_PARENT_ID,Type.FIELD_ID,{title:'foreign_blanks'});
                 //let foreign_search_1 = Data_Logic.get_search_foreign(Type.SEARCH_ITEMS,Type.DATA_GROUP,Type.FIELD_PARENT_ID,Type.FIELD_ID,{title:'foreign_cool',page_size:3,sort_by:{title:1}});
-                //let foreign_search_1 = Data_Logic.get_search_foreign(Type.SEARCH_ITEMS,Type.DATA_BLANK,Type.FIELD_PARENT_ID,Type.FIELD_ID,{title:'foreign_blanks',page_size:3,sort_by:{title:1},foreigns:[]});
+                //let foreign_search_1 = Data_Logic.get_search_foreign(Type.SEARkH_ITEMS,Type.DATA_BLANK,Type.FIELD_PARENT_ID,Type.FIELD_ID,{title:'foreign_blanks',page_size:3,sort_by:{title:1},foreigns:[]});
                 //foreign_sub_blank_search_1,foreign_sub_blank_search_2
                 //let foreign_search_2 = Data_Logic.get_search_foreign(Type.SEARCH_COUNT,Type.DATA_IMAGE,Type.FIELD_PARENT_ID,Type.FIELD_ID,{title:'images_cool'});
                 //let option = {};
@@ -81,10 +82,10 @@ describe('connect', function(){ this.timeout(25000);
                 //Log.w('88_biz_data',biz_data[0].groups_cool);
                 //Log.w('88_biz_data',biz_data[1].groups_cool);
                 //Log.w('88_biz_data',biz_data[0].groups_cool[0]);
+                */
                 //-- GET  END --//
                 //-->
                 //-- SEARCH START --//
-                /*
                 //let foreign_sub_blank_search_2 = Data_Logic.get_search_foreign(Type.SEARCH_ITEMS,Type.DATA_IMAGE,Type.FIELD_PARENT_ID,Type.FIELD_ID,{title:'group_images'});
                 //let foreign_sub_blank_search_1 = Data_Logic.get_search_foreign(Type.SEARCH_ITEMS,Type.DATA_BLANK,Type.FIELD_PARENT_ID,Type.FIELD_ID,{title:'group_blanks'});
                 //let foreign_search_1 = Data_Logic.get_search_foreign(Type.SEARCH_ITEMS,Type.DATA_GROUP,Type.FIELD_PARENT_ID,Type.FIELD_ID,{title:'groups_cool',page_size:3,sort_by:{title:1},foreigns:[foreign_sub_blank_search_1,foreign_sub_blank_search_2]});
@@ -96,7 +97,6 @@ describe('connect', function(){ this.timeout(25000);
                 let search = Data_Logic.get_search(Type.DATA_PRODUCT,{},{},1,0,option);
                 const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,search.option);
                 Log.w('33_biz_data',biz_data);
-                */
                 //-- SEARCH  END --//
                                //-- POST_ITEMS START --//
                 //let option = {};

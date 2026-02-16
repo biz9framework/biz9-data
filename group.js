@@ -10,61 +10,65 @@ class Group {
             let group_search_items = [];
             async.series([
                 function(call){
-                    console.log('1111111111');
                     for(const option_group of option.groups){
                         group_search_items.push(Group.get_search(option_group));
                     }
                     call();
                 },
                 function(call){
-                    console.log('22222222222');
-                    let group_query = {$or:[],$and:[]};
+                    let query = {$or:[]};
+                    let has_title = false;
                     for(const search_item of group_search_items){
+                        //get by title
                         for(const field in search_item.title) {
+                            has_title = true;
                             let new_item = {};
                             new_item[field] = search_item.title[field];
                             if(new_item[field]){
                                 let query_field = {};
                                 query_field[Type.FIELD_TITLE_URL] = field;
-                                group_query.$or.push(query_field);
-                            }else{
-                                let query_field = {};
-                                query_field[Type.FIELD_TITLE_URL] = {$ne:field};
-                                group_query.$and.push(query_field);
+                                query.$or.push(query_field);
                             }
                         }
-                        for(const item of data_items){
-                            let query_field = {};
-                            query_field[Type.FIELD_PARENT_ID] = item.id;
-                            group_query.$and.push(query_field);
+                        if(!has_title){
+                            for(const item of data_items){
+                                let query_field = {};
+                                query_field[Type.FIELD_PARENT_ID] = item.id;
+                                query.$or.push(query_field);
+                            }
                         }
-                        if(group_query.$or.length <= 0){
-                            delete group_query.$or;
-                        }
-                        search_item.query = group_query;
+                        search_item.query = query;
                     }
                     call();
                 },
                 function(call){
-                    console.log('33333333');
                     const run_data = async (database,cache,search_item) => {
                         const biz_data = await get_search_item_data(database,cache,search_item);
-                        return biz_data;
+                        for(const item of biz_data){
+                            search_item.items.push(item);
+                        }
                     };
                     const run = async (database,cache) => {
                         for(const search_item of group_search_items){
-                            const biz_data =  await run_data(database,cache,search_item);
+                            await run_data(database,cache,search_item);
                         }
                     };
                     run(database,cache).then(() => {
+                        Log.w('1111',group_search_items);
                         call();
                     });
                 },
                 function(call){
-                    console.log('333333bbbbbbbbbbbb');
+                    Log.w('here11',group_search_items);
+                },
+                function(call){
                     for(const data_item of data_items){
                         data_item.groups = [];
                         for(const search_item of group_search_items){
+                            //const match_items = search_item.items.filter(item_find => item_find[search_item.foreign_field] === data_item[search_item.parent_field]);
+                            data_item.groups = search_item.items.filter(item_find => item_find[search_item.parent_id] === data_item[Type.PARENT_ID]);
+
+                            /*
                             for(const group of search_item.items){
                                 if(data_item.id == group.parent_id){
                                     if(!data_item[Str.get_title_url(group.title)]){
@@ -74,12 +78,13 @@ class Group {
                                     data_item.groups.push(group);
                                 }
                             }
+                            */
                         }
                     }
                     call();
                 },
             ]).then(result => {
-                callback([error,data_items]);
+                //callback([error,data_items]);
             }).catch(err => {
                 Log.error("Group-Get",err);
                 callback([error,[]]);
@@ -89,37 +94,52 @@ class Group {
             return new Promise((callback) => {
                 let error = null;
                 let data = null;
+                let search = Data_Logic.get_search(Type.DATA_GROUP,search_item.query,{},search_item.page_current,search_item.page_size);
+                let option = search_item.field ? search_item.field : {};
+                get_item_list_adapter(database,cache,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option).then(([biz_error,items,item_count,page_count])=>{
+                    callback(items);
+                }).catch(err => {
+                    Log.error('Group-Get-Items-Data-1',err);
+                    error=Log.append(error,err);
+                });
+            }).catch(err => {
+                Log.error("Group-Search-Item-Data",err);
+                callback([error,[]]);
+            });
+        };
+        function get_search_item_data_old(database,cache,search_item) {
+            return new Promise((callback) => {
+                let error = null;
+                let data = null;
                 async.series([
                     async function(call) {
-                        console.log('44444444444');
+                        console.log('55555555');
                         const biz_data = await get_items_data(database,cache,search_item);
-                        Log.w('88888888888',biz_data);
-                        /*
-                        for(const item of biz_data.items){
-                            search_item.items.push(item);
+                        Log.w('6666',biz_data);
+                        if(biz_data.length>0){
+                            for(const item of biz_data){
+                                search_item.items.push(item);
+                            }
                         }
-                        */
                     },
                 ]).then(result => {
-                    //Log.w('9999999',search_item);
-                    //callback(search_item);
+                    callback(search_item);
                 }).catch(err => {
                     Log.error("Group-Search-Item-Data",err);
                     callback([error,[]]);
                 });
             });
         };
-        function get_items_data(database,cache,search_item) {
+        function get_items_data_old(database,cache,search_item) {
             return new Promise((callback) => {
                 let error = null;
-                let items = null;
+                let data = null;
                 async.series([
                     function(call) {
-                        console.log('555555555');
                         let search = Data_Logic.get_search(Type.DATA_GROUP,search_item.query,{},search_item.page_current,search_item.page_size);
                         let option = search_item.field ? search_item.field : {};
                         get_item_list_adapter(database,cache,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option).then(([biz_error,items,item_count,page_count])=>{
-                            items = items;
+                            data = items;
                             call();
                         }).catch(err => {
                             Log.error('Group-Get-Items-Data-1',err);
@@ -127,7 +147,6 @@ class Group {
                         });
                     },
                     function(call) {
-                        console.log('66666666666');
                         call();
                         /*
                         if(search_item.image && search_item.items.length>0){
@@ -150,8 +169,7 @@ class Group {
                         */
                     },
                 ]).then(result => {
-                    console.log('77777777777');
-                    callback(items);
+                    callback(data);
                 }).catch(err => {
                     Log.error("Group-Get-Items-Data",err);
                     callback([error,[]]);

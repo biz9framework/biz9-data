@@ -42,6 +42,11 @@
 							if(group_query.$or.length <= 0){
 								delete group_query.$or;
 							}
+
+
+
+
+
 							let item_group_join_option = {field:search_item.field};
 							if(search_item.image){
 								item_group_join_option['foreigns'] = [Data_Logic.get_search_foreign(Type.SEARCH_ITEMS,Type.DATA_IMAGE,Type.FIELD_PARENT_ID,Type.FIELD_ID)];
