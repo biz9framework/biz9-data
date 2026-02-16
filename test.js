@@ -97,7 +97,8 @@ describe('connect', function(){ this.timeout(25000);
                 //let option = {};
                 let search = Data_Logic.get_search(Type.DATA_PRODUCT,{},{},1,0,option);
                 const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,search.option);
-                //Log.w('33_biz_data',biz_data);
+                Log.w('33_biz_data',biz_data);
+                Log.w('33_biz_data',biz_data.items[0]);
                 //-- SEARCH  END --//
                                //-- POST_ITEMS START --//
                 //let option = {};

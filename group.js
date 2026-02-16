@@ -124,20 +124,21 @@ class Group {
                     callback([error,[]]);
                 });
             });
-        };
-        //9_search 9_get_search
-        static get_search = (group_item) => {
-            return {
-                field : group_item.field ? group_item.field : {},
-                title : group_item.title ? group_item.title : {}, // {groupShow:1,groupHide:0},{0:all}
-                image : group_item.image ? group_item.image : false,
-                page_current : group_item.page_current ? group_item.page_current : 1,
-                page_size : group_item.page_size ? group_item.page_size : 0,
-                query : {$or:[],$and:[]},
-                items : []
-            }
-        };
-    }
-    module.exports = {
-        Group
+        }
     };
+    //9_search 9_get_search
+    static get_search = (group_item) => {
+        return {
+            field : group_item.field ? group_item.field : {},
+            title : group_item.title ? group_item.title : {}, // {groupShow:1,groupHide:0},{0:all}
+            image : group_item.image ? group_item.image : false,
+            page_current : group_item.page_current ? group_item.page_current : 1,
+            page_size : group_item.page_size ? group_item.page_size : 0,
+            query : {$or:[],$and:[]},
+            items : []
+        }
+    };
+}
+module.exports = {
+    Group
+};
