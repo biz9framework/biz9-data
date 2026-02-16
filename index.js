@@ -1731,83 +1731,6 @@ class Portal {
 			});
 		});
 	};
-	//9_portal_search_simple
-	static search_simple = async (database,cache,data_type,filter,sort_by,page_current,page_size,option) => {
-		/* option params
-		 * n/a
-		 */
-		return new Promise((callback) => {
-			let error = null;
-			let cache = {};
-			let data = {data_type:data_type,item_count:0,page_count:1,filter:{},items:[]};
-			option = !Obj.check_is_empty(option) ? option : {};
-			async.series([
-				async function(call) {
-					const [biz_error,biz_data] = await get_cache(database.data_config);
-					cache = biz_data;
-				},
-				function(call){
-					let search = Data_Logic.get_search(data_type,filter,sort_by,page_current,page_size);
-					get_item_list_adapter(database,cache,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option).then(([biz_error,items,item_count,page_count])=>{
-						if(biz_error){
-							error=Log.append(error,biz_error);
-						}else{
-							data.item_count=item_count;
-							data.page_count=page_count;
-							data.search=search;
-							data.filter=filter;
-							data[Type.FIELD_ITEMS]=items;
-							call();
-						}
-					}).catch(err => {
-						Log.error('Data-Portal-Search-Simple-Items',err);
-						error=Log.append(error,err);
-					});
-				},
-				//9_get_simple_search_items_join
-				function(call){
-					if(option.joins){
-						Portal.get_data_joins(database,cache,data,option).then(([biz_error,biz_data])=>{
-							if(biz_error){
-								error=Log.append(error,biz_error);
-							}else{
-								data = biz_data;
-								call();
-							}
-						}).catch(err => {
-							Log.error('Data-Portal-Search-Simple-Join',err);
-							error=Log.append(error,err);
-						});
-					}else{
-						call();
-					}
-				},
-				//9_foreigns //9_get_foreigns get_simple_search_foreign
-				function(call){
-					if(option.foreigns && data[Type.FIELD_ITEMS].length > 0){
-						Foreign.get_data(database,cache,data[Type.FIELD_ITEMS],option).then(([biz_error,biz_data])=>{
-							if(biz_error){
-								error=Log.append(error,biz_error);
-							}else{
-								data[Type.FIELD_ITEMS] = biz_data;
-								call();
-							}
-						}).catch(err => {
-							Log.error('Data-Portal-Search-Foreign',err);
-							error=Log.append(error,err);
-						});
-					}else{
-						call();
-					}
-				},
-			]).then(result => {
-				callback([error,data]);
-			}).catch(err => {
-				Log.error("Count-List-Data",err);
-				callback([err,{}]);
-			});
-		});
-	};
 	//9_portal_search
 	static search = (database,data_type,filter,sort_by,page_current,page_size,option) => {
 		/* OPTIONS - START
@@ -2195,41 +2118,53 @@ class Portal {
 			data[Type.FIELD_RESULT_OK_GROUP_IMAGE_DELETE] = false;
 			let delete_item_query = { $or: [] };
 			let delete_group_list = [];
+			let delete_items = [];
 			option = !Obj.check_is_empty(option) ? option : {delete_group:true,delete_image:true};
 			async.series([
 				async function(call) {
 					const [biz_error,biz_data] = await get_cache(database.data_config);
 					cache = biz_data;
 				},
-				async function(call){
-					let search = Data_Logic.get_search(data_type,filter,{},1,0,{});
-					const [biz_error,biz_data] = await Portal.search_simple(database,cache,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,search.option);
+				function(call){
+					let search = Data_Logic.get_search(data_type,filter,{},1,0);
+					get_item_list_adapter(database,cache,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option).then(([biz_error,items,item_count,page_count])=>{
 					if(biz_error){
 						error=Log.append(error,biz_error);
 					}else{
-						if(biz_data[Type.FIELD_ITEMS].length>0){
-							let query = { $or: [] };
-							for(const data_item of biz_data[Type.FIELD_ITEMS]){
-								let query_field = {};
-								query_field[Type.FIELD_PARENT_ID] = data_item.id
-								delete_item_query.$or.push(query_field);
-								const [biz_error,biz_data] = await delete_item_adapter(database,cache,data_type,data_item.id);
-							};
+						if(items.length>0){
+							delete_items = items;
 						}
-						data[Type.FIELD_RESULT_OK_DELETE] = true;
+						call();
 					}
+					}).catch(err => {
+						Log.error('Data-Portal-Search',err);
+						error=Log.append(error,err);
+					});
+				},
+				async function(call){
+                	for(const data_item of delete_items){
+						let query_field = {};
+						query_field[Type.FIELD_PARENT_ID] = data_item.id
+						delete_item_query.$or.push(query_field);
+						data[Type.FIELD_RESULT_OK_DELETE] = true;
+						const [biz_error,biz_data] = await delete_item_adapter(database,cache,data_item.data_type,data_item.id);
+                    }
 				},
 				//get_group_ids
-				async function(call){
+				function(call){
 					if(option.delete_group && delete_item_query.$or.length > 0){
 						let data_type = Type.DATA_GROUP;
 						let search = Data_Logic.get_search(data_type,{},{},1,0,{field:{id:1,title:1,data_type:1}});
-						const [biz_error,biz_data] = await Portal.search_simple(database,cache,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,search.option);
-						if(biz_error){
-							error=Log.append(error,biz_error);
-						}else{
-							delete_group_list = biz_data.items;
-						}
+						get_item_list_adapter(database,cache,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option).then(([biz_error,items,item_count,page_count])=>{
+							if(biz_error){
+								error=Log.append(error,biz_error);
+							}else{
+								delete_group_list = items;
+								call();
+							}
+						});
+					}else{
+						call();
 					}
 				},
 				//delete_group_photo

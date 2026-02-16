@@ -47,19 +47,19 @@ describe('connect', function(){ this.timeout(25000);
             */
             async function(call){
                 //-->
-                let print_test = false;
+                let print_test = true;
                 // -- POST-START --//
                 /*
-                let parent = Data_Logic.get(Type.DATA_PRODUCT,0,{test:true});
-                //let parent = Data_Logic.get(Type.DATA_PRODUCT,'36');
-                const [biz_error,biz_data] = await Portal.post(database,Type.DATA_PRODUCT,parent);
+                //let parent = Data_Logic.get(Type.DATA_PRODUCT,0,{test:true});
+                let parent = Data_Logic.get(Type.DATA_PRODUCT,'820');
+                //const [biz_error,biz_data] = await Portal.post(database,Type.DATA_PRODUCT,parent);
                 //let group = Data_Logic.get(Type.DATA_GROUP,0,{test:true,parent:parent});
-                //let group = Data_Logic.get(Type.DATA_GROUP,'420',{test:true,parent:parent});
+                let group = Data_Logic.get(Type.DATA_GROUP,'289',{test:true,parent:parent});
                 //const [biz_error,biz_data] = await Portal.post(database,Type.DATA_GROUP,group);
                 //let blank = Data_Logic.get(Type.DATA_BLANK,0,{test:true,parent:parent});
                 //const [biz_error,biz_data] = await Portal.post(database,Type.DATA_BLANK,blank);
-                //let image = Data_Logic.get(Type.DATA_IMAGE,0,{test:true,parent:group});
-                //const [biz_error,biz_data] = await Portal.post(database,Type.DATA_IMAGE,image);
+                let image = Data_Logic.get(Type.DATA_IMAGE,0,{test:true,parent:group});
+                const [biz_error,biz_data] = await Portal.post(database,Type.DATA_IMAGE,image);
                 */
                 // -- POST-END --//
                 //-- GET  START --//
@@ -86,6 +86,7 @@ describe('connect', function(){ this.timeout(25000);
                 //-- GET  END --//
                 //-->
                 //-- SEARCH START --//
+                /*
                 //let foreign_sub_blank_search_2 = Data_Logic.get_search_foreign(Type.SEARCH_ITEMS,Type.DATA_IMAGE,Type.FIELD_PARENT_ID,Type.FIELD_ID,{title:'group_images'});
                 //let foreign_sub_blank_search_1 = Data_Logic.get_search_foreign(Type.SEARCH_ITEMS,Type.DATA_BLANK,Type.FIELD_PARENT_ID,Type.FIELD_ID,{title:'group_blanks'});
                 //let foreign_search_1 = Data_Logic.get_search_foreign(Type.SEARCH_ITEMS,Type.DATA_GROUP,Type.FIELD_PARENT_ID,Type.FIELD_ID,{title:'groups_cool',page_size:3,sort_by:{title:1},foreigns:[foreign_sub_blank_search_1,foreign_sub_blank_search_2]});
@@ -99,6 +100,7 @@ describe('connect', function(){ this.timeout(25000);
                 const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,search.option);
                 Log.w('33_biz_data',biz_data);
                 Log.w('33_biz_data',biz_data.items[0]);
+                */
                 //-- SEARCH  END --//
                                //-- POST_ITEMS START --//
                 //let option = {};
@@ -112,13 +114,12 @@ describe('connect', function(){ this.timeout(25000);
 
 
                 //-- DELETE  START --//
-                /*
                 let option = {};
                 //let parent = Data_Logic.get(Type.DATA_PRODUCT,'383');
                 //const [error,biz_data] = await Portal.delete(database,parent.data_type,parent.id,option);
                 let search = Data_Logic.get_search(Type.DATA_PRODUCT,{},{},1,0);
                 const [error,biz_data] = await Portal.delete_search(database,search.data_type,search.filter);
-                */
+                Log.w('88_biz_data',biz_data);
                 //-- DELETE  END --//
                 //-- COPY  START --//
                 //let parent = Data_Logic.get(Type.DATA_PRODUCT,'929');
