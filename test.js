@@ -93,10 +93,11 @@ describe('connect', function(){ this.timeout(25000);
                 //let foreign_search_2 = Data_Logic.get_search_foreign(Type.SEARCH_COUNT,Type.DATA_IMAGE,Type.FIELD_PARENT_ID,Type.FIELD_ID,{title:'images_cool'});
                 //let option = {foreigns:[foreign_search_1]};
                 let option = {groups:[Data_Logic.get_search_group({image:true})]};
+                //let option = {groups:[Data_Logic.get_search_group({image:true,title:{group_36:1,group_37:1}})]};
                 //let option = {};
                 let search = Data_Logic.get_search(Type.DATA_PRODUCT,{},{},1,0,option);
                 const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,search.option);
-                Log.w('33_biz_data',biz_data);
+                //Log.w('33_biz_data',biz_data);
                 //-- SEARCH  END --//
                                //-- POST_ITEMS START --//
                 //let option = {};
