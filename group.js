@@ -1,6 +1,6 @@
 const async = require('async');
-const {Log,Str,Num,Obj,DateTime}=require("/home/think1/www/doqbox/biz9-framework/biz9-utility/code");
-const {Type,Data_Logic}=require("/home/think1/www/doqbox/biz9-framework/biz9-logic/code");
+const {Log,Str,Num,Obj,DateTime}=require("/home/think1/www/doqbox/biz9-framework/biz9-utility/source");
+const {Type,Data_Logic}=require("/home/think1/www/doqbox/biz9-framework/biz9-logic/source");
 const {get_item_list_adapter,get_count_item_list_adapter}  = require('./adapter.js');
 const {Foreign} = require('./foreign.js');
 class Group {
