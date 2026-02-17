@@ -1,7 +1,7 @@
 const async = require('async');
 const {Log,Str,Num,Obj,DateTime}=require("/home/think1/www/doqbox/biz9-framework/biz9-utility/source");
 const {Type,Data_Logic}=require("/home/think1/www/doqbox/biz9-framework/biz9-logic/source");
-const {get_item_list_adapter,get_count_item_list_adapter}  = require('./adapter.js');
+const {Adapter}  = require('./adapter.js');
 class Foreign {
     static get_data = (database,cache,data_items,option) => {
         return new Promise((callback) => {
@@ -49,12 +49,11 @@ class Foreign {
             });
         });
         function get_items_data(database,cache,search_item) {
-
             return new Promise((resolve) => {
                 let search = Data_Logic.get_search(search_item.foreign_data_type,search_item.query,search_item.sort_by,search_item.page_current,search_item.page_size);
                 let foreign_option = search_item.field ? search_item.field : {};
                 if(search_item.query.$or.length>0){
-                get_item_list_adapter(database,cache,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option).then(([biz_error,items,item_count,page_count])=>{
+                Adapter.get_item_list(database,cache,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option).then(([biz_error,items,item_count,page_count])=>{
                     resolve(items);
                 }).catch(err => {
                     Log.error('Foreign-Get-Data',err);
@@ -71,7 +70,7 @@ class Foreign {
             function get_data(search_item,query) {
                 return new Promise((resolve2) => {
                     let search = Data_Logic.get_search(search_item.foreign_data_type,query,search_item.sort_by,search_item.page_current,search_item.page_size);
-                    get_count_item_list_adapter(database,search.data_type,search.filter).then(([biz_error,biz_data])=>{
+                    Adapter.get_count_item_list(database,search.data_type,search.filter).then(([biz_error,biz_data])=>{
                         resolve2(biz_data.count?biz_data.count : 0);
                     }).catch(err => {
                         Log.error('Foreign-Get-Data',err);

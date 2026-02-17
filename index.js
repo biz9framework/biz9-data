@@ -9,11 +9,11 @@ const dayjs = require('dayjs');
 const {Scriptz}=require("biz9-scriptz");
 const {Log,Str,Num,Obj,DateTime}=require("/home/think1/www/doqbox/biz9-framework/biz9-utility/source");
 const {Type,Favorite_Logic,Stat_Logic,Review_Logic,Data_Logic,Product_Logic,Demo_Logic,Category_Logic,Cart_Logic,Order_Logic,Field_Logic}=require("/home/think1/www/doqbox/biz9-framework/biz9-logic/source");
-const {get_cache} = require('./redis/base.js');
+const {Cache} = require('./redis/base.js');
 const {Foreign} = require('./foreign.js');
 const {Group} = require('./group.js');
 const {Join} = require('./join.js');
-const {get_database_adapter,check_database_adapter,delete_database_adapter,post_item_adapter,post_item_list_adapter,get_item_adapter,delete_item_adapter,get_item_list_adapter,delete_item_list_adapter,get_count_item_list_adapter,delete_item_cache }  = require('./adapter.js');
+const {Adapter}  = require('./adapter.js');
 class Database {
 	static get = async (data_config,option) => {
 		/* return
@@ -39,7 +39,7 @@ class Database {
 			if(data_config.APP_ID==null){
 				error=Log.append(error,"Database Error: Missing app_id.");
 			}
-			get_database_adapter(data_config).then(([biz_error,biz_data])=>{
+			Adapter.get_database(data_config).then(([biz_error,biz_data])=>{
 				if(biz_error){
 					error=Log.append(error,biz_error);
 				}else{
@@ -65,7 +65,7 @@ class Database {
 		 */
 		let error=null;
 		return new Promise((callback) => {
-			delete_database_adapter(data_config).then(([biz_error,biz_data])=>{
+			Adapter.delete_database(data_config).then(([biz_error,biz_data])=>{
 				if(biz_error){
 					error=Log.append(error,biz_error);
 				}else{
@@ -115,7 +115,7 @@ class Order_Data {
 	static post = async (database,order,order_payments,option) => {
 		return new Promise((callback) => {
 			let error = null;
-			let cache = {};
+			let cache = null;
 			let data = {};
 			option = !Obj.check_is_empty(option)  ? option : {};
 			data.order = Data_Logic.get(Type.DATA_ORDER,0,{data:{order_number:order.order_number,cart_number:order.cart_number,user_id:order.user_id,grand_total:order.grand_total}});
@@ -123,7 +123,7 @@ class Order_Data {
 			data.order_sub_items = [];
 			async.series([
 				async function(call) {
-					const [biz_error,biz_data] = await get_cache(database.data_config);
+					const [biz_error,biz_data] = await Cache.get(database.data_config);
 					cache = biz_data;
 				},
 				//post - order
@@ -138,7 +138,7 @@ class Order_Data {
 						}
 					}
 					data.order[Type.FIELD_GRAND_TOTAL] = Order_Logic.get_total(order).grand_total;
-					post_item_adapter(database,cache,Type.DATA_ORDER,data.order).then(([biz_error,biz_data])=>{
+					Adapter.post_item(database,cache,Type.DATA_ORDER,data.order).then(([biz_error,biz_data])=>{
 						if(biz_error){
 							error=Log.append(error,biz_error);
 						}else{
@@ -169,7 +169,7 @@ class Order_Data {
 							post_order_item.temp_row_id = order_item.temp_row_id;
 							data.order_items.push(post_order_item);
 						}
-						post_item_list_adapter(database,cache,data.order_items).then(([biz_error,biz_data])=>{
+						Adapter.post_item_list(database,cache,data.order_items).then(([biz_error,biz_data])=>{
 							if(biz_error){
 								error=Log.append(error,biz_error);
 							}else{
@@ -203,7 +203,7 @@ class Order_Data {
 								data.order_sub_items.push(post_order_sub_item);
 							}
 						}
-						const [biz_error,biz_data] = await post_item_list_adapter(database,cache,data.order_sub_items);
+						const [biz_error,biz_data] = await Adapter.post_item_list(database,cache,data.order_sub_items);
 						if(biz_error){
 							error=Log.append(error,biz_error);
 						}else{
@@ -214,7 +214,7 @@ class Order_Data {
 				//post - order_payments
 				async function(call){
 					if(order_payments.length>0){
-						const [biz_error,biz_data] = await post_item_list_adapter(database,cache,order_payments);
+						const [biz_error,biz_data] = await Adapter.post_item_list(database,cache,order_payments);
 						if(biz_error){
 							error=Log.append(error,biz_error);
 						}else{
@@ -310,14 +310,14 @@ class Order_Data {
 	static get = (database,order_number) => {
 		return new Promise((callback) => {
 			let error = null;
-			let cache = {};
+			let cache = null;
 			let data = {order:Data_Logic.get(Type.DATA_ORDER,0,{data:{order_number:order_number,order_items:[],user:Data_Logic.get(Type.DATA_USER,0)}})};
 			let order_parent_item_query = { $or: [] };
 			let order_sub_item_query = { $or: [] };
 			let order_sub_items = [];
 			async.series([
 				async function(call) {
-					const [biz_error,biz_data] = await get_cache(database.data_config);
+					const [biz_error,biz_data] = await Cache.get(database.data_config);
 					cache = biz_data;
 				},
 				//get_order
@@ -1086,18 +1086,18 @@ class Portal {
 					*/
 		return new Promise((callback) => {
 			let error= null;
-			let cache = {};
+			let cache = null;
 			let data = Data_Logic.get(data_type,0);
 			let field_result_ok = false;
 			option = !Obj.check_is_empty(option) ? option : {};
 			async.series([
 				async function(call) {
-					const [biz_error,biz_data] = await get_cache(database.data_config);
+					const [biz_error,biz_data] = await Cache.get(database.data_config);
 					cache = biz_data;
 				},
 				function(call){
 					if(option.cache_delete){
-						delete_item_cache(database,cache,data.data_type,data.id,option).then(([biz_error,biz_data])=>{
+						Adapter.delete_item_cache(database,cache,data.data_type,data.id,option).then(([biz_error,biz_data])=>{
 							if(biz_error){
 								error=Log.append(error,biz_error);
 							}else{
@@ -1113,7 +1113,7 @@ class Portal {
 				},
 				//item_by_id
 				function(call){
-					get_item_adapter(database,cache,data_type,id,option).then(([biz_error,biz_data])=>{
+					Adapter.get_item(database,cache,data_type,id,option).then(([biz_error,biz_data])=>{
 						if(biz_error){
 							error=Log.append(error,biz_error);
 						}else{
@@ -1269,17 +1269,17 @@ class Portal {
 		/* OPTIONS - END*/
 		return new Promise((callback) => {
 			let data = {data_type:data_type,item_count:0,page_count:1,filter:{},items:[]};
-			let cache = {};
+			let cache = null;
 			let error = null;
 			option = !Obj.check_is_empty(option) ? option : {};
 			async.series([
 				async function(call) {
-					const [biz_error,biz_data] = await get_cache(database.data_config);
+					const [biz_error,biz_data] = await Cache.get(database.data_config);
 					cache = biz_data;
 				},
 				function(call){
 					let search = Data_Logic.get_search(data_type,filter,sort_by,page_current,page_size);
-					get_item_list_adapter(database,cache,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option).then(([biz_error,items,item_count,page_count])=>{
+					Adapter.get_item_list(database,cache,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option).then(([biz_error,items,item_count,page_count])=>{
 						if(biz_error){
 							error=Log.append(error,biz_error);
 						}else{
@@ -1373,7 +1373,7 @@ class Portal {
 			option = !Obj.check_is_empty(option) ? option : {};
 			async.series([
 				async function(call) {
-					const [biz_error,biz_data] = await get_cache(database.data_config);
+					const [biz_error,biz_data] = await Cache.get(database.data_config);
 					cache = biz_data;
 				},
 				//clean
@@ -1399,7 +1399,7 @@ class Portal {
 				//delete cache item
 				function(call){
 					if(option.overwrite || option.delete_cache){
-						delete_item_cache(database,cache,data_type,data.id).then(([biz_error,biz_data])=>{
+						Adapter.delete_item_cache(database,cache,data_type,data.id).then(([biz_error,biz_data])=>{
 							if(biz_error){
 								error=Log.append(error,biz_error);
 							}else{
@@ -1414,7 +1414,7 @@ class Portal {
 					}
 				},
 				function(call){
-					post_item_adapter(database,cache,data_type,data,option).then(([biz_error,biz_data])=>{
+					Adapter.post_item(database,cache,data_type,data,option).then(([biz_error,biz_data])=>{
 						if(biz_error){
 							error=Log.append(error,biz_error);
 						}else{
@@ -1429,7 +1429,7 @@ class Portal {
 				//reset
 				function(call){
 					if(option.reset && data.id){
-						get_item_adapter(database,cache,data.data_type,data.id).then(([biz_error,biz_data])=>{
+						Adapter.get_item(database,cache,data.data_type,data.id).then(([biz_error,biz_data])=>{
 							if(biz_error){
 								error=Log.append(error,biz_error);
 							}else{
@@ -1473,7 +1473,7 @@ class Portal {
 			let data = Data_Logic.get(data_type,0);
 			async.series([
 				async function(call){
-					const [biz_error,biz_data] = await post_bulk_adapter(database,data_type,items);
+					const [biz_error,biz_data] = await Adapter.post_bulk(database,data_type,items);
 					if(biz_error){
 						error=Log.append(error,biz_error);
 					}else{
@@ -1513,11 +1513,11 @@ class Portal {
 			let delete_group_list = [];
 			async.series([
 				async function(call){
-					const [biz_error,biz_data] = await get_cache(database.data_config);
+					const [biz_error,biz_data] = await Cache.get(database.data_config);
 					cache = biz_data;
 				},
 				async function(call){
-					const [biz_error,biz_data] = await delete_item_adapter(database,cache,data_type,id);
+					const [biz_error,biz_data] = await Adapter.delete_item(database,cache,data_type,id);
 					if(biz_error){
 						error=Log.append(error,biz_error);
 					}else{
@@ -1577,11 +1577,11 @@ class Portal {
 			let error = null;
 			async.series([
 				async function(call) {
-					const [biz_error,biz_data] = await get_cache(database.data_config);
+					const [biz_error,biz_data] = await Cache.get(database.data_config);
 					cache = biz_data;
 				},
 				async function(call){
-					const [biz_error,biz_data] = await post_item_list_adapter(database,cache,data_items);
+					const [biz_error,biz_data] = await Adapter.post_item_list(database,cache,data_items);
 					if(biz_error){
 						error=Log.append(error,biz_error);
 					}else{
@@ -1613,12 +1613,12 @@ class Portal {
 			option = !Obj.check_is_empty(option) ? option : {delete_group:true,delete_image:true};
 			async.series([
 				async function(call) {
-					const [biz_error,biz_data] = await get_cache(database.data_config);
+					const [biz_error,biz_data] = await Cache.get(database.data_config);
 					cache = biz_data;
 				},
 				function(call){
 					let search = Data_Logic.get_search(data_type,filter,{},1,0);
-					get_item_list_adapter(database,cache,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option).then(([biz_error,items,item_count,page_count])=>{
+					Adapter.get_item_list(database,cache,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option).then(([biz_error,items,item_count,page_count])=>{
 					if(biz_error){
 						error=Log.append(error,biz_error);
 					}else{
@@ -1638,7 +1638,7 @@ class Portal {
 						query_field[Type.FIELD_PARENT_ID] = data_item.id
 						delete_item_query.$or.push(query_field);
 						data[Type.FIELD_RESULT_OK_DELETE] = true;
-						const [biz_error,biz_data] = await delete_item_adapter(database,cache,data_item.data_type,data_item.id);
+						const [biz_error,biz_data] = await Adapter.delete_item(database,cache,data_item.data_type,data_item.id);
                     }
 				},
 				//get_group_ids
@@ -1646,7 +1646,7 @@ class Portal {
 					if(option.delete_group && delete_item_query.$or.length > 0){
 						let data_type = Type.DATA_GROUP;
 						let search = Data_Logic.get_search(data_type,{},{},1,0,{field:{id:1,title:1,data_type:1}});
-						get_item_list_adapter(database,cache,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option).then(([biz_error,items,item_count,page_count])=>{
+						Adapter.get_item_list(database,cache,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option).then(([biz_error,items,item_count,page_count])=>{
 							if(biz_error){
 								error=Log.append(error,biz_error);
 							}else{
@@ -1670,7 +1670,7 @@ class Portal {
 						};
 						let data_type = Type.DATA_IMAGE;
 						let search = Data_Logic.get_search(data_type,delete_group_photo_query,{},1,0);
-						const [biz_error,biz_data] = await delete_item_list_adapter(database,cache,data_type,search.filter);
+						const [biz_error,biz_data] = await Adapter.delete_item_list(database,cache,data_type,search.filter);
 						if(biz_error){
 							error=Log.append(error,biz_error);
 						}else{
@@ -1683,7 +1683,7 @@ class Portal {
 						data[Type.FIELD_RESULT_OK_GROUP_DELETE] = false;
 						let data_type = Type.DATA_GROUP;
 						let search = Data_Logic.get_search(data_type,delete_item_query,{},1,0);
-						const [biz_error,biz_data] = await delete_item_list_adapter(database,cache,data_type,search.filter);
+						const [biz_error,biz_data] = await Adapter.delete_item_list(database,cache,data_type,search.filter);
 						if(biz_error){
 							error=Log.append(error,biz_error);
 						}else{
@@ -1696,7 +1696,7 @@ class Portal {
 						data[Type.FIELD_RESULT_OK_IMAGE_DELETE] = false;
 						let data_type = Type.DATA_IMAGE;
 						let search = Data_Logic.get_search(data_type,delete_item_query,{},1,0);
-						const [biz_error,biz_data] = await delete_item_list_adapter(database,cache,data_type,search.filter);
+						const [biz_error,biz_data] = await Adapter.delete_item_list(database,cache,data_type,search.filter);
 						if(biz_error){
 							error=Log.append(error,biz_error);
 						}else{
@@ -1723,11 +1723,11 @@ class Portal {
 			let data = {};
 			async.series([
 				async function(call) {
-					const [biz_error,biz_data] = await get_cache(database.data_config);
+					const [biz_error,biz_data] = await Cache.get(database.data_config);
 					cache = biz_data;
 				},
 				async function(call){
-					const [biz_error,biz_data] = await get_count_item_list_adapter(database,cache,data_type,filter);
+					const [biz_error,biz_data] = await Adapter.get_count_item_list(database,cache,data_type,filter);
 					if(biz_error){
 						error=Log.append(error,biz_error);
 					}else{
@@ -1765,7 +1765,7 @@ class Portal {
 			option = !Obj.check_is_empty(option) ? option : {};
 			async.series([
 				async function(call) {
-					const [biz_error,biz_data] = await get_cache(database.data_config);
+					const [biz_error,biz_data] = await Cache.get(database.data_config);
 					cache = biz_data;
 				},
 				async function(call){
@@ -1810,7 +1810,7 @@ class Portal {
 							copy_group[Type.FIELD_PARENT_ID] = copy_data.id;
 							post_groups.push(copy_group);
 						}
-						const [biz_error,biz_data] = await post_item_list_adapter(database,cache,post_groups);
+						const [biz_error,biz_data] = await Adapter.post_item_list(database,cache,post_groups);
 						if(biz_error){
 							error=Log.append(error,biz_error);
 						}else{
@@ -1881,7 +1881,7 @@ class Stat_Data {
 			data = Data_Logic.get(Type.DATA_STAT,stat.id,{data:{parent_data_type:stat.parent_data_type,user_id:stat.user_id,type:stat.type}});
 			async.series([
 				async function(call) {
-					const [biz_error,biz_data] = await get_cache(database.data_config);
+					const [biz_error,biz_data] = await Cache.get(database.data_config);
 					cache = biz_data;
 				},
 				async function(call){
@@ -1931,7 +1931,7 @@ class Stat_Data {
 						field[Type.FIELD_TITLE] = 1;
 						field[Type.FIELD_DATA_TYPE] = 1;
 						let data_option = {field};
-						const [biz_error,biz_data] = await get_item_adapter(database,cache,data.parent_data_type,stat.parent_id,data_option);
+						const [biz_error,biz_data] = await Adapter.get_item(database,cache,data.parent_data_type,stat.parent_id,data_option);
 						data = biz_data;
 					}
 				},
@@ -2024,7 +2024,7 @@ class Cart_Data  {
 			data.cart_sub_items = [];
 			async.series([
 				async function(call) {
-					const [biz_error,biz_data] = await get_cache(database.data_config);
+					const [biz_error,biz_data] = await Cache.get(database.data_config);
 					cache = biz_data;
 				},
 				//post - cart
@@ -2039,7 +2039,7 @@ class Cart_Data  {
 						}
 					}
 					data.cart[Type.FIELD_GRAND_TOTAL] = Cart_Logic.get_total(cart).grand_total;
-					post_item_adapter(database,cache,Type.DATA_CART,data.cart).then(([biz_error,biz_data])=>{
+					Adapter.post_item(database,cache,Type.DATA_CART,data.cart).then(([biz_error,biz_data])=>{
 						if(biz_error){
 							error=Log.append(error,biz_error);
 						}else{
@@ -2070,7 +2070,7 @@ class Cart_Data  {
 							post_cart_item.temp_row_id = cart_item.temp_row_id;
 							data.cart_items.push(post_cart_item);
 						}
-						post_item_list_adapter(database,cache,data.cart_items).then(([biz_error,biz_data])=>{
+						Adapter.post_item_list(database,cache,data.cart_items).then(([biz_error,biz_data])=>{
 							if(biz_error){
 								error=Log.append(error,biz_error);
 							}else{
@@ -2104,7 +2104,7 @@ class Cart_Data  {
 								data.cart_sub_items.push(post_cart_sub_item);
 							}
 						}
-						const [biz_error,biz_data] = await post_item_list_adapter(database,cache,data.cart_sub_items);
+						const [biz_error,biz_data] = await Adapter.post_item_list(database,cache,data.cart_sub_items);
 						if(biz_error){
 							error=Log.append(error,biz_error);
 						}else{
@@ -2191,7 +2191,7 @@ class Cart_Data  {
 			let cart_sub_items = [];
 			async.series([
 				async function(call) {
-					const [biz_error,biz_data] = await get_cache(database.data_config);
+					const [biz_error,biz_data] = await Cache.get(database.data_config);
 					cache = biz_data;
 				},
 				//get_cart
@@ -2321,17 +2321,17 @@ class Blank_Data {
 			//top
 			async.series([
 				async function(call) {
-					const [biz_error,biz_data] = await get_cache(database.data_config);
+					const [biz_error,biz_data] = await Cache.get(database.data_config);
 					cache = biz_data;
 				},
 				//await
 				async function(call){
-					const [biz_error,biz_data] = await get_item_adapter(database,cache,data.data_type,data.id,option);
+					const [biz_error,biz_data] = await Adapter.get_item(database,cache,data.data_type,data.id,option);
 					data = biz_data;
 				},
 				//plain
 				function(call){
-					get_item_adapter(database,cache,data.data_type,data.id,option).then(([biz_error,biz_data])=>{
+					Adapter.get_item(database,cache,data.data_type,data.id,option).then(([biz_error,biz_data])=>{
 						//logic
 						if(biz_error){
 							error=Log.append(error,biz_error);

@@ -1,7 +1,7 @@
 const async = require('async');
 const {Log,Str,Num,Obj,DateTime}=require("/home/think1/www/doqbox/biz9-framework/biz9-utility/source");
 const {Type,Data_Logic}=require("/home/think1/www/doqbox/biz9-framework/biz9-logic/source");
-const {get_item_list_adapter,get_count_item_list_adapter}  = require('./adapter.js');
+const {Adapter}  = require('./adapter.js');
 const {Foreign} = require('./foreign.js');
 class Join {
     static get_data = (database,cache,option) => {
@@ -22,7 +22,7 @@ class Join {
                                 search_item.data[search_item.title];
                                 let search = Data_Logic.get_search(search_item.search.data_type,search_item.search.filter,search_item.search.sort_by,search_item.search.page_current,search_item.search.page_size);
                                 let join_option = {field:search_item.field,distinct:search_item.distinct};
-                                get_item_list_adapter(database,cache,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,join_option).then(([biz_error,items,item_count,page_count])=>{
+                                Adapter.get_item_list(database,cache,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,join_option).then(([biz_error,items,item_count,page_count])=>{
                                     if(biz_error){
                                         error=Log.append(error,biz_error);
                                     }else{
@@ -40,7 +40,7 @@ class Join {
                             else if(search_item.type == Type.SEARCH_COUNT){
                                 let search = Data_Logic.get_search(search_item.search.data_type,search_item.search.filter,search_item.search.sort_by,search_item.search.page_current,search_item.search.page_size);
                                 let join_option = {field:search_item.field};
-                                get_count_item_list_adapter(database,search.data_type,search.filter).then(([biz_error,biz_data])=>{
+                                Adapter.get_count_item_list(database,search.data_type,search.filter).then(([biz_error,biz_data])=>{
                                     if(biz_error){
                                         error=Log.append(error,biz_error);
                                     }else{
@@ -55,7 +55,7 @@ class Join {
                             else if(search_item.type == Type.SEARCH_ONE){
                                 let search = Data_Logic.get_search(search_item.search.data_type,search_item.search.filter,search_item.search.sort_by,search_item.search.page_current,search_item.search.page_size);
                                 let join_option = {field:search_item.field};
-                                get_item_list_adapter(database,cache,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,join_option).then(([biz_error,items,item_count,page_count])=>{
+                                Adapter.get_item_list(database,cache,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,join_option).then(([biz_error,items,item_count,page_count])=>{
                                     if(biz_error){
                                         error=Log.append(error,biz_error);
                                     }else{

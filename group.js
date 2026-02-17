@@ -1,7 +1,7 @@
 const async = require('async');
 const {Log,Str,Num,Obj,DateTime}=require("/home/think1/www/doqbox/biz9-framework/biz9-utility/source");
 const {Type,Data_Logic}=require("/home/think1/www/doqbox/biz9-framework/biz9-logic/source");
-const {get_item_list_adapter,get_count_item_list_adapter}  = require('./adapter.js');
+const {Adapter}  = require('./adapter.js');
 const {Foreign} = require('./foreign.js');
 class Group {
     static get_data = (database,cache,data_items,option) => {
@@ -90,7 +90,7 @@ class Group {
                     function(call) {
                         let search = Data_Logic.get_search(Type.DATA_GROUP,search_item.query,{},search_item.page_current,search_item.page_size);
                         let option = search_item.field ? search_item.field : {};
-                        get_item_list_adapter(database,cache,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option).then(([biz_error,items,item_count,page_count])=>{
+                        Adapter.get_item_list(database,cache,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option).then(([biz_error,items,item_count,page_count])=>{
                             data = items;
                             call();
                         }).catch(err => {
