@@ -1536,7 +1536,7 @@ class Portal {
 					console.log('1111111');
 					if(option.joins){
 						console.log('22222222');
-						Join.get_data(database,cache,data,option).then(([biz_error,biz_data])=>{
+						Join.get_data(database,cache,option).then(([biz_error,biz_data])=>{
 							console.log('33333');
 							if(biz_error){
 								error=Log.append(error,biz_error);

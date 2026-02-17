@@ -70,7 +70,7 @@ describe('connect', function(){ this.timeout(25000);
                 //let foreign_search_1 = Data_Logic.get_search_foreign(Type.SEARkH_ITEMS,Type.DATA_BLANK,Type.FIELD_PARENT_ID,Type.FIELD_ID,{title:'foreign_blanks',page_size:3,sort_by:{title:1},foreigns:[]});
                 //foreign_sub_blank_search_1,foreign_sub_blank_search_2
                 //let foreign_search_2 = Data_Logic.get_search_foreign(Type.SEARCH_COUNT,Type.DATA_IMAGE,Type.FIELD_PARENT_ID,Type.FIELD_ID,{title:'images_cool'});
-                let join_1 = Data_Logic.get_search_join(Type.SEARCH_ITEMS,Data_Logic.get_search(Type.DATA_BLANK,{},{},1,0),{title:'my_joins'});
+                let join_1 = Data_Logic.get_search_join(Type.SEARCH_ONE,Data_Logic.get_search(Type.DATA_BLANK,{},{},1,0),{title:'my_joins'});
                 //let option = {};
                 //let option = {foreigns:[foreign_search_1]};
                 let option = {joins:[join_1]};
