@@ -1127,15 +1127,14 @@ class Portal {
 				},
 				//9_get_item_join 9_join get_item
 				function(call){
-					console.log('1111111');
 					if(option.joins){
-						console.log('22222222');
 						Join.get_data(database,cache,option).then(([biz_error,biz_data])=>{
-							console.log('33333');
 							if(biz_error){
 								error=Log.append(error,biz_error);
 							}else{
-								data = biz_data;
+                                for(const search_item of biz_data){
+                                    data[search_item.title] = search_item.data;
+                                }
 								call();
 							}
 						}).catch(err => {

@@ -81,41 +81,37 @@ class Join {
                 },
                 //foreign
                 function(call){
-                    function get_foreign_data(database,cache,items,foreign_search_item) {
-                        console.log('eeeeeeee');
-                        Foreign.get_data(database,cache,items,{foreigns:[foreign_search_item]}).then(([biz_error,biz_data])=>{
-                            if(biz_error){
-                                error=Log.append(error,biz_error);
-                            }else{
-                                Log.w('aaaaa',biz_data);
-                                //search_item.foreign_data[search_item.title] = biz_data;
-                                //resolve();
-                            }
+                    function get_foreign_data(database,cache,items,search_item) {
+                        return new Promise((resolve) => {
+                            Foreign.get_data(database,cache,items,{foreigns:search_item.foreigns}).then(([biz_error,biz_data])=>{
+                                if(biz_error){
+                                    error=Log.append(error,biz_error);
+                                }
+                                else{
+                                    resolve(biz_data);
+                                }
+                            }).catch(err => {
+                                Log.error('Data-Join-Get-Data-Foreign',err);
+                                error=Log.append(error,err);
+                            });
                         }).catch(err => {
-                            Log.error('Data-Join-Get-Data-Foreign',err);
-                            error=Log.append(error,err);
+                            Log.error("Data-Join-Get-Data-Foreign-2",err);
+                            callback([error,[]]);
                         });
                     }
                     const run = async () => {
-                        console.log('aaaaa');
                         for(const search_item of join_search_items){
-                            console.log('bbbbbbb');
-                            for(const foreign_search_item of search_item.foreigns){
-                                console.log('cccccccc');
-                                if(search_item.type != Type.SEARCH_COUNT){
-                                    console.log('ddddddddd');
-                                    await get_foreign_data(database,cache,search_item.data[search_item.title],foreign_search_item);
-                                }
+                            if(search_item.type != Type.SEARCH_COUNT){
+                                const biz_data = await get_foreign_data(database,cache,search_item.data[search_item.title],search_item);
                             }
                         }
                     }
                     run().then(() => {
-                        console.log('done');
-                        //call();
+                        call();
                     });
                 },
             ]).then(result => {
-                //callback([error,data]);
+                callback([error,join_search_items]);
             }).catch(err => {
                 Log.error("Data-Join-Get",err);
                 callback([error,[]]);
