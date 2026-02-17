@@ -29,7 +29,7 @@ class Join {
                                         search_item.data[search_item.title+'_item_count'] = item_count;
                                         search_item.data[search_item.title+'_page_count'] = page_count;
                                         search_item.data[search_item.title+'_search'] = search;
-                                        search_item.data[search_item.title] = items;
+                                        search_item.data[Type.FIELD_ITEMS] = items;
                                     }
                                     resolve();
                                 }).catch(err => {

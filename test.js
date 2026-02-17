@@ -47,7 +47,7 @@ describe('connect', function(){ this.timeout(25000);
             */
             async function(call){
                 //-->
-                let print_test = false;
+                let print_test = true;
                 // -- POST-START --//
                 /*
                 //let parent = Data_Logic.get(Type.DATA_PRODUCT,0,{test:true});
@@ -64,6 +64,7 @@ describe('connect', function(){ this.timeout(25000);
                 */
                 // -- POST-END --//
                 //-- GET  START --//
+                /*
                 //let option = {field:{title:1,id:1}};
                 //let foreign_sub_blank_search_1 = Data_Logic.get_search_foreign(Type.SEARCH_ITEMS,Type.DATA_BLANK,Type.FIELD_PARENT_ID,Type.FIELD_ID,{title:'foreign_blank'});
                 //let foreign_sub_blank_search_2 = Data_Logic.get_search_foreign(Type.SEARCH_ONE,Type.DATA_BLANK,Type.FIELD_PARENT_ID,Type.FIELD_ID,{title:'foreign_blanks'});
@@ -71,10 +72,11 @@ describe('connect', function(){ this.timeout(25000);
                 //let foreign_search_1 = Data_Logic.get_search_foreign(Type.SEARkH_ITEMS,Type.DATA_BLANK,Type.FIELD_PARENT_ID,Type.FIELD_ID,{title:'foreign_blanks',page_size:3,sort_by:{title:1},foreigns:[]});
                 //foreign_sub_blank_search_1,foreign_sub_blank_search_2
                 let foreign_1 = Data_Logic.get_search_foreign(Type.SEARCH_ITEMS,Type.DATA_IMAGE,Type.FIELD_PARENT_ID,Type.FIELD_ID,{title:'foreign_image_1'});
-                let join_1 = Data_Logic.get_search_join(Type.SEARCH_ITEMS,Data_Logic.get_search(Type.DATA_BLANK,{},{},1,0),{title:'mr_joins_1',foreigns:[foreign_1]});
+                let join_1 = Data_Logic.get_search_join(Type.SEARCH_ITEMS,Data_Logic.get_search(Type.DATA_BLANK,{},{},1,0),{title:'my_joins_1',foreigns:[foreign_1]});
+                let join_2 = Data_Logic.get_search_join(Type.SEARCH_ITEMS,Data_Logic.get_search(Type.DATA_IMAGE,{},{},1,0),{title:'my_joins_2'});
                 //let option = {};
                 //let option = {foreigns:[foreign_search_1]};
-                let option = {joins:[join_1]};
+                let option = {joins:[join_1,join_2]};
                 //let option = {groups:[Data_Logic.get_search_group({image:true})],foreigns:[foreign_search_1]};
                 //let option = {groups:[Data_Logic.get_search_group({image:false})]};
                 let parent = Data_Logic.get(Type.DATA_PRODUCT,'753');
@@ -84,24 +86,31 @@ describe('connect', function(){ this.timeout(25000);
                 //Log.w('88_biz_data',biz_data[0].groups_cool);
                 //Log.w('88_biz_data',biz_data[1].groups_cool);
                 //Log.w('88_biz_data',biz_data[0].groups_cool[0]);
+                */
                 //-- GET  END --//
                 //-->
                 //-- SEARCH START --//
-                /*
                 //let foreign_sub_blank_search_2 = Data_Logic.get_search_foreign(Type.SEARCH_ITEMS,Type.DATA_IMAGE,Type.FIELD_PARENT_ID,Type.FIELD_ID,{title:'group_images'});
                 //let foreign_sub_blank_search_1 = Data_Logic.get_search_foreign(Type.SEARCH_ITEMS,Type.DATA_BLANK,Type.FIELD_PARENT_ID,Type.FIELD_ID,{title:'group_blanks'});
                 //let foreign_search_1 = Data_Logic.get_search_foreign(Type.SEARCH_ITEMS,Type.DATA_GROUP,Type.FIELD_PARENT_ID,Type.FIELD_ID,{title:'groups_cool',page_size:3,sort_by:{title:1},foreigns:[foreign_sub_blank_search_1,foreign_sub_blank_search_2]});
                 //foreign_sub_blank_search_1,foreign_sub_blank_search_2
                 //let foreign_search_2 = Data_Logic.get_search_foreign(Type.SEARCH_COUNT,Type.DATA_IMAGE,Type.FIELD_PARENT_ID,Type.FIELD_ID,{title:'images_cool'});
                 //let option = {foreigns:[foreign_search_1]};
-                let option = {groups:[Data_Logic.get_search_group({image:true})]};
+                //let option = {groups:[Data_Logic.get_search_group({image:true})]};
                 //let option = {groups:[Data_Logic.get_search_group({image:true,title:{group_36:1,group_37:1}})]};
                 //let option = {};
+
+                let foreign_1 = Data_Logic.get_search_foreign(Type.SEARCH_ITEMS,Type.DATA_IMAGE,Type.FIELD_PARENT_ID,Type.FIELD_ID,{title:'foreign_image_1'});
+                let join_1 = Data_Logic.get_search_join(Type.SEARCH_ITEMS,Data_Logic.get_search(Type.DATA_BLANK,{},{},1,0),{title:'my_joins_1',foreigns:[foreign_1]});
+                let join_2 = Data_Logic.get_search_join(Type.SEARCH_ITEMS,Data_Logic.get_search(Type.DATA_IMAGE,{},{},1,0),{title:'my_joins_2'});
+                //let option = {};
+                //let option = {foreigns:[foreign_search_1]};
+                let option = {joins:[join_1,join_2]};
+
                 let search = Data_Logic.get_search(Type.DATA_PRODUCT,{},{},1,0,option);
                 const [biz_error,biz_data] = await Portal.search(database,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,search.option);
                 Log.w('33_biz_data',biz_data);
-                Log.w('33_biz_data',biz_data.items[0]);
-                */
+                //Log.w('33_biz_data',biz_data.items[0]);
                 //-- SEARCH  END --//
                                //-- POST_ITEMS START --//
                 //let option = {};

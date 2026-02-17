@@ -1294,25 +1294,27 @@ class Portal {
 						error=Log.append(error,err);
 					});
 				},
-				//9_get_item_join 9_join get_item
+		        //9_get_items_join 9_join get_items
 				function(call){
 					if(option.joins){
-						Join.get_data(database,cache,data,option).then(([biz_error,biz_data])=>{
+						Join.get_data(database,cache,option).then(([biz_error,biz_data])=>{
 							if(biz_error){
 								error=Log.append(error,biz_error);
 							}else{
-								data = biz_data;
+                                for(const search_item of biz_data){
+                                    data[search_item.title] = search_item.data;
+                                }
 								call();
 							}
 						}).catch(err => {
-							Log.error('Data-Portal-Get-Items-Join',err);
+							Log.error('Data-Portal-Get-Item-Join',err);
 							error=Log.append(error,err);
 						});
 					}else{
 						call();
 					}
 				},
-				//9_foreigns //9_get_foreigns get_items_foreign
+						//9_foreigns //9_get_foreigns get_items_foreign
 				function(call){
 					if(option.foreigns && data[Type.FIELD_ITEMS].length > 0){
 						Foreign.get_data(database,cache,data[Type.FIELD_ITEMS],option).then(([biz_error,biz_data])=>{
