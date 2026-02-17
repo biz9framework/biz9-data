@@ -1,3 +1,9 @@
+/*
+Copyright 2016 Certified CoderZ
+Author: Brandon Poole Sr. (biz9framework@gmail.com)
+License GNU General Public License v3.0
+Description: BiZ9 Framework: Data - Foreign
+*/
 const async = require('async');
 const {Log,Str,Num,Obj,DateTime}=require("/home/think1/www/doqbox/biz9-framework/biz9-utility/source");
 const {Type,Data_Logic}=require("/home/think1/www/doqbox/biz9-framework/biz9-logic/source");

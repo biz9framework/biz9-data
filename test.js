@@ -1,6 +1,12 @@
+/*
+Copyright 2016 Certified CoderZ
+Author: Brandon Poole Sr. (biz9framework@gmail.com)
+License GNU General Public License v3.0
+Description: BiZ9 Framework: Data - Test
+*/
 const async = require('async');
 const assert = require('node:assert');
-const {Data,Database,Portal} = require(".");
+const {Database,Portal} = require(".");
 const {Cache} = require('./redis.js');
 const {Log,Num,Str} = require("biz9-utility");
 const {Type,Data_Logic,Cart_Logic,Order_Logic} = require("/home/think1/www/doqbox/biz9-framework/biz9-logic/source");

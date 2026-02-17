@@ -1,9 +1,9 @@
-/* Copyright (C) 2016 9_OPZ #Certified CoderZ
- * GNU GENERAL PUBLIC LICENSE
- * Full LICENSE file ( gpl-3.0-licence.txt )
- * BiZ9 Framework
- * Data - Mongo - Base
- */
+/*
+Copyright 2016 Certified CoderZ
+Author: Brandon Poole Sr. (biz9framework@gmail.com)
+License GNU General Public License v3.0
+Description: BiZ9 Framework: Data - Mongo
+*/
 const async = require('async');
 const {Num,Log,Str,Obj,DateTime} = require("/home/think1/www/doqbox/biz9-framework/biz9-utility/source");
 const {Type} = require("/home/think1/www/doqbox/biz9-framework/biz9-logic/source");

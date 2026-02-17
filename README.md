@@ -1,4 +1,5 @@
 # BiZ9 Data
+** Docs Need To Be Updated - via Author
 **The BiZ9-Data Package** is an **object-relational mapper** (ORM) data access layer using [**Node.js**](http://Node.js). The package consists of **create**, **read**, **update** and **destroy** (CRUD) methods to handle data access and manipulations. The framework is fast and used for rapid application development for scaling applications from 0 to millions of records seamlessly and effortless. New data is written and persisted to the [**MongoDB**](https://www.mongodb.com/) tables/collections. Fetching data is obtained from the server cache memory using [**Redis**](https://redis.io/). Using **MongoDB** with **Redis** will speed up your overall application tremendously.
 This framework is used as a **data access component** for **mobile** and **website applications**. It is best suited to be used as a package within [**Express.js**](http://Express.js). It can also be utilized for other **Javascript** based applications.
 

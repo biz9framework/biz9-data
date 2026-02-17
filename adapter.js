@@ -1,15 +1,14 @@
 /*
-Copyright 2023 Certified CoderZ
-Author: certifiedcoderz@gmail.com (Certified CoderZ)
+Copyright 2016 Certified CoderZ
+Author: Brandon Poole Sr. (biz9framework@gmail.com)
 License GNU General Public License v3.0
-Description: BiZ9 Framework: Data - Mongo - Adapter
+Description: BiZ9 Framework: Data - Adapter
 */
 const async = require('async');
 const {Mongo}= require("./mongo.js");
 const {Cache} = require('./redis.js');
 const {Type,Data_Logic}=require("/home/think1/www/doqbox/biz9-framework/biz9-logic/source");
 const {Log,Str,Num,Obj}=require("/home/think1/www/doqbox/biz9-framework/biz9-utility/source");
-
 class Adapter {
     static get_database=(data_config,option)=>{
         return new Promise((callback) => {
@@ -522,5 +521,5 @@ class Adapter {
     }
 }
 module.exports = {
-    Adapter,
+    Adapter
 };
