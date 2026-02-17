@@ -5,8 +5,8 @@ License GNU General Public License v3.0
 Description: BiZ9 Framework: Data - Mongo - Adapter
 */
 const async = require('async');
-const {Mongo}= require("./mongo/base.js");
-const {Cache} = require('./redis/base.js');
+const {Mongo}= require("./mongo.js");
+const {Cache} = require('./redis.js');
 const {Type,Data_Logic}=require("/home/think1/www/doqbox/biz9-framework/biz9-logic/source");
 const {Log,Str,Num,Obj}=require("/home/think1/www/doqbox/biz9-framework/biz9-utility/source");
 

@@ -1,9 +1,7 @@
 const async = require('async');
 const assert = require('node:assert');
-
-const {Data,Database,Portal,User_Data,Page_Data,Product_Data,Review_Data,Cart_Data,Order_Data} = require(".");
-const {get_cache} = require('./redis/base.js');
-
+const {Data,Database,Portal} = require(".");
+const {Cache} = require('./redis.js');
 const {Log,Num,Str} = require("biz9-utility");
 const {Type,Data_Logic,Cart_Logic,Order_Logic} = require("/home/think1/www/doqbox/biz9-framework/biz9-logic/source");
 /*
@@ -41,7 +39,7 @@ describe('connect', function(){ this.timeout(25000);
             },
             /*
 		    async function(call) {
-                	const [biz_error,biz_data] = await get_cache(database.data_config);
+                	const [biz_error,biz_data] = await Cache.get(database.data_config);
                     cache = biz_data;
 			},
             */
