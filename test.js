@@ -54,8 +54,9 @@ describe('connect', function(){ this.timeout(25000);
                 //-->
                 let print_test = true;
                 // -- TEST -- //
-                let search = Data_Logic.get_search(Project_Table.PRODUCT,{},{},1,0,{});
-                Log.w('my_search',search);
+                //let search = Data_Logic.get_search(Project_Table.PRODUCT,{},{},1,0,{});
+                //let group = Data_Logic.get_group({value_type::});
+                //Log.w('my_search',search);
 
                 // -- POST-START --//
                 //let parent = Data_Logic.get(Project_Table.PRODUCT,0,{count:3,parent:my_parent,user:my_user,data:{cool:'apple1',sauce:'butter'}});
