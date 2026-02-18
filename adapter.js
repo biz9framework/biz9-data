@@ -288,7 +288,7 @@ class Adapter {
             async.series([
                 //cache_field_list
                 async function(call) {
-                    const [error,data] = await Cache.get_cache(cache,Adapter.get_cache_item_attr_list_key(data_type,id));
+                    const [error,data] = await Cache.get_value(cache,Adapter.get_cache_item_attr_list_key(data_type,id));
                     if(data){
                         cache_key_list=data.split(',');
                     }
@@ -309,7 +309,7 @@ class Adapter {
                         //cache
                         for(const item of cache_key_list) {
                             if(item){
-                                const [error,val] = await Cache.get_cache(cache,Adapter.get_cache_item_attr_key(data_type,id,item));
+                                const [error,val] = await Cache.get_value(cache,Adapter.get_cache_item_attr_key(data_type,id,item));
                                 if(val){
                                     item_data[item] = val;
                                 }else{
@@ -401,7 +401,7 @@ class Adapter {
             let item_data = Data_Logic.get(data_type,id);
             async.series([
                 async function(call) {
-                    const [error,data] = await Cache.get_cache(cache,Adapter.get_cache_item_attr_list_key(data_type,id));
+                    const [error,data] = await Cache.get_value(cache,Adapter.get_cache_item_attr_list_key(data_type,id));
                     cache_key_list=data;
                 },
                 async function(call) {
@@ -410,12 +410,12 @@ class Adapter {
                     }
                     for(const item of cache_string_list) {
                         if(item){
-                            const [error,val] = await Cache.delete(cache,Adapter.get_cache_item_attr_key(data_type,id,item));
+                            const [error,val] = await Cache.delete_value(cache,Adapter.get_cache_item_attr_key(data_type,id,item));
                         }
                     }
                 },
                 async function(call){
-                    const [error,data] = await Cache.delete(cache,Adapter.get_cache_item_attr_list_key(data_type,id));
+                    const [error,data] = await Cache.delete_value(cache,Adapter.get_cache_item_attr_list_key(data_type,id));
                     item_data.delete_cache_resultOK = true;
                     item_data.cache_item_attr_list = Adapter.get_cache_item_attr_list_key(data_type,id);
                 },
@@ -438,7 +438,7 @@ class Adapter {
             data[Type.FIELD_RESULT_OK_DELETE_DATABASE] = false;
             async.series([
                 async function(call) {
-                    const [biz_error,biz_data] = await Cache.get_cache(cache,Adapter.get_cache_item_attr_list_key(data_type,id));
+                    const [biz_error,biz_data] = await Cache.get_value(cache,Adapter.get_cache_item_attr_list_key(data_type,id));
                     cache_key_list=biz_data;
                 },
                 async function(call) {
@@ -447,12 +447,12 @@ class Adapter {
                     }
                     for(const item of cache_string_list) {
                         if(item){
-                            const [biz_error,val] = await Cache.delete(cache,Adapter.get_cache_item_attr_key(data_type,id,item));
+                            const [biz_error,val] = await Cache.delete_value(cache,Adapter.get_cache_item_attr_key(data_type,id,item));
                         }
                     }
                 },
                 async function(call){
-                    const [biz_error,biz_data] = await Cache.delete(cache,Adapter.get_cache_item_attr_list_key(data_type,id));
+                    const [biz_error,biz_data] = await Cache.delete_value(cache,Adapter.get_cache_item_attr_list_key(data_type,id));
                     if(!error){
                         data[Type.FIELD_RESULT_OK_DELETE_CACHE] = true;
                     }

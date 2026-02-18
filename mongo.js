@@ -54,7 +54,7 @@ class Mongo {
             if(!id){
                 id = '0';
             }
-            if(check_database(database)){
+            if(Mongo.check_database(database)){
                 database.collection(data_type).findOne({id:String(id)}).then((data) => {
                     if(data){
                         delete data['_id'];
@@ -91,7 +91,7 @@ class Mongo {
                 item[Type.FIELD_ID] = String(Num.get_id(999));
                 item[Type.FIELD_DATE_CREATE] = DateTime.get();
                 item[Type.FIELD_DATE_SAVE] = DateTime.get();
-                if(check_database(database)){
+                if(Mongo.check_database(database)){
                     database.collection(data_type).insertOne(item).then((data) => {
                         delete item['_id'];
                         callback([error,item]);
@@ -135,7 +135,7 @@ class Mongo {
                 bulk_list.push(item);
             }
 
-            if(check_database(database)){
+            if(Mongo.check_database(database)){
                 try {
                     database.collection(data_type).bulkWrite(bulk_list,
                         { ordered: false } )
@@ -152,7 +152,7 @@ class Mongo {
         return new Promise((callback) => {
             let error = null;
             let data = null;
-            if(check_database(database)){
+            if(Mongo.check_database(database)){
                 database.collection(data_type).deleteMany({id:id}).then((data) => {
                     if(data){
                         data = data;
@@ -169,7 +169,7 @@ class Mongo {
         return new Promise((callback) => {
             let error = null;
             let data = null;
-            if(check_database(database)){
+            if(Mongo.check_database(database)){
                 database.collection(data_type).deleteMany(filter).then((data) => {
                     if(data){
                         data = data;
@@ -191,7 +191,7 @@ class Mongo {
             async.series([
                 function(call) {
                     if(page_size>0){
-                        if(check_database(database)){
+                        if(Mongo.check_database(database)){
                             database.collection(data_type).countDocuments(filter).then((data) => {
                                 if(data){
                                     total_count = data;
@@ -210,7 +210,7 @@ class Mongo {
                     }
                 },
                 function(call) {
-                    if(check_database(database)){
+                    if(Mongo.check_database(database)){
                         page_current = parseInt(page_current);
                         page_size = parseInt(page_size);
                         database.collection(data_type).find(filter).sort(sort_by).collation({locale:"en_US",numericOrdering:true}).skip(page_current>0?((page_current-1)*page_size):0).limit(page_size).project({id:1,data_type:1,_id:0}).toArray().then((data) => {
