@@ -6,7 +6,7 @@ Description: BiZ9 Framework: Data - Group
 */
 const async = require('async');
 const {Log,Str,Num,Obj,DateTime}=require("/home/think1/www/doqbox/biz9-framework/biz9-utility/source");
-const {Type,Data_Logic}=require("/home/think1/www/doqbox/biz9-framework/biz9-logic/source");
+const {Data_Table,Data_Logic}=require(".");
 const {Adapter}  = require('./adapter.js');
 const {Foreign} = require('./foreign.js');
 class Group {
@@ -33,7 +33,7 @@ class Group {
                                 new_item[field] = search_item.title[field];
                                 if(new_item[field]){
                                     let query_field = {};
-                                    query_field[Type.FIELD_TITLE_URL] = field;
+                                    query_field[Data_Field.TITLE_URL] = field;
                                     query.$or.push(query_field);
                                 }
                             }
@@ -41,7 +41,7 @@ class Group {
                         if(!has_title){
                             for(const item of data_items){
                                 let query_field = {};
-                                query_field[Type.FIELD_PARENT_ID] = item.id;
+                                query_field[Data_Field.PARENT_ID] = item.id;
                                 query.$or.push(query_field);
                             }
                         }
@@ -94,34 +94,15 @@ class Group {
                 let data = [];
                 async.series([
                     function(call) {
-                        let search = Data_Logic.get_search(Type.DATA_GROUP,search_item.query,{},search_item.page_current,search_item.page_size);
+                        let search = Data_Logic.get_search(Data_Table.GROUP,search_item.query,{},search_item.page_current,search_item.page_size);
                         let option = search_item.field ? search_item.field : {};
-                        Adapter.get_item_list(database,cache,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,option).then(([biz_error,items,item_count,page_count])=>{
+                        Adapter.get_item_list(database,cache,search.type,search.filter,search.sort_by,search.page_current,search.page_size,option).then(([biz_error,items,item_count,page_count])=>{
                             data = items;
                             call();
                         }).catch(err => {
                             Log.error('Group-Get-Search-Item-Data',err);
                             error=Log.append(error,err);
                         });
-                    },
-                    //image
-                    function(call){
-                        if(search_item.image && data.length>0){
-                            let option = {foreigns:[Data_Logic.get_search_foreign(Type.SEARCH_ITEMS,Type.DATA_IMAGE,Type.FIELD_PARENT_ID,Type.FIELD_ID,{title:'images'})]};
-                            Foreign.get_data(database,cache,data,option).then(([biz_error,biz_data])=>{
-                                if(biz_error){
-                                    error=Log.append(error,biz_error);
-                                }else{
-                                    data = biz_data;
-                                }
-                                call();
-                            }).catch(err => {
-                                Log.error('Group-Get-Search-Item-Data-Foreign',err);
-                                error=Log.append(error,err);
-                            });
-                        }else{
-                            call();
-                        }
                     },
                 ]).then(result => {
                     callback(data);
@@ -137,7 +118,6 @@ class Group {
         return {
             field : group_item.field ? group_item.field : {},
             title : group_item.title ? group_item.title : {}, // {groupShow:1,groupHide:0},{0:all}
-            image : group_item.image ? group_item.image : false,
             page_current : group_item.page_current ? group_item.page_current : 1,
             page_size : group_item.page_size ? group_item.page_size : 0,
             query : {$or:[],$and:[]},

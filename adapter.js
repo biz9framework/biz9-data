@@ -7,7 +7,7 @@ Description: BiZ9 Framework: Data - Adapter
 const async = require('async');
 const {Mongo}= require("./mongo.js");
 const {Cache} = require('./redis.js');
-const {Type,Data_Logic}=require("/home/think1/www/doqbox/biz9-framework/biz9-logic/source");
+const {Data_Logic}=require(".");
 const {Log,Str,Num,Obj}=require("/home/think1/www/doqbox/biz9-framework/biz9-utility/source");
 class Adapter {
     static get_database=(data_config,option)=>{
@@ -41,7 +41,7 @@ class Adapter {
                 function(call){
                     async.forEachOf(item_data_list,(item,key,go)=>{
                         for(property in item[key]){
-                            if(property!=Type.FIELD_ID&&property!=Type.FIELD_DATA_TYPE){
+                            if(property!=Table_Field.ID&&property!=Table_Field.FIELD_DATA_TYPE){
                                 if(!item[key][property]){
                                     delete item[key][property];
                                 }
@@ -59,10 +59,10 @@ class Adapter {
                     async.forEachOf(item_data_list,(item,key,go)=>{
                         if(item){
                             async function main() {
-                                const [error,data] = await Mongo.post_item(database,item.data_type,item);
+                                const [error,data] = await Mongo.post_item(database,item.table,item);
                                 if(data){
                                     item.id=data.id;
-                                    Cache.delete_value(cache,Adapter.get_cache_item_attr_list_key(item.data_type,data.id)).then(([error,data]) => {
+                                    Cache.delete_value(cache,Adapter.get_cache_item_attr_list_key(item.table,data.id)).then(([error,data]) => {
                                         go();
                                     }).catch(error => {
                                         Log.error("Data-Adapter-Update-Item-List-2",error);
@@ -84,7 +84,7 @@ class Adapter {
                 },
                 function(call){
                     for(const item of item_data_list) {
-                        item.source=Type.TITLE_SOURCE_DATABASE;
+                        item.source=Data_Title.SOURCE_DATABASE;
                         item_data_new_list.push(item);
                     }
                     call();
@@ -97,21 +97,21 @@ class Adapter {
             });
         });
     }
-    static post_item=(database,cache,data_type,item_data,option) => {
+    static post_item=(database,cache,table,item_data,option) => {
         return new Promise((callback) => {
             let error = null;
             async.series([
                 async function(call){
-                    const [biz_error,biz_data] = await Mongo.post_item(database,data_type,item_data,option);
+                    const [biz_error,biz_data] = await Mongo.post_item(database,table,item_data,option);
                 },
                 function(call){
                     if(item_data.id){
-                        item_data.source=Type.TITLE_SOURCE_DATABASE;
+                        item_data.source=Data_Title.SOURCE_DATABASE;
                     }
                     call();
                 },
                 async function(call){
-                    const [error,data] = await Cache.delete_value(cache,Adapter.get_cache_item_attr_list_key(item_data.data_type,item_data.id));
+                    const [error,data] = await Cache.delete_value(cache,Adapter.get_cache_item_attr_list_key(item_data.table,item_data.id));
                 },
             ]).then(result => {
                 callback([error,item_data]);
@@ -121,7 +121,7 @@ class Adapter {
             });
         });
     }
-    static get_item_list = (database,cache,data_type,filter,sort_by,page_current,page_size,option) => {
+    static get_item_list = (database,cache,table,filter,sort_by,page_current,page_size,option) => {
         return new Promise((callback) => {
             let error = null;
             let item_id_list = [];
@@ -133,7 +133,7 @@ class Adapter {
                     if(!page_current){
                         page_current=1;
                     }
-                    const [error,total_count,data_list] = await Mongo.get_id_list(database,data_type,filter,sort_by,page_current,page_size,option);
+                    const [error,total_count,data_list] = await Mongo.get_id_list(database,table,filter,sort_by,page_current,page_size,option);
                     if(data_list.length>0){
                         item_count=total_count;
                         item_id_list=data_list;
@@ -142,7 +142,7 @@ class Adapter {
                 async function(call) {
                     if(item_id_list.length>0){
                         for(const item of item_id_list) {
-                            const [biz_error,biz_data] = await Adapter.get_item_cache_db(database,cache,data_type,item.id,option);
+                            const [biz_error,biz_data] = await Adapter.get_item_cache_db(database,cache,table,item.id,option);
                             if(biz_data){
                                 delete biz_data['_id'];
                                 item_data_list.push(biz_data);
@@ -156,7 +156,7 @@ class Adapter {
                         item_data_list = item_data_list.filter((obj, index, self) =>
                             index === self.findIndex((t) => t[option.distinct.field] === obj[option.distinct.field])
                         );
-                        let distinct_sort_by = option.distinct.sort_by ? option.distinct.sort_by : Type.TITLE_SORT_BY_ASC;
+                        let distinct_sort_by = option.distinct.sort_by ? option.distinct.sort_by : Data_Type.SORT_BY_ASC;
                         item_data_list = Obj.sort_list_by_field(item_data_list,option.distinct.field,distinct_sort_by);
                         item_count=item_data_list.length;
                         call();
@@ -179,35 +179,35 @@ class Adapter {
             });
         });
     }
-    static get_item = (database,cache,data_type,id,option) => {
+    static get_item = (database,cache,table,id,option) => {
         return new Promise((callback) => {
             let error = null;
             if(!option){
                 option = {};
             }
-            let data = Data_Logic.get(data_type,id);
+            let data = Data_Logic.get(table,id);
             option = option ?? {};
             async.series([
                 async function(call) {
                     if(!option.id_field){
-                        const [biz_error,biz_data] = await Adapter.get_item_cache_db(database,cache,data.data_type,data.id,option);
+                        const [biz_error,biz_data] = await Adapter.get_item_cache_db(database,cache,data.table,data.id,option);
                         if(biz_data.id){
                             data = biz_data;
                         }else{
-                            data = Data_Logic.get_not_found(data_type,id);
+                            data = Data_Logic.get_not_found(table,id);
                         }
                     }else{
                         let query_field={};
                         query_field[option.id_field] = id;
                         let page_current=1;
                         let page_size=0;
-                        const [biz_error,biz_data] = await Adapter.get_item_list(database,cache,data_type,query_field,{},page_current,page_size,option);
+                        const [biz_error,biz_data] = await Adapter.get_item_list(database,cache,table,query_field,{},page_current,page_size,option);
                         if(biz_data.length>0){
                             delete biz_data['_id'];
                             data = biz_data[0];
                         }else{
-                            data = Data_Logic.get_not_found(data_type,id);
-                            data.id_field = option.id_field ? option.id_field : Type.FIELD_ID;
+                            data = Data_Logic.get_not_found(table,id);
+                            data.id_field = option.id_field ? option.id_field : Table_Field.ID;
                         }
                     }
                 },
@@ -219,7 +219,7 @@ class Adapter {
             });
         });
     }
-    static post_cache_item = (cache,data_type,id,item_data) => {
+    static post_cache_item = (cache,table,id,item_data) => {
         return new Promise((callback) => {
             let error = null;
             let cache_string_str = '';
@@ -227,7 +227,7 @@ class Adapter {
             async.series([
                 function(call) {
                     for (const prop in item_data) {
-                        if(prop != Type.FIELD_SOURCE){
+                        if(prop != Table_Field.SOURCE){
                             prop_list.push({title:prop,value:item_data[prop]});
                         }
                     }
@@ -236,11 +236,11 @@ class Adapter {
                 async function(call) {
                     for(const item of prop_list) {
                         cache_string_str=cache_string_str+item.title+',';
-                        await Cache.post_value(cache,Adapter.get_cache_item_attr_key(data_type,id,item.title),item.value);
+                        await Cache.post_value(cache,Adapter.get_cache_item_attr_key(table,id,item.title),item.value);
                     }
                 },
                 async function(call) {
-                    const [error,data] = await Cache.post_value(cache,Adapter.get_cache_item_attr_list_key(data_type,id),cache_string_str);
+                    const [error,data] = await Cache.post_value(cache,Adapter.get_cache_item_attr_list_key(table,id),cache_string_str);
                 },
             ]).then(result => {
                 callback([error,item_data]);
@@ -250,23 +250,23 @@ class Adapter {
             });
         });
     }
-    static delete_item = (database,cache,data_type,id,option) => {
+    static delete_item = (database,cache,table,id,option) => {
         return new Promise((callback) => {
             let error = null;
-            let data = Data_Logic.get(data_type,id);
-            data[Type.FIELD_RESULT_OK_DELETE] = false;
-            data[Type.FIELD_RESULT_OK_DELETE_CACHE] = false;
-            data[Type.FIELD_RESULT_OK_DELETE_DATABASE] = false;
+            let data = Data_Logic.get(table,id);
+            data[Data_Type.RESULT_OK_DELETE] = false;
+            data[Data_Type.RESULT_OK_DELETE_CACHE] = false;
+            data[Data_Type.RESULT_OK_DELETE_DATABASE] = false;
             async.series([
                 async function(call) {
-                    const [biz_error,biz_data] = await Adapter.delete_item_cache_db(database,cache,data_type,id);
+                    const [biz_error,biz_data] = await Adapter.delete_item_cache_db(database,cache,table,id);
                     if(biz_error){
                         error = biz_error;
                     }else{
                         data = biz_data;
-                        data[Type.FIELD_RESULT_OK_DELETE] = true;
-                        data[Type.FIELD_RESULT_OK_DELETE_CACHE] = true;
-                        data[Type.FIELD_RESULT_OK_DELETE_DATABASE] = true;
+                        data[Data_Type.RESULT_OK_DELETE] = true;
+                        data[Data_Type.RESULT_OK_DELETE_CACHE] = true;
+                        data[Data_Type.RESULT_OK_DELETE_DATABASE] = true;
                     }
                 },
             ]).then(result => {
@@ -277,18 +277,18 @@ class Adapter {
             });
         });
     }
-    static get_item_cache_db = (database,cache,data_type,id,option) => {
+    static get_item_cache_db = (database,cache,table,id,option) => {
         return new Promise((callback) => {
             let error = null;
             let cache_key_list = [];
-            let item_data = Data_Logic.get(data_type,id);
+            let item_data = Data_Logic.get(table,id);
             let field_list = [];
             let hide_field_list = [];
             option = option ? option : {};
             async.series([
                 //cache_field_list
                 async function(call) {
-                    const [error,data] = await Cache.get_value(cache,Adapter.get_cache_item_attr_list_key(data_type,id));
+                    const [error,data] = await Cache.get_value(cache,Adapter.get_cache_item_attr_list_key(table,id));
                     if(data){
                         cache_key_list=data.split(',');
                     }
@@ -296,20 +296,20 @@ class Adapter {
                 async function(call) {
                     if(cache_key_list.length==0){
                         //db
-                        const [error,data] = await Mongo.get_item(database,data_type,id);
+                        const [error,data] = await Mongo.get_item(database,table,id);
                         if(data){
                             delete data['_id'];
                             item_data = data;
-                            const [error,data2] = await Adapter.post_cache_item(cache,data_type,id,data);
-                            item_data[Type.FIELD_SOURCE] = Type.TITLE_SOURCE_DATABASE;
+                            const [error,data2] = await Adapter.post_cache_item(cache,table,id,data);
+                            item_data[Data_Type.SOURCE] = Data_Title.SOURCE_DATABASE;
                         }else{
-                            item_data  = Data_Logic.get_not_found(data_type,id);
+                            item_data  = Data_Logic.get_not_found(table,id);
                         }
                     }else{
                         //cache
                         for(const item of cache_key_list) {
                             if(item){
-                                const [error,val] = await Cache.get_value(cache,Adapter.get_cache_item_attr_key(data_type,id,item));
+                                const [error,val] = await Cache.get_value(cache,Adapter.get_cache_item_attr_key(table,id,item));
                                 if(val){
                                     item_data[item] = val;
                                 }else{
@@ -317,7 +317,7 @@ class Adapter {
                                 }
                             }
                         }
-                        item_data[Type.FIELD_SOURCE] = Type.TITLE_SOURCE_CACHE;
+                        item_data[Table_Field.SOURCE] = Data_Title.SOURCE_CACHE;
                     }
                 },
                 async function(call) {
@@ -362,7 +362,7 @@ class Adapter {
             });
         });
     }
-    static delete_item_list = (database,cache,data_type,filter,option) => {
+    static delete_item_list = (database,cache,table,filter,option) => {
         return new Promise((callback) => {
             let error = null;
             let item_id_list = [];
@@ -371,17 +371,17 @@ class Adapter {
             option = option ? option : {};
             async.series([
                 async function(call) {
-                    const [error,total_count,data_list] = await Mongo.get_id_list(database,data_type,filter,{},0,9999,option);
+                    const [error,total_count,data_list] = await Mongo.get_id_list(database,table,filter,{},0,9999,option);
                     item_count=total_count;
                     item_id_list=data_list;
                 },
                 async function(call){
-                    const [error,data] = await Mongo.delete_item_list(database,data_type,filter);
+                    const [error,data] = await Mongo.delete_item_list(database,table,filter);
                 },
                 async function(call) {
                     var list = [];
                     for(const item of item_id_list) {
-                        [error,data] = await Adapter.delete_item_cache_db(database,cache,data_type,item.id);
+                        [error,data] = await Adapter.delete_item_cache_db(database,cache,table,item.id);
                         item_data_new_list.push(data);
                     };
                 },
@@ -393,15 +393,15 @@ class Adapter {
             });
         });
     }
-    static delete_item_cache=(database,cache,data_type,id,option)=>{
+    static delete_item_cache=(database,cache,table,id,option)=>{
         return new Promise((callback)=>{
             let error = null;
             let cache_key_list = '';
             let cache_string_list = '';
-            let item_data = Data_Logic.get(data_type,id);
+            let item_data = Data_Logic.get(table,id);
             async.series([
                 async function(call) {
-                    const [error,data] = await Cache.get_value(cache,Adapter.get_cache_item_attr_list_key(data_type,id));
+                    const [error,data] = await Cache.get_value(cache,Adapter.get_cache_item_attr_list_key(table,id));
                     cache_key_list=data;
                 },
                 async function(call) {
@@ -410,14 +410,14 @@ class Adapter {
                     }
                     for(const item of cache_string_list) {
                         if(item){
-                            const [error,val] = await Cache.delete_value(cache,Adapter.get_cache_item_attr_key(data_type,id,item));
+                            const [error,val] = await Cache.delete_value(cache,Adapter.get_cache_item_attr_key(table,id,item));
                         }
                     }
                 },
                 async function(call){
-                    const [error,data] = await Cache.delete_value(cache,Adapter.get_cache_item_attr_list_key(data_type,id));
+                    const [error,data] = await Cache.delete_value(cache,Adapter.get_cache_item_attr_list_key(table,id));
                     item_data.delete_cache_resultOK = true;
-                    item_data.cache_item_attr_list = Adapter.get_cache_item_attr_list_key(data_type,id);
+                    item_data.cache_item_attr_list = Adapter.get_cache_item_attr_list_key(table,id);
                 },
             ]).then(result => {
                 callback([error,item_data]);
@@ -427,18 +427,18 @@ class Adapter {
             });
         });
     }
-    static delete_item_cache_db = (database,cache,data_type,id) => {
+    static delete_item_cache_db = (database,cache,table,id) => {
         return new Promise((callback) => {
             let error = null;
             let cache_key_list = '';
             let cache_string_list = '';
-            let data = Data_Logic.get(data_type,id);
-            data[Type.FIELD_RESULT_OK_DELETE] = false;
-            data[Type.FIELD_RESULT_OK_DELETE_CACHE] = false;
-            data[Type.FIELD_RESULT_OK_DELETE_DATABASE] = false;
+            let data = Data_Logic.get(table,id);
+            data[Data_Type.RESULT_OK_DELETE] = false;
+            data[Data_Type.RESULT_OK_DELETE_CACHE] = false;
+            data[Data_Type.RESULT_OK_DELETE_DATABASE] = false;
             async.series([
                 async function(call) {
-                    const [biz_error,biz_data] = await Cache.get_value(cache,Adapter.get_cache_item_attr_list_key(data_type,id));
+                    const [biz_error,biz_data] = await Cache.get_value(cache,Adapter.get_cache_item_attr_list_key(table,id));
                     cache_key_list=biz_data;
                 },
                 async function(call) {
@@ -447,25 +447,25 @@ class Adapter {
                     }
                     for(const item of cache_string_list) {
                         if(item){
-                            const [biz_error,val] = await Cache.delete_value(cache,Adapter.get_cache_item_attr_key(data_type,id,item));
+                            const [biz_error,val] = await Cache.delete_value(cache,Adapter.get_cache_item_attr_key(table,id,item));
                         }
                     }
                 },
                 async function(call){
-                    const [biz_error,biz_data] = await Cache.delete_value(cache,Adapter.get_cache_item_attr_list_key(data_type,id));
+                    const [biz_error,biz_data] = await Cache.delete_value(cache,Adapter.get_cache_item_attr_list_key(table,id));
                     if(!error){
-                        data[Type.FIELD_RESULT_OK_DELETE_CACHE] = true;
+                        data[Data_Type.RESULT_OK_DELETE_CACHE] = true;
                     }
                 },
                 async function(call){
-                    const [biz_error,biz_data] = await Mongo.delete_item(database,data_type,id);
+                    const [biz_error,biz_data] = await Mongo.delete_item(database,table,id);
                     if(!biz_error){
-                        data[Type.FIELD_RESULT_OK_DELETE_DATABASE] = true;
+                        data[Data_Type.RESULT_OK_DELETE_DATABASE] = true;
                     }
                 },
                 async function(call){
-                    if(data[Type.FIELD_RESULT_OK_DELETE_DATABASE] && data[Type.FIELD_RESULT_OK_DELETE_CACHE]){
-                        data[Type.FIELD_RESULT_OK_DELETE] = true;
+                    if(data[Data_Type.RESULT_OK_DELETE_DATABASE] && data[Data_Type.RESULT_OK_DELETE_CACHE]){
+                        data[Data_Type.RESULT_OK_DELETE] = true;
                     }
                 }
             ]).then(result => {
@@ -476,15 +476,15 @@ class Adapter {
             });
         });
     }
-    static get_count_item_list = (database,data_type,filter) => {
+    static get_count_item_list = (database,table,filter) => {
         return new Promise((callback) => {
             let error = null;
             let item_data = {};
             async.series([
                 async function(call) {
-                    const [error,data] = await Mongo.get_count_item_list(database,data_type,filter);
+                    const [error,data] = await Mongo.get_count_item_list(database,table,filter);
                     item_data.count = data;
-                    item_data.data_type = data_type;
+                    item_data.table = table;
                     item_data.filter = filter;
                 },
             ]).then(result => {
@@ -495,12 +495,12 @@ class Adapter {
             });
         });
     }
-    static post_bulk=(database,cache,data_type,item_data_list) => {
+    static post_bulk=(database,cache,table,item_data_list) => {
         return new Promise((callback) => {
             let data ={result_OK:false};
             async.series([
                 async function(call){
-                    const [biz_error,biz_data] = await post_bulk_main(database,data_type,item_data_list);
+                    const [biz_error,biz_data] = await post_bulk_main(database,table,item_data_list);
                     if(biz_data.result_OK){
                         data = biz_data;
                     }
@@ -513,11 +513,11 @@ class Adapter {
             });
         });
     }
-    static get_cache_item_attr_key = (data_type,id,key) => {
-        return data_type + "_" + key + "_" + String(id);
+    static get_cache_item_attr_key = (table,id,key) => {
+        return table + "_" + key + "_" + String(id);
     }
-    static get_cache_item_attr_list_key = (data_type,id) => {
-        return data_type+"_aik_"+String(id);
+    static get_cache_item_attr_list_key = (table,id) => {
+        return table+"_aik_"+String(id);
     }
 }
 module.exports = {

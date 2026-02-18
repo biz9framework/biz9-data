@@ -6,10 +6,8 @@ Description: BiZ9 Framework: Data - Test
 */
 const async = require('async');
 const assert = require('node:assert');
-const {Database,Data} = require(".");
-const {Cache} = require('./redis.js');
+const {Data_Logic} = require(".");
 const {Log,Num,Str} = require("biz9-utility");
-const {Type,Data_Logic,Cart_Logic,Order_Logic} = require("/home/think1/www/doqbox/biz9-framework/biz9-logic/source");
 /*
  * availble tests
 - connect
@@ -40,8 +38,8 @@ describe('connect', function(){ this.timeout(25000);
         let data = {};
         async.series([
             async function(call){
-                const [biz_error,biz_data] = await Database.get(DATA_CONFIG);
-                database = biz_data;
+                //const [biz_error,biz_data] = await Database.get(DATA_CONFIG);
+                //database = biz_data;
             },
             /*
 		    async function(call) {
@@ -50,26 +48,33 @@ describe('connect', function(){ this.timeout(25000);
 			},
             */
             async function(call){
+                class Project_Table{
+                    static PRODUCT='product_biz';
+                }
                 //-->
                 let print_test = true;
+                // -- TEST -- //
+                let search = Data_Logic.get_search(Project_Table.PRODUCT,{},{},1,0,{});
+                Log.w('my_search',search);
+
                 // -- POST-START --//
-                /*
-                //let parent = Data_Logic.get(Type.DATA_PRODUCT,0,{test:true});
-                let parent = Data_Logic.get(Type.DATA_PRODUCT,'405');
+                //let parent = Data_Logic.get(Project_Table.PRODUCT,0,{count:3,parent:my_parent,user:my_user,data:{cool:'apple1',sauce:'butter'}});
+                //Log.w('11_parent',parent);
+                //let parent = Data_Logic.get(Type.DATA_PRODUCT,'405');
                 //const [biz_error,biz_data] = await Data.post(database,Type.DATA_PRODUCT,parent);
                 //let groupj= Data_Logic.get(Type.DATA_GROUP,0,{test:true,parent:parent});
                 //let group = Data_Logic.get(Type.DATA_GROUP,'289',{test:true,parent:parent});
                 //const [biz_error,biz_data] = await Data.post(database,Type.DATA_GROUP,group);
                 //let blank = Data_Logic.get(Type.DATA_BLANK,0,{test:true,parent:parent});
-                let blank = Data_Logic.get(Type.DATA_BLANK,'908',{test:true,parent:parent});
+                //let blank = Data_Logic.get(Type.DATA_BLANK,'908',{test:true,parent:parent});
                 //const [biz_error,biz_data] = await Data.post(database,Type.DATA_BLANK,blank);
-                let image = Data_Logic.get(Type.DATA_IMAGE,0,{test:true,parent:blank});
-                const [biz_error,biz_data] = await Data.post(database,Type.DATA_IMAGE,image);
+                //let image = Data_Logic.get(Type.DATA_IMAGE,0,{test:true,parent:blank});
+                //const [biz_error,biz_data] = await Data.post(database,Type.DATA_IMAGE,image);
                 //let item_list = Data_Logic.get(Type.DATA_PRODUCT,0,{test:true,count:3});
                 //const [biz_error,biz_data] = await Data.post_items(database,item_list);
-                */
                 // -- POST-END --//
                 //-- GET  START --//
+                /*
                 //let option = {field:{title:1,id:1}};
                 let foreign_sub_1 = Data_Logic.get_search_foreign(Type.SEARCH_ITEMS,Type.DATA_IMAGE,Type.FIELD_PARENT_ID,Type.FIELD_ID,{title:'foreign_sub_image_1'});
                 //let foreign_sub_2 = Data_Logic.get_search_foreign(Type.SEARCH_ITEMS,Type.DATA_SERVICE,Type.FIELD_PARENT_ID,Type.FIELD_ID,{title:'foreign_service_1'});
@@ -94,6 +99,7 @@ describe('connect', function(){ this.timeout(25000);
                 //Log.w('88_biz_data',biz_data[0].groups_cool);
                 //Log.w('88_biz_data',biz_data[1].groups_cool);
                 //Log.w('88_biz_data',biz_data[0].groups_cool[0]);
+                */
                 //-- GET  END --//
                 //-->
                 //-- SEARCH START --//

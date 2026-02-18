@@ -6,7 +6,7 @@ Description: BiZ9 Framework: Data - Join
 */
 const async = require('async');
 const {Log,Str,Num,Obj,DateTime}=require("/home/think1/www/doqbox/biz9-framework/biz9-utility/source");
-const {Type,Data_Logic}=require("/home/think1/www/doqbox/biz9-framework/biz9-logic/source");
+const {Value_Type,Data_Logic}=require(".");
 const {Adapter}  = require('./adapter.js');
 const {Foreign} = require('./foreign.js');
 class Join {
@@ -24,7 +24,7 @@ class Join {
                 function(call){
                     function get_data(search_item) {
                         return new Promise((resolve) => {
-                            if(search_item.type == Type.SEARCH_ITEMS){
+                            if(search_item.type == Value_Type.ITEMS){
                                 search_item.data[search_item.title];
                                 let search = Data_Logic.get_search(search_item.search.data_type,search_item.search.filter,search_item.search.sort_by,search_item.search.page_current,search_item.search.page_size);
                                 let join_option = {field:search_item.field,distinct:search_item.distinct};
@@ -35,7 +35,7 @@ class Join {
                                         search_item.data[search_item.title+'_item_count'] = item_count;
                                         search_item.data[search_item.title+'_page_count'] = page_count;
                                         search_item.data[search_item.title+'_search'] = search;
-                                        search_item.data[Type.FIELD_ITEMS] = items;
+                                        search_item.data[Value_Type.ITEMS] = items;
                                     }
                                     resolve();
                                 }).catch(err => {
@@ -43,7 +43,7 @@ class Join {
                                     error=Log.append(error,err);
                                 });
                             }
-                            else if(search_item.type == Type.SEARCH_COUNT){
+                            else if(search_item.type == Value_Type.COUNT){
                                 let search = Data_Logic.get_search(search_item.search.data_type,search_item.search.filter,search_item.search.sort_by,search_item.search.page_current,search_item.search.page_size);
                                 let join_option = {field:search_item.field};
                                 Adapter.get_count_item_list(database,search.data_type,search.filter).then(([biz_error,biz_data])=>{
@@ -58,7 +58,7 @@ class Join {
                                     error=Log.append(error,err);
                                 });
                             }
-                            else if(search_item.type == Type.SEARCH_ONE){
+                            else if(search_item.type == Value_Type.ONE){
                                 let search = Data_Logic.get_search(search_item.search.data_type,search_item.search.filter,search_item.search.sort_by,search_item.search.page_current,search_item.search.page_size);
                                 let join_option = {field:search_item.field};
                                 Adapter.get_item_list(database,cache,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,join_option).then(([biz_error,items,item_count,page_count])=>{
@@ -107,7 +107,7 @@ class Join {
                     }
                     const run = async () => {
                         for(const search_item of join_search_items){
-                            if(search_item.type != Type.SEARCH_COUNT){
+                            if(search_item.type != Value_Type.COUNT){
                                 const biz_data = await get_foreign_data(database,cache,search_item.data[search_item.title],search_item);
                             }
                         }
@@ -127,8 +127,8 @@ class Join {
     };
     static get_search = (join_item) => {
         return {
-            type : join_item.type ?  join_item.type : Type.SEARCH_ITEMS,
-            search : join_item.search ? join_item.search : Data_Logic.get_search(Type.DATA_BLANK,{},{},1,0),
+            type : join_item.type ?  join_item.type : Value_Type.ITEMS,
+            search : join_item.search ? join_item.search : Data_Logic.get_search(Data_Table.BLANK,{},{},1,0),
             field : join_item.field ? join_item.field : null,
             distinct : join_item.distinct ? join_item.distinct : null,
             title : join_item.title ? join_item.title : Str.get_title_url(Data_Logic.get_data_type_by_type(join_item.search.data_type,{plural:true})),
