@@ -52,25 +52,28 @@ describe('connect', function(){ this.timeout(25000);
                 let print_test = true;
                 // -- TEST -- //
                 // -- POST-START --//
-
+                /*
                 let option = {};
-                let parent = Data_Logic.get(Project_Table.PRODUCT,0,{data:{field_1:'value_'+Num.get_id(),field_2:'value_'+Num.get_id()}});
-                //let group = Data_Logic.get(Table.GROUP,0,{parent:parent,title:'Group '+Num.get_id()});
+                //let parent = Data_Logic.get(Project_Table.PRODUCT,0,{data:{field_1:'value_'+Num.get_id(),field_2:'value_'+Num.get_id()}});
+                let parent = Data_Logic.get(Project_Table.PRODUCT,'183');
+                let group = Data_Logic.get(Table.GROUP,0,{parent:parent,title:'Group '+Num.get_id()});
+                //const [error,biz_data] = await Data.post(database,parent.table,parent,option);
+                const [error,biz_data] = await Data.post(database,group.table,group,option);
                 //Log.w('22_group',group);
                 //let blank = Data_Logic.get(Project_Table.BLANK,0,{data:{field_1:'value_'+Num.get_id(),field_2:'value_'+Num.get_id()}});
-                const [error,biz_data] = await Data.post(database,parent.table,parent,option);
                 //let blank_items = Data_Logic.get(Project_Table.BLANK,0,{count:2,data:{field_1:'value_'+Num.get_id(),field_2:'value_'+Num.get_id()}});
                 //const [error,biz_data] = await Data.post_items(database,blank_items);
-
+                */
                 // -- POST-END --//
                 //-- GET  START --//
-                /*
+
                 let join_search_1 = Data_Logic.get_search(Project_Table.BLANK,{},{},1,0,{});
                 let join_1 = Data_Logic.get_join(Value_Type.ITEMS,join_search_1);
-                let option = {joins:[join_1]};
-                let parent = Data_Logic.get(Project_Table.PRODUCT,'507');
+                let group_1 = Data_Logic.get_group();
+                let option ={groups:[group_1]};/*{joins:[join_1]};*/
+                let parent = Data_Logic.get(Project_Table.PRODUCT,'183');
                 const [error,biz_data] = await Data.get(database,parent.table,parent.id,option);
-                */
+
                 //-- GET  END --//
                 //-->
 

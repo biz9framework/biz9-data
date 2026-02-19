@@ -10,7 +10,7 @@ const {Data_Logic}=require("/home/think1/www/doqbox/biz9-framework/biz9-logic/so
 const {Log,Str,Obj}=require("/home/think1/www/doqbox/biz9-framework/biz9-utility/source");
 const {Cache} = require('./redis.js');
 //const {Foreign} = require('./foreign.js');
-//const {Group} = require('./group.js');
+const {Group} = require('./group.js');
 const {Join} = require('./join.js');
 const {Adapter}  = require('./adapter.js');
 class Database {
@@ -106,7 +106,7 @@ class Database {
     }
 }
 class Data {
-    //9_portal_post
+    //9_data_post
     static post = async (database,table,data,option) => {
         /* option params
          * Fields
@@ -166,7 +166,6 @@ class Data {
                         if(biz_error){
                             error=Log.append(error,biz_error);
                         }else{
-                            Log.w('33_post',biz_data);
                             data = biz_data;
                             call();
                         }
@@ -201,7 +200,7 @@ class Data {
             });
         });
     };
-    //9_portal_post_items - 9_post_items
+    //9_data_post_items - 9_post_items
     static post_items = async (database,data_items) => {
         /* option params
          * n/a
@@ -231,7 +230,7 @@ class Data {
         });
     };
 
-    //9_portal_delete_search
+    //9_data_delete_search
     static delete_search = async (database,table,filter,option) => {
         /* option params
          * n/a
@@ -311,7 +310,7 @@ class Data {
             });
         });
     };
-      //9_portal_count
+      //9_data_count
         static count = async (database,table,filter) => {
             /* option params
              * n/a
@@ -427,9 +426,7 @@ class Data {
                 });
             });
         };
-
-
-    //9_portal_get
+    //9_data_get
     static get = async(database,table,id,option) => {
         /* Options
          * ID
@@ -583,7 +580,7 @@ class Data {
             });
         });
     };
-    //9_portal_search
+    //9_data_search
     static search = (database,table,filter,sort_by,page_current,page_size,option) => {
         /* OPTIONS - START
          * Fields
@@ -721,7 +718,7 @@ class Data {
             });
         });
     };
-    //9_portal_delete
+    //9_data_delete
     static delete = async(database,table,id,option) => {
         /*
          * Params
@@ -781,10 +778,7 @@ class Data {
             });
         });
     };
-
-
-
-    //9_portal_post_bulk
+    //9_data_post_bulk
     static post_bulk = async (database,table,items) => {
         /* option params
          * n/a

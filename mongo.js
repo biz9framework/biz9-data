@@ -85,7 +85,7 @@ class Mongo {
     static post_item = (database,table,item,option) => {
         return new Promise((callback) => {
             let error = null;
-            option = option ? option : {};
+            option = !Obj.check_is_empty(option) ? option : {};
             if (Str.check_is_null(item.id)){//insert
                 //item[Type.FIELD_ID] = Str.get_guid();
                 item[Field.ID] = String(Num.get_id(999));
