@@ -6,7 +6,7 @@ Description: BiZ9 Framework: Data - Mongo
 */
 const async = require('async');
 const {Num,Log,Str,Obj,DateTime} = require("/home/think1/www/doqbox/biz9-framework/biz9-utility/source");
-const {Table_Field} = require(".");
+const {Field} = require("/home/think1/www/doqbox/biz9-framework/biz9-logic/source");
 const {MongoClient} = require("mongodb");
 let client_db = {};
 class Mongo {
@@ -47,7 +47,7 @@ class Mongo {
             });
         });
     }
-    static get_item = (database,data_type,id,option) => {
+    static get_item = (database,table,id,option) => {
         return new Promise((callback) => {
             let error = null;
             let data = null;
@@ -55,7 +55,7 @@ class Mongo {
                 id = '0';
             }
             if(Mongo.check_database(database)){
-                database.collection(data_type).findOne({id:String(id)}).then((data) => {
+                database.collection(table).findOne({id:String(id)}).then((data) => {
                     if(data){
                         delete data['_id'];
                         data = data;
@@ -82,17 +82,17 @@ class Mongo {
     static check_db_client_connected = (database) => {
         return !!database && !!database.topology && !!database.topology.isConnected()
     }
-    static post_item = (database,data_type,item,option) => {
+    static post_item = (database,table,item,option) => {
         return new Promise((callback) => {
             let error = null;
             option = option ? option : {};
             if (Str.check_is_null(item.id)){//insert
                 //item[Type.FIELD_ID] = Str.get_guid();
-                item[Table_Field.ID] = String(Num.get_id(999));
-                item[Table_Field.DATE_CREATE] = DateTime.get();
-                item[Table_Field.DATE_SAVE] = DateTime.get();
+                item[Field.ID] = String(Num.get_id(999));
+                item[Field.DATE_CREATE] = DateTime.get();
+                item[Field.DATE_SAVE] = DateTime.get();
                 if(Mongo.check_database(database)){
-                    database.collection(data_type).insertOne(item).then((data) => {
+                    database.collection(table).insertOne(item).then((data) => {
                         delete item['_id'];
                         callback([error,item]);
                     }).catch(error => {
@@ -104,7 +104,7 @@ class Mongo {
                 item.date_save = DateTime.get();
                 if(!option.overwrite){
                     delete item['_id'];
-                    database.collection(data_type).updateOne({id:item.id},{$set: item}).then((data) => {
+                    database.collection(table).updateOne({id:item.id},{$set: item}).then((data) => {
                         callback([error,item]);
                     }).catch(error => {
                         Log.error("DATA-MONGO-BASE-UPDATE-ITEM-BASE-ERROR",error);
@@ -112,7 +112,7 @@ class Mongo {
                     });
                 }else{
                     delete item['_id'];
-                    database.collection(data_type).replaceOne({id:item.id},item).then((data) => {
+                    database.collection(table).replaceOne({id:item.id},item).then((data) => {
                         callback([error,item]);
                     }).catch(error => {
                         Log.error("DATA-MONGO-BASE-UPDATE-ITEM-BASE-ERROR",error);
@@ -122,7 +122,7 @@ class Mongo {
             }
         });
     }
-    static post_bulk_base = (database,data_type,data_list) => {
+    static post_bulk_base = (database,table,data_list) => {
         return new Promise((callback) => {
             let error = null;
             let data = {result_OK:false};
@@ -137,7 +137,7 @@ class Mongo {
 
             if(Mongo.check_database(database)){
                 try {
-                    database.collection(data_type).bulkWrite(bulk_list,
+                    database.collection(table).bulkWrite(bulk_list,
                         { ordered: false } )
                 } catch( error ) {
                     Log.w('bulk_write_error',error);
@@ -148,12 +148,12 @@ class Mongo {
             }
         });
     }
-    static delete_item = (database,data_type,id,option) => {
+    static delete_item = (database,table,id,option) => {
         return new Promise((callback) => {
             let error = null;
             let data = null;
             if(Mongo.check_database(database)){
-                database.collection(data_type).deleteMany({id:id}).then((data) => {
+                database.collection(table).deleteMany({id:id}).then((data) => {
                     if(data){
                         data = data;
                     };
@@ -165,12 +165,12 @@ class Mongo {
             }
         });
     }
-    static delete_item_list = (database,data_type,filter) => {
+    static delete_item_list = (database,table,filter) => {
         return new Promise((callback) => {
             let error = null;
             let data = null;
             if(Mongo.check_database(database)){
-                database.collection(data_type).deleteMany(filter).then((data) => {
+                database.collection(table).deleteMany(filter).then((data) => {
                     if(data){
                         data = data;
                     }
@@ -182,7 +182,7 @@ class Mongo {
             }
         });
     }
-    static get_id_list = (database,data_type,filter,sort_by,page_current,page_size,option) => {
+    static get_id_list = (database,table,filter,sort_by,page_current,page_size,option) => {
         return new Promise((callback) => {
             let error = null;
             let total_count = 0;
@@ -192,7 +192,7 @@ class Mongo {
                 function(call) {
                     if(page_size>0){
                         if(Mongo.check_database(database)){
-                            database.collection(data_type).countDocuments(filter).then((data) => {
+                            database.collection(table).countDocuments(filter).then((data) => {
                                 if(data){
                                     total_count = data;
                                 }
@@ -213,7 +213,7 @@ class Mongo {
                     if(Mongo.check_database(database)){
                         page_current = parseInt(page_current);
                         page_size = parseInt(page_size);
-                        database.collection(data_type).find(filter).sort(sort_by).collation({locale:"en_US",numericOrdering:true}).skip(page_current>0?((page_current-1)*page_size):0).limit(page_size).project({id:1,data_type:1,_id:0}).toArray().then((data) => {
+                        database.collection(table).find(filter).sort(sort_by).collation({locale:"en_US",numericOrdering:true}).skip(page_current>0?((page_current-1)*page_size):0).limit(page_size).project({id:1,table:1,_id:0}).toArray().then((data) => {
                             if(data){
                                 data_list = data;
                             }
@@ -242,11 +242,11 @@ class Mongo {
             });
         });
     }
-    static get_count_item_list = async (database,data_type,filter,option) => {
+    static get_count_item_list = async (database,table,filter,option) => {
         return new Promise((callback) => {
             let error = null;
             let data = 0;
-            database.collection(data_type).countDocuments(filter).then((data) => {
+            database.collection(table).countDocuments(filter).then((data) => {
                 if(data){
                     data = data;
                 }

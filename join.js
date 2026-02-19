@@ -6,7 +6,7 @@ Description: BiZ9 Framework: Data - Join
 */
 const async = require('async');
 const {Log,Str,Num,Obj,DateTime}=require("/home/think1/www/doqbox/biz9-framework/biz9-utility/source");
-const {Value_Type,Data_Logic}=require(".");
+const {Value_Type,Data_Logic}=require("/home/think1/www/doqbox/biz9-framework/biz9-logic/source");
 const {Adapter}  = require('./adapter.js');
 const {Foreign} = require('./foreign.js');
 class Join {
@@ -16,19 +16,21 @@ class Join {
             let join_search_items = [];
             async.series([
                 function(call){
+                    console.log('333333');
                     for(const option_join of option.joins){
                         join_search_items.push(Join.get_search(option_join));
                     }
                     call();
                 },
                 function(call){
+                    console.log('4444444444');
                     function get_data(search_item) {
                         return new Promise((resolve) => {
                             if(search_item.type == Value_Type.ITEMS){
                                 search_item.data[search_item.title];
-                                let search = Data_Logic.get_search(search_item.search.data_type,search_item.search.filter,search_item.search.sort_by,search_item.search.page_current,search_item.search.page_size);
+                                let search = Data_Logic.get_search(search_item.search.table,search_item.search.filter,search_item.search.sort_by,search_item.search.page_current,search_item.search.page_size);
                                 let join_option = {field:search_item.field,distinct:search_item.distinct};
-                                Adapter.get_item_list(database,cache,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,join_option).then(([biz_error,items,item_count,page_count])=>{
+                                Adapter.get_item_list(database,cache,search.table,search.filter,search.sort_by,search.page_current,search.page_size,join_option).then(([biz_error,items,item_count,page_count])=>{
                                     if(biz_error){
                                         error=Log.append(error,biz_error);
                                     }else{
@@ -44,9 +46,9 @@ class Join {
                                 });
                             }
                             else if(search_item.type == Value_Type.COUNT){
-                                let search = Data_Logic.get_search(search_item.search.data_type,search_item.search.filter,search_item.search.sort_by,search_item.search.page_current,search_item.search.page_size);
+                                let search = Data_Logic.get_search(search_item.search.table,search_item.search.filter,search_item.search.sort_by,search_item.search.page_current,search_item.search.page_size);
                                 let join_option = {field:search_item.field};
-                                Adapter.get_count_item_list(database,search.data_type,search.filter).then(([biz_error,biz_data])=>{
+                                Adapter.get_count_item_list(database,search.table,search.filter).then(([biz_error,biz_data])=>{
                                     if(biz_error){
                                         error=Log.append(error,biz_error);
                                     }else{
@@ -59,13 +61,13 @@ class Join {
                                 });
                             }
                             else if(search_item.type == Value_Type.ONE){
-                                let search = Data_Logic.get_search(search_item.search.data_type,search_item.search.filter,search_item.search.sort_by,search_item.search.page_current,search_item.search.page_size);
+                                let search = Data_Logic.get_search(search_item.search.table,search_item.search.filter,search_item.search.sort_by,search_item.search.page_current,search_item.search.page_size);
                                 let join_option = {field:search_item.field};
-                                Adapter.get_item_list(database,cache,search.data_type,search.filter,search.sort_by,search.page_current,search.page_size,join_option).then(([biz_error,items,item_count,page_count])=>{
+                                Adapter.get_item_list(database,cache,search.table,search.filter,search.sort_by,search.page_current,search.page_size,join_option).then(([biz_error,items,item_count,page_count])=>{
                                     if(biz_error){
                                         error=Log.append(error,biz_error);
                                     }else{
-                                        let one_item = items.length>0 ? items[0] : Data_Logic.get_not_found(search_item.search.data_type,0);
+                                        let one_item = items.length>0 ? items[0] : Data_Logic.get_not_found(search_item.search.table,0);
                                         search_item.data[search_item.title] = one_item;
                                         resolve();
                                     }
@@ -87,6 +89,9 @@ class Join {
                 },
                 //foreign
                 function(call){
+                    call();
+                    /*
+                    console.log('555555555');
                     function get_foreign_data(database,cache,items,search_item) {
                         return new Promise((resolve) => {
                             Foreign.get_data(database,cache,items,{foreigns:search_item.foreigns}).then(([biz_error,biz_data])=>{
@@ -115,6 +120,7 @@ class Join {
                     run().then(() => {
                         call();
                     });
+                    */
                 },
             ]).then(result => {
                 callback([error,join_search_items]);
@@ -131,7 +137,7 @@ class Join {
             search : join_item.search ? join_item.search : Data_Logic.get_search(Data_Table.BLANK,{},{},1,0),
             field : join_item.field ? join_item.field : null,
             distinct : join_item.distinct ? join_item.distinct : null,
-            title : join_item.title ? join_item.title : Str.get_title_url(Data_Logic.get_data_type_by_type(join_item.search.data_type,{plural:true})),
+            title : join_item.title ? join_item.title : Str.get_title_url(Data_Logic.get_data_type_by_type(join_item.search.table,{plural:true})),
             foreigns : join_item.foreigns ? join_item.foreigns : [],
             data : {},
             foreign_data : {}

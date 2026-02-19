@@ -6,9 +6,8 @@ Description: BiZ9 Framework: Data - Group
 */
 const async = require('async');
 const {Log,Str,Num,Obj,DateTime}=require("/home/think1/www/doqbox/biz9-framework/biz9-utility/source");
-const {Data_Table,Data_Logic}=require(".");
+const {Value_Type,Data_Logic}=require("/home/think1/www/doqbox/biz9-framework/biz9-logic/source");
 const {Adapter}  = require('./adapter.js');
-const {Foreign} = require('./foreign.js');
 class Group {
     static get_data = (database,cache,data_items,option) => {
         return new Promise((callback) => {

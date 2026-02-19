@@ -7,7 +7,7 @@ Description: BiZ9 Framework: Data - Adapter
 const async = require('async');
 const {Mongo}= require("./mongo.js");
 const {Cache} = require('./redis.js');
-const {Data_Logic}=require(".");
+const {Data_Logic,Title,Field,Type}=require("/home/think1/www/doqbox/biz9-framework/biz9-logic/source");
 const {Log,Str,Num,Obj}=require("/home/think1/www/doqbox/biz9-framework/biz9-utility/source");
 class Adapter {
     static get_database=(data_config,option)=>{
@@ -41,7 +41,7 @@ class Adapter {
                 function(call){
                     async.forEachOf(item_data_list,(item,key,go)=>{
                         for(property in item[key]){
-                            if(property!=Table_Field.ID&&property!=Table_Field.FIELD_DATA_TYPE){
+                            if(property!=Field.ID&&property!=Field.TABLE){
                                 if(!item[key][property]){
                                     delete item[key][property];
                                 }
@@ -84,7 +84,8 @@ class Adapter {
                 },
                 function(call){
                     for(const item of item_data_list) {
-                        item.source=Data_Title.SOURCE_DATABASE;
+                        item.source=Title.SOURCE_DATABASE;
+                        delete item._id;
                         item_data_new_list.push(item);
                     }
                     call();
@@ -106,7 +107,7 @@ class Adapter {
                 },
                 function(call){
                     if(item_data.id){
-                        item_data.source=Data_Title.SOURCE_DATABASE;
+                        item_data.source=Title.SOURCE_DATABASE;
                     }
                     call();
                 },
@@ -116,7 +117,7 @@ class Adapter {
             ]).then(result => {
                 callback([error,item_data]);
             }).catch(error => {
-                Log.error("Data-Adapter-Update-Item-Adapter-END",error);
+                Log.error("Data-Adapter-Update-Item-Adapter-2",error);
                 callback([error,[]]);
             });
         });
@@ -156,7 +157,7 @@ class Adapter {
                         item_data_list = item_data_list.filter((obj, index, self) =>
                             index === self.findIndex((t) => t[option.distinct.field] === obj[option.distinct.field])
                         );
-                        let distinct_sort_by = option.distinct.sort_by ? option.distinct.sort_by : Data_Type.SORT_BY_ASC;
+                        let distinct_sort_by = option.distinct.sort_by ? option.distinct.sort_by : Type.SORT_BY_ASC;
                         item_data_list = Obj.sort_list_by_field(item_data_list,option.distinct.field,distinct_sort_by);
                         item_count=item_data_list.length;
                         call();
@@ -207,7 +208,7 @@ class Adapter {
                             data = biz_data[0];
                         }else{
                             data = Data_Logic.get_not_found(table,id);
-                            data.id_field = option.id_field ? option.id_field : Table_Field.ID;
+                            data.id_field = option.id_field ? option.id_field : Field.ID;
                         }
                     }
                 },
@@ -227,7 +228,7 @@ class Adapter {
             async.series([
                 function(call) {
                     for (const prop in item_data) {
-                        if(prop != Table_Field.SOURCE){
+                        if(prop != Field.SOURCE){
                             prop_list.push({title:prop,value:item_data[prop]});
                         }
                     }
@@ -254,9 +255,9 @@ class Adapter {
         return new Promise((callback) => {
             let error = null;
             let data = Data_Logic.get(table,id);
-            data[Data_Type.RESULT_OK_DELETE] = false;
-            data[Data_Type.RESULT_OK_DELETE_CACHE] = false;
-            data[Data_Type.RESULT_OK_DELETE_DATABASE] = false;
+            data[Type.RESULT_OK_DELETE] = false;
+            data[Type.RESULT_OK_DELETE_CACHE] = false;
+            data[Type.RESULT_OK_DELETE_DATABASE] = false;
             async.series([
                 async function(call) {
                     const [biz_error,biz_data] = await Adapter.delete_item_cache_db(database,cache,table,id);
@@ -264,9 +265,9 @@ class Adapter {
                         error = biz_error;
                     }else{
                         data = biz_data;
-                        data[Data_Type.RESULT_OK_DELETE] = true;
-                        data[Data_Type.RESULT_OK_DELETE_CACHE] = true;
-                        data[Data_Type.RESULT_OK_DELETE_DATABASE] = true;
+                        data[Type.RESULT_OK_DELETE] = true;
+                        data[Type.RESULT_OK_DELETE_CACHE] = true;
+                        data[Type.RESULT_OK_DELETE_DATABASE] = true;
                     }
                 },
             ]).then(result => {
@@ -301,7 +302,7 @@ class Adapter {
                             delete data['_id'];
                             item_data = data;
                             const [error,data2] = await Adapter.post_cache_item(cache,table,id,data);
-                            item_data[Data_Type.SOURCE] = Data_Title.SOURCE_DATABASE;
+                            item_data[Type.SOURCE] = Title.SOURCE_DATABASE;
                         }else{
                             item_data  = Data_Logic.get_not_found(table,id);
                         }
@@ -317,7 +318,7 @@ class Adapter {
                                 }
                             }
                         }
-                        item_data[Table_Field.SOURCE] = Data_Title.SOURCE_CACHE;
+                        item_data[Field.SOURCE] = Title.SOURCE_CACHE;
                     }
                 },
                 async function(call) {
@@ -416,7 +417,7 @@ class Adapter {
                 },
                 async function(call){
                     const [error,data] = await Cache.delete_value(cache,Adapter.get_cache_item_attr_list_key(table,id));
-                    item_data.delete_cache_resultOK = true;
+                    item_data[Type.RESULT_OK_DELETE_CACHE] = true;
                     item_data.cache_item_attr_list = Adapter.get_cache_item_attr_list_key(table,id);
                 },
             ]).then(result => {
@@ -433,9 +434,9 @@ class Adapter {
             let cache_key_list = '';
             let cache_string_list = '';
             let data = Data_Logic.get(table,id);
-            data[Data_Type.RESULT_OK_DELETE] = false;
-            data[Data_Type.RESULT_OK_DELETE_CACHE] = false;
-            data[Data_Type.RESULT_OK_DELETE_DATABASE] = false;
+            data[Type.RESULT_OK_DELETE] = false;
+            data[Type.RESULT_OK_DELETE_CACHE] = false;
+            data[Type.RESULT_OK_DELETE_DATABASE] = false;
             async.series([
                 async function(call) {
                     const [biz_error,biz_data] = await Cache.get_value(cache,Adapter.get_cache_item_attr_list_key(table,id));
@@ -454,18 +455,18 @@ class Adapter {
                 async function(call){
                     const [biz_error,biz_data] = await Cache.delete_value(cache,Adapter.get_cache_item_attr_list_key(table,id));
                     if(!error){
-                        data[Data_Type.RESULT_OK_DELETE_CACHE] = true;
+                        data[Type.RESULT_OK_DELETE_CACHE] = true;
                     }
                 },
                 async function(call){
                     const [biz_error,biz_data] = await Mongo.delete_item(database,table,id);
                     if(!biz_error){
-                        data[Data_Type.RESULT_OK_DELETE_DATABASE] = true;
+                        data[Type.RESULT_OK_DELETE_DATABASE] = true;
                     }
                 },
                 async function(call){
-                    if(data[Data_Type.RESULT_OK_DELETE_DATABASE] && data[Data_Type.RESULT_OK_DELETE_CACHE]){
-                        data[Data_Type.RESULT_OK_DELETE] = true;
+                    if(data[Type.RESULT_OK_DELETE_DATABASE] && data[Type.RESULT_OK_DELETE_CACHE]){
+                        data[Type.RESULT_OK_DELETE] = true;
                     }
                 }
             ]).then(result => {

@@ -6,296 +6,814 @@ Description: BiZ9 Framework: Data
 */
 const async = require('async');
 const {Scriptz}=require("biz9-scriptz");
+const {Data_Logic}=require("/home/think1/www/doqbox/biz9-framework/biz9-logic/source");
 const {Log,Str,Obj}=require("/home/think1/www/doqbox/biz9-framework/biz9-utility/source");
-//const {Cache} = require('./redis.js');
+const {Cache} = require('./redis.js');
 //const {Foreign} = require('./foreign.js');
 //const {Group} = require('./group.js');
-//const {Join} = require('./join.js');
-//const {Adapter}  = require('./adapter.js');
-
-class Value_Type {
-    //type - search
-    static COUNT = 'count';
-    static ITEMS = 'items';
-    static ONE = 'one';
-}
-class Table_Field {
-    static DATE_CREATE='date_create';
-    static TABLE='table';
-    static DATE_SAVE='date_save';
-    static ID='id';
-    static ITEM='item';
-    static ITEMS='items';
-    static OBJ='obj';
-    static GROUP='group';
-    static USER='user';
-    static USER_ID = 'user_id';
-    static USER_TABLE='user_table';
-    static PARENT_ID = 'parent_id';
-    static PARENT_TABLE='parent_table';
-    static SOURCE='source';
-    static TITLE='title';
-    static TITLE_URL='title_url';
-}
-class Data_Type {
-    //result
-    static RESULT_OK = 'resultOK';
-    static RESULT_OK_DELETE = 'delete_resultOK';
-    static RESULT_OK_GROUP_DELETE = 'group_delete_resultOK';
-    static RESULT_OK_DELETE_CACHE = 'delete_cache_resultOK';
-    static RESULT_OK_DELETE_DATABASE = 'delete_database_resultOK';
-    //source
-    static SOURCE='source';
-    static SOURCE_TABLE='source_table';
-    static SOURCE_KEY='source_key';
-    static SOURCE_ID='source_id';
-    static SOURCE_PARENT_ID='source_parent_id';
-    //sort_by
-    static SORT_BY_ASC='asc';
-    static SORT_BY_DESC='desc';
-    //data_source
-    static DATA_SOURCE_CLIENT_CACHE="client_cache";
-    static DATA_SOURCE_SERVER_CACHE="server_cache";
-    static DATA_SOURCE_DATABASE="database";
-    static DATA_SOURCE_CLIENT="client";
-    static DATA_SOURCE_SERVER="server";
-    static DATA_SOURCE_NOT_FOUND="not_found";
-}
-class Data_Title {
-    //general
-    static GROUP='Group';
-    static N_A='N/A';
-    //source
-    static SOURCE_DATABASE='Database';
-    static SOURCE_CACHE='Cache';
-    static SOURCE_NOT_FOUND='Not-Found';
-}
-class Data_Table {
-    static BLANK='blank_biz';
-    static GROUP='group_biz';
-}
-class Data_Logic {
-    static get = (table,id,option) => {
-        /* Option
-         * count / 3
-         * parent / {parent_table,parent_id}
-         * user / {user_table,user_id}
-         * data / {}
-        */
-        let data = {table:table,id:id};
-        if(option.data){
-            data = Obj.merge(data,option.data);
-        }
-        if(option.title){
-            data[Table_Field.TITLE] = option.title;
-            data[Table_Field.TITLE_URL] = Str.get_title_url(option.title);
-        }
-        if(option.parent){
-            data[Table_Field.PARENT_TABLE] = option.parent[Table_Field.TABLE];
-            data[Table_Field.PARENT_ID] = option.parent[Table_Field.ID];
-        }
-        if(option.user){
-            data[Table_Field.USER_TABLE] = option.user[Table_Field.TABLE];
-            data[Table_Field.USER_ID] = option.user[Table_Field.ID];
-        }
-        if(option.count){
-            let data_items = [];
-            if(!data.title){
-                data.title = 'Item';
-                data.title_url = Str.get_title_url(data.title);
+const {Join} = require('./join.js');
+const {Adapter}  = require('./adapter.js');
+class Database {
+    static get = async (data_config,option) => {
+        /* return
+         * - n/a
+         * option params
+         * - biz9_config_file
+         *   - source file for data config. / obj / ex. root folder biz9_config.
+         * - app_id
+         *   - database id. / string / ex. project_500
+         */
+        let error=null;
+        let data={};
+        return new Promise((callback) => {
+            option = !Obj.check_is_empty(option) ? option : {biz9_config_file:null,app_id:null};
+            if(option.biz9_config_file==null){
+                option.biz9_config_file=null;
+            }else{
+                data_config = Scriptz.get_biz9_config(option);
             }
-            for(let a = 1; a < option.count+1; a++){
-                const copy = { ...data };
-                copy.title = data.title + " " + a;
-                copy.title_url = Str.get_title_url(copy.title);
-                data_items.push(copy);
+            if(option.app_id){
+                data_config.APP_ID = option.app_id;
             }
-            data = data_items;
-        }
-        return data;
-    };
-    static get_search = (table,filter,sort_by,page_current,page_size,option) => {
-        console.log('aaaaaa');
-        option = !Obj.check_is_empty(option) ? option : {};
-        console.log('bbbb');
-        return {table:table,filter:filter,sort_by:sort_by,page_current:page_current,page_size:page_size,option:option};
-    }
-    static get_group = (option) => {
-        option = !Obj.check_is_empty(option)  ? option : {};
-        let value_type  = option.value_type ? option.value_type : Value_Type.SEARCH_ITEMS;
-        let field = option.field ? option.field : {};
-        let title = option.title ? Str.get_title_url(option.title) : {};
-        let page_current = option.page_current ? option.page_current : 1;
-        let page_size = option.page_size ? option.page_size : 0;
-        let foreigns = option.foreigns ? option.foreigns : [];
-        return {value_type:value_type,field:field,title:title,page_current:page_current,page_size:page_size,foreigns:foreigns};
-    }
-    /*
-    static get_foreign = (value_type,foreign_table,foreign_field,parent_field,option) => {
-        option = !Obj.check_is_empty(option)  ? option : {};
-        value_type = value_type ? value_type : Value_Type.SEARCH_ITEMS;
-        foreign_table = foreign_table ? foreign_table : Str.get_title_url(Data_Logic.get_data_type_by_type(foreign_table,{plural:true}));
-        foreign_field = foreign_field ? foreign_field : Table_Field.PARENT_ID;
-        parent_field = parent_field ? parent_field : parent_field;
-        let field = option.field ? option.field : null;
-        let title = option.title ? Str.get_title_url(option.title) : Str.get_title_url(Data_Logic.get_data_type_by_type(foreign_table,{plural:true}));
-        let page_current = option.page_current ? option.page_current : 1;
-        let page_size = option.page_size ? option.page_size : 0;
-        return {value_type:value_type,foreign_table:foreign_table,foreign_field:foreign_field,parent_field:parent_field,field:field,title:title,page_current:page_current,page_size:page_size};
-    }
-    static get_join = (value_type,search,option) => {
-        option = !Obj.check_is_empty(option)  ? option : {};
-        value_type = value_type ? value_type : Value_Type.SEARCH_ITEMS;
-        search = search ? search : Data_Logic.get_search(Value_Type.DATA_BLANK,{},{},1,0);
-        let field = option.field ? option.field : {};
-        let distinct = option.distinct ? option.distinct : null; //distinct:{field:'title',sort_by:Data_Type.SORT_BY_DESC}
-        let title = option.title ? Str.get_title_url(option.title) : Str.get_title_url(Data_Logic.get_data_type_by_type(search.data,{plural:true}));
-        let foreigns = option.foreigns ? option.foreigns : [];
-        let page_current = option.page_current ? option.page_current : 1;
-        let page_size = option.page_size ? option.page_size : 0;
-        return {value_type:value_type,search:search,field:field,title:title,distinct:distinct,foreigns:foreigns,page_current:page_current,page_size:page_size};
-    }
-    static copy = (table,item,option)=>{
-        let copy_item = Data_Logic.get_new(table,0);
-        option = !Obj.check_is_empty(option)  ? option : {};
-        const keys = Object.keys(item);
-        keys.forEach(key => {
-            if(
-                key!=Data_Field.ID&&
-                key!=Data_Field.SOURCE&&
-                key!=Data_Field.DATE_CREATE&&
-                key!=Data_Field.DATE_SAVE&&
-                key!=Data_Field.OBJ&&
-                key!=Data_Field.USER&&
-                key!=Data_Field.GROUP&&
-                key!=Data_Field.ITEM&&
-                !Obj.check_is_array(item[key])&&
-                Obj.check_is_value(item[key])
-            ){
-                copy_item[key]=item[key];
+            if(data_config.APP_ID==null){
+                error=Log.append(error,"Database Error: Missing app_id.");
             }
-        });
-        return copy_item;
-    };
-    static get_not_found = (table,id,option) =>{
-        option=!Obj.check_is_empty(option)?option:{};
-        if(!table){
-            table = Data_Table.BLANK;
-        }
-        if(!id){
-            id = 0;
-        }
-        let item = Data_Logic.get(table,id);
-        item.id = 0;
-        item.id_key = id;
-        item.title = "Item Not Found";
-        item.title_url = Str.get_title_url(item.title);
-        item.source = Data_Title.SOURCE_NOT_FOUND;
-        return item;
-    };
-    */
-    }
-    class Database {
-        static get = async (data_config,option) => {
-            /* return
-             * - n/a
-             * option params
-             * - biz9_config_file
-             *   - source file for data config. / obj / ex. root folder biz9_config.
-             * - app_id
-             *   - database id. / string / ex. project_500
-             */
-            let error=null;
-            let data={};
-            return new Promise((callback) => {
-                option = !Obj.check_is_empty(option) ? option : {biz9_config_file:null,app_id:null};
-                if(option.biz9_config_file==null){
-                    option.biz9_config_file=null;
+            Adapter.get_database(data_config).then(([biz_error,biz_data])=>{
+                if(biz_error){
+                    error=Log.append(error,biz_error);
                 }else{
-                    data_config = Scriptz.get_biz9_config(option);
+                    biz_data.data_config=data_config;
+                    biz_data.app_id=data_config.APP_ID;
+                    callback([error,biz_data]);
                 }
-                if(option.app_id){
-                    data_config.APP_ID = option.app_id;
+            }).catch(err => {
+                Log.error('Data-Database-Get',err);
+                error=Log.append(error,err);
+            });
+        });
+    }
+    static delete = async (database) => {
+        /* option params
+         * - database
+         *      - connected database. / obj / ex. mongo db connection.
+         * return objects
+         *  - database
+         *      - Disconnect database. / obj / ex. null. dispose db obj.
+         *  - app_id
+         *      - database id. / string / ex. project_500
+         */
+        let error=null;
+        return new Promise((callback) => {
+            Adapter.delete_database(data_config).then(([biz_error,biz_data])=>{
+                if(biz_error){
+                    error=Log.append(error,biz_error);
+                }else{
+                    biz_data.data_config=data_config;
+                    biz_data.app_id=data_config.APP_ID;
+                    callback([err,null]);
                 }
-                if(data_config.APP_ID==null){
-                    error=Log.append(error,"Database Error: Missing app_id.");
-                }
-                Adapter.get_database(data_config).then(([biz_error,biz_data])=>{
+            }).catch(err => {
+                Log.error('Data-Db-Delete',err);
+                error=Log.append(error,err);
+            });
+        });
+    }
+    static info = async (database,option) => {
+        /* return
+         * tbd
+         */
+        return new Promise((callback) => {
+            let data = [];
+            let error = null;
+            option = !Obj.check_is_empty(option) ? option : {};
+            async.series([
+                async function(call){
+                    const collections = await database.listCollections().toArray();
+                    for (const collectionInfo of collections) {
+                        const collectionName = collectionInfo.name;
+                        const collection = database.collection(collectionName);
+                        const count = await collection.estimatedDocumentCount();
+                        data.push({title:collectionName,item_count:count});
+                    }
+                },
+            ]).then(result => {
+                callback([error,data]);
+            }).catch(err => {
+                Log.error("Database-Info",err);
+                callback([err,null]);
+            });
+        });
+    }
+}
+class Data {
+    //9_portal_post
+    static post = async (database,table,data,option) => {
+        /* option params
+         * Fields
+           - overwrite / obj_type. bool / ex. true,false / default. false -- post brand new obj.deleteing old.
+           - reset / obj_type. bool / ex. true,false / default. false -- get update item aka recently saved item.
+           - clean / obj_type. bool / ex. true,false / default. false -- checks and removes any list, groups, etc.
+           - delete_cache / obj_type. bool / ex. true,false / default. false -- clear cache.
+           */
+        return new Promise((callback) => {
+            let error = null;
+            let cache = {};
+            option = !Obj.check_is_empty(option) ? option : {};
+            async.series([
+                async function(call) {
+                    const [biz_error,biz_data] = await Cache.get(database.data_config);
+                    cache = biz_data;
+                },
+                //clean
+                function(call){
+                    if(option.clean){
+                        let new_data = {};
+                        for(const field in data){
+                            if(!Obj.check_is_array(data[field]) &&
+                                !Obj.check_is_array(data[field]) &&
+                                Obj.check_is_value(data[field]) &&
+                                !Str.check_if_str_exist(field,'_item_count') &&
+                                !Str.check_if_str_exist(field,'_page_count'))
+                            {
+                                new_data[field] = data[field];
+                            }
+                        }
+                        data = new_data;
+                        call();
+                    }else{
+                        call();
+                    }
+                },
+                //delete cache item
+                function(call){
+                    if(option.overwrite || option.delete_cache){
+                        Adapter.delete_item_cache(database,cache,table,data.id).then(([biz_error,biz_data])=>{
+                            if(biz_error){
+                                error=Log.append(error,biz_error);
+                            }else{
+                                call();
+                            }
+                        }).catch(err => {
+                            Log.error('Data-Post-Delete-Cache',err);
+                            error=Log.append(error,err);
+                        });
+                    }else{
+                        call();
+                    }
+                },
+                function(call){
+                    Adapter.post_item(database,cache,table,data,option).then(([biz_error,biz_data])=>{
+                        if(biz_error){
+                            error=Log.append(error,biz_error);
+                        }else{
+                            Log.w('33_post',biz_data);
+                            data = biz_data;
+                            call();
+                        }
+                    }).catch(err => {
+                        Log.error('Data-Post-Post-Item-Apapter',err);
+                        error=Log.append(error,err);
+                    });
+                },
+                //reset
+                function(call){
+                    if(option.reset && data.id){
+                        Adapter.get_item(database,cache,data.table,data.id).then(([biz_error,biz_data])=>{
+                            if(biz_error){
+                                error=Log.append(error,biz_error);
+                            }else{
+                                data = biz_data;
+                                call();
+                            }
+                        }).catch(err => {
+                            Log.error('Data-Get-Reset',err);
+                            error=Log.append(error,err);
+                        });
+                    }else{
+                        call();
+                    }
+                },
+            ]).then(result => {
+                callback([error,data]);
+            }).catch(err => {
+                Log.error("Post-Data",err);
+                callback([err,{}]);
+            });
+        });
+    };
+    //9_portal_post_items - 9_post_items
+    static post_items = async (database,data_items) => {
+        /* option params
+         * n/a
+         */
+        return new Promise((callback) => {
+            let cache = {};
+            let error = null;
+            async.series([
+                async function(call) {
+                    const [biz_error,biz_data] = await Cache.get(database.data_config);
+                    cache = biz_data;
+                },
+                async function(call){
+                    const [biz_error,biz_data] = await Adapter.post_item_list(database,cache,data_items);
                     if(biz_error){
                         error=Log.append(error,biz_error);
                     }else{
-                        biz_data.data_config=data_config;
-                        biz_data.app_id=data_config.APP_ID;
-                        callback([error,biz_data]);
+                        data_items = biz_data;
                     }
-                }).catch(err => {
-                    Log.error('Data-Database-Get',err);
-                    error=Log.append(error,err);
-                });
+                },
+            ]).then(result => {
+                callback([error,data_items]);
+            }).catch(err => {
+                Log.error("Post-List-Data",err);
+                callback([err,{}]);
             });
-        }
-        static delete = async (database) => {
+        });
+    };
+
+    //9_portal_delete_search
+    static delete_search = async (database,table,filter,option) => {
+        /* option params
+         * n/a
+         */
+        return new Promise((callback) => {
+            let error = null;
+            let data = Data_Logic.get(table,0,{data:{filter:filter}});
+            let cache = {};
+            data[Data_Type.RESULT_OK_DELETE] = false;
+            let delete_item_query = { $or: [] };
+            let delete_group_list = [];
+            let delete_items = [];
+            option = !Obj.check_is_empty(option) ? option : {delete_group:true};
+            async.series([
+                async function(call) {
+                    const [biz_error,biz_data] = await Cache.get(database.data_config);
+                    cache = biz_data;
+                },
+                function(call){
+                    let search = Data_Logic.get_search(table,filter,{},1,0);
+                    Adapter.get_item_list(database,cache,search.table,search.filter,search.sort_by,search.page_current,search.page_size,option).then(([biz_error,items,item_count,page_count])=>{
+                        if(biz_error){
+                            error=Log.append(error,biz_error);
+                        }else{
+                            if(items.length>0){
+                                delete_items = items;
+                            }
+                            call();
+                        }
+                    }).catch(err => {
+                        Log.error('Data-Search',err);
+                        error=Log.append(error,err);
+                    });
+                },
+                async function(call){
+                    for(const data_item of delete_items){
+                        let query_field = {};
+                        query_field[Table_Field.PARENT_ID] = data_item.id
+                        delete_item_query.$or.push(query_field);
+                        data[Table_Field.RESULT_OK_DELETE] = true;
+                        const [biz_error,biz_data] = await Adapter.delete_item(database,cache,data_item.table,data_item.id);
+                    }
+                },
+                //get_group_ids
+                function(call){
+                    if(option.delete_group && delete_item_query.$or.length > 0){
+                        let search = Data_Logic.get_search(table,{},{},1,0,{field:{id:1,title:1,table:1}});
+                        Adapter.get_item_list(database,cache,search.table,search.filter,search.sort_by,search.page_current,search.page_size,option).then(([biz_error,items,item_count,page_count])=>{
+                            if(biz_error){
+                                error=Log.append(error,biz_error);
+                            }else{
+                                delete_group_list = items;
+                                call();
+                            }
+                        });
+                    }else{
+                        call();
+                    }
+                },
+                async function(call){
+                    if(option.delete_group && delete_item_query.$or.length > 0){
+                        data[Data_Type.RESULT_OK_GROUP_DELETE] = false;
+                        let search = Data_Logic.get_search(Data_Table.GROUP,delete_item_query,{},1,0);
+                        const [biz_error,biz_data] = await Adapter.delete_item_list(database,cache,Data_Table.GROUP,search.filter);
+                        if(biz_error){
+                            error=Log.append(error,biz_error);
+                        }else{
+                            data[Data_Type.RESULT_OK_GROUP_DELETE] = true;
+                        }
+                    }
+                },
+            ]).then(result => {
+                callback([error,data]);
+            }).catch(err => {
+                Log.error("Delete-List-Data",err);
+                callback([err,[]]);
+            });
+        });
+    };
+      //9_portal_count
+        static count = async (database,table,filter) => {
             /* option params
-             * - database
-             *      - connected database. / obj / ex. mongo db connection.
-             * return objects
-             *  - database
-             *      - Disconnect database. / obj / ex. null. dispose db obj.
-             *  - app_id
-             *      - database id. / string / ex. project_500
-             */
-            let error=null;
-            return new Promise((callback) => {
-                Adapter.delete_database(data_config).then(([biz_error,biz_data])=>{
-                    if(biz_error){
-                        error=Log.append(error,biz_error);
-                    }else{
-                        biz_data.data_config=data_config;
-                        biz_data.app_id=data_config.APP_ID;
-                        callback([err,null]);
-                    }
-                }).catch(err => {
-                    Log.error('Data-Db-Delete',err);
-                    error=Log.append(error,err);
-                });
-            });
-        }
-        static info = async (database,option) => {
-            /* return
-             * tbd
+             * n/a
              */
             return new Promise((callback) => {
-                let data = [];
                 let error = null;
-                option = !Obj.check_is_empty(option) ? option : {};
+                let cache = {};
+                let data = {};
                 async.series([
+                    async function(call) {
+                        const [biz_error,biz_data] = await Cache.get(database.data_config);
+                        cache = biz_data;
+                    },
                     async function(call){
-                        const collections = await database.listCollections().toArray();
-                        for (const collectionInfo of collections) {
-                            const collectionName = collectionInfo.name;
-                            const collection = database.collection(collectionName);
-                            const count = await collection.estimatedDocumentCount();
-                            data.push({title:collectionName,item_count:count});
+                        const [biz_error,biz_data] = await Adapter.get_count_item_list(database,cache,table,filter);
+                        if(biz_error){
+                            error=Log.append(error,biz_error);
+                        }else{
+                            data = biz_data.count;
                         }
                     },
                 ]).then(result => {
                     callback([error,data]);
                 }).catch(err => {
-                    Log.error("Database-Info",err);
-                    callback([err,null]);
+                    Log.error("Count-List-Data",err);
+                    callback([err,{}]);
                 });
             });
-        }
-    }
-    module.exports = {
-        Data_Logic
-        //Database
-        //Data
-        /*
-    Data_Table,
-    Data_Type,
-    Data_Title,
-    Value_Type,
-    Table_Field,
-    */
+        };
+
+     //9_data_copy //9_copy
+        static copy = async (database,table,id,option) => {
+            /*
+             * params
+             * - title_tbd
+             *   - description. / obj_type / ex.
+             * options
+             * - copy_group
+             *   - description. / obj_type / ex. true/false
+             * return
+             * - title_tbd
+             *   - description. / obj_type / ex.
+             *
+             */
+            return new Promise((callback) => {
+                let error = null;
+                let cache = {};
+                let data = Data_Logic.get(table,id);
+                let top_data = Data_Logic.get(table,0);
+                let copy_data = Data_Logic.get(table,0);
+                option = !Obj.check_is_empty(option) ? option : {};
+                async.series([
+                    async function(call) {
+                        const [biz_error,biz_data] = await Cache.get(database.data_config);
+                        cache = biz_data;
+                    },
+                    async function(call){
+                        let data_group_option = Data_Logic.get_group();
+                        const [biz_error,biz_data] = await Data.get(database,table,id,{groups:[data_group_option]});
+                        if(biz_error){
+                            error=Log.append(error,biz_error);
+                        }else{
+                            top_data=biz_data;
+                        }
+                    },
+                    //top_item
+                    async function(call){
+                        if(top_data.id){
+                            copy_data = Data_Logic.copy(table,top_data);
+                            copy_data[Table_Field.TITLE] = 'Copy '+top_data[Table_Field.TITLE];
+                            copy_data[Table_Field.TITLE_URL] = 'copy_'+top_data[Table_Field.TITLE_URL];
+                            copy_data[Table_Field.SOURCE_ID] = top_data.id;
+                            copy_data[Table_Field.SOURCE_TABLE] = top_data.table;
+                            const [biz_error,biz_data] = await Data.post(database,copy_data.table,copy_data);
+                            if(biz_error){
+                                error=Log.append(error,biz_error);
+                            }else{
+                                copy_data=biz_data;
+                            }
+                        }else{
+                            copy_data = Data_Logic.get_not_found(table,id);
+                        }
+                    },
+                    async function(call){
+                        if(top_data.id && top_data.groups.length > 0){
+                            copy_data.groups = [];
+                            let post_groups = [];
+                            for(const group of top_data.groups){
+                                let copy_group = Data_Logic.copy(Table_Field.GROUP,group);
+                                copy_group[Table_Field.TITLE] = 'Copy '+group[Table_Field.TITLE];
+                                copy_group[Table_Field.TITLE_URL] = 'copy_'+group[Table_Field.TITLE_URL];
+                                copy_group[Table_Field.SOURCE_ID] = group.id;
+                                copy_group[Table_Field.SOURCE_TABLE] = group.table;
+
+                                copy_group[Table_Field.PARENT_TABLE] = copy_data.table;
+                                copy_group[Table_Field.PARENT_ID] = copy_data.id;
+                                post_groups.push(copy_group);
+                            }
+                            const [biz_error,biz_data] = await Adapter.post_item_list(database,cache,post_groups);
+                            if(biz_error){
+                                error=Log.append(error,biz_error);
+                            }else{
+                                copy_data.groups=biz_data;
+                            }
+                        }
+                    },
+                ]).then(result => {
+                    data = copy_data;
+                    callback([error,data]);
+                }).catch(err => {
+                    Log.error("Copy",err);
+                    callback([err,{}]);
+                });
+            });
+        };
+
+
+    //9_portal_get
+    static get = async(database,table,id,option) => {
+        /* Options
+         * ID
+           - id_field / table. str / ex. title_url / default. id
+         * Cache
+           - cache_delete / table. bool / ex. true/false / default. false
+         * Fields
+           - field / table. obj / ex. {field_show_1:1,field_hide_2:0} / default. throw error
+         * Sub Values ( Page Edit )
+           - sub_value table type. bool / ex. true/false / default. throw error
+         *  Group
+            -- groups / table. obj. group_search / ex. [
+                    {
+                        value_type:Value_Type.SEARCH_ITEMS,Value_Type.SEARCH_ONE,
+                        field:{field_show_1:1,field_hide_2:0},
+                        title:{group_show_1:1,group_hide_2:0},
+                        page_current:1,
+                        page_size:0,
+                    }];
+         *  Foreign
+            -- foreigns / value_type. obj. foreign_search / ex. [
+                    {
+                        value_type:Value_Type.SEARCH_ITEMS,Value_Type.SEARCH_ONE,
+                        foreign_table:Type.DATA_PRODUCT,
+                        foreign_field:'id',
+                        parent_field:'parent_id',
+                        field:{field_show_1:1,field_hide_2:0},
+                        title:'field_title',
+                        page_current:1,
+                        page_size:0,
+                    }];
+         *  Join
+            -- joins / value_type. obj. join_search / ex. [
+                    {
+                        value_type:Value_Type.SEARCH_ITEMS,Value_Type.SEARCH_ONE
+                        search:search_obj,
+                        title:'field_title',
+                        page_current:1,
+                        page_size:0
+                    }];
+                    */
+        return new Promise((callback) => {
+            let error= null;
+            let cache = null;
+            let data = Data_Logic.get(table,id);
+            let field_result_ok = false;
+            option = !Obj.check_is_empty(option) ? option : {};
+            async.series([
+                async function(call) {
+                    const [biz_error,biz_data] = await Cache.get(database.data_config);
+                    cache = biz_data;
+                },
+                function(call){
+                    if(option.cache_delete){
+                        Adapter.delete_item_cache(database,cache,data.table,data.id,option).then(([biz_error,biz_data])=>{
+                            if(biz_error){
+                                error=Log.append(error,biz_error);
+                            }else{
+                                call();
+                            }
+                        }).catch(err => {
+                            Log.error('Data-Delete-Cache',err);
+                            error=Log.append(error,err);
+                        });
+                    }else{
+                        call();
+                    }
+                },
+                //item_by_id
+                function(call){
+                    Adapter.get_item(database,cache,table,id,option).then(([biz_error,biz_data])=>{
+                        if(biz_error){
+                            error=Log.append(error,biz_error);
+                        }else{
+                            data = biz_data;
+                            call();
+                        }
+                    }).catch(err => {
+                        Log.error('Data-Get',err);
+                        error=Log.append(error,err);
+                    });
+                },
+                //9_get_item_join 9_join get_item
+                function(call){
+                    if(option.joins){
+                        Join.get_data(database,cache,option).then(([biz_error,biz_data])=>{
+                            if(biz_error){
+                                error=Log.append(error,biz_error);
+                            }else{
+                                for(const search_item of biz_data){
+                                    data[search_item.title] = search_item.data;
+                                }
+                                call();
+                            }
+                        }).catch(err => {
+                            Log.error('Data-Get-Item-Join',err);
+                            error=Log.append(error,err);
+                        });
+                    }else{
+                        call();
+                    }
+                },
+                //9_group //9_get_group get_item_group
+                    function(call){
+                        if(option.groups && data.id){
+                            Group.get_data(database,cache,[data],option).then(([biz_error,biz_data])=>{
+                                if(biz_error){
+                                    error=Log.append(error,biz_error);
+                                }else{
+                                    data = biz_data[0];
+                                }
+                                call();
+                            }).catch(err => {
+                                Log.error('Data-Item-Group',err);
+                                error=Log.append(error,err);
+                            });
+                        }else{
+                            call();
+                        }
+                    },
+                /*
+                //9_foreigns //9_get_foreigns get_item_foreign
+                    function(call){
+                        if(option.foreigns && data.id){
+                            Foreign.get_data(database,cache,[data],option).then(([biz_error,biz_data])=>{
+                                if(biz_error){
+                                    error=Log.append(error,biz_error);
+                                }else{
+                                    data = biz_data[0];
+                                }
+                                call();
+                            }).catch(err => {
+                                Log.error('Data-Search-Foreign',err);
+                                error=Log.append(error,err);
+                            });
+                        }else{
+                            call();
+                        }
+                    },
+                    async function(call){
+                        if(option.sub_value && data.id){
+                            data.sub_values = Data_Logic.get_sub_value_items(data.sub_values);;
+                        }
+                    },
+                    */
+            ]).then(result => {
+                callback([error,data]);
+            }).catch(err => {
+                Log.error("ERROR-PORTAL-GET",err);
+                callback([error,{}]);
+            });
+        });
     };
+    //9_portal_search
+    static search = (database,table,filter,sort_by,page_current,page_size,option) => {
+        /* OPTIONS - START
+         * Fields
+           - field / table. obj / ex. {field_show_1:1,field_hide_2:0} / default. throw error
+         * Distinct
+           - distinct / table. obj.
+                    {
+                        field:'title'
+                        sort_by:Value_Type.SEARCH_SORT_BY_ASC,
+                    };
+         *  Foreign
+            -- foreigns / value_type. obj items / ex. [
+                    {
+                        value_type:Value_Type.SEARCH_ITEMS,Value_Type.SEARCH_ONE,Value_Type.SEARCH_ONE
+                        foreign_table:Type.DATA_ITEM,
+                        foreign_field:'id',
+                        parent_field:'parent_id',
+                        field:{field_show_1:1,field_hide_2:0},
+                        title:'field_title',
+                    }];
+         *  Join
+            -- joins / value_type. obj. join_search / ex. [
+                    {
+                        value_type:Value_Type.SEARCH_ITEMS,Value_Type.SEARCH_ONE
+                        search:search_obj,
+                        title:'field_title',
+                        page_current:1,
+                        page_size:0
+                    }];
+         *  Group
+            -- groups / value_type. obj. group_search / ex. [
+                    {
+                        value_type:Value_Type.SEARCH_ITEMS,Value_Type.SEARCH_ONE,
+                        field:{field_show_1:1,field_hide_2:0},
+                        title:{group_show_1:1,group_hide_2:0},
+                        page_current:1,
+                        page_size:0,
+                    }];
+
+         * Return
+            - value_type
+            - item_count
+            - page_count
+            - filter
+            - items
+        /* OPTIONS - END*/
+        return new Promise((callback) => {
+            let data = {value_type:value_type,item_count:0,page_count:1,filter:{},items:[]};
+            let cache = null;
+            let error = null;
+            option = !Obj.check_is_empty(option) ? option : {};
+            async.series([
+                async function(call) {
+                    const [biz_error,biz_data] = await Cache.get(database.data_config);
+                    cache = biz_data;
+                },
+                function(call){
+                    let search = Data_Logic.get_search(table,filter,sort_by,page_current,page_size);
+                    Adapter.get_item_list(database,cache,search.table,search.filter,search.sort_by,search.page_current,search.page_size,option).then(([biz_error,items,item_count,page_count])=>{
+                        if(biz_error){
+                            error=Log.append(error,biz_error);
+                        }else{
+                            data.item_count=item_count;
+                            data.page_count=page_count;
+                            data.search=search;
+                            data[Value_Type.FIELD_ITEMS]=items;
+                        }
+                        call();
+                    }).catch(err => {
+                        Log.error('Data-Search',err);
+                        error=Log.append(error,err);
+                    });
+                },
+                //9_get_items_join 9_join get_items
+                function(call){
+                    if(option.joins){
+                        Join.get_data(database,cache,option).then(([biz_error,biz_data])=>{
+                            if(biz_error){
+                                error=Log.append(error,biz_error);
+                            }else{
+                                for(const search_item of biz_data){
+                                    data[search_item.title] = search_item.data;
+                                }
+                                call();
+                            }
+                        }).catch(err => {
+                            Log.error('Data-Get-Item-Join',err);
+                            error=Log.append(error,err);
+                        });
+                    }else{
+                        call();
+                    }
+                },
+                //9_foreigns //9_get_foreigns get_items_foreign
+                function(call){
+                    if(option.foreigns && data[Data_Field.ITEMS].length > 0){
+                        Foreign.get_data(database,cache,data[Table_Field.ITEMS],option).then(([biz_error,biz_data])=>{
+                            if(biz_error){
+                                error=Log.append(error,biz_error);
+                            }else{
+                                data[Data_Field.ITEMS] = biz_data;
+                                call();
+                            }
+                        }).catch(err => {
+                            Log.error('Data-Search-Foreign',err);
+                            error=Log.append(error,err);
+                        });
+                    }else{
+                        call();
+                    }
+                },
+                //9_get_items_group 9_group
+                function(call){
+                    if(option.groups && data[Table_Field.ITEMS].length>0){
+                        Group.get_data(database,cache,data[Table_Field.ITEMS],option).then(([biz_error,biz_data])=>{
+                            if(biz_error){
+                                error=Log.append(error,biz_error);
+                            }else{
+                                data[Table_Field.ITEMS] = biz_data;
+                            }
+                            call();
+                        }).catch(err => {
+                            Log.error('Data-Item-Group',err);
+                            error=Log.append(error,err);
+                        });
+                    }else{
+                        call();
+                    }
+                },
+            ]).then(result => {
+                callback([error,data]);
+            }).catch(err => {
+                Log.error('DATA-PORTAL-SEARCH-ERROR',err);
+                callback([err,[]]);
+            });
+        });
+    };
+    //9_portal_delete
+    static delete = async(database,table,id,option) => {
+        /*
+         * Params
+         * - title
+         *   - description / table / example / required
+         * Option
+         *   - delete_group / bool / true/false / default: false - delete Type.DATA_GROUP
+         * Return
+         * - tbd
+         */
+        return new Promise((callback) => {
+            let error = null;
+            let cache = null;
+            let data = Data_Logic.get(table,id);
+            data[Data_Type.RESULT_OK_DELETE] = false;
+            data[Data_Type.RESULT_OK_DELETE_CACHE] = false;
+            data[Data_Type.RESULT_OK_DELETE_DATABASE] = false;
+            data[Data_Type.RESULT_OK_GROUP_DELETE] = false;
+            option = !Obj.check_is_empty(option) ? option : {delete_group:true};
+            let delete_group_list = [];
+            async.series([
+                async function(call){
+                    const [biz_error,biz_data] = await Cache.get(database.data_config);
+                    cache = biz_data;
+                },
+                async function(call){
+                    const [biz_error,biz_data] = await Adapter.delete_item(database,cache,table,id);
+                    if(biz_error){
+                        error=Log.append(error,biz_error);
+                    }else{
+                        if(biz_data[Data_Type.RESULT_OK_DELETE]){
+                            data[Data_Type.RESULT_OK_DELETE]  = true;
+                            data[Data_Type.RESULT_OK_DELETE_CACHE] = true;
+                            data[Data_Type.RESULT_OK_DELETE_DATABASE] = true;
+                        }
+                    }
+                },
+                async function(call){
+                    if(option.delete_group){
+                        data[Data_Type.RESULT_OK_GROUP_DELETE] = false;
+                        let filter = {parent_id:data.id};
+                        const [biz_error,biz_data] = await Data.delete_search(database,Data_Table.GROUP,filter);
+                        if(biz_error){
+                            error=Log.append(error,biz_error);
+                        }else{
+                            if(biz_data[Data_Type.RESULT_OK_DELETE]){
+                                data[Data_Type.RESULT_OK_GROUP_DELETE] = true;
+                            }
+                        }
+                    }
+                },
+            ]).then(result => {
+                callback([error,data]);
+            }).catch(err => {
+                Log.error("Delete-Item",err);
+                callback([err,{}]);
+            });
+        });
+    };
+
+
+
+    //9_portal_post_bulk
+    static post_bulk = async (database,table,items) => {
+        /* option params
+         * n/a
+         */
+        return new Promise((callback) => {
+            let error = null;
+            let data = Data_Logic.get(table,0);
+            async.series([
+                async function(call){
+                    const [biz_error,biz_data] = await Adapter.post_bulk(database,table,items);
+                    if(biz_error){
+                        error=Log.append(error,biz_error);
+                    }else{
+                        data = biz_data;
+                    }
+                },
+            ]).then(result => {
+                callback([error,data]);
+            }).catch(err => {
+                Log.error("Post-Bulk-Data",err);
+                callback([err,{}]);
+            });
+        });
+    };
+
+
+}
+
+module.exports = {
+    Database,
+    Data
+};
