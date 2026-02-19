@@ -56,31 +56,46 @@ describe('connect', function(){ this.timeout(25000);
                 /*
                 let option = {};
                 // -- parent --
-                //let parent = Data_Logic.get(Project_Table.PRODUCT,0,{data:{field_1:'value_'+Num.get_id(),field_2:'value_'+Num.get_id()}});
-                let parent = Data_Logic.get(Project_Table.BLANK,'635');
-                //const [error,biz_data] = await Data.post(database,parent.table,parent,option);
+                let parent = Data_Logic.get(Project_Table.PRODUCT,0,{data:{field_1:'value_'+Num.get_id(),field_2:'value_'+Num.get_id()}});
+                //let parent = Data_Logic.get(Project_Table.PRODUCT,'643');
+                const [error,biz_data] = await Data.post(database,parent.table,parent,option);
                 // -- sub items --
-                let sub_items = Data_Logic.get(Project_Table.IMAGE,0,{count:3,parent:parent,data:{field_1:'value_'+Num.get_id(),field_2:'value_'+Num.get_id()}});
-                const [error,biz_data] = await Data.post_items(database,sub_items);
-
+                //let sub_items = Data_Logic.get(Project_Table.GROUP,0,{count:3,parent:parent,data:{field_1:'value_'+Num.get_id(),field_2:'value_'+Num.get_id()}});
+                //const [error,biz_data] = await Data.post_items(database,sub_items);
                 */
                 // -- POST-END --//
-                //-- GET  START --//
-
+                //-- GET START --//
+                /*
                 let foreign_2 = Data_Logic.get_foreign(Value_Type.ITEMS,Project_Table.IMAGE,Field.PARENT_ID,Field.ID,{title:'images'});
-
                 let join_search_1 = Data_Logic.get_search(Project_Table.BLANK,{},{},1,0,{});
                 let join_1 = Data_Logic.get_join(Value_Type.ITEMS,join_search_1,{foreigns:[foreign_2]});
                 let foreign_1 = Data_Logic.get_foreign(Value_Type.ITEMS,Project_Table.BLANK,Field.PARENT_ID,Field.ID);
-
                 //let group_1 = Data_Logic.get_group({foreigns:[foreign_2]});//Data_Logic.get_group();
                 let option = {joins:[join_1]};//{groups:[group_1]};//{foreigns:[foreign_1]};
                 let parent = Data_Logic.get(Project_Table.PRODUCT,'643');
                 const [error,biz_data] = await Data.get(database,parent.table,parent.id,option);
-
-                //-- GET  END --//
+                */
+                //-- GET END --//
                 //-->
-                ///next Group 49604 3
+                //-- SEARCH START --//
+                /*
+                let join_search_1 = Data_Logic.get_search(Project_Table.BLANK,{},{},1,0,{});
+                let join_1 = Data_Logic.get_join(Value_Type.ITEMS,join_search_1);
+                let foreign_1 = Data_Logic.get_foreign(Value_Type.ITEMS,Project_Table.BLANK,Field.PARENT_ID,Field.ID);
+                let group_1 = Data_Logic.get_group();
+                let option = {groups:[group_1]};//{joins:[join_1],foreigns:[foreign_1]};
+                let search = Data_Logic.get_search(Project_Table.PRODUCT,{},{},1,0,{});
+                const [error,biz_data] = await Data.search(database,search.table,search.filter,search.sort_by,search.page_current,search.page_size,option);
+                */
+                //-- SEARCH START --//
+                // -- DELETE-START --//
+                let option = {};
+                // -- parent --
+                //let parent = Data_Logic.get(Project_Table.PRODUCT,'643');
+                //const [error,biz_data] = await Data.delete(database,parent.table,parent.id,option);
+                let search = Data_Logic.get_search(Project_Table.PRODUCT,{},{},1,0,{});
+                const [error,biz_data] = await Data.delete_search(database,search.table,search.filter,search.sort_by,search.page_current,search.page_size,option);
+                // -- DELETE-END --//
 
                 //---
                 if(print_test){;

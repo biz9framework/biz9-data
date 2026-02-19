@@ -6,7 +6,7 @@ Description: BiZ9 Framework: Data
 */
 const async = require('async');
 const {Scriptz}=require("biz9-scriptz");
-const {Data_Logic}=require("/home/think1/www/doqbox/biz9-framework/biz9-logic/source");
+const {Data_Logic,Field,Type,Table}=require("/home/think1/www/doqbox/biz9-framework/biz9-logic/source");
 const {Log,Str,Obj}=require("/home/think1/www/doqbox/biz9-framework/biz9-utility/source");
 const {Cache} = require('./redis.js');
 const {Foreign} = require('./foreign.js');
@@ -230,7 +230,7 @@ class Data {
         });
     };
 
-    //9_data_delete_search
+    //9_data_delete_search //9_delete_search
     static delete_search = async (database,table,filter,option) => {
         /* option params
          * n/a
@@ -239,7 +239,7 @@ class Data {
             let error = null;
             let data = Data_Logic.get(table,0,{data:{filter:filter}});
             let cache = {};
-            data[Data_Type.RESULT_OK_DELETE] = false;
+            data[Type.RESULT_OK_DELETE] = false;
             let delete_item_query = { $or: [] };
             let delete_group_list = [];
             let delete_items = [];
@@ -268,9 +268,9 @@ class Data {
                 async function(call){
                     for(const data_item of delete_items){
                         let query_field = {};
-                        query_field[Table_Field.PARENT_ID] = data_item.id
+                        query_field[Field.PARENT_ID] = data_item.id
                         delete_item_query.$or.push(query_field);
-                        data[Table_Field.RESULT_OK_DELETE] = true;
+                        data[Type.RESULT_OK_DELETE] = true;
                         const [biz_error,biz_data] = await Adapter.delete_item(database,cache,data_item.table,data_item.id);
                     }
                 },
@@ -292,13 +292,13 @@ class Data {
                 },
                 async function(call){
                     if(option.delete_group && delete_item_query.$or.length > 0){
-                        data[Data_Type.RESULT_OK_GROUP_DELETE] = false;
-                        let search = Data_Logic.get_search(Data_Table.GROUP,delete_item_query,{},1,0);
-                        const [biz_error,biz_data] = await Adapter.delete_item_list(database,cache,Data_Table.GROUP,search.filter);
+                        data[Type.RESULT_OK_GROUP_DELETE] = false;
+                        let search = Data_Logic.get_search(Table.GROUP,delete_item_query,{},1,0);
+                        const [biz_error,biz_data] = await Adapter.delete_item_list(database,cache,search.table,search.filter);
                         if(biz_error){
                             error=Log.append(error,biz_error);
                         }else{
-                            data[Data_Type.RESULT_OK_GROUP_DELETE] = true;
+                            data[Type.RESULT_OK_GROUP_DELETE] = true;
                         }
                     }
                 },
@@ -380,10 +380,10 @@ class Data {
                     async function(call){
                         if(top_data.id){
                             copy_data = Data_Logic.copy(table,top_data);
-                            copy_data[Table_Field.TITLE] = 'Copy '+top_data[Table_Field.TITLE];
-                            copy_data[Table_Field.TITLE_URL] = 'copy_'+top_data[Table_Field.TITLE_URL];
-                            copy_data[Table_Field.SOURCE_ID] = top_data.id;
-                            copy_data[Table_Field.SOURCE_TABLE] = top_data.table;
+                            copy_data[Field.TITLE] = 'Copy '+top_data[Field.TITLE];
+                            copy_data[Field.TITLE_URL] = 'copy_'+top_data[Field.TITLE_URL];
+                            copy_data[Field.SOURCE_ID] = top_data.id;
+                            copy_data[Field.SOURCE_TABLE] = top_data.table;
                             const [biz_error,biz_data] = await Data.post(database,copy_data.table,copy_data);
                             if(biz_error){
                                 error=Log.append(error,biz_error);
@@ -399,14 +399,14 @@ class Data {
                             copy_data.groups = [];
                             let post_groups = [];
                             for(const group of top_data.groups){
-                                let copy_group = Data_Logic.copy(Table_Field.GROUP,group);
-                                copy_group[Table_Field.TITLE] = 'Copy '+group[Table_Field.TITLE];
-                                copy_group[Table_Field.TITLE_URL] = 'copy_'+group[Table_Field.TITLE_URL];
-                                copy_group[Table_Field.SOURCE_ID] = group.id;
-                                copy_group[Table_Field.SOURCE_TABLE] = group.table;
+                                let copy_group = Data_Logic.copy(Field.GROUP,group);
+                                copy_group[Field.TITLE] = 'Copy '+group[Field.TITLE];
+                                copy_group[Field.TITLE_URL] = 'copy_'+group[Field.TITLE_URL];
+                                copy_group[Field.SOURCE_ID] = group.id;
+                                copy_group[Field.SOURCE_TABLE] = group.table;
 
-                                copy_group[Table_Field.PARENT_TABLE] = copy_data.table;
-                                copy_group[Table_Field.PARENT_ID] = copy_data.id;
+                                copy_group[Field.PARENT_TABLE] = copy_data.table;
+                                copy_group[Field.PARENT_ID] = copy_data.id;
                                 post_groups.push(copy_group);
                             }
                             const [biz_error,biz_data] = await Adapter.post_item_list(database,cache,post_groups);
@@ -580,7 +580,7 @@ class Data {
             });
         });
     };
-    //9_data_search
+    //9_data_search //9_search
     static search = (database,table,filter,sort_by,page_current,page_size,option) => {
         /* OPTIONS - START
          * Fields
@@ -628,7 +628,7 @@ class Data {
             - items
         /* OPTIONS - END*/
         return new Promise((callback) => {
-            let data = {value_type:value_type,item_count:0,page_count:1,filter:{},items:[]};
+            let data = {table:table,item_count:0,page_count:1,filter:{},items:[]};
             let cache = null;
             let error = null;
             option = !Obj.check_is_empty(option) ? option : {};
@@ -646,7 +646,7 @@ class Data {
                             data.item_count=item_count;
                             data.page_count=page_count;
                             data.search=search;
-                            data[Value_Type.FIELD_ITEMS]=items;
+                            data[Field.ITEMS]=items;
                         }
                         call();
                     }).catch(err => {
@@ -654,7 +654,7 @@ class Data {
                         error=Log.append(error,err);
                     });
                 },
-                //9_get_items_join 9_join get_items
+                //9_get_items_join 9_join get_itemm 9_search_join
                 function(call){
                     if(option.joins){
                         Join.get_data(database,cache,option).then(([biz_error,biz_data])=>{
@@ -674,14 +674,14 @@ class Data {
                         call();
                     }
                 },
-                //9_foreigns //9_get_foreigns get_items_foreign
+                //9_foreigns //9_get_foreigns get_items_foreign 9_search_foreign
                 function(call){
-                    if(option.foreigns && data[Data_Field.ITEMS].length > 0){
-                        Foreign.get_data(database,cache,data[Table_Field.ITEMS],option).then(([biz_error,biz_data])=>{
+                    if(option.foreigns && data[Field.ITEMS].length > 0){
+                        Foreign.get_data(database,cache,data[Field.ITEMS],option).then(([biz_error,biz_data])=>{
                             if(biz_error){
                                 error=Log.append(error,biz_error);
                             }else{
-                                data[Data_Field.ITEMS] = biz_data;
+                                data[Field.ITEMS] = biz_data;
                                 call();
                             }
                         }).catch(err => {
@@ -694,12 +694,12 @@ class Data {
                 },
                 //9_get_items_group 9_group
                 function(call){
-                    if(option.groups && data[Table_Field.ITEMS].length>0){
-                        Group.get_data(database,cache,data[Table_Field.ITEMS],option).then(([biz_error,biz_data])=>{
+                    if(option.groups && data[Field.ITEMS].length>0){
+                        Group.get_data(database,cache,data[Field.ITEMS],option).then(([biz_error,biz_data])=>{
                             if(biz_error){
                                 error=Log.append(error,biz_error);
                             }else{
-                                data[Table_Field.ITEMS] = biz_data;
+                                data[Field.ITEMS] = biz_data;
                             }
                             call();
                         }).catch(err => {
@@ -718,7 +718,7 @@ class Data {
             });
         });
     };
-    //9_data_delete
+    //9_data_delete 9_delete
     static delete = async(database,table,id,option) => {
         /*
          * Params
@@ -733,10 +733,10 @@ class Data {
             let error = null;
             let cache = null;
             let data = Data_Logic.get(table,id);
-            data[Data_Type.RESULT_OK_DELETE] = false;
-            data[Data_Type.RESULT_OK_DELETE_CACHE] = false;
-            data[Data_Type.RESULT_OK_DELETE_DATABASE] = false;
-            data[Data_Type.RESULT_OK_GROUP_DELETE] = false;
+            data[Type.RESULT_OK_DELETE] = false;
+            data[Type.RESULT_OK_DELETE_CACHE] = false;
+            data[Type.RESULT_OK_DELETE_DATABASE] = false;
+            data[Type.RESULT_OK_GROUP_DELETE] = false;
             option = !Obj.check_is_empty(option) ? option : {delete_group:true};
             let delete_group_list = [];
             async.series([
@@ -749,26 +749,28 @@ class Data {
                     if(biz_error){
                         error=Log.append(error,biz_error);
                     }else{
-                        if(biz_data[Data_Type.RESULT_OK_DELETE]){
-                            data[Data_Type.RESULT_OK_DELETE]  = true;
-                            data[Data_Type.RESULT_OK_DELETE_CACHE] = true;
-                            data[Data_Type.RESULT_OK_DELETE_DATABASE] = true;
+                        if(biz_data[Type.RESULT_OK_DELETE]){
+                            data[Type.RESULT_OK_DELETE]  = true;
+                            data[Type.RESULT_OK_DELETE_CACHE] = true;
+                            data[Type.RESULT_OK_DELETE_DATABASE] = true;
                         }
                     }
                 },
                 async function(call){
+                    /*
                     if(option.delete_group){
-                        data[Data_Type.RESULT_OK_GROUP_DELETE] = false;
+                        data[Type.RESULT_OK_GROUP_DELETE] = false;
                         let filter = {parent_id:data.id};
-                        const [biz_error,biz_data] = await Data.delete_search(database,Data_Table.GROUP,filter);
+                        const [biz_error,biz_data] = await Data.delete_search(database,Table.GROUP,filter);
                         if(biz_error){
                             error=Log.append(error,biz_error);
                         }else{
-                            if(biz_data[Data_Type.RESULT_OK_DELETE]){
-                                data[Data_Type.RESULT_OK_GROUP_DELETE] = true;
+                            if(biz_data[Type.RESULT_OK_DELETE]){
+                                data[Type.RESULT_OK_GROUP_DELETE] = true;
                             }
                         }
                     }
+                    */
                 },
             ]).then(result => {
                 callback([error,data]);

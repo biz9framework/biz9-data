@@ -153,7 +153,7 @@ class Mongo {
             let error = null;
             let data = null;
             if(Mongo.check_database(database)){
-                database.collection(table).deleteMany({id:id}).then((data) => {
+                database.collection(table).deleteOne({id:id}).then((data) => {
                     if(data){
                         data = data;
                     };
