@@ -27,13 +27,13 @@ class Foreign {
                     const run_data = async (database,cache,search_item) => {
                             await get_search_item_data(database,cache,search_item);
                             for(const data_item of data_items){
-                                if(search_item.type == Value_Type.SEARCH_ITEMS){
+                                if(search_item.type == Value_Type.ITEMS){
                                     const match_items = search_item.items.filter(item_find => item_find[search_item.foreign_field] === data_item[search_item.parent_field]);
                                     data_item[search_item.title] = match_items;
                                 }else if(search_item.type == Value_Type.COUNT){
                                     const match_item = search_item.items.find(item_find => item_find[Table_Field.ID] === data_item[Table_Field.ID]);
                                     data_item[search_item.title] = match_item.data;
-                                }else if(search_item.type == Value_Type.SEARCH_ONE){
+                                }else if(search_item.type == Value_Type.ONE){
                                     data_item[search_item.title] = search_item.items[0];
                                 }
                             }
@@ -123,7 +123,7 @@ class Foreign {
                                         }else if(sub_search_foreign_item.type == Value_Type.COUNT){
                                             const match_item = sub_search_foreign_item.items.find(item_find => item_find[Table_Field.ID] === data_item[Table_Field.ID]);
                                             data_item[sub_search_foreign_item.title] = match_item.data;
-                                        }else if(sub_search_foreign_item.type == Value_Type.SEARCH_ONE){
+                                        }else if(sub_search_foreign_item.type == Value_Type.ONE){
                                             const match_items = sub_search_foreign_item.items.filter(item_find => item_find[sub_search_foreign_item.foreign_field] === data_item[sub_search_foreign_item.parent_field]);
                                             if(match_items.length>0){
                                                 data_item[sub_search_foreign_item.title] = match_items[0];
@@ -152,7 +152,7 @@ class Foreign {
                     let data = null;
                     async.series([
                         async function(call) {
-                            if(search_item.type == Value_Type.SEARCH_ITEMS){
+                            if(search_item.type == Value_Type.ITEMS){
                                 const biz_data = await get_items_data(database,cache,search_item);
                                 for(const item of biz_data){
                                     search_item.items.push(item);
@@ -162,7 +162,7 @@ class Foreign {
                                 for(const item of biz_data){
                                     search_item.items.push(item);
                                 }
-                            }else if(search_item.type == Value_Type.SEARCH_ONE){
+                            }else if(search_item.type == Value_Type.ONE){
                                 search_item.page_size = 1;
                                 const biz_data = await get_items_data(database,cache,search_item);
                                 if(biz_data.length>0){
@@ -173,6 +173,7 @@ class Foreign {
                             }
                         },
                     ]).then(result => {
+                        Log.w('aaa',search_item);
                         callback(search_item);
                     }).catch(err => {
                         Log.error("Blank-Get",err);
@@ -185,7 +186,7 @@ class Foreign {
     //9_search 9_get_search
     static get_search = (foreign_item) => {
         return {
-            type : foreign_item.type ? foreign_item.type : Value_Type.SEARCH_ITEMS,
+            type : foreign_item.type ? foreign_item.type : Value_Type.ITEMS,
             foreign_table : foreign_item.foreign_table,
             foreign_field : foreign_item.foreign_field,
             parent_field : foreign_item.parent_field,

@@ -9,7 +9,7 @@ const {Scriptz}=require("biz9-scriptz");
 const {Data_Logic}=require("/home/think1/www/doqbox/biz9-framework/biz9-logic/source");
 const {Log,Str,Obj}=require("/home/think1/www/doqbox/biz9-framework/biz9-utility/source");
 const {Cache} = require('./redis.js');
-//const {Foreign} = require('./foreign.js');
+const {Foreign} = require('./foreign.js');
 const {Group} = require('./group.js');
 const {Join} = require('./join.js');
 const {Adapter}  = require('./adapter.js');
@@ -547,8 +547,7 @@ class Data {
                             call();
                         }
                     },
-                /*
-                //9_foreigns //9_get_foreigns get_item_foreign
+                    //9_foreigns //9_get_foreigns get_item_foreign
                     function(call){
                         if(option.foreigns && data.id){
                             Foreign.get_data(database,cache,[data],option).then(([biz_error,biz_data])=>{
@@ -566,6 +565,7 @@ class Data {
                             call();
                         }
                     },
+                    /*
                     async function(call){
                         if(option.sub_value && data.id){
                             data.sub_values = Data_Logic.get_sub_value_items(data.sub_values);;
@@ -573,6 +573,7 @@ class Data {
                     },
                     */
             ]).then(result => {
+                Log.w('www',data);
                 callback([error,data]);
             }).catch(err => {
                 Log.error("ERROR-PORTAL-GET",err);

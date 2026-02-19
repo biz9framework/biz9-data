@@ -8,6 +8,7 @@ const async = require('async');
 const {Log,Str,Num,Obj,DateTime}=require("/home/think1/www/doqbox/biz9-framework/biz9-utility/source");
 const {Value_Type,Data_Logic,Field,Table}=require("/home/think1/www/doqbox/biz9-framework/biz9-logic/source");
 const {Adapter}  = require('./adapter.js');
+const {Foreign} = require('./foreign.js');
 class Group {
     static get_data = (database,cache,data_items,option) => {
         return new Promise((callback) => {
@@ -103,6 +104,23 @@ class Group {
                             error=Log.append(error,err);
                         });
                     },
+                    function(call){
+                        if(search_item.foreigns.length>0 && data.length>0){
+                            Foreign.get_data(database,cache,data,{foreigns:search_item.foreigns}).then(([biz_error,biz_data])=>{
+                                if(biz_error){
+                                    error=Log.append(error,biz_error);
+                                }else{
+                                    data = biz_data;
+                                }
+                                call();
+                            }).catch(err => {
+                                Log.error('Data-Group-Foreign',err);
+                                error=Log.append(error,err);
+                            });
+                        }else{
+                            call();
+                        }
+                    },
                 ]).then(result => {
                     callback(data);
                 }).catch(err => {
@@ -119,6 +137,7 @@ class Group {
             title : group_item.title ? group_item.title : {}, // {groupShow:1,groupHide:0},{0:all}
             page_current : group_item.page_current ? group_item.page_current : 1,
             page_size : group_item.page_size ? group_item.page_size : 0,
+            foreigns : group_item.foreigns ? group_item.foreigns : [],
             query : {$or:[],$and:[]},
             items : []
         }
