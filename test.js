@@ -84,7 +84,7 @@ describe('connect', function(){ this.timeout(25000);
 
                 //---
                 if(print_test){;
-                    //Log.w('99_biz_data',biz_data);
+                    Log.w('99_biz_data',biz_data);
                 }
              },
 ],

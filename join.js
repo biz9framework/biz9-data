@@ -6,7 +6,7 @@ Description: BiZ9 Framework: Data - Join
 */
 const async = require('async');
 const {Log,Str,Num,Obj,DateTime}=require("/home/think1/www/doqbox/biz9-framework/biz9-utility/source");
-const {Value_Type,Data_Logic}=require("/home/think1/www/doqbox/biz9-framework/biz9-logic/source");
+const {Value_Type,Data_Logic,Field}=require("/home/think1/www/doqbox/biz9-framework/biz9-logic/source");
 const {Adapter}  = require('./adapter.js');
 const {Foreign} = require('./foreign.js');
 class Join {
@@ -35,7 +35,7 @@ class Join {
                                         search_item.data[search_item.title+'_item_count'] = item_count;
                                         search_item.data[search_item.title+'_page_count'] = page_count;
                                         search_item.data[search_item.title+'_search'] = search;
-                                        search_item.data[Value_Type.ITEMS] = items;
+                                        search_item.data[search_item.title+"_"+Field.ITEMS] = items;
                                     }
                                     resolve();
                                 }).catch(err => {
@@ -87,14 +87,9 @@ class Join {
                 },
                 //foreign
                 function(call){
-                    console.log('111111111');
                     function get_foreign_data(database,cache,items,search_item) {
-                        console.log('44444444');
                         return new Promise((resolve) => {
-                            //Log.w('cool',items);
-                            /*
                             Foreign.get_data(database,cache,items,{foreigns:search_item.foreigns}).then(([biz_error,biz_data])=>{
-                                console.log('555555');
                                 if(biz_error){
                                     error=Log.append(error,biz_error);
                                 }
@@ -105,21 +100,15 @@ class Join {
                                 Log.error('Data-Join-Get-Data-Foreign',err);
                                 error=Log.append(error,err);
                             });
-                            */
                         }).catch(err => {
                             Log.error("Data-Join-Get-Data-Foreign-2",err);
                             callback([error,[]]);
                         });
                     }
                     const run = async () => {
-                        console.log('2222222');
                         for(const search_item of join_search_items){
-                            console.log('333333');
                             if(search_item.type != Value_Type.COUNT){
-                                console.log('4444444444');
-                                console.log(search_item);
-                                console.log(search_item.data[search_item.title]);
-                                //const biz_data = await get_foreign_data(database,cache,search_item.data[search_item.title],search_item);
+                                const biz_data = await get_foreign_data(database,cache,search_item.data[search_item.title+"_"+Field.ITEMS],search_item);
                             }
                         }
                     }
@@ -128,7 +117,7 @@ class Join {
                     });
                 },
             ]).then(result => {
-                //callback([error,join_search_items]);
+                callback([error,join_search_items]);
             }).catch(err => {
                 Log.error("Data-Join-Get",err);
                 callback([error,[]]);
