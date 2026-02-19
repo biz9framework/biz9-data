@@ -310,122 +310,122 @@ class Data {
             });
         });
     };
-      //9_data_count
-        static count = async (database,table,filter) => {
-            /* option params
-             * n/a
-             */
-            return new Promise((callback) => {
-                let error = null;
-                let cache = {};
-                let data = {};
-                async.series([
-                    async function(call) {
-                        const [biz_error,biz_data] = await Cache.get(database.data_config);
-                        cache = biz_data;
-                    },
-                    async function(call){
-                        const [biz_error,biz_data] = await Adapter.get_count_item_list(database,cache,table,filter);
+    //9_data_count
+    static count = async (database,table,filter) => {
+        /* option params
+         * n/a
+         */
+        return new Promise((callback) => {
+            let error = null;
+            let cache = {};
+            let data = {};
+            async.series([
+                async function(call) {
+                    const [biz_error,biz_data] = await Cache.get(database.data_config);
+                    cache = biz_data;
+                },
+                async function(call){
+                    const [biz_error,biz_data] = await Adapter.get_count_item_list(database,cache,table,filter);
+                    if(biz_error){
+                        error=Log.append(error,biz_error);
+                    }else{
+                        data = biz_data.count;
+                    }
+                },
+            ]).then(result => {
+                callback([error,data]);
+            }).catch(err => {
+                Log.error("Count-List-Data",err);
+                callback([err,{}]);
+            });
+        });
+    };
+
+    //9_data_copy //9_copy
+    static copy = async (database,table,id,option) => {
+        /*
+         * params
+         * - title_tbd
+         *   - description. / obj_type / ex.
+         * options
+         * - copy_group
+         *   - description. / obj_type / ex. true/false
+         * return
+         * - title_tbd
+         *   - description. / obj_type / ex.
+         *
+         */
+        return new Promise((callback) => {
+            let error = null;
+            let cache = {};
+            let data = Data_Logic.get(table,id);
+            let top_data = Data_Logic.get(table,0);
+            let copy_data = Data_Logic.get(table,0);
+            option = !Obj.check_is_empty(option) ? option : {};
+            async.series([
+                async function(call) {
+                    const [biz_error,biz_data] = await Cache.get(database.data_config);
+                    cache = biz_data;
+                },
+                async function(call){
+                    let data_group_option = Data_Logic.get_group();
+                    const [biz_error,biz_data] = await Data.get(database,table,id,{groups:[data_group_option]});
+                    if(biz_error){
+                        error=Log.append(error,biz_error);
+                    }else{
+                        top_data=biz_data;
+                    }
+                },
+                //top_item
+                async function(call){
+                    if(top_data.id){
+                        copy_data = Data_Logic.copy(table,top_data);
+                        copy_data[Field.TITLE] = 'Copy '+top_data[Field.TITLE];
+                        copy_data[Field.TITLE_URL] = 'copy_'+top_data[Field.TITLE_URL];
+                        copy_data[Field.SOURCE_ID] = top_data.id;
+                        copy_data[Field.SOURCE_TABLE] = top_data.table;
+                        const [biz_error,biz_data] = await Data.post(database,copy_data.table,copy_data);
                         if(biz_error){
                             error=Log.append(error,biz_error);
                         }else{
-                            data = biz_data.count;
+                            copy_data=biz_data;
                         }
-                    },
-                ]).then(result => {
-                    callback([error,data]);
-                }).catch(err => {
-                    Log.error("Count-List-Data",err);
-                    callback([err,{}]);
-                });
-            });
-        };
+                    }else{
+                        copy_data = Data_Logic.get_not_found(table,id);
+                    }
+                },
+                async function(call){
+                    if(top_data.id && top_data.groups.length > 0){
+                        copy_data.groups = [];
+                        let post_groups = [];
+                        for(const group of top_data.groups){
+                            let copy_group = Data_Logic.copy(Field.GROUP,group);
+                            copy_group[Field.TITLE] = 'Copy '+group[Field.TITLE];
+                            copy_group[Field.TITLE_URL] = 'copy_'+group[Field.TITLE_URL];
+                            copy_group[Field.SOURCE_ID] = group.id;
+                            copy_group[Field.SOURCE_TABLE] = group.table;
 
-     //9_data_copy //9_copy
-        static copy = async (database,table,id,option) => {
-            /*
-             * params
-             * - title_tbd
-             *   - description. / obj_type / ex.
-             * options
-             * - copy_group
-             *   - description. / obj_type / ex. true/false
-             * return
-             * - title_tbd
-             *   - description. / obj_type / ex.
-             *
-             */
-            return new Promise((callback) => {
-                let error = null;
-                let cache = {};
-                let data = Data_Logic.get(table,id);
-                let top_data = Data_Logic.get(table,0);
-                let copy_data = Data_Logic.get(table,0);
-                option = !Obj.check_is_empty(option) ? option : {};
-                async.series([
-                    async function(call) {
-                        const [biz_error,biz_data] = await Cache.get(database.data_config);
-                        cache = biz_data;
-                    },
-                    async function(call){
-                        let data_group_option = Data_Logic.get_group();
-                        const [biz_error,biz_data] = await Data.get(database,table,id,{groups:[data_group_option]});
+                            copy_group[Field.PARENT_TABLE] = copy_data.table;
+                            copy_group[Field.PARENT_ID] = copy_data.id;
+                            post_groups.push(copy_group);
+                        }
+                        const [biz_error,biz_data] = await Adapter.post_item_list(database,cache,post_groups);
                         if(biz_error){
                             error=Log.append(error,biz_error);
                         }else{
-                            top_data=biz_data;
+                            copy_data.groups=biz_data;
                         }
-                    },
-                    //top_item
-                    async function(call){
-                        if(top_data.id){
-                            copy_data = Data_Logic.copy(table,top_data);
-                            copy_data[Field.TITLE] = 'Copy '+top_data[Field.TITLE];
-                            copy_data[Field.TITLE_URL] = 'copy_'+top_data[Field.TITLE_URL];
-                            copy_data[Field.SOURCE_ID] = top_data.id;
-                            copy_data[Field.SOURCE_TABLE] = top_data.table;
-                            const [biz_error,biz_data] = await Data.post(database,copy_data.table,copy_data);
-                            if(biz_error){
-                                error=Log.append(error,biz_error);
-                            }else{
-                                copy_data=biz_data;
-                            }
-                        }else{
-                            copy_data = Data_Logic.get_not_found(table,id);
-                        }
-                    },
-                    async function(call){
-                        if(top_data.id && top_data.groups.length > 0){
-                            copy_data.groups = [];
-                            let post_groups = [];
-                            for(const group of top_data.groups){
-                                let copy_group = Data_Logic.copy(Field.GROUP,group);
-                                copy_group[Field.TITLE] = 'Copy '+group[Field.TITLE];
-                                copy_group[Field.TITLE_URL] = 'copy_'+group[Field.TITLE_URL];
-                                copy_group[Field.SOURCE_ID] = group.id;
-                                copy_group[Field.SOURCE_TABLE] = group.table;
-
-                                copy_group[Field.PARENT_TABLE] = copy_data.table;
-                                copy_group[Field.PARENT_ID] = copy_data.id;
-                                post_groups.push(copy_group);
-                            }
-                            const [biz_error,biz_data] = await Adapter.post_item_list(database,cache,post_groups);
-                            if(biz_error){
-                                error=Log.append(error,biz_error);
-                            }else{
-                                copy_data.groups=biz_data;
-                            }
-                        }
-                    },
-                ]).then(result => {
-                    data = copy_data;
-                    callback([error,data]);
-                }).catch(err => {
-                    Log.error("Copy",err);
-                    callback([err,{}]);
-                });
+                    }
+                },
+            ]).then(result => {
+                data = copy_data;
+                callback([error,data]);
+            }).catch(err => {
+                Log.error("Copy",err);
+                callback([err,{}]);
             });
-        };
+        });
+    };
     //9_data_get
     static get = async(database,table,id,option) => {
         /* Options
@@ -530,42 +530,42 @@ class Data {
                     }
                 },
                 //9_group //9_get_group get_item_group
-                    function(call){
-                        if(option.groups && data.id){
-                            Group.get_data(database,cache,[data],option).then(([biz_error,biz_data])=>{
-                                if(biz_error){
-                                    error=Log.append(error,biz_error);
-                                }else{
-                                    data = biz_data[0];
-                                }
-                                call();
-                            }).catch(err => {
-                                Log.error('Data-Item-Group',err);
-                                error=Log.append(error,err);
-                            });
-                        }else{
+                function(call){
+                    if(option.groups && data.id){
+                        Group.get_data(database,cache,[data],option).then(([biz_error,biz_data])=>{
+                            if(biz_error){
+                                error=Log.append(error,biz_error);
+                            }else{
+                                data = biz_data[0];
+                            }
                             call();
-                        }
-                    },
-                    //9_foreigns //9_get_foreigns get_item_foreign
-                    function(call){
-                        if(option.foreigns && data.id){
-                            Foreign.get_data(database,cache,[data],option).then(([biz_error,biz_data])=>{
-                                if(biz_error){
-                                    error=Log.append(error,biz_error);
-                                }else{
-                                    data = biz_data[0];
-                                }
-                                call();
-                            }).catch(err => {
-                                Log.error('Data-Search-Foreign',err);
-                                error=Log.append(error,err);
-                            });
-                        }else{
+                        }).catch(err => {
+                            Log.error('Data-Item-Group',err);
+                            error=Log.append(error,err);
+                        });
+                    }else{
+                        call();
+                    }
+                },
+                //9_foreigns //9_get_foreigns get_item_foreign
+                function(call){
+                    if(option.foreigns && data.id){
+                        Foreign.get_data(database,cache,[data],option).then(([biz_error,biz_data])=>{
+                            if(biz_error){
+                                error=Log.append(error,biz_error);
+                            }else{
+                                data = biz_data[0];
+                            }
                             call();
-                        }
-                    },
-                    /*
+                        }).catch(err => {
+                            Log.error('Data-Search-Foreign',err);
+                            error=Log.append(error,err);
+                        });
+                    }else{
+                        call();
+                    }
+                },
+                /*
                     async function(call){
                         if(option.sub_value && data.id){
                             data.sub_values = Data_Logic.get_sub_value_items(data.sub_values);;
@@ -803,10 +803,7 @@ class Data {
             });
         });
     };
-
-
 }
-
 module.exports = {
     Database,
     Data
