@@ -56,12 +56,12 @@ describe('connect', function(){ this.timeout(25000);
                 /*
                 let option = {};
                 // -- parent --
-                let parent = Data_Logic.get(Project_Table.PRODUCT,0,{data:{field_1:'value_'+Num.get_id(),field_2:'value_'+Num.get_id()}});
-                //let parent = Data_Logic.get(Project_Table.PRODUCT,'643');
-                const [error,biz_data] = await Data.post(database,parent.table,parent,option);
+                //let parent = Data_Logic.get(Project_Table.PRODUCT,0,{data:{field_1:'value_'+Num.get_id(),field_2:'value_'+Num.get_id()}});
+                let parent = Data_Logic.get(Project_Table.PRODUCT,'48');
+                //const [error,biz_data] = await Data.post(database,parent.table,parent,option);
                 // -- sub items --
-                //let sub_items = Data_Logic.get(Project_Table.GROUP,0,{count:3,parent:parent,data:{field_1:'value_'+Num.get_id(),field_2:'value_'+Num.get_id()}});
-                //const [error,biz_data] = await Data.post_items(database,sub_items);
+                let sub_items = Data_Logic.get(Project_Table.GROUP,0,{count:3,parent:parent,data:{field_1:'value_'+Num.get_id(),field_2:'value_'+Num.get_id()}});
+                const [error,biz_data] = await Data.post_items(database,sub_items);
                 */
                 // -- POST-END --//
                 //-- GET START --//
@@ -91,10 +91,10 @@ describe('connect', function(){ this.timeout(25000);
                 // -- DELETE-START --//
                 let option = {};
                 // -- parent --
-                //let parent = Data_Logic.get(Project_Table.PRODUCT,'643');
-                //const [error,biz_data] = await Data.delete(database,parent.table,parent.id,option);
-                let search = Data_Logic.get_search(Project_Table.PRODUCT,{},{},1,0,{});
-                const [error,biz_data] = await Data.delete_search(database,search.table,search.filter,search.sort_by,search.page_current,search.page_size,option);
+                let parent = Data_Logic.get(Project_Table.PRODUCT,'48');
+                const [error,biz_data] = await Data.delete(database,parent.table,parent.id,option);
+                //let search = Data_Logic.get_search(Project_Table.PRODUCT,{},{},1,0,{});
+                //const [error,biz_data] = await Data.delete_search(database,search.table,search.filter,search.sort_by,search.page_current,search.page_size,option);
                 // -- DELETE-END --//
 
                 //---

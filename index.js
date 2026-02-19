@@ -757,7 +757,6 @@ class Data {
                     }
                 },
                 async function(call){
-                    /*
                     if(option.delete_group){
                         data[Type.RESULT_OK_GROUP_DELETE] = false;
                         let filter = {parent_id:data.id};
@@ -770,7 +769,6 @@ class Data {
                             }
                         }
                     }
-                    */
                 },
             ]).then(result => {
                 callback([error,data]);
