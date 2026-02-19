@@ -55,36 +55,36 @@ describe('connect', function(){ this.timeout(25000);
                 // -- POST-START --//
                 /*
                 let option = {};
+                // -- parent --
                 //let parent = Data_Logic.get(Project_Table.PRODUCT,0,{data:{field_1:'value_'+Num.get_id(),field_2:'value_'+Num.get_id()}});
-                //let parent = Data_Logic.get(Project_Table.GROUP,'989');
-                let parent = Data_Logic.get(Project_Table.PRODUCT,'757');
+                let parent = Data_Logic.get(Project_Table.BLANK,'635');
                 //const [error,biz_data] = await Data.post(database,parent.table,parent,option);
-                //let blank = Data_Logic.get(Project_Table.BLANK,0,{data:{field_1:'value_'+Num.get_id(),field_2:'value_'+Num.get_id()}});
-                //let blanks = Data_Logic.get(Project_Table.BLANK,0,{count:2,parent:parent,data:{field_1:'value_'+Num.get_id(),field_2:'value_'+Num.get_id()}});
-                //let images = Data_Logic.get(Project_Table.IMAGE,0,{count:3,parent:parent,data:{url_1:'value_'+Num.get_id(),url_2:'value_'+Num.get_id()}});
-                let groups = Data_Logic.get(Project_Table.GROUP,0,{count:3,parent:parent,title:'Group '+Num.get_id(),data:{url_1:'value_'+Num.get_id(),url_2:'value_'+Num.get_id()}});
-                const [error,biz_data] = await Data.post_items(database,groups);
+                // -- sub items --
+                let sub_items = Data_Logic.get(Project_Table.IMAGE,0,{count:3,parent:parent,data:{field_1:'value_'+Num.get_id(),field_2:'value_'+Num.get_id()}});
+                const [error,biz_data] = await Data.post_items(database,sub_items);
+
                 */
                 // -- POST-END --//
                 //-- GET  START --//
-                /*
-                let join_search_1 = Data_Logic.get_search(Project_Table.BLANK,{},{},1,0,{});
-                let join_1 = Data_Logic.get_join(Value_Type.ITEMS,join_search_1);
-                let foreign_1 = Data_Logic.get_foreign(Value_Type.ITEMS,Project_Table.BLANK,Field.PARENT_ID,Field.ID);
+
                 let foreign_2 = Data_Logic.get_foreign(Value_Type.ITEMS,Project_Table.IMAGE,Field.PARENT_ID,Field.ID,{title:'images'});
 
-                let group_1 = Data_Logic.get_group({foreigns:[foreign_2]});//Data_Logic.get_group();
-                let option = {groups:[group_1]};//{foreigns:[foreign_1]};{joins:[join_1]};
-                let parent = Data_Logic.get(Project_Table.PRODUCT,'757');
+                let join_search_1 = Data_Logic.get_search(Project_Table.BLANK,{},{},1,0,{});
+                let join_1 = Data_Logic.get_join(Value_Type.ITEMS,join_search_1,{foreigns:[foreign_2]});
+                let foreign_1 = Data_Logic.get_foreign(Value_Type.ITEMS,Project_Table.BLANK,Field.PARENT_ID,Field.ID);
+
+                //let group_1 = Data_Logic.get_group({foreigns:[foreign_2]});//Data_Logic.get_group();
+                let option = {joins:[join_1]};//{groups:[group_1]};//{foreigns:[foreign_1]};
+                let parent = Data_Logic.get(Project_Table.PRODUCT,'643');
                 const [error,biz_data] = await Data.get(database,parent.table,parent.id,option);
-                */
+
                 //-- GET  END --//
                 //-->
                 ///next Group 49604 3
 
                 //---
                 if(print_test){;
-                    Log.w('99_biz_data',biz_data);
+                    //Log.w('99_biz_data',biz_data);
                 }
              },
 ],

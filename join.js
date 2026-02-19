@@ -16,14 +16,12 @@ class Join {
             let join_search_items = [];
             async.series([
                 function(call){
-                    console.log('333333');
                     for(const option_join of option.joins){
                         join_search_items.push(Join.get_search(option_join));
                     }
                     call();
                 },
                 function(call){
-                    console.log('4444444444');
                     function get_data(search_item) {
                         return new Promise((resolve) => {
                             if(search_item.type == Value_Type.ITEMS){
@@ -89,12 +87,14 @@ class Join {
                 },
                 //foreign
                 function(call){
-                    call();
-                    /*
-                    console.log('555555555');
+                    console.log('111111111');
                     function get_foreign_data(database,cache,items,search_item) {
+                        console.log('44444444');
                         return new Promise((resolve) => {
+                            //Log.w('cool',items);
+                            /*
                             Foreign.get_data(database,cache,items,{foreigns:search_item.foreigns}).then(([biz_error,biz_data])=>{
+                                console.log('555555');
                                 if(biz_error){
                                     error=Log.append(error,biz_error);
                                 }
@@ -105,25 +105,30 @@ class Join {
                                 Log.error('Data-Join-Get-Data-Foreign',err);
                                 error=Log.append(error,err);
                             });
+                            */
                         }).catch(err => {
                             Log.error("Data-Join-Get-Data-Foreign-2",err);
                             callback([error,[]]);
                         });
                     }
                     const run = async () => {
+                        console.log('2222222');
                         for(const search_item of join_search_items){
+                            console.log('333333');
                             if(search_item.type != Value_Type.COUNT){
-                                const biz_data = await get_foreign_data(database,cache,search_item.data[search_item.title],search_item);
+                                console.log('4444444444');
+                                console.log(search_item);
+                                console.log(search_item.data[search_item.title]);
+                                //const biz_data = await get_foreign_data(database,cache,search_item.data[search_item.title],search_item);
                             }
                         }
                     }
                     run().then(() => {
                         call();
                     });
-                    */
                 },
             ]).then(result => {
-                callback([error,join_search_items]);
+                //callback([error,join_search_items]);
             }).catch(err => {
                 Log.error("Data-Join-Get",err);
                 callback([error,[]]);

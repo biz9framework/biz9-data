@@ -573,7 +573,6 @@ class Data {
                     },
                     */
             ]).then(result => {
-                Log.w('www',data);
                 callback([error,data]);
             }).catch(err => {
                 Log.error("ERROR-PORTAL-GET",err);
