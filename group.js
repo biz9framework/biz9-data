@@ -6,7 +6,7 @@ Description: BiZ9 Framework: Data - Group
 */
 const async = require('async');
 const {Log,Str,Num,Obj,DateTime}=require("/home/think1/www/doqbox/biz9-framework/biz9-utility/source");
-const {Value_Type,Data_Logic,Field,Table}=require("/home/think1/www/doqbox/biz9-framework/biz9-logic/source");
+const {Data_Logic,Data_Field,Data_Table}=require("/home/think1/www/doqbox/biz9-framework/biz9-data-logic/source");
 const {Adapter}  = require('./adapter.js');
 const {Foreign} = require('./foreign.js');
 class Group {
@@ -33,7 +33,7 @@ class Group {
                                 new_item[field] = search_item.title[field];
                                 if(new_item[field]){
                                     let query_field = {};
-                                    query_field[Field.TITLE_URL] = field;
+                                    query_field[Data_Field.TITLE_URL] = field;
                                     query.$or.push(query_field);
                                 }
                             }
@@ -41,7 +41,7 @@ class Group {
                         if(!has_title){
                             for(const item of data_items){
                                 let query_field = {};
-                                query_field[Field.PARENT_ID] = item.id;
+                                query_field[Data_Field.PARENT_ID] = item.id;
                                 query.$or.push(query_field);
                             }
                         }
@@ -94,7 +94,7 @@ class Group {
                 let data = [];
                 async.series([
                     function(call) {
-                        let search = Data_Logic.get_search(Table.GROUP,search_item.query,{},search_item.page_current,search_item.page_size);
+                        let search = Data_Logic.get_search(Data_Table.GROUP,search_item.query,{},search_item.page_current,search_item.page_size);
                         let option = search_item.field ? search_item.field : {};
                         Adapter.get_item_list(database,cache,search.table,search.filter,search.sort_by,search.page_current,search.page_size,option).then(([biz_error,items,item_count,page_count])=>{
                             data = items;

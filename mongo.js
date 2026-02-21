@@ -6,7 +6,7 @@ Description: BiZ9 Framework: Data - Mongo
 */
 const async = require('async');
 const {Num,Log,Str,Obj,DateTime} = require("/home/think1/www/doqbox/biz9-framework/biz9-utility/source");
-const {Field} = require("/home/think1/www/doqbox/biz9-framework/biz9-logic/source");
+const {Data_Field} = require("/home/think1/www/doqbox/biz9-framework/biz9-data-logic/source");
 const {MongoClient} = require("mongodb");
 let client_db = {};
 class Mongo {
@@ -88,9 +88,9 @@ class Mongo {
             option = !Obj.check_is_empty(option) ? option : {};
             if (Str.check_is_null(item.id)){//insert
                 //item[Type.FIELD_ID] = Str.get_guid();
-                item[Field.ID] = String(Num.get_id(999));
-                item[Field.DATE_CREATE] = DateTime.get();
-                item[Field.DATE_SAVE] = DateTime.get();
+                item[Data_Field.ID] = String(Num.get_id(999));
+                item[Data_Field.DATE_CREATE] = DateTime.get();
+                item[Data_Field.DATE_SAVE] = DateTime.get();
                 if(Mongo.check_database(database)){
                     database.collection(table).insertOne(item).then((data) => {
                         delete item['_id'];

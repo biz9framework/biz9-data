@@ -8,7 +8,7 @@ const async = require('async');
 const assert = require('node:assert');
 const {Database,Data} = require(".");
 const {Log,Num,Str} = require("biz9-utility");
-const {Data_Logic,Value_Type,Table,Field}=require("/home/think1/www/doqbox/biz9-framework/biz9-logic/source");
+const {Data_Logic,Data_Value_Type,Table,Data_Field}=require("/home/think1/www/doqbox/biz9-framework/biz9-data-logic/source");
 /*
  * availble tests
 - connect
@@ -57,22 +57,23 @@ describe('connect', function(){ this.timeout(25000);
                 let option = {};
                 // -- parent --
                 //let parent = Data_Logic.get(Project_Table.PRODUCT,0,{data:{field_1:'value_'+Num.get_id(),field_2:'value_'+Num.get_id()}});
-                let parent = Data_Logic.get(Project_Table.PRODUCT,'48');
+                let parent = Data_Logic.get(Project_Table.PRODUCT,'833');
                 //const [error,biz_data] = await Data.post(database,parent.table,parent,option);
                 // -- sub items --
-                let sub_items = Data_Logic.get(Project_Table.GROUP,0,{count:3,parent:parent,data:{field_1:'value_'+Num.get_id(),field_2:'value_'+Num.get_id()}});
+                let sub_items = Data_Logic.get(Project_Table.BLANK,0,{count:3,parent:parent,data:{field_1:'value_'+Num.get_id(),field_2:'value_'+Num.get_id()}});
                 const [error,biz_data] = await Data.post_items(database,sub_items);
                 */
                 // -- POST-END --//
                 //-- GET START --//
                 /*
-                let foreign_2 = Data_Logic.get_foreign(Value_Type.ITEMS,Project_Table.IMAGE,Field.PARENT_ID,Field.ID,{title:'images'});
-                let join_search_1 = Data_Logic.get_search(Project_Table.BLANK,{},{},1,0,{});
-                let join_1 = Data_Logic.get_join(Value_Type.ITEMS,join_search_1,{foreigns:[foreign_2]});
-                let foreign_1 = Data_Logic.get_foreign(Value_Type.ITEMS,Project_Table.BLANK,Field.PARENT_ID,Field.ID);
+                //let foreign_2 = Data_Logic.get_foreign(Data_Value_Type.ITEMS,Project_Table.IMAGE,Data_Field.PARENT_ID,Field.ID,{title:'images'});
+                //let join_search_1 = Data_Logic.get_search(Project_Table.BLANK,{},{},1,0,{});
+                //let join_1 = Data_Logic.get_join(Data_Value_Type.ITEMS,join_search_1,{foreigns:[foreign_2]});
+                //let foreign_1 = Data_Logic.get_foreign(Data_Value_Type.ITEMS,Project_Table.BLANK,Data_Field.PARENT_ID,Field.ID);
                 //let group_1 = Data_Logic.get_group({foreigns:[foreign_2]});//Data_Logic.get_group();
-                let option = {joins:[join_1]};//{groups:[group_1]};//{foreigns:[foreign_1]};
-                let parent = Data_Logic.get(Project_Table.PRODUCT,'643');
+                let option = {};
+                //let option = {joins:[join_1]};//{groups:[group_1]};//{foreigns:[foreign_1]};
+                let parent = Data_Logic.get(Project_Table.PRODUCT,'833');
                 const [error,biz_data] = await Data.get(database,parent.table,parent.id,option);
                 */
                 //-- GET END --//
@@ -80,21 +81,24 @@ describe('connect', function(){ this.timeout(25000);
                 //-- SEARCH START --//
                 /*
                 let join_search_1 = Data_Logic.get_search(Project_Table.BLANK,{},{},1,0,{});
-                let join_1 = Data_Logic.get_join(Value_Type.ITEMS,join_search_1);
-                let foreign_1 = Data_Logic.get_foreign(Value_Type.ITEMS,Project_Table.BLANK,Field.PARENT_ID,Field.ID);
+                let join_1 = Data_Logic.get_join(Data_Value_Type.ITEMS,join_search_1);
+                let foreign_1 = Data_Logic.get_foreign(Data_Value_Type.ITEMS,Project_Table.BLANK,Data_Field.PARENT_ID,Field.ID);
                 let group_1 = Data_Logic.get_group();
                 let option = {groups:[group_1]};//{joins:[join_1],foreigns:[foreign_1]};
-                let search = Data_Logic.get_search(Project_Table.PRODUCT,{},{},1,0,{});
-                const [error,biz_data] = await Data.search(database,search.table,search.filter,search.sort_by,search.page_current,search.page_size,option);
                 */
+                let search = Data_Logic.get_search(Project_Table.PRODUCT,{},{},1,0,{});
+                //const [error,biz_data] = await Data.search(database,search.table,search.filter,search.sort_by,search.page_current,search.page_size,option);
+                const [error,biz_data] = await Data.count(database,search.table,search.filter);
                 //-- SEARCH START --//
                 // -- DELETE-START --//
+                /*
                 let option = {};
                 // -- parent --
                 let parent = Data_Logic.get(Project_Table.PRODUCT,'48');
                 const [error,biz_data] = await Data.delete(database,parent.table,parent.id,option);
                 //let search = Data_Logic.get_search(Project_Table.PRODUCT,{},{},1,0,{});
                 //const [error,biz_data] = await Data.delete_search(database,search.table,search.filter,search.sort_by,search.page_current,search.page_size,option);
+                */
                 // -- DELETE-END --//
 
                 //---
