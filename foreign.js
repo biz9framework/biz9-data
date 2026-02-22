@@ -25,21 +25,25 @@ class Foreign {
                         foreign_search_items.push(foreign_item);
                     }
                     const run_data = async (database,cache,search_item) => {
-                             await get_search_item_data(database,cache,search_item);
-                            for(const data_item of data_items){
-                                if(search_item.value_type == Data_Value_Type.ITEMS){
-                                    const match_items = search_item.items.filter(item_find => item_find[search_item.foreign_field] === data_item[search_item.parent_field]);
-                                    data_item[search_item.title] = [];
-                                            if(match_items.length>0){
-                                                data_item[search_item.title] = [...match_items];
-                                            }
-                                }else if(search_item.value_type == Data_Value_Type.COUNT){
-                                    data_item[search_item.title] = search_item.data;
-                                }else if(search_item.value_type == Data_Value_Type.ONE){
-                                    data_item[search_item.title] = Data_Logic.get_not_found(search_item.foreign_table,0);
-
+                        await get_search_item_data(database,cache,search_item);
+                        for(const data_item of data_items){
+                            if(search_item.value_type == Data_Value_Type.ITEMS){
+                                const match_items = search_item.items.filter(item_find => item_find[search_item.foreign_field] === data_item[search_item.parent_field]);
+                                data_item[search_item.title] = [];
+                                if(match_items.length>0){
+                                    data_item[search_item.title] = [...match_items];
                                 }
+                            }else if(search_item.value_type == Data_Value_Type.COUNT){
+                                data_item[search_item.title] = search_item.data;
+                            }else if(search_item.value_type == Data_Value_Type.ONE){
+                                if(search_item.items.length>0){
+                                    data_item[search_item.title] = search_item.items[0];
+                                }else{
+                                    data_item[search_item.title] = Data_Logic.get_not_found(search_item.foreign_table,0);
+                                }
+
                             }
+                        }
                     }
                     const run = async (database,cache) => {
                         for(const search_item of foreign_search_items){
@@ -62,12 +66,12 @@ class Foreign {
                 let search = Data_Logic.get_search(search_item.foreign_table,search_item.query,search_item.sort_by,search_item.page_current,search_item.page_size);
                 let foreign_option = search_item.field ? search_item.field : {};
                 if(search_item.query.$or.length>0){
-                Adapter.get_item_list(database,cache,search.table,search.filter,search.sort_by,search.page_current,search.page_size,option).then(([biz_error,items,item_count,page_count])=>{
-                    resolve(items);
-                }).catch(err => {
-                    Log.error('Foreign-Get-Data',err);
-                    error=Log.append(error,err);
-                });
+                    Adapter.get_item_list(database,cache,search.table,search.filter,search.sort_by,search.page_current,search.page_size,option).then(([biz_error,items,item_count,page_count])=>{
+                        resolve(items);
+                    }).catch(err => {
+                        Log.error('Foreign-Get-Data',err);
+                        error=Log.append(error,err);
+                    });
                 }else{
                     resolve([]);
                 }
@@ -76,31 +80,31 @@ class Foreign {
         function get_count_data(database,search_item) {
             return new Promise((resolve) => {
                 let data = [];
-            function get_data(search_item,query) {
-                return new Promise((resolve2) => {
-                    let search = Data_Logic.get_search(search_item.foreign_table,query,search_item.sort_by,search_item.page_current,search_item.page_size);
-                    Adapter.get_count_item_list(database,search.table,search.filter).then(([biz_error,biz_data])=>{
-                        search_item.data = 'applke';
-                        resolve2(biz_data.count?biz_data.count : 0);
-                    }).catch(err => {
-                        Log.error('Foreign-Get-Data',err);
-                        error=Log.append(error,err);
+                function get_data(search_item,query) {
+                    return new Promise((resolve2) => {
+                        let search = Data_Logic.get_search(search_item.foreign_table,query,search_item.sort_by,search_item.page_current,search_item.page_size);
+                        Adapter.get_count_item_list(database,search.table,search.filter).then(([biz_error,biz_data])=>{
+                            search_item.data = 'applke';
+                            resolve2(biz_data.count?biz_data.count : 0);
+                        }).catch(err => {
+                            Log.error('Foreign-Get-Data',err);
+                            error=Log.append(error,err);
+                        });
                     });
-                });
-            }
-            const run = async () => {
-                for(const search_item_query of search_item.query.$or){
-                    const biz_data = await get_data(search_item,search_item_query);
-                    if(search_item.value_type != Data_Value_Type.COUNT){
-                        data.push({id:search_item_query.parent_id,data:biz_data});
-                    }else{
-                        data = biz_data;
+                }
+                const run = async () => {
+                    for(const search_item_query of search_item.query.$or){
+                        const biz_data = await get_data(search_item,search_item_query);
+                        if(search_item.value_type != Data_Value_Type.COUNT){
+                            data.push({id:search_item_query.parent_id,data:biz_data});
+                        }else{
+                            data = biz_data;
+                        }
                     }
                 }
-            }
-            run().then(() => {
-                resolve(data);
-            });
+                run().then(() => {
+                    resolve(data);
+                });
             });
         }
         function get_search_item_data(database,cache,search_item) {
