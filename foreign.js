@@ -25,15 +25,17 @@ class Foreign {
                         foreign_search_items.push(foreign_item);
                     }
                     const run_data = async (database,cache,search_item) => {
-                            await get_search_item_data(database,cache,search_item);
+                             await get_search_item_data(database,cache,search_item);
                             for(const data_item of data_items){
-                                if(search_item.type == Data_Value_Type.ITEMS){
+                                if(search_item.value_type == Data_Value_Type.ITEMS){
                                     const match_items = search_item.items.filter(item_find => item_find[search_item.foreign_field] === data_item[search_item.parent_field]);
-                                    data_item[search_item.title] = match_items;
-                                }else if(search_item.type == Data_Value_Type.COUNT){
-                                    const match_item = search_item.items.find(item_find => item_find[Data_Table_Field.ID] === data_item[Data_Table_Field.ID]);
-                                    data_item[search_item.title] = match_item.data;
-                                }else if(search_item.type == Data_Value_Type.ONE){
+                                    data_item[search_item.title] = [];
+                                            if(match_items.length>0){
+                                                data_item[search_item.title] = [...match_items];
+                                            }
+                                }else if(search_item.value_type == Data_Value_Type.COUNT){
+                                    data_item[search_item.title] = search_item.data;
+                                }else if(search_item.value_type == Data_Value_Type.ONE){
                                     data_item[search_item.title] = search_item.items[0];
                                 }
                             }
@@ -77,6 +79,7 @@ class Foreign {
                 return new Promise((resolve2) => {
                     let search = Data_Logic.get_search(search_item.foreign_table,query,search_item.sort_by,search_item.page_current,search_item.page_size);
                     Adapter.get_count_item_list(database,search.table,search.filter).then(([biz_error,biz_data])=>{
+                        search_item.data = 'applke';
                         resolve2(biz_data.count?biz_data.count : 0);
                     }).catch(err => {
                         Log.error('Foreign-Get-Data',err);
@@ -87,7 +90,11 @@ class Foreign {
             const run = async () => {
                 for(const search_item_query of search_item.query.$or){
                     const biz_data = await get_data(search_item,search_item_query);
-                    data.push({id:search_item_query.parent_id,data:biz_data});
+                    if(search_item.value_type != Data_Value_Type.COUNT){
+                        data.push({id:search_item_query.parent_id,data:biz_data});
+                    }else{
+                        data = biz_data;
+                    }
                 }
             }
             run().then(() => {
@@ -106,7 +113,7 @@ class Foreign {
                     function(call){
                         const run = async (database,cache,search_item) => {
                             let sub_foreign_search_items = [];
-                            if(search_item.type != Data_Value_Type.COUNT){
+                            if(search_item.value_type != Data_Value_Type.COUNT){
                                 for(const sub_search_item of search_item.foreigns){
                                     let sub_search_foreign_item = Foreign.get_search(sub_search_item);
                                     for(const data_item of search_item.items){
@@ -118,12 +125,14 @@ class Foreign {
                                     for(const data_item of search_item.items){
                                         if(sub_search_foreign_item.value_type == Data_Value_Type.ITEMS){
                                             const match_items = sub_search_foreign_item.items.filter(item_find => item_find[sub_search_foreign_item.foreign_field] === data_item[sub_search_foreign_item.parent_field]);
-                                            data_item[sub_search_foreign_item.title] = match_items;
-
-                                        }else if(sub_search_foreign_item.type == Data_Value_Type.COUNT){
+                                            data_item[sub_search_foreign_item.title] = [];
+                                            if(match_items.length>0){
+                                                data_item[sub_search_foreign_item.title] = [...match_items];
+                                            }
+                                        }else if(sub_search_foreign_item.value_type == Data_Value_Type.COUNT){
                                             const match_item = sub_search_foreign_item.items.find(item_find => item_find[Data_Table_Field.ID] === data_item[Data_Table_Field.ID]);
                                             data_item[sub_search_foreign_item.title] = match_item.data;
-                                        }else if(sub_search_foreign_item.type == Data_Value_Type.ONE){
+                                        }else if(sub_search_foreign_item.value_type == Data_Value_Type.ONE){
                                             const match_items = sub_search_foreign_item.items.filter(item_find => item_find[sub_search_foreign_item.foreign_field] === data_item[sub_search_foreign_item.parent_field]);
                                             if(match_items.length>0){
                                                 data_item[sub_search_foreign_item.title] = match_items[0];
@@ -152,17 +161,15 @@ class Foreign {
                     let data = null;
                     async.series([
                         async function(call) {
-                            if(search_item.type == Data_Value_Type.ITEMS){
+                            if(search_item.value_type == Data_Value_Type.ITEMS){
                                 const biz_data = await get_items_data(database,cache,search_item);
                                 for(const item of biz_data){
                                     search_item.items.push(item);
                                 }
-                            }else if(search_item.type == Data_Value_Type.COUNT){
+                            }else if(search_item.value_type == Data_Value_Type.COUNT){
                                 const biz_data = await get_count_data(database,search_item);
-                                for(const item of biz_data){
-                                    search_item.items.push(item);
-                                }
-                            }else if(search_item.type == Data_Value_Type.ONE){
+                                search_item.data = biz_data;
+                            }else if(search_item.value_type == Data_Value_Type.ONE){
                                 search_item.page_size = 1;
                                 const biz_data = await get_items_data(database,cache,search_item);
                                 if(biz_data.length>0){
@@ -173,11 +180,10 @@ class Foreign {
                             }
                         },
                     ]).then(result => {
-                        Log.w('aaa',search_item);
                         callback(search_item);
                     }).catch(err => {
                         Log.error("Blank-Get",err);
-                        //callback([error,[]]);
+                        callback([error,[]]);
                     });
                 });
             }
@@ -186,7 +192,7 @@ class Foreign {
     //9_search 9_get_search
     static get_search = (foreign_item) => {
         return {
-            type : foreign_item.type ? foreign_item.type : Data_Value_Type.ITEMS,
+            value_type : foreign_item.value_type ? foreign_item.value_type : Data_Value_Type.ITEMS,
             foreign_table : foreign_item.foreign_table,
             foreign_field : foreign_item.foreign_field,
             parent_field : foreign_item.parent_field,

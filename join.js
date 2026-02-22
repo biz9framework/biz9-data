@@ -24,7 +24,7 @@ class Join {
                 function(call){
                     function get_data(search_item) {
                         return new Promise((resolve) => {
-                            if(search_item.type == Data_Value_Type.ITEMS){
+                            if(search_item.value_type == Data_Value_Type.ITEMS){
                                 search_item.data[search_item.title];
                                 let search = Data_Logic.get_search(search_item.search.table,search_item.search.filter,search_item.search.sort_by,search_item.search.page_current,search_item.search.page_size);
                                 let join_option = {field:search_item.field,distinct:search_item.distinct};
@@ -43,7 +43,7 @@ class Join {
                                     error=Log.append(error,err);
                                 });
                             }
-                            else if(search_item.type == Data_Value_Type.COUNT){
+                            else if(search_item.value_type == Data_Value_Type.COUNT){
                                 let search = Data_Logic.get_search(search_item.search.table,search_item.search.filter,search_item.search.sort_by,search_item.search.page_current,search_item.search.page_size);
                                 let join_option = {field:search_item.field};
                                 Adapter.get_count_item_list(database,search.table,search.filter).then(([biz_error,biz_data])=>{
@@ -58,7 +58,7 @@ class Join {
                                     error=Log.append(error,err);
                                 });
                             }
-                            else if(search_item.type == Data_Value_Type.ONE){
+                            else if(search_item.value_type == Data_Value_Type.ONE){
                                 let search = Data_Logic.get_search(search_item.search.table,search_item.search.filter,search_item.search.sort_by,search_item.search.page_current,search_item.search.page_size);
                                 let join_option = {field:search_item.field};
                                 Adapter.get_item_list(database,cache,search.table,search.filter,search.sort_by,search.page_current,search.page_size,join_option).then(([biz_error,items,item_count,page_count])=>{
@@ -107,7 +107,7 @@ class Join {
                     }
                     const run = async () => {
                         for(const search_item of join_search_items){
-                            if(search_item.type != Data_Value_Type.COUNT){
+                            if(search_item.value_type != Data_Value_Type.COUNT){
                                 const biz_data = await get_foreign_data(database,cache,search_item.data[search_item.title+"_"+Data_Field.ITEMS],search_item);
                             }
                         }
@@ -127,7 +127,7 @@ class Join {
     };
     static get_search = (join_item) => {
         return {
-            type : join_item.type ?  join_item.type : Data_Value_Type.ITEMS,
+            value_type : join_item.value_type ?  join_item.value_type : Data_Value_Type.ITEMS,
             search : join_item.search ? join_item.search : Data_Logic.get_search(Data_Table.BLANK,{},{},1,0),
             field : join_item.field ? join_item.field : null,
             distinct : join_item.distinct ? join_item.distinct : null,

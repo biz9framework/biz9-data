@@ -9,6 +9,7 @@ const assert = require('node:assert');
 const {Database,Data} = require(".");
 const {Log,Num,Str} = require("biz9-utility");
 const {Store_Field,Store_Type,Store_Table,Store_Logic}=require("/home/think1/www/doqbox/biz9-framework/biz9-store/source");
+const {Cart_Data}=require("/home/think1/www/doqbox/biz9-framework/biz9-store-data/source");
 const {User_Field,User_Type,User_Table,User_Logic}=require("/home/think1/www/doqbox/biz9-framework/biz9-user/source");
 const {Data_Logic,Data_Value_Type,Table,Data_Field}=require("/home/think1/www/doqbox/biz9-framework/biz9-data-logic/source");
 /*
@@ -53,33 +54,22 @@ describe('connect', function(){ this.timeout(25000);
             async function(call){
                 //-->
                 let print_test = false;
-
-                // -- CART-GET-FOREIGN-START -- //
-                let foreign_user = Data_Logic.get_foreign(Data_Value_Type.ONE,User_Table.USER,Data_Field.ID,User_Field.USER_ID,{title:'user'});
-                let foreign_cart_item_parent = Data_Logic.get_foreign(Data_Value_Type.ONE,Store_Table.PRODUCT,Data_Field.ID,Data_Field.PARENT_ID,{title:'parent'});
-                let foreign_cart_item = Data_Logic.get_foreign(Data_Value_Type.ITEMS,Store_Table.CART_ITEM,Store_Field.CART_ID,Data_Field.ID,{title:'cart_items',foreigns:[foreign_cart_item_parent]});
-                //let foreign_cart_item = Data_Logic.get_foreign(Data_Value_Type.ITEMS,Store_Table.CART_ITEM,Store_Field.CART_ID,Data_Field.ID,{title:'cart_items'});
-
-                let cart_option = { id_field:Store_Field.CART_NUMBER,foreigns:[foreign_cart_item] };
-
-                let cart_number = 'CA-27827';
-                const [biz_error,biz_data] = await Data.get(database,Store_Table.CART,cart_number,cart_option);
-                Log.w('11_data',biz_data);
-                // -- CART-GET-FOREIGN-END -- //
-
+                // -- POST-START --//
                 /*
                 let option = {};
                 // -- parent --
-                //let parent = Data_Logic.get(Project_Table.PRODUCT,0,{data:{field_1:'value_'+Num.get_id(),field_2:'value_'+Num.get_id()}});
-                let parent = Data_Logic.get(Project_Table.PRODUCT,'833');
-        //const [error,biz_data] = await Data.post(database,parent.table,parent,option);
-        // -- sub items --
-                let sub_items = Data_Logic.get(Project_Table.BLANK,0,{count:3,parent:parent,data:{field_1:'value_'+Num.get_id(),field_2:'value_'+Num.get_id()}});
+                //Log.w('33_parent',parent);
+                //let parent = Data_Logic.get(Project_Table.PRODUCT,'833');
+                //const [error,biz_data] = await Data.post(database,parent.table,parent,option);
+                // -- sub items --
+                //let sub_items = Data_Logic.get(Project_Table.BLANK,0,{count:3,parent:parent,data:{field_1:'value_'+Num.get_id(),field_2:'value_'+Num.get_id()}});
+                let sub_items = Data_Logic.get(Project_Table.PRODUCT,0,{count:5,data:Store_Logic.get_test_product()});
+                //let sub_items = Data_Logic.get(Project_Table.PRODUCT,0,{count:1,data:User_Logic.get_test_user()});
                 const [error,biz_data] = await Data.post_items(database,sub_items);
                 */
-        // -- POST-END --//
-        //-- GET START --//
-        /*
+                // -- POST-END --//
+                //-- GET START --//
+            /*
             //let foreign_2 = Data_Logic.get_foreign(Data_Value_Type.ITEMS,Project_Table.IMAGE,Data_Field.PARENT_ID,Field.ID,{title:'images'});
             //let join_search_1 = Data_Logic.get_search(Project_Table.BLANK,{},{},1,0,{});
             //let join_1 = Data_Logic.get_join(Data_Value_Type.ITEMS,join_search_1,{foreigns:[foreign_2]});
@@ -115,17 +105,53 @@ describe('connect', function(){ this.timeout(25000);
         */
         // -- DELETE-END --//
 
-        //---
-        if(print_test){;
-            Log.w('99_biz_data',biz_data);
-        }
-            },
+        // -- CART-POST-TEST-- START
+        /*
+        let user = Data_Logic.get(User_Table.USER,'228');
+        let cart = Store_Logic.get_cart(user.id,{cart_code:'CA'});
+        let product_1 = Data_Logic.get(Project_Table.PRODUCT,'518');
+        let product_2 = Data_Logic.get(Project_Table.PRODUCT,'860');
+        let product_sub_1 = Data_Logic.get(Project_Table.PRODUCT,'129');
+        let product_sub_2 = Data_Logic.get(Project_Table.PRODUCT,'92');
+        let cart_item_1 = Store_Logic.get_cart_item(product_1.table,product_1.id,1,Store_Logic.get_test_cost());
+        let cart_sub_item_1 = Store_Logic.get_cart_sub_item(cart_item_1.id,Store_Type.CART_SUB_TYPE_STANDARD,product_sub_1.table,product_sub_1.id,1,Store_Logic.get_test_cost());
+        cart_item_1.cart_sub_items.push(cart_sub_item_1);
+        let cart_item_2 = Store_Logic.get_cart_item(product_2.table,product_2.id,1,Store_Logic.get_test_cost());
+        let cart_sub_item_2 = Store_Logic.get_cart_sub_item(cart_item_2.id,Store_Type.CART_SUB_TYPE_STANDARD,product_sub_2.table,product_sub_2.id,1,Store_Logic.get_test_cost());
+        cart_item_2.cart_sub_items.push(cart_sub_item_2);
+        cart.cart_items.push(cart_item_1);
+        cart.cart_items.push(cart_item_2);
+        const [biz_error,biz_data] = await Cart_Data.post(database,cart);
+        Log.w('11_cart_post',biz_data);
+        */
+        // -- CART-POST-TEST-2 -- END
+
+
+        // -- CART-GET-FOREIGN-START -- //
+                let foreign_user = Data_Logic.get_foreign(Data_Value_Type.COUNT,User_Table.USER,Data_Field.ID,User_Field.USER_ID,{title:'user'});
+                let foreign_cart_item_parent = Data_Logic.get_foreign(Data_Value_Type.ITEMS,Store_Table.PRODUCT,Data_Field.ID,Data_Field.PARENT_ID,{title:'parent'});
+                let foreign_cart_item = Data_Logic.get_foreign(Data_Value_Type.ONE,Store_Table.CART_ITEM,Store_Field.CART_ID,Data_Field.ID,{title:'cart_items',foreigns:[foreign_cart_item_parent]});
+//let foreign_cart_item = Data_Logic.get_foreign(Data_Value_Type.ITEMS,Store_Table.CART_ITEM,Store_Field.CART_ID,Data_Field.ID,{title:'cart_items'});
+                //Log.w('www',foreign_cart_item);
+                let cart_option = { id_field:Store_Field.CART_NUMBER,foreigns:[foreign_user] };
+                let cart_number = 'CA-71893';
+                const [biz_error,biz_data] = await Data.get(database,Store_Table.CART,cart_number,cart_option);
+                Log.w('33_data',biz_data);
+                //Log.w('33_data',biz_data.cart_items.length);
+            // -- CART-GET-FOREIGN-END -- //
+
+
+//---
+if(print_test){;
+    Log.w('99_biz_data',biz_data);
+}
+},
         ],
             function(error, result){
                 console.log('CONNECT-DONE');
                 done();
             });
-    });
+});
 });
 //9_blank - 9_test_blank
 describe('blank', function(){ this.timeout(25000);
