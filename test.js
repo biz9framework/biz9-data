@@ -129,7 +129,7 @@ describe('connect', function(){ this.timeout(25000);
 
         // -- CART-GET-FOREIGN-START -- //
                 let foreign_user = Data_Logic.get_foreign(Data_Value_Type.ITEMS,User_Table.USER,Data_Field.ID,User_Field.USER_ID,{title:'user'});
-                let foreign_cart_item_parent = Data_Logic.get_foreign(Data_Value_Type.COUNT,Store_Table.PRODUCT,Data_Field.ID,Data_Field.PARENT_ID,{title:'parent'});
+                let foreign_cart_item_parent = Data_Logic.get_foreign(Data_Value_Type.ONE,Store_Table.PRODUCT,Data_Field.ID,Data_Field.PARENT_ID,{title:'parent'});
                 let foreign_cart_item = Data_Logic.get_foreign(Data_Value_Type.ITEMS,Store_Table.CART_ITEM,Store_Field.CART_ID,Data_Field.ID,{title:'cart_items',foreigns:[foreign_cart_item_parent]});
 //let foreign_cart_item = Data_Logic.get_foreign(Data_Value_Type.ITEMS,Store_Table.CART_ITEM,Store_Field.CART_ID,Data_Field.ID,{title:'cart_items'});
                 //Log.w('www',foreign_cart_item);
@@ -137,6 +137,7 @@ describe('connect', function(){ this.timeout(25000);
                 let cart_number = 'CA-71893';
                 const [biz_error,biz_data] = await Data.get(database,Store_Table.CART,cart_number,cart_option);
                 Log.w('33_data',biz_data);
+                Log.w('33_data',biz_data.cart_items);
                 //Log.w('33_data',biz_data.cart_items.length);
             // -- CART-GET-FOREIGN-END -- //
 
