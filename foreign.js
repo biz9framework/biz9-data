@@ -36,7 +36,8 @@ class Foreign {
                                 }else if(search_item.value_type == Data_Value_Type.COUNT){
                                     data_item[search_item.title] = search_item.data;
                                 }else if(search_item.value_type == Data_Value_Type.ONE){
-                                    data_item[search_item.title] = search_item.items[0];
+                                    data_item[search_item.title] = Data_Logic.get_not_found(search_item.foreign_table,0);
+
                                 }
                             }
                     }
@@ -123,7 +124,6 @@ class Foreign {
                                     }
                                     sub_search_foreign_item = await run_search_item_data(database,cache,sub_search_foreign_item);
                                     for(const data_item of search_item.items){
-
                                         if(sub_search_foreign_item.value_type == Data_Value_Type.ITEMS){
                                             const match_items = sub_search_foreign_item.items.filter(item_find => item_find[sub_search_foreign_item.foreign_field] === data_item[sub_search_foreign_item.parent_field]);
                                             data_item[sub_search_foreign_item.title] = [];

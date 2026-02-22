@@ -17,7 +17,7 @@ const {Data_Logic,Data_Value_Type,Data_Table,Data_Field}=require("/home/think1/w
 - connect
 */
 /* --- TEST CONFIG START --- */
-const APP_ID = 'test-stage-feb19';
+const APP_ID = 'test-stage-feb22';
 /* --- TEST CONFIG END --- */
 
 /* --- DATA CONFIG START --- */
@@ -128,17 +128,16 @@ describe('connect', function(){ this.timeout(25000);
 
 
         // -- CART-GET-FOREIGN-START -- //
-                let foreign_user = Data_Logic.get_foreign(Data_Value_Type.ITEMS,User_Table.USER,Data_Field.ID,User_Field.USER_ID,{title:'user'});
-                let foreign_cart_item_parent = Data_Logic.get_foreign(Data_Value_Type.ONE,Store_Table.PRODUCT,Data_Field.ID,Data_Field.PARENT_ID,{title:'parent'});
-                let foreign_cart_item = Data_Logic.get_foreign(Data_Value_Type.ITEMS,Store_Table.CART_ITEM,Store_Field.CART_ID,Data_Field.ID,{title:'cart_items',foreigns:[foreign_cart_item_parent]});
+                let foreign_user = Data_Logic.get_foreign(Data_Value_Type.ONE,User_Table.USER,Data_Field.ID,User_Field.USER_ID,{title:'user'});
+                let foreign_cart_item_parent = Data_Logic.get_foreign(Data_Value_Type.ONE,Store_Table.PRODUCT,'Data_Field.ID',Data_Field.PARENT_ID,{title:'parent'});
+                let foreign_cart_item = Data_Logic.get_foreign(Data_Value_Type.ONE,Store_Table.CART_ITEM,Store_Field.CART_ID,Data_Field.ID,{title:'cart_items',foreigns:[foreign_cart_item_parent]});
 //let foreign_cart_item = Data_Logic.get_foreign(Data_Value_Type.ITEMS,Store_Table.CART_ITEM,Store_Field.CART_ID,Data_Field.ID,{title:'cart_items'});
                 //Log.w('www',foreign_cart_item);
                 let cart_option = { id_field:Store_Field.CART_NUMBER,foreigns:[foreign_user,foreign_cart_item] };
-                let cart_number = 'CA-71893';
+                let cart_number = 'CA-16399';
                 const [biz_error,biz_data] = await Data.get(database,Store_Table.CART,cart_number,cart_option);
                 Log.w('33_data',biz_data);
                 Log.w('33_data',biz_data.cart_items);
-                //Log.w('33_data',biz_data.cart_items.length);
             // -- CART-GET-FOREIGN-END -- //
 
 
