@@ -32,10 +32,10 @@ class Join {
                                     if(biz_error){
                                         error=Log.append(error,biz_error);
                                     }else{
-                                        search_item.data[search_item.title+'_item_count'] = item_count;
-                                        search_item.data[search_item.title+'_page_count'] = page_count;
-                                        search_item.data[search_item.title+'_search'] = search;
-                                        search_item.data[search_item.title+"_"+Data_Field.ITEMS] = items;
+                                        search_item.data['count'] = item_count;
+                                        search_item.data['page_count'] = page_count;
+                                        search_item.data['search'] = search;
+                                        search_item.data[Data_Field.ITEMS] = items;
                                     }
                                     resolve();
                                 }).catch(err => {
@@ -50,7 +50,7 @@ class Join {
                                     if(biz_error){
                                         error=Log.append(error,biz_error);
                                     }else{
-                                        search_item.data[Str.get_title_url(search_item.title)] = biz_data.count;
+                                        search_item.data = biz_data.count;
                                         resolve();
                                     }
                                 }).catch(err => {
@@ -66,7 +66,7 @@ class Join {
                                         error=Log.append(error,biz_error);
                                     }else{
                                         let one_item = items.length>0 ? items[0] : Data_Logic.get_not_found(search_item.search.table,0);
-                                        search_item.data[search_item.title] = one_item;
+                                        search_item.data = one_item;
                                         resolve();
                                     }
                                 }).catch(err => {

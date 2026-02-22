@@ -11,7 +11,7 @@ const {Log,Num,Str} = require("biz9-utility");
 const {Store_Field,Store_Type,Store_Table,Store_Logic}=require("/home/think1/www/doqbox/biz9-framework/biz9-store/source");
 const {Cart_Data}=require("/home/think1/www/doqbox/biz9-framework/biz9-store-data/source");
 const {User_Field,User_Type,User_Table,User_Logic}=require("/home/think1/www/doqbox/biz9-framework/biz9-user/source");
-const {Data_Logic,Data_Value_Type,Table,Data_Field}=require("/home/think1/www/doqbox/biz9-framework/biz9-data-logic/source");
+const {Data_Logic,Data_Value_Type,Data_Table,Data_Field}=require("/home/think1/www/doqbox/biz9-framework/biz9-data-logic/source");
 /*
  * availble tests
 - connect
@@ -62,8 +62,8 @@ describe('connect', function(){ this.timeout(25000);
                 //let parent = Data_Logic.get(Project_Table.PRODUCT,'833');
                 //const [error,biz_data] = await Data.post(database,parent.table,parent,option);
                 // -- sub items --
-                //let sub_items = Data_Logic.get(Project_Table.BLANK,0,{count:3,parent:parent,data:{field_1:'value_'+Num.get_id(),field_2:'value_'+Num.get_id()}});
-                let sub_items = Data_Logic.get(Project_Table.PRODUCT,0,{count:5,data:Store_Logic.get_test_product()});
+                let sub_items = Data_Logic.get(Project_Table.BLANK,0,{count:3,parent:parent,data:{field_1:'value_'+Num.get_id(),field_2:'value_'+Num.get_id()}});
+                //let sub_items = Data_Logic.get(Project_Table.PRODUCT,0,{count:5,data:Store_Logic.get_test_product()});
                 //let sub_items = Data_Logic.get(Project_Table.PRODUCT,0,{count:1,data:User_Logic.get_test_user()});
                 const [error,biz_data] = await Data.post_items(database,sub_items);
                 */
@@ -128,12 +128,12 @@ describe('connect', function(){ this.timeout(25000);
 
 
         // -- CART-GET-FOREIGN-START -- //
-                let foreign_user = Data_Logic.get_foreign(Data_Value_Type.COUNT,User_Table.USER,Data_Field.ID,User_Field.USER_ID,{title:'user'});
-                let foreign_cart_item_parent = Data_Logic.get_foreign(Data_Value_Type.ITEMS,Store_Table.PRODUCT,Data_Field.ID,Data_Field.PARENT_ID,{title:'parent'});
-                let foreign_cart_item = Data_Logic.get_foreign(Data_Value_Type.ONE,Store_Table.CART_ITEM,Store_Field.CART_ID,Data_Field.ID,{title:'cart_items',foreigns:[foreign_cart_item_parent]});
+                let foreign_user = Data_Logic.get_foreign(Data_Value_Type.ITEMS,User_Table.USER,Data_Field.ID,User_Field.USER_ID,{title:'user'});
+                let foreign_cart_item_parent = Data_Logic.get_foreign(Data_Value_Type.COUNT,Store_Table.PRODUCT,Data_Field.ID,Data_Field.PARENT_ID,{title:'parent'});
+                let foreign_cart_item = Data_Logic.get_foreign(Data_Value_Type.ITEMS,Store_Table.CART_ITEM,Store_Field.CART_ID,Data_Field.ID,{title:'cart_items',foreigns:[foreign_cart_item_parent]});
 //let foreign_cart_item = Data_Logic.get_foreign(Data_Value_Type.ITEMS,Store_Table.CART_ITEM,Store_Field.CART_ID,Data_Field.ID,{title:'cart_items'});
                 //Log.w('www',foreign_cart_item);
-                let cart_option = { id_field:Store_Field.CART_NUMBER,foreigns:[foreign_user] };
+                let cart_option = { id_field:Store_Field.CART_NUMBER,foreigns:[foreign_user,foreign_cart_item] };
                 let cart_number = 'CA-71893';
                 const [biz_error,biz_data] = await Data.get(database,Store_Table.CART,cart_number,cart_option);
                 Log.w('33_data',biz_data);
