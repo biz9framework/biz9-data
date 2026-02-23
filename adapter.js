@@ -382,8 +382,8 @@ class Adapter {
                 async function(call) {
                     var list = [];
                     for(const item of item_id_list) {
-                        [error,data] = await Adapter.delete_item_cache_db(database,cache,table,item.id);
-                        item_data_new_list.push(data);
+                        [biz_error,biz_data] = await Adapter.delete_item_cache_db(database,cache,table,item.id);
+                        item_data_new_list.push(biz_data);
                     };
                 },
             ]).then(result => {
@@ -460,6 +460,7 @@ class Adapter {
                 },
                 async function(call){
                     const [biz_error,biz_data] = await Mongo.delete_item(database,table,id);
+                    data[Data_Type.RESULT_OK_DELETE_COUNT] = biz_data.deletedCount;
                     if(!biz_error){
                         data[Data_Type.RESULT_OK_DELETE_DATABASE] = true;
                     }

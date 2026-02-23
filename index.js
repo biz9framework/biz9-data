@@ -240,6 +240,7 @@ class Data {
             let data = Data_Logic.get(table,0,{data:{filter:filter}});
             let cache = {};
             data[Data_Type.RESULT_OK_DELETE] = false;
+            data[Data_Type.RESULT_OK_DELETE_COUNT] = 0;
             let delete_item_query = { $or: [] };
             let delete_group_list = [];
             let delete_items = [];
@@ -272,6 +273,9 @@ class Data {
                         delete_item_query.$or.push(query_field);
                         data[Data_Type.RESULT_OK_DELETE] = true;
                         const [biz_error,biz_data] = await Adapter.delete_item(database,cache,data_item.table,data_item.id);
+                        if(parseInt(biz_data[Data_Type.RESULT_OK_DELETE_COUNT]) > 0){
+                            data[Data_Type.RESULT_OK_DELETE_COUNT] = data[Data_Type.RESULT_OK_DELETE_COUNT] + parseInt(biz_data[Data_Type.RESULT_OK_DELETE_COUNT]);
+                        }
                     }
                 },
                 //get_group_ids
@@ -737,6 +741,7 @@ class Data {
             data[Data_Type.RESULT_OK_DELETE_CACHE] = false;
             data[Data_Type.RESULT_OK_DELETE_DATABASE] = false;
             data[Data_Type.RESULT_OK_GROUP_DELETE] = false;
+            data[Data_Type.RESULT_OK_DELETE_COUNT] = 0;
             option = !Obj.check_is_empty(option) ? option : {delete_group:true};
             let delete_group_list = [];
             async.series([
@@ -750,6 +755,7 @@ class Data {
                         error=Log.append(error,biz_error);
                     }else{
                         if(biz_data[Data_Type.RESULT_OK_DELETE]){
+                            data[Data_Type.RESULT_OK_DELETE_COUNT]  = biz_data[Data_Type.RESULT_OK_DELETE_COUNT];
                             data[Data_Type.RESULT_OK_DELETE]  = true;
                             data[Data_Type.RESULT_OK_DELETE_CACHE] = true;
                             data[Data_Type.RESULT_OK_DELETE_DATABASE] = true;
