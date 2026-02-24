@@ -112,7 +112,7 @@ class Data {
            - reset
            - clean
            - delete_cache
-        */
+           */
         return new Promise((callback) => {
             let error = null;
             let cache = {};
@@ -231,8 +231,8 @@ class Data {
     static delete_search = async (database,table,filter,option) => {
         /* options
            - delete_group
-        */
- return new Promise((callback) => {
+           */
+        return new Promise((callback) => {
             let error = null;
             let data = Data_Logic.get(table,0,{data:{filter:filter}});
             let cache = {};
@@ -345,7 +345,7 @@ class Data {
         /*
          * options
          * - copy_group
-        */
+         */
         return new Promise((callback) => {
             let error = null;
             let cache = {};
@@ -427,7 +427,7 @@ class Data {
            - groups
            - foreigns
            - joins
-        */
+           */
         return new Promise((callback) => {
             let error= null;
             let cache = null;
@@ -548,7 +548,7 @@ class Data {
            - foreigns
            - joins
            - groups
-        */
+           */
         return new Promise((callback) => {
             let data = {table:table,item_count:0,page_count:1,filter:{},items:[]};
             let cache = null;
@@ -644,7 +644,7 @@ class Data {
     static delete = async(database,table,id,option) => {
         /* options
            - delete_group
-        */
+           */
         return new Promise((callback) => {
             let error = null;
             let cache = null;
@@ -698,10 +698,10 @@ class Data {
     };
     //9_data_post_bulk
     static post_bulk = async (database,table,items) => {
-     /* options
+        /* options
            - none
-        */
-    return new Promise((callback) => {
+           */
+        return new Promise((callback) => {
             let error = null;
             let data = Data_Logic.get(table,0);
             async.series([
