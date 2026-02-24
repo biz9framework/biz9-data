@@ -712,6 +712,6 @@ class Data {
     };
 }
 module.exports = {
-    Data
-    Database,
+    Data,
+    Database
 };
