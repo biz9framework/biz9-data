@@ -15,14 +15,9 @@ const {Join} = require('./join.js');
 const {Adapter}  = require('./adapter.js');
 class Database {
     static get = async (data_config,option) => {
-        /* return
-         * - n/a
-         * option params
-         * - biz9_config_file
-         *   - source file for data config. / obj / ex. root folder biz9_config.
-         * - app_id
-         *   - database id. / string / ex. project_500
-         */
+    /* options
+        - none
+    */
         let error=null;
         let data={};
         return new Promise((callback) => {
@@ -53,16 +48,10 @@ class Database {
         });
     }
     static delete = async (database) => {
-        /* option params
-         * - database
-         *      - connected database. / obj / ex. mongo db connection.
-         * return objects
-         *  - database
-         *      - Disconnect database. / obj / ex. null. dispose db obj.
-         *  - app_id
-         *      - database id. / string / ex. project_500
-         */
-        let error=null;
+        /* options
+            - none
+        */
+       let error=null;
         return new Promise((callback) => {
             Adapter.delete_database(data_config).then(([biz_error,biz_data])=>{
                 if(biz_error){
@@ -79,10 +68,10 @@ class Database {
         });
     }
     static info = async (database,option) => {
-        /* return
-         * tbd
-         */
-        return new Promise((callback) => {
+        /* options
+            - none
+        */
+    return new Promise((callback) => {
             let data = [];
             let error = null;
             option = !Obj.check_is_empty(option) ? option : {};
@@ -112,7 +101,7 @@ class Data {
            - reset
            - clean
            - delete_cache
-           */
+        */
         return new Promise((callback) => {
             let error = null;
             let cache = {};
@@ -313,7 +302,7 @@ class Data {
     //9_count
     static count = async (database,table,filter) => {
         /* option params
-         * none
+            * none
          */
         return new Promise((callback) => {
             let error = null;
@@ -723,6 +712,6 @@ class Data {
     };
 }
 module.exports = {
-    Database,
     Data
+    Database,
 };
