@@ -106,15 +106,13 @@ class Database {
     }
 }
 class Data {
-    //9_data_post
+    //9_post
     static post = async (database,table,data,option) => {
-        /* option params
-         * Fields
-           - overwrite / obj_type. bool / ex. true,false / default. false -- post brand new obj.deleteing old.
-           - reset / obj_type. bool / ex. true,false / default. false -- get update item aka recently saved item.
-           - clean / obj_type. bool / ex. true,false / default. false -- checks and removes any list, groups, etc.
-           - delete_cache / obj_type. bool / ex. true,false / default. false -- clear cache.
-           */
+        /* options
+           - reset
+           - clean
+           - delete_cache
+        */
         return new Promise((callback) => {
             let error = null;
             let cache = {};
@@ -146,7 +144,7 @@ class Data {
                 },
                 //delete cache item
                 function(call){
-                    if(option.overwrite || option.delete_cache){
+                    if(option.delete_cache){
                         Adapter.delete_item_cache(database,cache,table,data.id).then(([biz_error,biz_data])=>{
                             if(biz_error){
                                 error=Log.append(error,biz_error);
@@ -200,7 +198,7 @@ class Data {
             });
         });
     };
-    //9_data_post_items - 9_post_items
+    //9_post_items
     static post_items = async (database,data_items) => {
         /* option params
          * n/a
@@ -229,13 +227,12 @@ class Data {
             });
         });
     };
-
-    //9_data_delete_search //9_delete_search
+    //9_delete_search
     static delete_search = async (database,table,filter,option) => {
-        /* option params
-         * n/a
-         */
-        return new Promise((callback) => {
+        /* options
+           - delete_group
+        */
+ return new Promise((callback) => {
             let error = null;
             let data = Data_Logic.get(table,0,{data:{filter:filter}});
             let cache = {};
@@ -278,7 +275,6 @@ class Data {
                         }
                     }
                 },
-                //get_group_ids
                 function(call){
                     if(option.delete_group && delete_item_query.$or.length > 0){
                         let search = Data_Logic.get_search(table,{},{},1,0,{field:{id:1,title:1,table:1}});
@@ -314,10 +310,10 @@ class Data {
             });
         });
     };
-    //9_data_count 9_count
+    //9_count
     static count = async (database,table,filter) => {
         /* option params
-         * n/a
+         * none
          */
         return new Promise((callback) => {
             let error = null;
@@ -344,28 +340,19 @@ class Data {
             });
         });
     };
-
-    //9_data_copy //9_copy
+    //9_copy
     static copy = async (database,table,id,option) => {
         /*
-         * params
-         * - title_tbd
-         *   - description. / obj_type / ex.
          * options
          * - copy_group
-         *   - description. / obj_type / ex. true/false
-         * return
-         * - title_tbd
-         *   - description. / obj_type / ex.
-         *
-         */
+        */
         return new Promise((callback) => {
             let error = null;
             let cache = {};
             let data = Data_Logic.get(table,id);
             let top_data = Data_Logic.get(table,0);
             let copy_data = Data_Logic.get(table,0);
-            option = !Obj.check_is_empty(option) ? option : {};
+            option = !Obj.check_is_empty(option) ? option : {copy_group:true};
             async.series([
                 async function(call) {
                     const [biz_error,biz_data] = await Cache.get(database.data_config);
@@ -399,7 +386,7 @@ class Data {
                     }
                 },
                 async function(call){
-                    if(top_data.id && top_data.groups.length > 0){
+                    if(top_data.id && top_data.groups.length > 0 && option.copy_group){
                         copy_data.groups = [];
                         let post_groups = [];
                         for(const group of top_data.groups){
@@ -430,48 +417,17 @@ class Data {
             });
         });
     };
-    //9_data_get
+    //9_get
     static get = async(database,table,id,option) => {
         /* Options
-         * ID
-           - id_field / table. str / ex. title_url / default. id
-         * Cache
-           - cache_delete / table. bool / ex. true/false / default. false
-         * Fields
-           - field / table. obj / ex. {field_show_1:1,field_hide_2:0} / default. throw error
-         * Sub Values ( Page Edit )
-           - sub_value table type. bool / ex. true/false / default. throw error
-         *  Group
-            -- groups / table. obj. group_search / ex. [
-                    {
-                        value_type:Value_Type.SEARCH_ITEMS,Value_Type.SEARCH_ONE,
-                        field:{field_show_1:1,field_hide_2:0},
-                        title:{group_show_1:1,group_hide_2:0},
-                        page_current:1,
-                        page_size:0,
-                    }];
-         *  Foreign
-            -- foreigns / value_type. obj. foreign_search / ex. [
-                    {
-                        value_type:Value_Type.SEARCH_ITEMS,Value_Type.SEARCH_ONE,
-                        foreign_table:Type.DATA_PRODUCT,
-                        foreign_field:'id',
-                        parent_field:'parent_id',
-                        field:{field_show_1:1,field_hide_2:0},
-                        title:'field_title',
-                        page_current:1,
-                        page_size:0,
-                    }];
-         *  Join
-            -- joins / value_type. obj. join_search / ex. [
-                    {
-                        value_type:Value_Type.SEARCH_ITEMS,Value_Type.SEARCH_ONE
-                        search:search_obj,
-                        title:'field_title',
-                        page_current:1,
-                        page_size:0
-                    }];
-                    */
+           - id_field
+           - cache_delete
+           - field
+           - sub_value
+           - groups
+           - foreigns
+           - joins
+        */
         return new Promise((callback) => {
             let error= null;
             let cache = null;
@@ -513,7 +469,7 @@ class Data {
                         error=Log.append(error,err);
                     });
                 },
-                //9_get_item_join 9_join get_item
+                //9_get_join 9_join
                 function(call){
                     if(option.joins){
                         Join.get_data(database,cache,option).then(([biz_error,biz_data])=>{
@@ -533,7 +489,7 @@ class Data {
                         call();
                     }
                 },
-                //9_group //9_get_group get_item_group
+                //9_group 9_item_group
                 function(call){
                     if(option.groups && data.id){
                         Group.get_data(database,cache,[data],option).then(([biz_error,biz_data])=>{
@@ -551,7 +507,7 @@ class Data {
                         call();
                     }
                 },
-                //9_foreigns //9_get_foreigns get_item_foreign
+                //9_foreigns 9_item_foreign
                 function(call){
                     if(option.foreigns && data.id){
                         Foreign.get_data(database,cache,[data],option).then(([biz_error,biz_data])=>{
@@ -579,58 +535,20 @@ class Data {
             ]).then(result => {
                 callback([error,data]);
             }).catch(err => {
-                Log.error("ERROR-PORTAL-GET",err);
+                Log.error("DATA-GET-ERROR",err);
                 callback([error,{}]);
             });
         });
     };
-    //9_data_search //9_search
+    //9_search
     static search = (database,table,filter,sort_by,page_current,page_size,option) => {
-        /* OPTIONS - START
-         * Fields
-           - field / table. obj / ex. {field_show_1:1,field_hide_2:0} / default. throw error
-         * Distinct
-           - distinct / table. obj.
-                    {
-                        field:'title'
-                        sort_by:Value_Type.SEARCH_SORT_BY_ASC,
-                    };
-         *  Foreign
-            -- foreigns / value_type. obj items / ex. [
-                    {
-                        value_type:Value_Type.SEARCH_ITEMS,Value_Type.SEARCH_ONE,Value_Type.SEARCH_ONE
-                        foreign_table:Type.DATA_ITEM,
-                        foreign_field:'id',
-                        parent_field:'parent_id',
-                        field:{field_show_1:1,field_hide_2:0},
-                        title:'field_title',
-                    }];
-         *  Join
-            -- joins / value_type. obj. join_search / ex. [
-                    {
-                        value_type:Value_Type.SEARCH_ITEMS,Value_Type.SEARCH_ONE
-                        search:search_obj,
-                        title:'field_title',
-                        page_current:1,
-                        page_size:0
-                    }];
-         *  Group
-            -- groups / value_type. obj. group_search / ex. [
-                    {
-                        value_type:Value_Type.SEARCH_ITEMS,Value_Type.SEARCH_ONE,
-                        field:{field_show_1:1,field_hide_2:0},
-                        title:{group_show_1:1,group_hide_2:0},
-                        page_current:1,
-                        page_size:0,
-                    }];
-
-         * Return
-            - value_type
-            - item_count
-            - page_count
-            - filter
-            - items
-        /* OPTIONS - END*/
+        /* options
+           - field
+           - distinct
+           - foreigns
+           - joins
+           - groups
+        */
         return new Promise((callback) => {
             let data = {table:table,item_count:0,page_count:1,filter:{},items:[]};
             let cache = null;
@@ -658,7 +576,7 @@ class Data {
                         error=Log.append(error,err);
                     });
                 },
-                //9_get_items_join 9_join get_itemm 9_search_join
+                //9_join 9_item_join
                 function(call){
                     if(option.joins){
                         Join.get_data(database,cache,option).then(([biz_error,biz_data])=>{
@@ -678,7 +596,7 @@ class Data {
                         call();
                     }
                 },
-                //9_foreigns //9_get_foreigns get_items_foreign 9_search_foreign
+                //9_foreign //9_item_foreign
                 function(call){
                     if(option.foreigns && data[Data_Field.ITEMS].length > 0){
                         Foreign.get_data(database,cache,data[Data_Field.ITEMS],option).then(([biz_error,biz_data])=>{
@@ -696,7 +614,7 @@ class Data {
                         call();
                     }
                 },
-                //9_get_items_group 9_group
+                //9_group 9_item_group
                 function(call){
                     if(option.groups && data[Data_Field.ITEMS].length>0){
                         Group.get_data(database,cache,data[Data_Field.ITEMS],option).then(([biz_error,biz_data])=>{
@@ -717,22 +635,16 @@ class Data {
             ]).then(result => {
                 callback([error,data]);
             }).catch(err => {
-                Log.error('DATA-PORTAL-SEARCH-ERROR',err);
+                Log.error('DATA-SEARCH-ERROR',err);
                 callback([err,[]]);
             });
         });
     };
-    //9_data_delete 9_delete
+    //9_delete
     static delete = async(database,table,id,option) => {
-        /*
-         * Params
-         * - title
-         *   - description / table / example / required
-         * Option
-         *   - delete_group / bool / true/false / default: false - delete Type.DATA_GROUP
-         * Return
-         * - tbd
-         */
+        /* options
+           - delete_group
+        */
         return new Promise((callback) => {
             let error = null;
             let cache = null;
@@ -786,10 +698,10 @@ class Data {
     };
     //9_data_post_bulk
     static post_bulk = async (database,table,items) => {
-        /* option params
-         * n/a
-         */
-        return new Promise((callback) => {
+     /* options
+           - none
+        */
+    return new Promise((callback) => {
             let error = null;
             let data = Data_Logic.get(table,0);
             async.series([
