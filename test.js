@@ -55,18 +55,16 @@ describe('connect', function(){ this.timeout(25000);
                 //-->
                 let print_test = true;
                 // -- POST-START --//
-                /*
                 let option = {};
                 // -- parent --
                 //Log.w('33_parent',parent);
-                //let parent = Data_Logic.get(Project_Table.PRODUCT,0);
-                //const [error,biz_data] = await Data.post(database,parent.table,parent,option);
+                let parent = Data_Logic.get(Project_Table.PRODUCT,0);
+                const [error,biz_data] = await Data.post(database,parent.table,parent,option);
                 // -- sub items --
                 //let sub_items = Data_Logic.get(Project_Table.BLANK,0,{count:10,parent:parent,data:{field_1:'value_'+Num.get_id(),field_2:'value_'+Num.get_id()}});
-                let sub_items = Data_Logic.get(Project_Table.PRODUCT,0,{count:10,data:Store_Logic.get_test_product()});
+                //let sub_items = Data_Logic.get(Project_Table.PRODUCT,0,{count:10,data:Store_Logic.get_test_product()});
                 //let sub_items = Data_Logic.get(Project_Table.PRODUCT,0,{count:1,data:User_Logic.get_test_user()});
-                const [error,biz_data] = await Data.post_items(database,sub_items);
-                */
+                //const [error,biz_data] = await Data.post_items(database,sub_items);
                 // -- POST-END --//
                 //-- GET START --//
                 /*
@@ -95,12 +93,14 @@ describe('connect', function(){ this.timeout(25000);
                 //const [error,biz_data] = await Data.count(database,search.table,search.filter);
                 //-- SEARCH START --//
                 // -- DELETE-START --//
+                /*
                 let option = {};
                 // -- parent --
                 //let parent = Data_Logic.get(Project_Table.PRODUCT,'255');
                 //const [error,biz_data] = await Data.delete(database,parent.table,parent.id,option);
                 let search = Data_Logic.get_search(Project_Table.PRODUCT,{},{},1,0,{});
                 const [error,biz_data] = await Data.delete_search(database,search.table,search.filter,search.sort_by,search.page_current,search.page_size,option);
+                */
                 // -- DELETE-END --//
 
         // -- CART-POST-TEST-- START

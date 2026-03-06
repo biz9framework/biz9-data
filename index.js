@@ -101,6 +101,7 @@ class Data {
            - reset
            - clean
            - delete_cache
+           - overwrite
         */
         return new Promise((callback) => {
             let error = null;
@@ -133,7 +134,7 @@ class Data {
                 },
                 //delete cache item
                 function(call){
-                    if(option.delete_cache){
+                    if(option.delete_cache || option.overwrite){
                         Adapter.delete_item_cache(database,cache,table,data.id).then(([biz_error,biz_data])=>{
                             if(biz_error){
                                 error=Log.append(error,biz_error);
@@ -466,7 +467,8 @@ class Data {
                                 error=Log.append(error,biz_error);
                             }else{
                                 for(const search_item of biz_data){
-                                    data[search_item.title] = search_item.data;
+                                    data[search_item.title+"_"+Data_Type.INFO] = search_item.data;
+                                    data[search_item.title] = search_item.data.items;
                                 }
                                 call();
                             }
@@ -565,7 +567,7 @@ class Data {
                         error=Log.append(error,err);
                     });
                 },
-                //9_join 9_item_join
+                //9_items_join 9_search_join
                 function(call){
                     if(option.joins){
                         Join.get_data(database,cache,option).then(([biz_error,biz_data])=>{
@@ -573,7 +575,8 @@ class Data {
                                 error=Log.append(error,biz_error);
                             }else{
                                 for(const search_item of biz_data){
-                                    data[search_item.title] = search_item.data;
+                                    data[search_item.title+"_"+Data_Type.INFO] = search_item.data;
+                                    data[search_item.title] = search_item.data.items;
                                 }
                                 call();
                             }
