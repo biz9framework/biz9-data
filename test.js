@@ -17,7 +17,7 @@ const {Data_Logic,Data_Value_Type,Data_Table,Data_Field}=require("/home/think1/w
 - connect
 */
 /* --- TEST CONFIG START --- */
-const APP_ID = 'test-stage-feb23';
+const APP_ID = 'test-stage-march7';
 /* --- TEST CONFIG END --- */
 
 /* --- DATA CONFIG START --- */
@@ -34,6 +34,7 @@ const DATA_CONFIG ={
 };
 class Project_Table{
     static BLANK = 'blank_biz';
+    static BLOG_POST = 'blog_post_biz';
     static PRODUCT = 'product_biz';
     static GROUP = 'group_biz';
     static IMAGE = 'image_biz';
@@ -55,6 +56,7 @@ describe('connect', function(){ this.timeout(25000);
                 //-->
                 let print_test = true;
                 // -- POST-START --//
+                /*
                 let option = {};
                 // -- parent --
                 //Log.w('33_parent',parent);
@@ -65,20 +67,26 @@ describe('connect', function(){ this.timeout(25000);
                 //let sub_items = Data_Logic.get(Project_Table.PRODUCT,0,{count:10,data:Store_Logic.get_test_product()});
                 //let sub_items = Data_Logic.get(Project_Table.PRODUCT,0,{count:1,data:User_Logic.get_test_user()});
                 //const [error,biz_data] = await Data.post_items(database,sub_items);
+                */
                 // -- POST-END --//
                 //-- GET START --//
                 /*
-                    //let foreign_2 = Data_Logic.get_foreign(Data_Value_Type.ITEMS,Project_Table.IMAGE,Data_Field.PARENT_ID,Field.ID,{title:'images'});
-                    //let join_search_1 = Data_Logic.get_search(Project_Table.BLANK,{},{},1,0,{});
-                    //let join_1 = Data_Logic.get_join(Data_Value_Type.ITEMS,join_search_1,{foreigns:[foreign_2]});
-                    //let foreign_1 = Data_Logic.get_foreign(Data_Value_Type.ITEMS,Project_Table.BLANK,Data_Field.PARENT_ID,Field.ID);
-                    //let group_1 = Data_Logic.get_group({foreigns:[foreign_2]});//Data_Logic.get_group();
-                let option = {};
-                //let option = {joins:[join_1]};//{groups:[group_1]};//{foreigns:[foreign_1]};
-                let parent = Data_Logic.get(Project_Table.PRODUCT,'833');
+                //let foreign_2 = Data_Logic.get_foreign(Data_Value_Type.ITEMS,Project_Table.IMAGE,Data_Field.PARENT_ID,Field.ID,{title:'images'});
+                //let join_search_1 = Data_Logic.get_search(Project_Table.BLANK,{},{},1,0,{});
+                //let join_1 = Data_Logic.get_join(Data_Value_Type.ITEMS,join_search_1,{foreigns:[foreign_2]});
+                //let foreign_1 = Data_Logic.get_foreign(Data_Value_Type.ITEMS,Project_Table.BLANK,Data_Field.PARENT_ID,Field.ID);
+                let group_1 = Data_Logic.get_group();//Data_Logic.get_group();
+                //let option = {};
+                let option = {groups:[group_1]};//{{joins:[join_1]};foreigns:[foreign_1]};
+                let parent = Data_Logic.get(Project_Table.BLOG_POST,'899');
                 const [error,biz_data] = await Data.get(database,parent.table,parent.id,option);
                 */
                 //-- GET END --//
+                //-- COPY START --//
+                let option = {};
+                let parent = Data_Logic.get(Project_Table.BLOG_POST,'844');
+                const [error,biz_data] = await Data.copy(database,parent.table,parent.id,option);
+                //-- COPY END --//
                 //-->
                 //-- SEARCH START --//
                 /*
@@ -103,8 +111,8 @@ describe('connect', function(){ this.timeout(25000);
                 */
                 // -- DELETE-END --//
 
-        // -- CART-POST-TEST-- START
-        /*
+                // -- CART-POST-TEST-- START
+                /*
         let user = Data_Logic.get(User_Table.USER,'228');
         let cart = Store_Logic.get_cart(user.id,{cart_code:'CA'});
         let product_1 = Data_Logic.get(Project_Table.PRODUCT,'518');
@@ -122,11 +130,11 @@ describe('connect', function(){ this.timeout(25000);
         const [biz_error,biz_data] = await Cart_Data.post(database,cart);
         Log.w('11_cart_post',biz_data);
         */
-        // -- CART-POST-TEST-2 -- END
+                // -- CART-POST-TEST-2 -- END
 
 
-        // -- CART-GET-FOREIGN-START -- //
-        /*
+                // -- CART-GET-FOREIGN-START -- //
+                /*
                 let foreign_user = Data_Logic.get_foreign(Data_Value_Type.ONE,User_Table.USER,Data_Field.ID,User_Field.USER_ID,{title:'user'});
                 let foreign_cart_item_parent = Data_Logic.get_foreign(Data_Value_Type.ONE,Store_Table.PRODUCT,'Data_Field.ID',Data_Field.PARENT_ID,{title:'parent'});
                 let foreign_cart_item = Data_Logic.get_foreign(Data_Value_Type.ONE,Store_Table.CART_ITEM,Store_Field.CART_ID,Data_Field.ID,{title:'cart_items',foreigns:[foreign_cart_item_parent]});

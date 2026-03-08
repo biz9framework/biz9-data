@@ -375,14 +375,15 @@ class Data {
                         copy_data = Data_Logic.get_not_found(table,id);
                     }
                 },
+                //group
                 async function(call){
                     if(top_data.id && top_data.groups.length > 0 && option.copy_group){
                         copy_data.groups = [];
                         let post_groups = [];
                         for(const group of top_data.groups){
-                            let copy_group = Data_Logic.copy(Data_Field.GROUP,group);
-                            copy_group[Data_Field.TITLE] = 'Copy '+group[Data_Field.TITLE];
-                            copy_group[Data_Field.TITLE_URL] = 'copy_'+group[Data_Field.TITLE_URL];
+                            let copy_group = Data_Logic.copy(Data_Table.GROUP,group);
+                            copy_group[Data_Field.TITLE] = group[Data_Field.TITLE];
+                            copy_group[Data_Field.TITLE_URL] = group[Data_Field.TITLE_URL];
                             copy_group[Data_Field.SOURCE_ID] = group.id;
                             copy_group[Data_Field.SOURCE_TABLE] = group.table;
 
@@ -397,6 +398,7 @@ class Data {
                             copy_data.groups=biz_data;
                         }
                     }
+                    Log.w('rrrr',copy_data);
                 },
             ]).then(result => {
                 data = copy_data;

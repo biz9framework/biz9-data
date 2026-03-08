@@ -382,7 +382,7 @@ class Adapter {
                 async function(call) {
                     var list = [];
                     for(const item of item_id_list) {
-                        [biz_error,biz_data] = await Adapter.delete_item_cache_db(database,cache,table,item.id);
+                        const [biz_error,biz_data] = await Adapter.delete_item_cache_db(database,cache,table,item.id);
                         item_data_new_list.push(biz_data);
                     };
                 },

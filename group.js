@@ -71,9 +71,7 @@ class Group {
                         for(const search_item of group_search_items){
                             const match_items = search_item.items.filter(item_find => item_find.parent_id === data_item.id);
                             for(const group of match_items){
-                                if(!data_item[Str.get_title_url(group.title)]){
-                                    data_item[Str.get_title_url(group.title)] = [];
-                                }
+                                data_item[Str.get_title_url(group.title)] = [];
                                 data_item[Str.get_title_url(group.title)].push(group);
                                 data_item.groups.push(group);
                             }
