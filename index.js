@@ -469,7 +469,7 @@ class Data {
                                 error=Log.append(error,biz_error);
                             }else{
                                 for(const search_item of biz_data){
-                                    data[search_item.title+"_"+Data_Type.INFO] = search_item.data;
+                                    data[search_item.title+"_"+Data_Type.JOIN] = search_item.data;
                                     data[search_item.title] = search_item.data.items;
                                 }
                                 call();
@@ -577,7 +577,7 @@ class Data {
                                 error=Log.append(error,biz_error);
                             }else{
                                 for(const search_item of biz_data){
-                                    data[search_item.title+"_"+Data_Type.INFO] = search_item.data;
+                                    data[search_item.title+"_"+Data_Type.JOIN] = search_item.data;
                                     data[search_item.title] = search_item.data.items;
                                 }
                                 call();

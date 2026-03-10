@@ -7,8 +7,9 @@ Description: BiZ9 Framework: Data - Test
 const async = require('async');
 const assert = require('node:assert');
 const {Database,Data} = require(".");
-const {Log,Num,Str} = require("biz9-utility");
+const {Log,Num,Str,Obj} = require("biz9-utility");
 const {Store_Field,Store_Type,Store_Table,Store_Logic}=require("/home/think1/www/doqbox/biz9-framework/biz9-store/source");
+const {Website_Title,Form_Field,Website_Table}=require("/home/think1/www/doqbox/biz9-framework/biz9-website/source");
 const {Cart_Data}=require("/home/think1/www/doqbox/biz9-framework/biz9-store-data/source");
 const {User_Field,User_Type,User_Table,User_Logic}=require("/home/think1/www/doqbox/biz9-framework/biz9-user/source");
 const {Data_Logic,Data_Value_Type,Data_Table,Data_Field}=require("/home/think1/www/doqbox/biz9-framework/biz9-data-logic/source");
@@ -17,7 +18,7 @@ const {Data_Logic,Data_Value_Type,Data_Table,Data_Field}=require("/home/think1/w
 - connect
 */
 /* --- TEST CONFIG START --- */
-const APP_ID = 'test-stage-march7';
+const APP_ID = 'test-stage-march10';
 /* --- TEST CONFIG END --- */
 
 /* --- DATA CONFIG START --- */
@@ -54,7 +55,37 @@ describe('connect', function(){ this.timeout(25000);
             },
             async function(call){
                 //-->
-                let print_test = true;
+                let print_test = false;
+                //-- WEBSITE-PAGE-HOME START --//
+                let page_title = Str.get_title_url(Website_Title.PAGE_HOME);
+                // -- joins -- start
+                // -- product-popular
+                let join_product_popular = Data_Logic.get_join(Data_Value_Type.ITEMS,Data_Logic.get_search(Store_Table.PRODUCT,{},{view_count:-1},1,12),{title:'popular_products'});
+                // -- product-lastest
+                //let join_product_latest = Data_Logic.get_join(Data_Value_Type.ITEMS,Data_Logic.get_search(Store_Table.PRODUCT,{},{date_create:-1},1,12),{title:'latest_products'});
+                //let join_product_rating = Data_Logic.get_join(Data_Value_Type.ITEMS,Data_Logic.get_search(Store_Table.PRODUCT,{},{rating_avg:-1},1,12),{title:'top_products'});
+                //let join_product_trending = Data_Logic.get_join(Data_Value_Type.ITEMS,Data_Logic.get_search(Store_Table.PRODUCT,{},{view_count:-1},1,12),{title:'trending_products'});
+                let option = {
+                    joins:[
+                        join_product_popular
+/*
+                        join_product_latest,
+                        join_product_rating,
+                        join_product_trending,
+                        */
+                    ]};
+
+                option = Obj.merge(option,{id_field:Form_Field.TITLE_URL});
+
+                Log.w('join_product_popular',join_product_popular);
+
+                let parent = Data_Logic.get(Website_Table.PAGE,page_title);
+                const [error,biz_data] = await Data.get(database,parent.table,parent.id,option);
+
+                Log.w('33_data',biz_data);
+
+                //-- WEBSITE-PAGE-HOME END --//
+
                 // -- POST-START --//
                 /*
                 let option = {};
@@ -83,9 +114,11 @@ describe('connect', function(){ this.timeout(25000);
                 */
                 //-- GET END --//
                 //-- COPY START --//
+                /*
                 let option = {};
                 let parent = Data_Logic.get(Project_Table.BLOG_POST,'844');
                 const [error,biz_data] = await Data.copy(database,parent.table,parent.id,option);
+                */
                 //-- COPY END --//
                 //-->
                 //-- SEARCH START --//

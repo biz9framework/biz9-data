@@ -460,7 +460,7 @@ class Adapter {
                 },
                 async function(call){
                     const [biz_error,biz_data] = await Mongo.delete_item(database,table,id);
-                    data[Data_Type.RESULT_OK_DELETE_COUNT] = biz_data.deletedCount;
+                    data[Data_Type.RESULT_OK_DELETE_COUNT] = biz_data ? biz_data.deletedCount : 0;
                     if(!biz_error){
                         data[Data_Type.RESULT_OK_DELETE_DATABASE] = true;
                     }
