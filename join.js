@@ -6,7 +6,7 @@ Description: BiZ9 Framework: Data - Join
 */
 const async = require('async');
 const {Log,Str,Num,Obj,DateTime}=require("/home/think1/www/doqbox/biz9-framework/biz9-utility/source");
-const {Data_Value_Type,Data_Logic,Data_Field}=require("/home/think1/www/doqbox/biz9-framework/biz9-data-logic/source");
+const {Data_Value_Type,Data_Logic,Data_Field,Data_Table}=require("/home/think1/www/doqbox/biz9-framework/biz9-data-logic/source");
 const {Adapter}  = require('./adapter.js');
 const {Foreign} = require('./foreign.js');
 class Join {
@@ -131,7 +131,7 @@ class Join {
             search : join_item.search ? join_item.search : Data_Logic.get_search(Data_Table.BLANK,{},{},1,0),
             field : join_item.field ? join_item.field : null,
             distinct : join_item.distinct ? join_item.distinct : null,
-            title : join_item.title ? join_item.title : Str.get_title_url(Data_Logic.get_data_type_by_type(join_item.search.table,{plural:true})),
+            title : join_item.title ? join_item.title : Str.get_title_url(Data_Logic.get_table_by_name(join_item.table,{plural:true})),
             foreigns : join_item.foreigns ? join_item.foreigns : [],
             data : {},
             foreign_data : {}

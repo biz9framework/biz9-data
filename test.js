@@ -18,7 +18,7 @@ const {Data_Logic,Data_Value_Type,Data_Table,Data_Field}=require("/home/think1/w
 - connect
 */
 /* --- TEST CONFIG START --- */
-const APP_ID = 'test-stage-march10';
+const APP_ID = 'test-stage-march17';
 /* --- TEST CONFIG END --- */
 
 /* --- DATA CONFIG START --- */
@@ -37,6 +37,7 @@ class Project_Table{
     static BLANK = 'blank_biz';
     static BLOG_POST = 'blog_post_biz';
     static PRODUCT = 'product_biz';
+    static PAGE = 'page_biz';
     static GROUP = 'group_biz';
     static IMAGE = 'image_biz';
 }
@@ -56,36 +57,6 @@ describe('connect', function(){ this.timeout(25000);
             async function(call){
                 //-->
                 let print_test = false;
-                //-- WEBSITE-PAGE-HOME START --//
-                let page_title = Str.get_title_url(Website_Title.PAGE_HOME);
-                // -- joins -- start
-                // -- product-popular
-                let join_product_popular = Data_Logic.get_join(Data_Value_Type.ITEMS,Data_Logic.get_search(Store_Table.PRODUCT,{},{view_count:-1},1,12),{title:'popular_products'});
-                // -- product-lastest
-                //let join_product_latest = Data_Logic.get_join(Data_Value_Type.ITEMS,Data_Logic.get_search(Store_Table.PRODUCT,{},{date_create:-1},1,12),{title:'latest_products'});
-                //let join_product_rating = Data_Logic.get_join(Data_Value_Type.ITEMS,Data_Logic.get_search(Store_Table.PRODUCT,{},{rating_avg:-1},1,12),{title:'top_products'});
-                //let join_product_trending = Data_Logic.get_join(Data_Value_Type.ITEMS,Data_Logic.get_search(Store_Table.PRODUCT,{},{view_count:-1},1,12),{title:'trending_products'});
-                let option = {
-                    joins:[
-                        join_product_popular
-/*
-                        join_product_latest,
-                        join_product_rating,
-                        join_product_trending,
-                        */
-                    ]};
-
-                option = Obj.merge(option,{id_field:Form_Field.TITLE_URL});
-
-                Log.w('join_product_popular',join_product_popular);
-
-                let parent = Data_Logic.get(Website_Table.PAGE,page_title);
-                const [error,biz_data] = await Data.get(database,parent.table,parent.id,option);
-
-                Log.w('33_data',biz_data);
-
-                //-- WEBSITE-PAGE-HOME END --//
-
                 // -- POST-START --//
                 /*
                 let option = {};
@@ -101,17 +72,20 @@ describe('connect', function(){ this.timeout(25000);
                 */
                 // -- POST-END --//
                 //-- GET START --//
-                /*
                 //let foreign_2 = Data_Logic.get_foreign(Data_Value_Type.ITEMS,Project_Table.IMAGE,Data_Field.PARENT_ID,Field.ID,{title:'images'});
-                //let join_search_1 = Data_Logic.get_search(Project_Table.BLANK,{},{},1,0,{});
-                //let join_1 = Data_Logic.get_join(Data_Value_Type.ITEMS,join_search_1,{foreigns:[foreign_2]});
-                //let foreign_1 = Data_Logic.get_foreign(Data_Value_Type.ITEMS,Project_Table.BLANK,Data_Field.PARENT_ID,Field.ID);
-                let group_1 = Data_Logic.get_group();//Data_Logic.get_group();
-                //let option = {};
-                let option = {groups:[group_1]};//{{joins:[join_1]};foreigns:[foreign_1]};
-                let parent = Data_Logic.get(Project_Table.BLOG_POST,'899');
+                //let join_search_1 = Data_Logic.get_search(Project_Table.PRODUCT,{},{},1,2,{});
+                //let join_1 = Data_Logic.get_join(Data_Value_Type.ITEMS,join_search_1,{title:'apple'});
+                //let option = {title:'cool',joins:[join_1]};//{{joins:[join_1]};foreigns:[foreign_1]};
+                //option = Obj.merge(option,{title:'cool',id_field:Form_Field.TITLE_URL});
+                //let foreign_sub_value = Data_Logic.get_foreign(Data_Value_Type.ITEMS,Website_Table.SUB_VALUE,Form_Field.PARENT_ID,Form_Field.ID,{title:'sub_values'});
+                let foreign_1 = Data_Logic.get_foreign(Data_Value_Type.ITEMS,Project_Table.IMAGE,Form_Field.PARENT_ID,Form_Field.ID,{title:'images'});
+                let option = {groups:[Data_Logic.get_group({foreigns:[foreign_1]})]};
+                let parent = Data_Logic.get(Store_Table.PRODUCT,'117');
                 const [error,biz_data] = await Data.get(database,parent.table,parent.id,option);
-                */
+                Log.w('33_result',biz_data);
+                //Log.w('44_result',biz_data.main_images);
+                //Log.w('44_result',biz_data.groups[0]);
+                //Log.w('44_result',biz_data.groups[0].images);
                 //-- GET END --//
                 //-- COPY START --//
                 /*

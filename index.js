@@ -6,7 +6,7 @@ Description: BiZ9 Framework: Data
 */
 const async = require('async');
 const {Scriptz}=require("biz9-scriptz");
-const {Data_Logic,Data_Field,Data_Type,Data_Table}=require("/home/think1/www/doqbox/biz9-framework/biz9-data-logic/source");
+const {Data_Logic,Data_Field,Data_Type,Data_Table,Data_Value_Type}=require("/home/think1/www/doqbox/biz9-framework/biz9-data-logic/source");
 const {Log,Str,Obj}=require("/home/think1/www/doqbox/biz9-framework/biz9-utility/source");
 const {Cache} = require('./redis.js');
 const {Foreign} = require('./foreign.js');
@@ -118,7 +118,6 @@ class Data {
                         let new_data = {};
                         for(const field in data){
                             if(!Obj.check_is_array(data[field]) &&
-                                !Obj.check_is_array(data[field]) &&
                                 Obj.check_is_value(data[field]) &&
                                 !Str.check_if_str_exist(field,'_item_count') &&
                                 !Str.check_if_str_exist(field,'_page_count'))
@@ -398,7 +397,6 @@ class Data {
                             copy_data.groups=biz_data;
                         }
                     }
-                    Log.w('rrrr',copy_data);
                 },
             ]).then(result => {
                 data = copy_data;
@@ -412,13 +410,13 @@ class Data {
     //9_get
     static get = async(database,table,id,option) => {
         /* Options
-           - id_field
            - cache_delete
            - field
-           - sub_value
-           - groups
            - foreigns
+           - groups
+           - id_field
            - joins
+           - title
            */
         return new Promise((callback) => {
             let error= null;
@@ -448,12 +446,18 @@ class Data {
                     }
                 },
                 //item_by_id
+                //title
                 function(call){
                     Adapter.get_item(database,cache,table,id,option).then(([biz_error,biz_data])=>{
                         if(biz_error){
                             error=Log.append(error,biz_error);
                         }else{
-                            data = biz_data;
+                            if(!option.title){
+                                data = biz_data;
+                           }else{
+                                data = biz_data;
+                                data[option.title] = Obj.merge({},biz_data);;
+                            }
                             call();
                         }
                     }).catch(err => {
@@ -470,7 +474,11 @@ class Data {
                             }else{
                                 for(const search_item of biz_data){
                                     data[search_item.title+"_"+Data_Type.JOIN] = search_item.data;
-                                    data[search_item.title] = search_item.data.items;
+                                    if(search_item.value_type == Data_Value_Type.ITEMS){
+                                        data[search_item.title] = search_item.data.items;
+                                    }else{
+                                        data[search_item.title] = search_item.data;
+                                    }
                                 }
                                 call();
                             }
@@ -518,13 +526,6 @@ class Data {
                         call();
                     }
                 },
-                /*
-                    async function(call){
-                        if(option.sub_value && data.id){
-                            data.sub_values = Data_Logic.get_sub_value_items(data.sub_values);;
-                        }
-                    },
-                    */
             ]).then(result => {
                 callback([error,data]);
             }).catch(err => {
@@ -569,7 +570,7 @@ class Data {
                         error=Log.append(error,err);
                     });
                 },
-                //9_items_join 9_search_join
+                //9_items_join 9_search_join 9_joins
                 function(call){
                     if(option.joins){
                         Join.get_data(database,cache,option).then(([biz_error,biz_data])=>{
@@ -578,7 +579,11 @@ class Data {
                             }else{
                                 for(const search_item of biz_data){
                                     data[search_item.title+"_"+Data_Type.JOIN] = search_item.data;
-                                    data[search_item.title] = search_item.data.items;
+                                    if(search_item.value_type == Data_Value_Type.ITEMS){
+                                        data[search_item.title] = search_item.data.items;
+                                    }else{
+                                        data[search_item.title] = search_item.data;
+                                    }
                                 }
                                 call();
                             }
@@ -715,6 +720,32 @@ class Data {
             });
         });
     };
+    //9_blank
+    static blank = async (database,table,items) => {
+        /* options
+           - none
+           */
+        return new Promise((callback) => {
+            let error = null;
+            let data = {};
+            async.series([
+                async function(call){
+                    const [biz_error,biz_data] = await get(database,table,items);
+                    if(biz_error){
+                        error=Log.append(error,biz_error);
+                    }else{
+                        data = biz_data;
+                    }
+                },
+            ]).then(result => {
+                callback([error,data]);
+            }).catch(err => {
+                Log.error("Blank-Data",err);
+                callback([err,{}]);
+            });
+        });
+    };
+
 }
 module.exports = {
     Data,
