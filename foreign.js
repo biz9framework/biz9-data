@@ -180,71 +180,72 @@ class Foreign {
             async.series([
                 async function(call){
                     let sub_foreign_search_items = [];
-                        if(search_item.value_type != Data_Value_Type.COUNT){
-                            for(const sub_search_item of search_item.foreigns){
-                                let sub_search_foreign_item = Foreign.get_search(sub_search_item); //here2
-                                for(const data_item of search_item.items){
-                                    let query_field = {};
-                                    query_field[sub_search_foreign_item.foreign_field] = data_item[sub_search_foreign_item.parent_field];
-                                    sub_search_foreign_item.query.$or.push(query_field);
-                                }
-                                sub_search_foreign_item = await Foreign.run_search_item_data(database,cache,sub_search_foreign_item); //here3
-                                sub_search_foreign_items.push(sub_search_foreign_item);
-                                for(const data_item of search_item.items){
-                                    if(sub_search_foreign_item.value_type == Data_Value_Type.ITEMS){
-                                        const match_items = sub_search_foreign_item.items.filter(item_find => item_find[sub_search_foreign_item.foreign_field] === data_item[sub_search_foreign_item.parent_field]);
-                                        data_item[sub_search_foreign_item.title] = [];
-                                        if(match_items.length>0){
-                                            data_item[sub_search_foreign_item.title] = [...match_items];
-                                        }
-                                    }else if(sub_search_foreign_item.value_type == Data_Value_Type.COUNT){
-                                        data_item[sub_search_foreign_item.title] = sub_search_foreign_item.data;
-                                    }else if(sub_search_foreign_item.value_type == Data_Value_Type.ONE){
-                                        const match_items = sub_search_foreign_item.items.filter(item_find => item_find[sub_search_foreign_item.foreign_field] === data_item[sub_search_foreign_item.parent_field]);
-                                        if(match_items.length>0){
-                                            data_item[sub_search_foreign_item.title] = {};
-                                            data_item[sub_search_foreign_item.title] = match_items[0];
-                                        }else{
-                                            data_item[sub_search_foreign_item.title] =  Data_Logic.get_not_found(sub_search_item.foreign_table,0);
-                                        }
+                    if(search_item.value_type != Data_Value_Type.COUNT){
+                        for(const sub_search_item of search_item.foreigns){
+                            let sub_search_foreign_item = Foreign.get_search(sub_search_item); //here2
+                            for(const data_item of search_item.items){
+                                let query_field = {};
+                                query_field[sub_search_foreign_item.foreign_field] = data_item[sub_search_foreign_item.parent_field];
+                                sub_search_foreign_item.query.$or.push(query_field);
+                            }
+                            sub_search_foreign_item = await Foreign.run_search_item_data(database,cache,sub_search_foreign_item); //here3
+                            sub_search_foreign_items.push(sub_search_foreign_item);
+                            for(const data_item of search_item.items){
+                                if(sub_search_foreign_item.value_type == Data_Value_Type.ITEMS){
+                                    const match_items = sub_search_foreign_item.items.filter(item_find => item_find[sub_search_foreign_item.foreign_field] === data_item[sub_search_foreign_item.parent_field]);
+                                    data_item[sub_search_foreign_item.title] = [];
+                                    if(match_items.length>0){
+                                        data_item[sub_search_foreign_item.title] = [...match_items];
+                                    }
+                                }else if(sub_search_foreign_item.value_type == Data_Value_Type.COUNT){
+                                    data_item[sub_search_foreign_item.title] = sub_search_foreign_item.data;
+                                }else if(sub_search_foreign_item.value_type == Data_Value_Type.ONE){
+                                    const match_items = sub_search_foreign_item.items.filter(item_find => item_find[sub_search_foreign_item.foreign_field] === data_item[sub_search_foreign_item.parent_field]);
+                                    if(match_items.length>0){
+                                        data_item[sub_search_foreign_item.title] = {};
+                                        data_item[sub_search_foreign_item.title] = match_items[0];
+                                    }else{
+                                        data_item[sub_search_foreign_item.title] =  Data_Logic.get_not_found(sub_search_item.foreign_table,0);
                                     }
                                 }
                             }
                         }
+                    }
                 },
-                 async function(call){
-                     //new
-                     var sub_child_search_foreign_items = [];
-                     for(const sub_search_sub_foreign_item of sub_search_foreign_items){
-                        for(const sub_search_sub_foreign of sub_search_sub_foreign_item.foreigns){
+                async function(call){
+                    //new
+                    var sub_child_search_foreign_items = [];
+                    for(const sub_search_main_foreign_item of sub_search_foreign_items){
+                        for(const sub_search_sub_foreign of sub_search_main_foreign_item.foreigns){
                             let sub_search_foreign_item = Foreign.get_search(sub_search_sub_foreign);
-                            for(const sub_child_query_item of sub_search_sub_foreign_item.items){
+                            for(const sub_child_query_item of sub_search_main_foreign_item.items){
                                 let query_field = {};
                                 query_field[sub_search_foreign_item.foreign_field] = sub_child_query_item[sub_search_foreign_item.parent_field];
                                 sub_search_foreign_item.query.$or.push(query_field);
                             }
-                            //here_go
-                            //Log.w('aaaaa',sub_search_foreign_items);
                             sub_search_foreign_item = await Foreign.run_search_item_data(database,cache,sub_search_foreign_item); //here3
-                            sub_child_search_foreign_items.push(sub_search_foreign_item);
-                            for(const data_item of search_item.items){
-                                Log.w('close',data_item);
+                            for(const data_item of sub_search_main_foreign_item.items){
                                 if(sub_search_foreign_item.value_type == Data_Value_Type.ITEMS){
-                                    console.log('yes');
                                     const match_items = sub_search_foreign_item.items.filter(item_find => item_find[sub_search_foreign_item.foreign_field] === data_item[sub_search_foreign_item.parent_field]);
-                                        data_item[sub_search_foreign_item.title] = [];
-                                        if(match_items.length>0){
-                                            data_item[sub_search_foreign_item.title] = [...match_items];
-                                        }
+                                    data_item[sub_search_foreign_item.title] = [];
+                                    if(match_items.length>0){
+                                        data_item[sub_search_foreign_item.title] = [...match_items];
+                                    }
+                                }else if(sub_search_foreign_item.value_type == Data_Value_Type.COUNT){
+                                    data_item[sub_search_foreign_item.title] = sub_search_foreign_item.data;
+                                }else if(sub_search_foreign_item.value_type == Data_Value_Type.ONE){
+                                    const match_items = sub_search_foreign_item.items.filter(item_find => item_find[sub_search_foreign_item.foreign_field] === data_item[sub_search_foreign_item.parent_field]);
+                                    if(match_items.length>0){
+                                        data_item[sub_search_foreign_item.title] = {};
+                                        data_item[sub_search_foreign_item.title] = match_items[0];
+                                    }else{
+                                        data_item[sub_search_foreign_item.title] = Data_Logic.get_not_found(sub_search_sub_foreign.foreign_table,0);
+                                    }
                                 }
                             }
-                            Log.w('sss',search_item.items[0]);
-
                         }
-                     }
-
-                 },
-
+                    }
+                },
             ]).then(result => {
                 callback([error,search_item]);
             }).catch(err => {
