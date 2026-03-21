@@ -213,7 +213,6 @@ class Foreign {
                     }
                 },
                 async function(call){
-                    //new
                     var sub_child_search_foreign_items = [];
                     for(const sub_search_main_foreign_item of sub_search_foreign_items){
                         for(const sub_search_sub_foreign of sub_search_main_foreign_item.foreigns){
@@ -249,7 +248,7 @@ class Foreign {
             ]).then(result => {
                 callback([error,search_item]);
             }).catch(err => {
-                Log.error("Blank-Data",err);
+                Log.error("Get-Search-Item-Detail",err);
                 callback([err,{}]);
             });
         });
