@@ -1,4 +1,4 @@
-VERSION='7.7.16'
+VERSION='7.7.17'
 TITLE='BiZ9-Data'
 REPO='git@github.com:biz9framework/biz9-data.git'
 BRANCH='main'

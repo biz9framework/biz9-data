@@ -6,8 +6,8 @@ Description: BiZ9 Framework: Data
 */
 const async = require('async');
 const {Scriptz}=require("biz9-scriptz");
-const {Data_Logic,Data_Field,Data_Type,Data_Table,Data_Value_Type}=require("/home/think1/www/doqbox/biz9-framework/biz9-data-logic/source");
-const {Log,Str,Obj}=require("/home/think1/www/doqbox/biz9-framework/biz9-utility/source");
+const {Data_Logic,Data_Field,Data_Type,Data_Table,Data_Value_Type}=require("biz9-data-logic");
+const {Log,Str,Obj}=require("biz9-utility");
 const {Cache} = require('./redis.js');
 const {Foreign} = require('./foreign.js');
 const {Group} = require('./group.js');
