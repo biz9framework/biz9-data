@@ -15,9 +15,9 @@ const {Join} = require('./join.js');
 const {Adapter}  = require('./adapter.js');
 class Database {
     static get = async (data_config,option) => {
-    /* options
+        /* options
         - none
-    */
+        */
         let error=null;
         let data={};
         return new Promise((callback) => {
@@ -50,8 +50,8 @@ class Database {
     static delete = async (database) => {
         /* options
             - none
-        */
-       let error=null;
+            */
+        let error=null;
         return new Promise((callback) => {
             Adapter.delete_database(data_config).then(([biz_error,biz_data])=>{
                 if(biz_error){
@@ -70,8 +70,8 @@ class Database {
     static info = async (database,option) => {
         /* options
             - none
-        */
-    return new Promise((callback) => {
+            */
+        return new Promise((callback) => {
             let data = [];
             let error = null;
             option = !Obj.check_is_empty(option) ? option : {};
@@ -95,6 +95,157 @@ class Database {
     }
 }
 class Data {
+ //9_count
+    static count = async (database,table,search_filter) => {
+        /* requried
+         * - search obj filter
+         * option
+         * - none
+        */
+        return new Promise((callback) => {
+            let error = null;
+            let cache = {};
+            let data = {};
+            async.series([
+                async function(call) {
+                    const [biz_error,biz_data] = await Cache.get(database.data_config);
+                    cache = biz_data;
+                },
+                async function(call){
+                    const [biz_error,biz_data] = await Adapter.get_count_item_list(database,table,search_filter);
+                    data = biz_data.count;
+                },
+            ]).then(result => {
+                callback([error,data]);
+            }).catch(err => {
+                Log.error("Count-List-Data",err);
+                callback([err,{}]);
+            });
+        });
+    };
+ //9_copy
+    static copy = async (database,table,id,option) => {
+        /* requried
+         * - table
+         * - id
+         * option
+         * - copy_group / bool
+        */
+        return new Promise((callback) => {
+            let error = null;
+            let cache = {};
+            let data = Data_Logic.get(table,id);
+            let top_data = Data_Logic.get(table,0);
+            let copy_data = Data_Logic.get(table,0);
+            option = !Obj.check_is_empty(option) ? option : {copy_group:true};
+            async.series([
+                async function(call) {
+                    const [biz_error,biz_data] = await Cache.get(database.data_config);
+                    cache = biz_data;
+                },
+                async function(call){
+                    let data_group_option = Data_Logic.get_group();
+                    const [biz_error,biz_data] = await Data.get(database,table,id,{groups:[data_group_option]});
+                    top_data=biz_data;
+                },
+                //top_item
+                async function(call){
+                    if(top_data.id){
+                        copy_data = Data_Logic.copy(table,top_data);
+                        copy_data[Data_Field.TITLE] = 'Copy '+top_data[Data_Field.TITLE];
+                        copy_data[Data_Field.TITLE_URL] = 'copy_'+top_data[Data_Field.TITLE_URL];
+                        copy_data[Data_Field.SOURCE_ID] = top_data.id;
+                        copy_data[Data_Field.SOURCE_TABLE] = top_data.table;
+                        const [biz_error,biz_data] = await Data.post(database,copy_data.table,copy_data);
+                        copy_data=biz_data;
+                    }else{
+                        copy_data = Data_Logic.get_not_found(table,id);
+                    }
+                },
+                //group
+                async function(call){
+                    if(top_data.id && top_data.groups.length > 0 && option.copy_group){
+                        copy_data.groups = [];
+                        let post_groups = [];
+                        for(const group of top_data.groups){
+                            let copy_group = Data_Logic.copy(Data_Table.GROUP,group);
+                            copy_group[Data_Field.TITLE] = group[Data_Field.TITLE];
+                            copy_group[Data_Field.TITLE_URL] = group[Data_Field.TITLE_URL];
+                            copy_group[Data_Field.SOURCE_ID] = group.id;
+                            copy_group[Data_Field.SOURCE_TABLE] = group.table;
+                            copy_group[Data_Field.PARENT_TABLE] = copy_data.table;
+                            copy_group[Data_Field.PARENT_ID] = copy_data.id;
+                            post_groups.push(copy_group);
+                        }
+                        const [biz_error,biz_data] = await Adapter.post_item_list(database,cache,post_groups);
+                        copy_data.groups=biz_data;
+                    }
+                },
+            ]).then(result => {
+                data = copy_data;
+                callback([error,data]);
+            }).catch(err => {
+                Log.error("Copy",err);
+                callback([err,{}]);
+            });
+        });
+    };
+//9_delete
+    static delete = async(database,table,id,option) => {
+        /* requried
+         * - table
+         * - id
+         * option
+         * - delete_group / bool
+        */
+        return new Promise((callback) => {
+            console.log('111111111');
+            let error = null;
+            let cache = null;
+            let data = Data_Logic.get(table,id);
+            error[Data_Type.RESULT_OK_DELETE] = false;
+            error[Data_Type.RESULT_OK_DELETE_CACHE] = false;
+            error[Data_Type.RESULT_OK_DELETE_DATABASE] = false;
+            error[Data_Type.RESULT_OK_GROUP_DELETE] = false;
+            error[Data_Type.RESULT_OK_DELETE_COUNT] = 0;
+            option = !Obj.check_is_empty(option) ? option : {delete_group:true};
+            let delete_group_list = [];
+            async.series([
+                async function(call){
+                    const [biz_error,biz_data] = await Cache.get(database.data_config);
+                    cache = biz_data;
+                },
+                async function(call){
+                    console.log('33333333');
+                    const [biz_error,biz_data] = await Adapter.delete_item(database,cache,data.table,data.id);
+                    if(error[Data_Type.RESULT_OK_DELETE]){
+                        error[Data_Type.RESULT_OK_DELETE_COUNT]  = error[Data_Type.RESULT_OK_DELETE_COUNT];
+                        error[Data_Type.RESULT_OK_DELETE]  = true;
+                        error[Data_Type.RESULT_OK_DELETE_CACHE] = true;
+                        error[Data_Type.RESULT_OK_DELETE_DATABASE] = true;
+                    }
+                },
+                async function(call){
+                    console.log('4444444');
+                    if(option.delete_group){
+                        error[Data_Type.RESULT_OK_GROUP_DELETE] = false;
+                        let filter = {parent_id:data.id};
+                        const [biz_error,biz_data] = await Data.delete_search(database,Data_Table.GROUP,filter);
+                        if(error[Data_Type.RESULT_OK_DELETE]){
+                            error[Data_Type.RESULT_OK_GROUP_DELETE] = true;
+                        }
+                    }
+                },
+            ]).then(result => {
+                callback([error,data]);
+            }).catch(err => {
+                Log.error("Delete-Item",err);
+                callback([err,{}]);
+            });
+        });
+    };
+
+
     //9_post
     static post = async (database,table,data,option) => {
         /* options
@@ -102,7 +253,7 @@ class Data {
            - clean
            - delete_cache
            - overwrite
-        */
+           */
         return new Promise((callback) => {
             let error = null;
             let cache = {};
@@ -135,11 +286,7 @@ class Data {
                 function(call){
                     if(option.delete_cache || option.overwrite){
                         Adapter.delete_item_cache(database,cache,table,data.id).then(([biz_error,biz_data])=>{
-                            if(biz_error){
-                                error=Log.append(error,biz_error);
-                            }else{
-                                call();
-                            }
+                            call();
                         }).catch(err => {
                             Log.error('Data-Post-Delete-Cache',err);
                             error=Log.append(error,err);
@@ -150,12 +297,8 @@ class Data {
                 },
                 function(call){
                     Adapter.post_item(database,cache,table,data,option).then(([biz_error,biz_data])=>{
-                        if(biz_error){
-                            error=Log.append(error,biz_error);
-                        }else{
-                            data = biz_data;
-                            call();
-                        }
+                        data = biz_data;
+                        call();
                     }).catch(err => {
                         Log.error('Data-Post-Post-Item-Apapter',err);
                         error=Log.append(error,err);
@@ -165,12 +308,8 @@ class Data {
                 function(call){
                     if(option.reset && data.id){
                         Adapter.get_item(database,cache,data.table,data.id).then(([biz_error,biz_data])=>{
-                            if(biz_error){
-                                error=Log.append(error,biz_error);
-                            }else{
-                                data = biz_data;
-                                call();
-                            }
+                            data = biz_data;
+                            call();
                         }).catch(err => {
                             Log.error('Data-Get-Reset',err);
                             error=Log.append(error,err);
@@ -202,11 +341,7 @@ class Data {
                 },
                 async function(call){
                     const [biz_error,biz_data] = await Adapter.post_item_list(database,cache,data_items);
-                    if(biz_error){
-                        error=Log.append(error,biz_error);
-                    }else{
-                        data_items = biz_data;
-                    }
+                    data_items = biz_data;
                 },
             ]).then(result => {
                 callback([error,data_items]);
@@ -225,8 +360,8 @@ class Data {
             let error = null;
             let data = Data_Logic.get(table,0,{data:{filter:filter}});
             let cache = {};
-            data[Data_Type.RESULT_OK_DELETE] = false;
-            data[Data_Type.RESULT_OK_DELETE_COUNT] = 0;
+            error[Data_Type.RESULT_OK_DELETE] = false;
+            error[Data_Type.RESULT_OK_DELETE_COUNT] = 0;
             let delete_item_query = { $or: [] };
             let delete_group_list = [];
             let delete_items = [];
@@ -239,14 +374,10 @@ class Data {
                 function(call){
                     let search = Data_Logic.get_search(table,filter,{},1,0);
                     Adapter.get_item_list(database,cache,search.table,search.filter,search.sort_by,search.page_current,search.page_size,option).then(([biz_error,items,item_count,page_count])=>{
-                        if(biz_error){
-                            error=Log.append(error,biz_error);
-                        }else{
-                            if(items.length>0){
-                                delete_items = items;
-                            }
-                            call();
+                        if(items.length>0){
+                            delete_items = items;
                         }
+                        call();
                     }).catch(err => {
                         Log.error('Data-Search',err);
                         error=Log.append(error,err);
@@ -257,10 +388,10 @@ class Data {
                         let query_field = {};
                         query_field[Data_Field.PARENT_ID] = data_item.id
                         delete_item_query.$or.push(query_field);
-                        data[Data_Type.RESULT_OK_DELETE] = true;
+                        error[Data_Type.RESULT_OK_DELETE] = true;
                         const [biz_error,biz_data] = await Adapter.delete_item(database,cache,data_item.table,data_item.id);
-                        if(parseInt(biz_data[Data_Type.RESULT_OK_DELETE_COUNT]) > 0){
-                            data[Data_Type.RESULT_OK_DELETE_COUNT] = data[Data_Type.RESULT_OK_DELETE_COUNT] + parseInt(biz_data[Data_Type.RESULT_OK_DELETE_COUNT]);
+                        if(parseInt(error[Data_Type.RESULT_OK_DELETE_COUNT]) > 0){
+                            error[Data_Type.RESULT_OK_DELETE_COUNT] = error[Data_Type.RESULT_OK_DELETE_COUNT] + parseInt(error[Data_Type.RESULT_OK_DELETE_COUNT]);
                         }
                     }
                 },
@@ -268,12 +399,8 @@ class Data {
                     if(option.delete_group && delete_item_query.$or.length > 0){
                         let search = Data_Logic.get_search(table,{},{},1,0,{field:{id:1,title:1,table:1}});
                         Adapter.get_item_list(database,cache,search.table,search.filter,search.sort_by,search.page_current,search.page_size,option).then(([biz_error,items,item_count,page_count])=>{
-                            if(biz_error){
-                                error=Log.append(error,biz_error);
-                            }else{
-                                delete_group_list = items;
-                                call();
-                            }
+                            delete_group_list = items;
+                            call();
                         });
                     }else{
                         call();
@@ -281,14 +408,10 @@ class Data {
                 },
                 async function(call){
                     if(option.delete_group && delete_item_query.$or.length > 0){
-                        data[Data_Type.RESULT_OK_GROUP_DELETE] = false;
+                        error[Data_Type.RESULT_OK_GROUP_DELETE] = false;
                         let search = Data_Logic.get_search(Data_Table.GROUP,delete_item_query,{},1,0);
                         const [biz_error,biz_data] = await Adapter.delete_item_list(database,cache,search.table,search.filter);
-                        if(biz_error){
-                            error=Log.append(error,biz_error);
-                        }else{
-                            data[Data_Type.RESULT_OK_GROUP_DELETE] = true;
-                        }
+                        error[Data_Type.RESULT_OK_GROUP_DELETE] = true;
                     }
                 },
             ]).then(result => {
@@ -299,115 +422,7 @@ class Data {
             });
         });
     };
-    //9_count
-    static count = async (database,table,filter) => {
-        /* option params
-            * none
-         */
-        return new Promise((callback) => {
-            let error = null;
-            let cache = {};
-            let data = {};
-            async.series([
-                async function(call) {
-                    const [biz_error,biz_data] = await Cache.get(database.data_config);
-                    cache = biz_data;
-                },
-                async function(call){
-                    const [biz_error,biz_data] = await Adapter.get_count_item_list(database,table,filter);
-                    if(biz_error){
-                        error=Log.append(error,biz_error);
-                    }else{
-                        data = biz_data.count;
-                    }
-                },
-            ]).then(result => {
-                callback([error,data]);
-            }).catch(err => {
-                Log.error("Count-List-Data",err);
-                callback([err,{}]);
-            });
-        });
-    };
-    //9_copy
-    static copy = async (database,table,id,option) => {
-        /*
-         * options
-         * - copy_group
-         */
-        return new Promise((callback) => {
-            let error = null;
-            let cache = {};
-            let data = Data_Logic.get(table,id);
-            let top_data = Data_Logic.get(table,0);
-            let copy_data = Data_Logic.get(table,0);
-            option = !Obj.check_is_empty(option) ? option : {copy_group:true};
-            async.series([
-                async function(call) {
-                    const [biz_error,biz_data] = await Cache.get(database.data_config);
-                    cache = biz_data;
-                },
-                async function(call){
-                    let data_group_option = Data_Logic.get_group();
-                    const [biz_error,biz_data] = await Data.get(database,table,id,{groups:[data_group_option]});
-                    if(biz_error){
-                        error=Log.append(error,biz_error);
-                    }else{
-                        top_data=biz_data;
-                    }
-                },
-                //top_item
-                async function(call){
-                    if(top_data.id){
-                        copy_data = Data_Logic.copy(table,top_data);
-                        copy_data[Data_Field.TITLE] = 'Copy '+top_data[Data_Field.TITLE];
-                        copy_data[Data_Field.TITLE_URL] = 'copy_'+top_data[Data_Field.TITLE_URL];
-                        copy_data[Data_Field.SOURCE_ID] = top_data.id;
-                        copy_data[Data_Field.SOURCE_TABLE] = top_data.table;
-                        const [biz_error,biz_data] = await Data.post(database,copy_data.table,copy_data);
-                        if(biz_error){
-                            error=Log.append(error,biz_error);
-                        }else{
-                            copy_data=biz_data;
-                        }
-                    }else{
-                        copy_data = Data_Logic.get_not_found(table,id);
-                    }
-                },
-                //group
-                async function(call){
-                    if(top_data.id && top_data.groups.length > 0 && option.copy_group){
-                        copy_data.groups = [];
-                        let post_groups = [];
-                        for(const group of top_data.groups){
-                            let copy_group = Data_Logic.copy(Data_Table.GROUP,group);
-                            copy_group[Data_Field.TITLE] = group[Data_Field.TITLE];
-                            copy_group[Data_Field.TITLE_URL] = group[Data_Field.TITLE_URL];
-                            copy_group[Data_Field.SOURCE_ID] = group.id;
-                            copy_group[Data_Field.SOURCE_TABLE] = group.table;
-
-                            copy_group[Data_Field.PARENT_TABLE] = copy_data.table;
-                            copy_group[Data_Field.PARENT_ID] = copy_data.id;
-                            post_groups.push(copy_group);
-                        }
-                        const [biz_error,biz_data] = await Adapter.post_item_list(database,cache,post_groups);
-                        if(biz_error){
-                            error=Log.append(error,biz_error);
-                        }else{
-                            copy_data.groups=biz_data;
-                        }
-                    }
-                },
-            ]).then(result => {
-                data = copy_data;
-                callback([error,data]);
-            }).catch(err => {
-                Log.error("Copy",err);
-                callback([err,{}]);
-            });
-        });
-    };
-    //9_get
+   //9_get
     static get = async(database,table,id,option) => {
         /* Options
            - cache_delete
@@ -432,11 +447,7 @@ class Data {
                 function(call){
                     if(option.cache_delete){
                         Adapter.delete_item_cache(database,cache,data.table,data.id,option).then(([biz_error,biz_data])=>{
-                            if(biz_error){
-                                error=Log.append(error,biz_error);
-                            }else{
-                                call();
-                            }
+                            call();
                         }).catch(err => {
                             Log.error('Data-Delete-Cache',err);
                             error=Log.append(error,err);
@@ -448,18 +459,14 @@ class Data {
                 //item_by_id
                 //title
                 function(call){
-                    Adapter.get_item(database,cache,table,id,option).then(([biz_error,biz_data])=>{
-                        if(biz_error){
-                            error=Log.append(error,biz_error);
+                    Adapter.get_item(database,cache,data.table,data.id,option).then(([biz_error,biz_data])=>{
+                        if(!option.title){
+                            data = biz_data;
                         }else{
-                            if(!option.title){
-                                data = biz_data;
-                           }else{
-                                data = biz_data;
-                                data[option.title] = Obj.merge({},biz_data);;
-                            }
-                            call();
+                            data = biz_data;
+                            data[option.title] = Obj.merge({},biz_data);;
                         }
+                        call();
                     }).catch(err => {
                         Log.error('Data-Get',err);
                         error=Log.append(error,err);
@@ -469,19 +476,15 @@ class Data {
                 function(call){
                     if(option.joins){
                         Join.get_data(database,cache,option).then(([biz_error,biz_data])=>{
-                            if(biz_error){
-                                error=Log.append(error,biz_error);
-                            }else{
-                                for(const search_item of biz_data){
-                                    data[search_item.title+"_"+Data_Type.JOIN] = search_item.data;
-                                    if(search_item.value_type == Data_Value_Type.ITEMS){
-                                        data[search_item.title] = search_item.data.items;
-                                    }else{
-                                        data[search_item.title] = search_item.data;
-                                    }
+                            for(const search_item of biz_data){
+                                data[search_item.title+"_"+Data_Type.JOIN] = search_item.data;
+                                if(search_item.value_type == Data_Value_Type.ITEMS){
+                                    data[search_item.title] = search_item.data.items;
+                                }else{
+                                    data[search_item.title] = search_item.data;
                                 }
-                                call();
                             }
+                            call();
                         }).catch(err => {
                             Log.error('Data-Get-Item-Join',err);
                             error=Log.append(error,err);
@@ -494,11 +497,7 @@ class Data {
                 function(call){
                     if(option.groups && data.id){
                         Group.get_data(database,cache,[data],option).then(([biz_error,biz_data])=>{
-                            if(biz_error){
-                                error=Log.append(error,biz_error);
-                            }else{
-                                data = biz_data[0];
-                            }
+                            data = biz_data[0];
                             call();
                         }).catch(err => {
                             Log.error('Data-Item-Group',err);
@@ -512,11 +511,7 @@ class Data {
                 function(call){
                     if(option.foreigns && data.id){
                         Foreign.get_data(database,cache,[data],option).then(([biz_error,biz_data])=>{
-                            if(biz_error){
-                                error=Log.append(error,biz_error);
-                            }else{
-                                data = biz_data[0];
-                            }
+                            data = biz_data[0];
                             call();
                         }).catch(err => {
                             Log.error('Data-Search-Foreign',err);
@@ -556,14 +551,10 @@ class Data {
                 function(call){
                     let search = Data_Logic.get_search(table,filter,sort_by,page_current,page_size);
                     Adapter.get_item_list(database,cache,search.table,search.filter,search.sort_by,search.page_current,search.page_size,option).then(([biz_error,items,item_count,page_count])=>{
-                        if(biz_error){
-                            error=Log.append(error,biz_error);
-                        }else{
-                            data.item_count=item_count;
-                            data.page_count=page_count;
-                            data.search=search;
-                            data[Data_Field.ITEMS]=items;
-                        }
+                        data.item_count=item_count;
+                        data.page_count=page_count;
+                        data.search=search;
+                        data[Data_Field.ITEMS]=items;
                         call();
                     }).catch(err => {
                         Log.error('Data-Search',err);
@@ -574,19 +565,15 @@ class Data {
                 function(call){
                     if(option.joins){
                         Join.get_data(database,cache,option).then(([biz_error,biz_data])=>{
-                            if(biz_error){
-                                error=Log.append(error,biz_error);
-                            }else{
-                                for(const search_item of biz_data){
-                                    data[search_item.title+"_"+Data_Type.JOIN] = search_item.data;
-                                    if(search_item.value_type == Data_Value_Type.ITEMS){
-                                        data[search_item.title] = search_item.data.items;
-                                    }else{
-                                        data[search_item.title] = search_item.data;
-                                    }
+                            for(const search_item of biz_data){
+                                data[search_item.title+"_"+Data_Type.JOIN] = search_item.data;
+                                if(search_item.value_type == Data_Value_Type.ITEMS){
+                                    data[search_item.title] = search_item.data.items;
+                                }else{
+                                    data[search_item.title] = search_item.data;
                                 }
-                                call();
                             }
+                            call();
                         }).catch(err => {
                             Log.error('Data-Get-Item-Join',err);
                             error=Log.append(error,err);
@@ -599,12 +586,8 @@ class Data {
                 function(call){
                     if(option.foreigns && data[Data_Field.ITEMS].length > 0){
                         Foreign.get_data(database,cache,data[Data_Field.ITEMS],option).then(([biz_error,biz_data])=>{
-                            if(biz_error){
-                                error=Log.append(error,biz_error);
-                            }else{
-                                data[Data_Field.ITEMS] = biz_data;
-                                call();
-                            }
+                            data[Data_Field.ITEMS] = biz_data;
+                            call();
                         }).catch(err => {
                             Log.error('Data-Search-Foreign',err);
                             error=Log.append(error,err);
@@ -617,11 +600,7 @@ class Data {
                 function(call){
                     if(option.groups && data[Data_Field.ITEMS].length>0){
                         Group.get_data(database,cache,data[Data_Field.ITEMS],option).then(([biz_error,biz_data])=>{
-                            if(biz_error){
-                                error=Log.append(error,biz_error);
-                            }else{
-                                data[Data_Field.ITEMS] = biz_data;
-                            }
+                            data[Data_Field.ITEMS] = biz_data;
                             call();
                         }).catch(err => {
                             Log.error('Data-Item-Group',err);
@@ -639,63 +618,7 @@ class Data {
             });
         });
     };
-    //9_delete
-    static delete = async(database,table,id,option) => {
-        /* options
-           - delete_group
-           */
-        return new Promise((callback) => {
-            let error = null;
-            let cache = null;
-            let data = Data_Logic.get(table,id);
-            data[Data_Type.RESULT_OK_DELETE] = false;
-            data[Data_Type.RESULT_OK_DELETE_CACHE] = false;
-            data[Data_Type.RESULT_OK_DELETE_DATABASE] = false;
-            data[Data_Type.RESULT_OK_GROUP_DELETE] = false;
-            data[Data_Type.RESULT_OK_DELETE_COUNT] = 0;
-            option = !Obj.check_is_empty(option) ? option : {delete_group:true};
-            let delete_group_list = [];
-            async.series([
-                async function(call){
-                    const [biz_error,biz_data] = await Cache.get(database.data_config);
-                    cache = biz_data;
-                },
-                async function(call){
-                    const [biz_error,biz_data] = await Adapter.delete_item(database,cache,table,id);
-                    if(biz_error){
-                        error=Log.append(error,biz_error);
-                    }else{
-                        if(biz_data[Data_Type.RESULT_OK_DELETE]){
-                            data[Data_Type.RESULT_OK_DELETE_COUNT]  = biz_data[Data_Type.RESULT_OK_DELETE_COUNT];
-                            data[Data_Type.RESULT_OK_DELETE]  = true;
-                            data[Data_Type.RESULT_OK_DELETE_CACHE] = true;
-                            data[Data_Type.RESULT_OK_DELETE_DATABASE] = true;
-                        }
-                    }
-                },
-                async function(call){
-                    if(option.delete_group){
-                        data[Data_Type.RESULT_OK_GROUP_DELETE] = false;
-                        let filter = {parent_id:data.id};
-                        const [biz_error,biz_data] = await Data.delete_search(database,Data_Table.GROUP,filter);
-                        if(biz_error){
-                            error=Log.append(error,biz_error);
-                        }else{
-                            if(biz_data[Data_Type.RESULT_OK_DELETE]){
-                                data[Data_Type.RESULT_OK_GROUP_DELETE] = true;
-                            }
-                        }
-                    }
-                },
-            ]).then(result => {
-                callback([error,data]);
-            }).catch(err => {
-                Log.error("Delete-Item",err);
-                callback([err,{}]);
-            });
-        });
-    };
-    //9_data_post_bulk
+        //9_data_post_bulk
     static post_bulk = async (database,table,items) => {
         /* options
            - none
@@ -706,11 +629,7 @@ class Data {
             async.series([
                 async function(call){
                     const [biz_error,biz_data] = await Adapter.post_bulk(database,table,items);
-                    if(biz_error){
-                        error=Log.append(error,biz_error);
-                    }else{
-                        data = biz_data;
-                    }
+                    data = biz_data;
                 },
             ]).then(result => {
                 callback([error,data]);
@@ -731,11 +650,7 @@ class Data {
             async.series([
                 async function(call){
                     const [biz_error,biz_data] = await get(database,table,items);
-                    if(biz_error){
-                        error=Log.append(error,biz_error);
-                    }else{
-                        data = biz_data;
-                    }
+                    data = biz_data;
                 },
             ]).then(result => {
                 callback([error,data]);
@@ -745,7 +660,6 @@ class Data {
             });
         });
     };
-
 }
 module.exports = {
     Data,

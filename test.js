@@ -16,9 +16,18 @@ const {Data_Logic,Data_Value_Type,Data_Table,Data_Field}=require("/home/think1/w
 /*
  * availble tests
 - connect
+-- data_count
+-- data_copy
+-- data_delete
+-- data_delete_search
+-- data_get
+-- data_post
+-- data_post_items
+-- data_search
+---group_add
 */
 /* --- TEST CONFIG START --- */
-const APP_ID = 'test-stage-march17';
+const APP_ID = 'test-stage-march23';
 /* --- TEST CONFIG END --- */
 
 /* --- DATA CONFIG START --- */
@@ -168,39 +177,158 @@ if(print_test){;
             });
 });
 });
-//9_blank - 9_test_blank
-describe('blank', function(){ this.timeout(25000);
-    it("_blank", function(done){
+//9_count - 9_test_count
+describe('data_count', function(){ this.timeout(25000);
+    it("_data_count", function(done){
+        console.log('COUNT-START');
         let error=null;
         let database = {};
         let data = {};
+        let option = {};
+        let post_data = Data_Logic.get(Project_Table.PRODUCT,'929');
+        let post_search = Data_Logic.get_search(Project_Table.PRODUCT,{},{},1,0,{});
         async.series([
             async function(call){
                 const [biz_error,biz_data] = await Database.get(DATA_CONFIG);
                 database = biz_data;
             },
             async function(call){
-                //-->
-                let print_test = true;
-                //-->
-                //-- GET  START --//
-                /*
-                    //let option = {id_field:Type.FIELD_TITLE_URL,stat:{print:false,type:Type.STAT_VIEW,user_id:12}};
-                let parent = Data_Logic.get(Type.DATA_PRODUCT,'929');
-        //Log.w('parent',parent);
-                const [error,biz_data] = await Data.get(database,parent.table,parent.id,option);
-                */
-        //-- GET  END --//
-        //---
-        if(print_test){;
-            Log.w('99_biz_data',biz_data);
-        }
+                const [biz_error,biz_data] = await Data.count(database,post_search.table,post_search.filter,option);
+                Log.w('biz_data',biz_data);
+                Log.w('biz_error',biz_error);
+            },
+            async function(call){
+                console.log('COUNT-SUCCESS');
             },
         ],
             function(error, result){
-                console.log('CONNECT-DONE');
+                console.log('COUNT-DONE');
                 done();
             });
     });
 });
+//9_copy - 9_test_copy
+describe('data_copy', function(){ this.timeout(25000);
+    it("_data_copy", function(done){
+        console.log('COPY-START');
+        let error=null;
+        let database = {};
+        let data = {};
+        let option = {};
+        let post_data = Data_Logic.get(Project_Table.PRODUCT,'618');
+        async.series([
+            async function(call){
+                const [biz_error,biz_data] = await Database.get(DATA_CONFIG);
+                database = biz_data;
+            },
+            async function(call){
+                const [biz_error,biz_data] = await Data.copy(database,post_data.table,post_data.id,option);
+                Log.w('biz_data',biz_data);
+                Log.w('biz_error',biz_error);
+            },
+            async function(call){
+                console.log('COPY-SUCCESS');
+            },
+        ],
+            function(error, result){
+                console.log('COPY-DONE');
+                done();
+            });
+    });
+});
+
+//9_delete - 9_test_delete
+describe('data_delete', function(){ this.timeout(25000);
+    it("_data_delete", function(done){
+        console.log('DELETE-START');
+        let error=null;
+        let database = {};
+        let data = {};
+        let option = {};
+        let post_data = Data_Logic.get(Project_Table.PRODUCT,'618');
+        async.series([
+            async function(call){
+                const [biz_error,biz_data] = await Database.get(DATA_CONFIG);
+                database = biz_data;
+            },
+            async function(call){
+                const [biz_error,biz_data] = await Data.delete(database,post_data.table,post_data.id,option);
+                Log.w('biz_data',biz_data);
+                Log.w('biz_error',biz_error);
+            },
+            async function(call){
+                console.log('DELETE-SUCCESS');
+            },
+        ],
+            function(error, result){
+                console.log('DELETE-DONE');
+                done();
+            });
+    });
+});
+
+
+//9_get - 9_test_get
+describe('data_get', function(){ this.timeout(25000);
+    it("_data_get", function(done){
+        console.log('GET-START');
+        let error=null;
+        let database = {};
+        let data = {};
+        let option = {};
+        let post_data = Data_Logic.get(Project_Table.PRODUCT,'618');
+        let post_search = Data_Logic.get_search(Project_Table.PRODUCT,{},{},1,0,{});
+        async.series([
+            async function(call){
+                const [biz_error,biz_data] = await Database.get(DATA_CONFIG);
+                database = biz_data;
+            },
+            async function(call){
+                const [biz_error,biz_data] = await Data.get(database,post_data.table,post_data.id,option);
+                Log.w('biz_data',biz_data);
+                Log.w('biz_error',biz_error);
+            },
+            async function(call){
+                console.log('GET-SUCCESS');
+            },
+        ],
+            function(error, result){
+                console.log('GET-DONE');
+                done();
+            });
+    });
+});
+
+
+//9_blank - 9_test_blank
+describe('data_blank', function(){ this.timeout(25000);
+    it("_data_blank", function(done){
+        console.log('BLANK-START');
+        let error=null;
+        let database = {};
+        let data = {};
+        let option = {};
+        let post_data = Data_Logic.get(Project_Table.PRODUCT,'929');
+        let post_search = Data_Logic.get_search(Project_Table.PRODUCT,{},{},1,0,{});
+        async.series([
+            async function(call){
+                const [biz_error,biz_data] = await Database.get(DATA_CONFIG);
+                database = biz_data;
+            },
+            async function(call){
+                const [biz_error,biz_data] = await Data.count(database,post_search.table,post_search.filter,option);
+                Log.w('biz_data',biz_data);
+                Log.w('biz_error',biz_error);
+            },
+            async function(call){
+                console.log('BLANK-SUCCESS');
+            },
+        ],
+            function(error, result){
+                console.log('BLANK-DONE');
+                done();
+            });
+    });
+});
+
 

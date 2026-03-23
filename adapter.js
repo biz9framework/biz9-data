@@ -49,10 +49,7 @@ class Adapter {
                         }
                         go();
                     }, error => {
-                        if(error){
-                            error=error;
-                        }
-                        call();
+                        Log.w('post_item_list',error);
                     });
                 },
                 async function(call){
@@ -77,9 +74,7 @@ class Adapter {
                             go();
                         }
                     }, error => {
-                        if(error){
-                            error=error;
-                        }
+                        Log.w('post_item_list-2',error);
                     });
                 },
                 function(call){
@@ -94,7 +89,6 @@ class Adapter {
                 callback([error,item_data_new_list]);
             }).catch(error => {
                 Log.error("Data-Adapter-Update-Item-List-5",error);
-                callback([error,[]]);
             });
         });
     }
@@ -118,7 +112,6 @@ class Adapter {
                 callback([error,item_data]);
             }).catch(error => {
                 Log.error("Data-Adapter-Update-Item-Adapter-2",error);
-                callback([error,[]]);
             });
         });
     }
@@ -176,7 +169,6 @@ class Adapter {
                 callback([error,item_data_list,item_count,page_count]);
             }).catch(error => {
                 Log.error("Get-Item-List-Adapter-3",error);
-                callback([error,[]]);
             });
         });
     }
@@ -216,7 +208,6 @@ class Adapter {
                 callback([error,data]);
             }).catch(error => {
                 Log.error("Adapter-Get-Item-Adapter-5",error);
-                callback([error,null]);
             });
         });
     }
@@ -247,7 +238,6 @@ class Adapter {
                 callback([error,item_data]);
             }).catch(error => {
                 Log.error("Data-Adapter-Set-Cache-Item-2",error);
-                callback([error,null]);
             });
         });
     }
@@ -255,26 +245,21 @@ class Adapter {
         return new Promise((callback) => {
             let error = null;
             let data = Data_Logic.get(table,id);
-            data[Data_Type.RESULT_OK_DELETE] = false;
-            data[Data_Type.RESULT_OK_DELETE_CACHE] = false;
-            data[Data_Type.RESULT_OK_DELETE_DATABASE] = false;
+            error[Data_Type.RESULT_OK_DELETE] = false;
+            error[Data_Type.RESULT_OK_DELETE_CACHE] = false;
+            error[Data_Type.RESULT_OK_DELETE_DATABASE] = false;
             async.series([
                 async function(call) {
                     const [biz_error,biz_data] = await Adapter.delete_item_cache_db(database,cache,table,id);
-                    if(biz_error){
-                        error = biz_error;
-                    }else{
-                        data = biz_data;
-                        data[Data_Type.RESULT_OK_DELETE] = true;
-                        data[Data_Type.RESULT_OK_DELETE_CACHE] = true;
-                        data[Data_Type.RESULT_OK_DELETE_DATABASE] = true;
-                    }
+                    data = biz_data;
+                    error[Data_Type.RESULT_OK_DELETE] = true;
+                    error[Data_Type.RESULT_OK_DELETE_CACHE] = true;
+                    error[Data_Type.RESULT_OK_DELETE_DATABASE] = true;
                 },
             ]).then(result => {
                 callback([error,data]);
             }).catch(error => {
                 Log.error("Adapter-Get-Item-Adapter-4",error);
-                callback([error,null]);
             });
         });
     }
@@ -359,7 +344,6 @@ class Adapter {
                 callback([error,item_data]);
             }).catch(error => {
                 Log.error("Data-Adapter-Get-Item-Cache-DB",error);
-                callback([error,null]);
             });
         });
     }
@@ -390,7 +374,6 @@ class Adapter {
                 callback([error,item_data_new_list]);
             }).catch(error => {
                 Log.error("Data-Adapter-Delete-Item-List-Adapter-3",error);
-                callback([error,[]]);
             });
         });
     }
@@ -417,14 +400,13 @@ class Adapter {
                 },
                 async function(call){
                     const [error,data] = await Cache.delete_value(cache,Adapter.get_cache_item_attr_list_key(table,id));
-                    item_data[Data_Type.RESULT_OK_DELETE_CACHE] = true;
-                    item_data.cache_item_attr_list = Adapter.get_cache_item_attr_list_key(table,id);
+                    error[Data_Type.RESULT_OK_DELETE_CACHE] = true;
+                    error.cache_item_attr_list = Adapter.get_cache_item_attr_list_key(table,id);
                 },
             ]).then(result => {
                 callback([error,item_data]);
             }).catch(error => {
                 Log.error("Data-Adapter-Delete-Item-Cache-5",error);
-                callback([error,null]);
             });
         });
     }
@@ -434,9 +416,9 @@ class Adapter {
             let cache_key_list = '';
             let cache_string_list = '';
             let data = Data_Logic.get(table,id);
-            data[Data_Type.RESULT_OK_DELETE] = false;
-            data[Data_Type.RESULT_OK_DELETE_CACHE] = false;
-            data[Data_Type.RESULT_OK_DELETE_DATABASE] = false;
+            error[Data_Type.RESULT_OK_DELETE] = false;
+            error[Data_Type.RESULT_OK_DELETE_CACHE] = false;
+            error[Data_Type.RESULT_OK_DELETE_DATABASE] = false;
             async.series([
                 async function(call) {
                     const [biz_error,biz_data] = await Cache.get_value(cache,Adapter.get_cache_item_attr_list_key(table,id));
@@ -454,27 +436,22 @@ class Adapter {
                 },
                 async function(call){
                     const [biz_error,biz_data] = await Cache.delete_value(cache,Adapter.get_cache_item_attr_list_key(table,id));
-                    if(!error){
-                        data[Data_Type.RESULT_OK_DELETE_CACHE] = true;
-                    }
+                    error[Data_Type.RESULT_OK_DELETE_CACHE] = true;
                 },
                 async function(call){
                     const [biz_error,biz_data] = await Mongo.delete_item(database,table,id);
-                    data[Data_Type.RESULT_OK_DELETE_COUNT] = biz_data ? biz_data.deletedCount : 0;
-                    if(!biz_error){
-                        data[Data_Type.RESULT_OK_DELETE_DATABASE] = true;
-                    }
+                    error[Data_Type.RESULT_OK_DELETE_COUNT] = biz_data ? biz_data.deletedCount : 0;
+                    error[Data_Type.RESULT_OK_DELETE_DATABASE] = true;
                 },
                 async function(call){
-                    if(data[Data_Type.RESULT_OK_DELETE_DATABASE] && data[Data_Type.RESULT_OK_DELETE_CACHE]){
-                        data[Data_Type.RESULT_OK_DELETE] = true;
+                    if(error[Data_Type.RESULT_OK_DELETE_DATABASE] && error[Data_Type.RESULT_OK_DELETE_CACHE]){
+                        error[Data_Type.RESULT_OK_DELETE] = true;
                     }
                 }
             ]).then(result => {
                 callback([error,data]);
             }).catch(error => {
                 Log.error("Data-Adapter-Delete-Item-Cache-DB-5",error);
-                callback([error,null]);
             });
         });
     }
@@ -493,7 +470,6 @@ class Adapter {
                 callback([error,item_data]);
             }).catch(error => {
                 Log.error("Data-Adapter-Count-Item-List",error);
-                callback([error,null]);
             });
         });
     }
@@ -511,7 +487,6 @@ class Adapter {
                 callback([error,data]);
             }).catch(error => {
                 Log.error("Data-Adapter-Update-Item-Adapter-END",error);
-                callback([error,[]]);
             });
         });
     }

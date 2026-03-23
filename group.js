@@ -105,11 +105,7 @@ class Group {
                     function(call){
                         if(search_item.foreigns.length>0 && data.length>0){
                             Foreign.get_data(database,cache,data,{foreigns:search_item.foreigns}).then(([biz_error,biz_data])=>{
-                                if(biz_error){
-                                    error=Log.append(error,biz_error);
-                                }else{
-                                    data = biz_data;
-                                }
+                                data = biz_data;
                                 call();
                             }).catch(err => {
                                 Log.error('Data-Group-Foreign',err);

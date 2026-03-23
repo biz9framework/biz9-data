@@ -29,14 +29,10 @@ class Join {
                                 let search = Data_Logic.get_search(search_item.search.table,search_item.search.filter,search_item.search.sort_by,search_item.search.page_current,search_item.search.page_size);
                                 let join_option = {field:search_item.field,distinct:search_item.distinct};
                                 Adapter.get_item_list(database,cache,search.table,search.filter,search.sort_by,search.page_current,search.page_size,join_option).then(([biz_error,items,item_count,page_count])=>{
-                                    if(biz_error){
-                                        error=Log.append(error,biz_error);
-                                    }else{
-                                        search_item.data['count'] = item_count;
-                                        search_item.data['page_count'] = page_count;
-                                        search_item.data['search'] = search;
-                                        search_item.data[Data_Field.ITEMS] = items;
-                                    }
+                                    search_item.data['count'] = item_count;
+                                    search_item.data['page_count'] = page_count;
+                                    search_item.data['search'] = search;
+                                    search_item.data[Data_Field.ITEMS] = items;
                                     resolve();
                                 }).catch(err => {
                                     Log.error('Data-Join-Get-Data',err);
@@ -47,12 +43,8 @@ class Join {
                                 let search = Data_Logic.get_search(search_item.search.table,search_item.search.filter,search_item.search.sort_by,search_item.search.page_current,search_item.search.page_size);
                                 let join_option = {field:search_item.field};
                                 Adapter.get_count_item_list(database,search.table,search.filter).then(([biz_error,biz_data])=>{
-                                    if(biz_error){
-                                        error=Log.append(error,biz_error);
-                                    }else{
-                                        search_item.data = biz_data.count;
-                                        resolve();
-                                    }
+                                    search_item.data = biz_data.count;
+                                    resolve();
                                 }).catch(err => {
                                     Log.error('Data-Join-Get-Data-Count',err);
                                     error=Log.append(error,err);
@@ -62,13 +54,9 @@ class Join {
                                 let search = Data_Logic.get_search(search_item.search.table,search_item.search.filter,search_item.search.sort_by,search_item.search.page_current,search_item.search.page_size);
                                 let join_option = {field:search_item.field};
                                 Adapter.get_item_list(database,cache,search.table,search.filter,search.sort_by,search.page_current,search.page_size,join_option).then(([biz_error,items,item_count,page_count])=>{
-                                    if(biz_error){
-                                        error=Log.append(error,biz_error);
-                                    }else{
-                                        let one_item = items.length>0 ? items[0] : Data_Logic.get_not_found(search_item.search.table,0);
-                                        search_item.data = one_item;
-                                        resolve();
-                                    }
+                                    let one_item = items.length>0 ? items[0] : Data_Logic.get_not_found(search_item.search.table,0);
+                                    search_item.data = one_item;
+                                    resolve();
                                 }).catch(err => {
                                     Log.error('Data-Join-Get-Data-One',err);
                                     error=Log.append(error,err);
@@ -90,12 +78,7 @@ class Join {
                     function get_foreign_data(database,cache,items,search_item) {
                         return new Promise((resolve) => {
                             Foreign.get_data(database,cache,items,{foreigns:search_item.foreigns}).then(([biz_error,biz_data])=>{
-                                if(biz_error){
-                                    error=Log.append(error,biz_error);
-                                }
-                                else{
-                                    resolve(biz_data);
-                                }
+                                resolve(biz_data);
                             }).catch(err => {
                                 Log.error('Data-Join-Get-Data-Foreign',err);
                                 error=Log.append(error,err);
@@ -123,7 +106,6 @@ class Join {
                 callback([error,[]]);
             });
         });
-
     };
     static get_search = (join_item) => {
         return {

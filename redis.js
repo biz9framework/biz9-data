@@ -16,7 +16,6 @@ class Cache {
                 callback([null,data]);
             }).catch(error => {
                 Log.error("Data-Redis-Base-Get-Cache-Base-Error",error);
-                callback([null,error]);
             });
         });
     }
@@ -28,7 +27,6 @@ class Cache {
                 callback([null,data]);
             }).catch(error => {
                 Log.error("Data-Redis-Base-Close-Cache-Base-Error",error);
-                callback([null,error]);
             });
         });
     }
@@ -39,7 +37,6 @@ class Cache {
                 callback([error,data]);
             }).catch(error => {
                 Log.error("Data-Redis-Base-Delete-Cache-String-Base-Error",error);
-                callback([null,error]);
             });
         });
     }
@@ -50,7 +47,6 @@ class Cache {
                 callback([error,data]);
             }).catch(error => {
                 Log.error("Data-Redis-Base-Get-Cache-String-Base-Error",error);
-                callback([null,error]);
             });
         });
     }
@@ -66,7 +62,6 @@ class Cache {
                 callback([error,data]);
             }).catch(error => {
                 Log.error("Data-Redis-Base-Set-Cache-String-Base-Error",error);
-                callback([null,error]);
             });
         });
     }

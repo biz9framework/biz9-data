@@ -43,7 +43,6 @@ class Mongo {
                 callback([error,null]);
             }).catch(error => {
                 Log.error("DATA-MONGO-BASE-ClOSE-DB-BASE-ERROR",error);
-                callback([error,null]);
             });
         });
     }
@@ -63,7 +62,6 @@ class Mongo {
                     callback([error,data]);
                 }).catch(error => {
                     Log.error("DATA-BASE-GET-ITEM-BASE-ERROR",error);
-                    callback([error,null]);
                 });
             }
         });
@@ -97,7 +95,6 @@ class Mongo {
                         callback([error,item]);
                     }).catch(error => {
                         Log.error("DATA-MONGO-BASE-UPDATE-ITEM-BASE-ERROR",error);
-                        callback([error,null]);
                     });
                 }
             }else{
@@ -108,7 +105,6 @@ class Mongo {
                         callback([error,item]);
                     }).catch(error => {
                         Log.error("DATA-MONGO-BASE-UPDATE-ITEM-BASE-ERROR",error);
-                        callback([error,null]);
                     });
                 }else{
                     delete item['_id'];
@@ -116,7 +112,6 @@ class Mongo {
                         callback([error,item]);
                     }).catch(error => {
                         Log.error("DATA-MONGO-BASE-UPDATE-ITEM-BASE-ERROR",error);
-                        callback([error,null]);
                     });
                 }
             }
@@ -160,7 +155,6 @@ class Mongo {
                     callback([error,data]);
                 }).catch(error => {
                     Log.error("DATA-MONGO-BASE-DELETE-ITEM-BASE-ERROR",error);
-                    callback([error,null]);
                 });
             }
         });
@@ -177,7 +171,6 @@ class Mongo {
                     callback([error,data]);
                 }).catch(error => {
                     Log.error("DATA-MONGO-BASE-DELETE-lIST-BASE-ERROR",error);
-                    callback([error,[]]);
                 });
             }
         });
@@ -199,11 +192,9 @@ class Mongo {
                                 call();
                             }).catch(error => {
                                 Log.error("DATA-MONGO-BASE-GET-SQL-PAGING-TBLiD-BASE-ERROR-1",error);
-                                callback([error,0,[]]);
                             });
                         }else{
                             Log.error("DATA-MONGO-BASE-GET-SQL-PAGING-TBLID-BASE-ERROR-2",error);
-                            callback(['No connection',0,[]]);
                         }
                     }else{
                         call();
@@ -224,7 +215,6 @@ class Mongo {
                         });
                     }else{
                         Log.error("DATA-Mongo-Base-Get-SQL-PAGING-TBLID-BASE-ERROR-4",error);
-                        callback(['No connection',0,[]]);
                     }
                 },
                 function(call) {
@@ -238,7 +228,6 @@ class Mongo {
                 callback([error,total_count,data_list]);
             }).catch(error => {
                 Log.error("PROJECT-FILENAME-UPDATE-BLANK-ERROR-5",error);
-                callback([error,0,[]]);
             });
         });
     }
@@ -253,7 +242,6 @@ class Mongo {
                 callback([error,data]);
             }).catch(error => {
                 Log.error("DATA-MONGO-BASE-COUNT-ITEM-LIST-BASE-ERROR",error);
-                callback([error,null]);
             });
         });
     }
