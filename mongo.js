@@ -150,7 +150,7 @@ class Mongo {
             if(Mongo.check_database(database)){
                 database.collection(table).deleteOne({id:id}).then((data) => {
                     if(data){
-                        data = data;
+                        data = data.deletedCount;
                     };
                     callback([error,data]);
                 }).catch(error => {

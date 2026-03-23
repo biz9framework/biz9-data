@@ -236,7 +236,6 @@ describe('data_copy', function(){ this.timeout(25000);
             });
     });
 });
-
 //9_delete - 9_test_delete
 describe('data_delete', function(){ this.timeout(25000);
     it("_data_delete", function(done){
@@ -245,7 +244,7 @@ describe('data_delete', function(){ this.timeout(25000);
         let database = {};
         let data = {};
         let option = {};
-        let post_data = Data_Logic.get(Project_Table.PRODUCT,'618');
+        let post_data = Data_Logic.get(Project_Table.PRODUCT,'881');
         async.series([
             async function(call){
                 const [biz_error,biz_data] = await Database.get(DATA_CONFIG);
@@ -266,8 +265,35 @@ describe('data_delete', function(){ this.timeout(25000);
             });
     });
 });
-
-
+//9_delete_search - 9_delete_search
+describe('data_delete_search', function(){ this.timeout(25000);
+    it("_data_delete_search", function(done){
+        console.log('DELETE-SEARCH-START');
+        let error=null;
+        let database = {};
+        let data = {};
+        let option = {};
+        let post_search = Data_Logic.get_search(Project_Table.PRODUCT,{id:'200'},{},1,0,{});
+        async.series([
+            async function(call){
+                const [biz_error,biz_data] = await Database.get(DATA_CONFIG);
+                database = biz_data;
+            },
+            async function(call){
+                const [biz_error,biz_data] = await Data.delete_search(database,post_search.table,post_search.filter,option);
+                Log.w('biz_data',biz_data);
+                Log.w('biz_error',biz_error);
+            },
+            async function(call){
+                console.log('DELETE-SEARCH-SUCCESS');
+            },
+        ],
+            function(error, result){
+                console.log('DELETE-SEARCH-DONE');
+                done();
+            });
+    });
+});
 //9_get - 9_test_get
 describe('data_get', function(){ this.timeout(25000);
     it("_data_get", function(done){
@@ -276,8 +302,7 @@ describe('data_get', function(){ this.timeout(25000);
         let database = {};
         let data = {};
         let option = {};
-        let post_data = Data_Logic.get(Project_Table.PRODUCT,'618');
-        let post_search = Data_Logic.get_search(Project_Table.PRODUCT,{},{},1,0,{});
+        let post_data = Data_Logic.get(Project_Table.PRODUCT,'200');
         async.series([
             async function(call){
                 const [biz_error,biz_data] = await Database.get(DATA_CONFIG);
@@ -298,6 +323,94 @@ describe('data_get', function(){ this.timeout(25000);
             });
     });
 });
+//9_post - 9_test_post
+describe('data_post', function(){ this.timeout(25000);
+    it("_data_post", function(done){
+        console.log('POST-START');
+        let error=null;
+        let database = {};
+        let data = {};
+        let option = {};
+        let post_data = Store_Logic.get_test_product();
+        async.series([
+            async function(call){
+                const [biz_error,biz_data] = await Database.get(DATA_CONFIG);
+                database = biz_data;
+            },
+            async function(call){
+                const [biz_error,biz_data] = await Data.post(database,post_data.table,post_data,option);
+                Log.w('biz_data',biz_data);
+                Log.w('biz_error',biz_error);
+            },
+            async function(call){
+                console.log('POST-SUCCESS');
+            },
+        ],
+            function(error, result){
+                console.log('POST-DONE');
+                done();
+            });
+    });
+});
+//9_post_items - 9_test_post_items
+describe('data_post_items', function(){ this.timeout(25000);
+    it("_data_post_items", function(done){
+        console.log('POST-ITEMS-START');
+        let error=null;
+        let database = {};
+        let data = {};
+        let option = {};
+        let post_data = Store_Logic.get_test_products();
+        async.series([
+            async function(call){
+                const [biz_error,biz_data] = await Database.get(DATA_CONFIG);
+                database = biz_data;
+            },
+            async function(call){
+                const [biz_error,biz_data] = await Data.post_items(database,post_data,option);
+                Log.w('biz_data',biz_data);
+                Log.w('biz_error',biz_error);
+            },
+            async function(call){
+                console.log('POST-ITEMS-SUCCESS');
+            },
+        ],
+            function(error, result){
+                console.log('POST-ITEMS-DONE');
+                done();
+            });
+    });
+});
+//9_search - 9_test_search
+describe('data_search', function(){ this.timeout(25000);
+    it("_data_search", function(done){
+        console.log('BLANK-START');
+        let error=null;
+        let database = {};
+        let data = {};
+        let option = {};
+        let post_search = Data_Logic.get_search(Project_Table.PRODUCT,{},{},1,0,{});
+        async.series([
+            async function(call){
+                const [biz_error,biz_data] = await Database.get(DATA_CONFIG);
+                database = biz_data;
+            },
+            async function(call){
+                const [biz_error,biz_data] = await Data.search(database,post_search.table,post_search.filter,post_search.sort_by,post_search.page_current,post_search.page_size,option);
+                Log.w('biz_data',biz_data);
+                Log.w('biz_error',biz_error);
+            },
+            async function(call){
+                console.log('BLANK-SUCCESS');
+            },
+        ],
+            function(error, result){
+                console.log('BLANK-DONE');
+                done();
+            });
+    });
+});
+
 
 
 //9_blank - 9_test_blank

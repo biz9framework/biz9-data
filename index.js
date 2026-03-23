@@ -6,7 +6,7 @@ Description: BiZ9 Framework: Data
 */
 const async = require('async');
 const {Scriptz}=require("biz9-scriptz");
-const {Data_Logic,Data_Field,Data_Type,Data_Table,Data_Value_Type}=require("biz9-data-logic");
+const {Data_Logic,Data_Field,Data_Type,Data_Table,Data_Value_Type}=require("/home/think1/www/doqbox/biz9-framework/biz9-data-logic/source");
 const {Log,Str,Obj}=require("biz9-utility");
 const {Cache} = require('./redis.js');
 const {Foreign} = require('./foreign.js');
@@ -95,13 +95,13 @@ class Database {
     }
 }
 class Data {
- //9_count
+    //9_count
     static count = async (database,table,search_filter) => {
         /* requried
          * - search obj filter
          * option
          * - none
-        */
+         */
         return new Promise((callback) => {
             let error = null;
             let cache = {};
@@ -123,14 +123,14 @@ class Data {
             });
         });
     };
- //9_copy
+    //9_copy
     static copy = async (database,table,id,option) => {
         /* requried
          * - table
          * - id
          * option
          * - copy_group / bool
-        */
+         */
         return new Promise((callback) => {
             let error = null;
             let cache = {};
@@ -177,7 +177,7 @@ class Data {
                             copy_group[Data_Field.PARENT_ID] = copy_data.id;
                             post_groups.push(copy_group);
                         }
-                        const [biz_error,biz_data] = await Adapter.post_item_list(database,cache,post_groups);
+                        const [biz_error,biz_data] = await Adapter.post_items(database,cache,post_groups);
                         copy_data.groups=biz_data;
                     }
                 },
@@ -190,17 +190,16 @@ class Data {
             });
         });
     };
-//9_delete
+    //9_delete
     static delete = async(database,table,id,option) => {
         /* requried
          * - table
          * - id
          * option
          * - delete_group / bool
-        */
+         */
         return new Promise((callback) => {
-            console.log('111111111');
-            let error = null;
+            let error = {};
             let cache = null;
             let data = Data_Logic.get(table,id);
             error[Data_Type.RESULT_OK_DELETE] = false;
@@ -216,22 +215,22 @@ class Data {
                     cache = biz_data;
                 },
                 async function(call){
-                    console.log('33333333');
                     const [biz_error,biz_data] = await Adapter.delete_item(database,cache,data.table,data.id);
-                    if(error[Data_Type.RESULT_OK_DELETE]){
-                        error[Data_Type.RESULT_OK_DELETE_COUNT]  = error[Data_Type.RESULT_OK_DELETE_COUNT];
-                        error[Data_Type.RESULT_OK_DELETE]  = true;
-                        error[Data_Type.RESULT_OK_DELETE_CACHE] = true;
-                        error[Data_Type.RESULT_OK_DELETE_DATABASE] = true;
+                    if(biz_error[Data_Type.RESULT_OK_DELETE]){
+                        error[Data_Type.RESULT_OK_DELETE_COUNT]  = biz_error[Data_Type.RESULT_OK_DELETE_COUNT];
+                        if(error[Data_Type.RESULT_OK_DELETE_COUNT] > 0){
+                            error[Data_Type.RESULT_OK_DELETE]  = true;
+                            error[Data_Type.RESULT_OK_DELETE_CACHE] = true;
+                            error[Data_Type.RESULT_OK_DELETE_DATABASE] = true;
+                        }
                     }
                 },
                 async function(call){
-                    console.log('4444444');
                     if(option.delete_group){
                         error[Data_Type.RESULT_OK_GROUP_DELETE] = false;
                         let filter = {parent_id:data.id};
                         const [biz_error,biz_data] = await Data.delete_search(database,Data_Table.GROUP,filter);
-                        if(error[Data_Type.RESULT_OK_DELETE]){
+                        if(biz_error[Data_Type.RESULT_OK_DELETE]){
                             error[Data_Type.RESULT_OK_GROUP_DELETE] = true;
                         }
                     }
@@ -244,126 +243,24 @@ class Data {
             });
         });
     };
-
-
-    //9_post
-    static post = async (database,table,data,option) => {
-        /* options
-           - reset
-           - clean
-           - delete_cache
-           - overwrite
-           */
-        return new Promise((callback) => {
-            let error = null;
-            let cache = {};
-            option = !Obj.check_is_empty(option) ? option : {};
-            async.series([
-                async function(call) {
-                    const [biz_error,biz_data] = await Cache.get(database.data_config);
-                    cache = biz_data;
-                },
-                //clean
-                function(call){
-                    if(option.clean){
-                        let new_data = {};
-                        for(const field in data){
-                            if(!Obj.check_is_array(data[field]) &&
-                                Obj.check_is_value(data[field]) &&
-                                !Str.check_if_str_exist(field,'_item_count') &&
-                                !Str.check_if_str_exist(field,'_page_count'))
-                            {
-                                new_data[field] = data[field];
-                            }
-                        }
-                        data = new_data;
-                        call();
-                    }else{
-                        call();
-                    }
-                },
-                //delete cache item
-                function(call){
-                    if(option.delete_cache || option.overwrite){
-                        Adapter.delete_item_cache(database,cache,table,data.id).then(([biz_error,biz_data])=>{
-                            call();
-                        }).catch(err => {
-                            Log.error('Data-Post-Delete-Cache',err);
-                            error=Log.append(error,err);
-                        });
-                    }else{
-                        call();
-                    }
-                },
-                function(call){
-                    Adapter.post_item(database,cache,table,data,option).then(([biz_error,biz_data])=>{
-                        data = biz_data;
-                        call();
-                    }).catch(err => {
-                        Log.error('Data-Post-Post-Item-Apapter',err);
-                        error=Log.append(error,err);
-                    });
-                },
-                //reset
-                function(call){
-                    if(option.reset && data.id){
-                        Adapter.get_item(database,cache,data.table,data.id).then(([biz_error,biz_data])=>{
-                            data = biz_data;
-                            call();
-                        }).catch(err => {
-                            Log.error('Data-Get-Reset',err);
-                            error=Log.append(error,err);
-                        });
-                    }else{
-                        call();
-                    }
-                },
-            ]).then(result => {
-                callback([error,data]);
-            }).catch(err => {
-                Log.error("Post-Data",err);
-                callback([err,{}]);
-            });
-        });
-    };
-    //9_post_items
-    static post_items = async (database,data_items) => {
-        /* option params
-         * n/a
-         */
-        return new Promise((callback) => {
-            let cache = {};
-            let error = null;
-            async.series([
-                async function(call) {
-                    const [biz_error,biz_data] = await Cache.get(database.data_config);
-                    cache = biz_data;
-                },
-                async function(call){
-                    const [biz_error,biz_data] = await Adapter.post_item_list(database,cache,data_items);
-                    data_items = biz_data;
-                },
-            ]).then(result => {
-                callback([error,data_items]);
-            }).catch(err => {
-                Log.error("Post-List-Data",err);
-                callback([err,{}]);
-            });
-        });
-    };
     //9_delete_search
     static delete_search = async (database,table,filter,option) => {
-        /* options
-           - delete_group
-           */
+        /* requried
+         * - table
+         * - search_filter
+         * option
+         * - delete_group / bool
+         */
         return new Promise((callback) => {
-            let error = null;
+            let error = {};
             let data = Data_Logic.get(table,0,{data:{filter:filter}});
             let cache = {};
             error[Data_Type.RESULT_OK_DELETE] = false;
+            error[Data_Type.RESULT_OK_GROUP_DELETE] = false;
             error[Data_Type.RESULT_OK_DELETE_COUNT] = 0;
+            error[Data_Type.RESULT_OK_DELETE_GROUP_COUNT] = 0;
             let delete_item_query = { $or: [] };
-            let delete_group_list = [];
+            let delete_group_items = [];
             let delete_items = [];
             option = !Obj.check_is_empty(option) ? option : {delete_group:true};
             async.series([
@@ -390,16 +287,16 @@ class Data {
                         delete_item_query.$or.push(query_field);
                         error[Data_Type.RESULT_OK_DELETE] = true;
                         const [biz_error,biz_data] = await Adapter.delete_item(database,cache,data_item.table,data_item.id);
-                        if(parseInt(error[Data_Type.RESULT_OK_DELETE_COUNT]) > 0){
-                            error[Data_Type.RESULT_OK_DELETE_COUNT] = error[Data_Type.RESULT_OK_DELETE_COUNT] + parseInt(error[Data_Type.RESULT_OK_DELETE_COUNT]);
+                        if(parseInt(biz_error[Data_Type.RESULT_OK_DELETE_COUNT]) > 0){
+                            error[Data_Type.RESULT_OK_DELETE_COUNT] = biz_error[Data_Type.RESULT_OK_DELETE_COUNT] + parseInt(error[Data_Type.RESULT_OK_DELETE_COUNT]);
                         }
                     }
                 },
                 function(call){
                     if(option.delete_group && delete_item_query.$or.length > 0){
-                        let search = Data_Logic.get_search(table,{},{},1,0,{field:{id:1,title:1,table:1}});
+                        let search = Data_Logic.get_search(table,delete_item_query,{},1,0,{field:{id:1,title:1,table:1}});
                         Adapter.get_item_list(database,cache,search.table,search.filter,search.sort_by,search.page_current,search.page_size,option).then(([biz_error,items,item_count,page_count])=>{
-                            delete_group_list = items;
+                            delete_group_items = items;
                             call();
                         });
                     }else{
@@ -407,10 +304,15 @@ class Data {
                     }
                 },
                 async function(call){
-                    if(option.delete_group && delete_item_query.$or.length > 0){
-                        error[Data_Type.RESULT_OK_GROUP_DELETE] = false;
-                        let search = Data_Logic.get_search(Data_Table.GROUP,delete_item_query,{},1,0);
-                        const [biz_error,biz_data] = await Adapter.delete_item_list(database,cache,search.table,search.filter);
+                    for(const data_item of delete_group_items){
+                        let query_field = {};
+                        query_field[Data_Field.ID] = data_item.id;
+                        const [biz_error,biz_data] = await Adapter.delete_item(database,cache,data_item.table,data_item.id);
+                        if(parseInt(biz_error[Data_Type.RESULT_OK_DELETE_COUNT]) > 0){
+                            error[Data_Type.RESULT_OK_DELETE_GROUP_COUNT] = biz_error[Data_Type.RESULT_OK_DELETE_GROUP_COUNT] + parseInt(error[Data_Type.RESULT_OK_DELETE_GROUP_COUNT]);
+                        }
+                    }
+                    if(error[Data_Type.RESULT_OK_DELETE_GROUP_COUNT]>0){
                         error[Data_Type.RESULT_OK_GROUP_DELETE] = true;
                     }
                 },
@@ -422,9 +324,12 @@ class Data {
             });
         });
     };
-   //9_get
+    //9_get
     static get = async(database,table,id,option) => {
-        /* Options
+     /* requried
+          - table
+          - id
+        * option
            - cache_delete
            - field
            - foreigns
@@ -432,9 +337,9 @@ class Data {
            - id_field
            - joins
            - title
-           */
+      */
         return new Promise((callback) => {
-            let error= null;
+            let error= {};
             let cache = null;
             let data = Data_Logic.get(table,id);
             let field_result_ok = false;
@@ -529,7 +434,118 @@ class Data {
             });
         });
     };
-    //9_search
+    //9_post
+    static post = async (database,table,data,option) => {
+        /* requried
+          - table
+          - data / obj
+        * option
+           - reset
+           - clean
+           - delete_cache
+           - overwrite
+        */
+        return new Promise((callback) => {
+            let error = null;
+            let cache = {};
+            option = !Obj.check_is_empty(option) ? option : {};
+            async.series([
+                async function(call) {
+                    const [biz_error,biz_data] = await Cache.get(database.data_config);
+                    cache = biz_data;
+                },
+                //clean
+                function(call){
+                    if(option.clean){
+                        let new_data = {};
+                        for(const field in data){
+                            if(!Obj.check_is_array(data[field]) &&
+                                Obj.check_is_value(data[field]) &&
+                                !Str.check_if_str_exist(field,'_item_count') &&
+                                !Str.check_if_str_exist(field,'_page_count'))
+                            {
+                                new_data[field] = data[field];
+                            }
+                        }
+                        data = new_data;
+                        call();
+                    }else{
+                        call();
+                    }
+                },
+                //delete cache item
+                function(call){
+                    if(option.delete_cache || option.overwrite){
+                        Adapter.delete_item_cache(database,cache,table,data.id).then(([biz_error,biz_data])=>{
+                            call();
+                        }).catch(err => {
+                            Log.error('Data-Post-Delete-Cache',err);
+                            error=Log.append(error,err);
+                        });
+                    }else{
+                        call();
+                    }
+                },
+                function(call){
+                    Adapter.post_item(database,cache,table,data,option).then(([biz_error,biz_data])=>{
+                        data = biz_data;
+                        call();
+                    }).catch(err => {
+                        Log.error('Data-Post-Post-Item-Apapter',err);
+                        error=Log.append(error,err);
+                    });
+                },
+                //reset
+                function(call){
+                    if(option.reset && data.id){
+                        Adapter.get_item(database,cache,data.table,data.id).then(([biz_error,biz_data])=>{
+                            data = biz_data;
+                            call();
+                        }).catch(err => {
+                            Log.error('Data-Get-Reset',err);
+                            error=Log.append(error,err);
+                        });
+                    }else{
+                        call();
+                    }
+                },
+            ]).then(result => {
+                callback([error,data]);
+            }).catch(err => {
+                Log.error("Post-Data",err);
+                callback([err,{}]);
+            });
+        });
+    };
+    //9_post_items
+    static post_items = async (database,data_items) => {
+        /* requried
+          - data_items / []
+        * option
+           - none
+        */
+        return new Promise((callback) => {
+            let cache = {};
+            let error = null;
+            async.series([
+                async function(call) {
+                    const [biz_error,biz_data] = await Cache.get(database.data_config);
+                    cache = biz_data;
+                },
+                async function(call){
+                    const [biz_error,biz_data] = await Adapter.post_items(database,cache,data_items);
+                    data_items = biz_data;
+                    error = biz_error;
+                },
+            ]).then(result => {
+                callback([error,data_items]);
+            }).catch(err => {
+                Log.error("Post-Items-Data",err);
+                callback([err,{}]);
+            });
+        });
+    };
+   //9_search
     static search = (database,table,filter,sort_by,page_current,page_size,option) => {
         /* options
            - field
@@ -541,7 +557,7 @@ class Data {
         return new Promise((callback) => {
             let data = {table:table,item_count:0,page_count:1,filter:{},items:[]};
             let cache = null;
-            let error = null;
+            let error = {};
             option = !Obj.check_is_empty(option) ? option : {};
             async.series([
                 async function(call) {
@@ -618,7 +634,7 @@ class Data {
             });
         });
     };
-        //9_data_post_bulk
+    //9_data_post_bulk
     static post_bulk = async (database,table,items) => {
         /* options
            - none

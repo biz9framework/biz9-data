@@ -33,13 +33,13 @@ class Adapter {
     static check_database=(database,option)=>{
         return Mongo.check(database,option);
     }
-    static post_items=(database,cache,items,option)=>{
+    static post_item_list=(database,cache,item_data_list,option)=>{
         return new Promise((callback) => {
             let error = null;
             let item_data_new_list=[];
             async.series([
-                async function(call){
-                    async.forEachOf(items,(item,key,go)=>{
+                function(call){
+                    async.forEachOf(item_data_list,(item,key,go)=>{
                         for(property in item[key]){
                             if(property!=Data_Field.ID&&property!=Data_Field.TABLE){
                                 if(!item[key][property]){
@@ -49,11 +49,14 @@ class Adapter {
                         }
                         go();
                     }, error => {
-                        Log.w('post_items',error);
+                        if(error){
+                            error=error;
+                        }
+                        call();
                     });
                 },
                 async function(call){
-                    async.forEachOf(items,(item,key,go)=>{
+                    async.forEachOf(item_data_list,(item,key,go)=>{
                         if(item){
                             async function main() {
                                 const [error,data] = await Mongo.post_item(database,item.table,item);
@@ -74,20 +77,24 @@ class Adapter {
                             go();
                         }
                     }, error => {
-                        Log.w('post_items-2',error);
+                        if(error){
+                            error=error;
+                        }
                     });
                 },
-                async function(call){
-                    for(const item of items) {
+                function(call){
+                    for(const item of item_data_list) {
                         item.source=Data_Title.SOURCE_DATABASE;
                         delete item._id;
                         item_data_new_list.push(item);
                     }
+                    call();
                 },
             ]).then(result=>{
                 callback([error,item_data_new_list]);
             }).catch(error => {
                 Log.error("Data-Adapter-Update-Item-List-5",error);
+                callback([error,[]]);
             });
         });
     }
@@ -98,10 +105,11 @@ class Adapter {
                 async function(call){
                     const [biz_error,biz_data] = await Mongo.post_item(database,table,item_data,option);
                 },
-                async function(call){
+                function(call){
                     if(item_data.id){
                         item_data.source=Data_Title.SOURCE_DATABASE;
                     }
+                    call();
                 },
                 async function(call){
                     const [error,data] = await Cache.delete_value(cache,Adapter.get_cache_item_attr_list_key(item_data.table,item_data.id));
@@ -110,6 +118,7 @@ class Adapter {
                 callback([error,item_data]);
             }).catch(error => {
                 Log.error("Data-Adapter-Update-Item-Adapter-2",error);
+                callback([error,[]]);
             });
         });
     }
@@ -117,7 +126,7 @@ class Adapter {
         return new Promise((callback) => {
             let error = null;
             let item_id_list = [];
-            let items = [];
+            let item_data_list = [];
             let item_count = 0;
             let page_count = 0;
             async.series([
@@ -137,32 +146,37 @@ class Adapter {
                             const [biz_error,biz_data] = await Adapter.get_item_cache_db(database,cache,table,item.id,option);
                             if(biz_data){
                                 delete biz_data['_id'];
-                                items.push(biz_data);
+                                item_data_list.push(biz_data);
                             }
                         }
                     }
                 },
                 //distinct
-                async function(call){
+                function(call){
                     if(option.distinct){
-                        items = items.filter((obj, index, self) =>
+                        item_data_list = item_data_list.filter((obj, index, self) =>
                             index === self.findIndex((t) => t[option.distinct.field] === obj[option.distinct.field])
                         );
                         let distinct_sort_by = option.distinct.sort_by ? option.distinct.sort_by : Data_Type.SORT_BY_ASC;
-                        items = Obj.sort_list_by_field(items,option.distinct.field,distinct_sort_by);
-                        item_count=items.length;
+                        item_data_list = Obj.sort_list_by_field(item_data_list,option.distinct.field,distinct_sort_by);
+                        item_count=item_data_list.length;
+                        call();
+                    }else{
+                        call();
                     }
                 },
-                async function(call) {
+                function(call) {
                     page_count = !Str.check_is_null(Math.round(item_count/page_size+1)) ? Math.round(item_count/page_size+1) : 0;
                     page_count = page_count == "Infinity" || Str.check_is_null(page_count) ? 1 : page_count;
                     item_count = Str.check_is_null(item_count) ? "0" : item_count;
                     page_size = Str.check_is_null(page_size) ? "0" : page_size;
+                    call();
                 }
             ]).then(result => {
-                callback([error,items,item_count,page_count]);
+                callback([error,item_data_list,item_count,page_count]);
             }).catch(error => {
                 Log.error("Get-Item-List-Adapter-3",error);
+                callback([error,[]]);
             });
         });
     }
@@ -202,6 +216,7 @@ class Adapter {
                 callback([error,data]);
             }).catch(error => {
                 Log.error("Adapter-Get-Item-Adapter-5",error);
+                callback([error,null]);
             });
         });
     }
@@ -211,12 +226,13 @@ class Adapter {
             let cache_string_str = '';
             let prop_list = [];
             async.series([
-                async function(call) {
+                function(call) {
                     for (const prop in item_data) {
                         if(prop != Data_Field.SOURCE){
                             prop_list.push({title:prop,value:item_data[prop]});
                         }
                     }
+                    call();
                 },
                 async function(call) {
                     for(const item of prop_list) {
@@ -231,29 +247,34 @@ class Adapter {
                 callback([error,item_data]);
             }).catch(error => {
                 Log.error("Data-Adapter-Set-Cache-Item-2",error);
+                callback([error,null]);
             });
         });
     }
     static delete_item = (database,cache,table,id,option) => {
         return new Promise((callback) => {
-            let error = {};
+            let error = null;
             let data = Data_Logic.get(table,id);
-            error[Data_Type.RESULT_OK_DELETE] = false;
-            error[Data_Type.RESULT_OK_DELETE_CACHE] = false;
-            error[Data_Type.RESULT_OK_DELETE_DATABASE] = false;
+            data[Data_Type.RESULT_OK_DELETE] = false;
+            data[Data_Type.RESULT_OK_DELETE_CACHE] = false;
+            data[Data_Type.RESULT_OK_DELETE_DATABASE] = false;
             async.series([
                 async function(call) {
                     const [biz_error,biz_data] = await Adapter.delete_item_cache_db(database,cache,table,id);
-                    data = biz_data;
-                    error[Data_Type.RESULT_OK_DELETE_COUNT] = biz_error[Data_Type.RESULT_OK_DELETE_COUNT];
-                    error[Data_Type.RESULT_OK_DELETE] = true;
-                    error[Data_Type.RESULT_OK_DELETE_CACHE] = true;
-                    error[Data_Type.RESULT_OK_DELETE_DATABASE] = true;
+                    if(biz_error){
+                        error = biz_error;
+                    }else{
+                        data = biz_data;
+                        data[Data_Type.RESULT_OK_DELETE] = true;
+                        data[Data_Type.RESULT_OK_DELETE_CACHE] = true;
+                        data[Data_Type.RESULT_OK_DELETE_DATABASE] = true;
+                    }
                 },
             ]).then(result => {
                 callback([error,data]);
             }).catch(error => {
                 Log.error("Adapter-Get-Item-Adapter-4",error);
+                callback([error,null]);
             });
         });
     }
@@ -338,6 +359,7 @@ class Adapter {
                 callback([error,item_data]);
             }).catch(error => {
                 Log.error("Data-Adapter-Get-Item-Cache-DB",error);
+                callback([error,null]);
             });
         });
     }
@@ -368,12 +390,13 @@ class Adapter {
                 callback([error,item_data_new_list]);
             }).catch(error => {
                 Log.error("Data-Adapter-Delete-Item-List-Adapter-3",error);
+                callback([error,[]]);
             });
         });
     }
     static delete_item_cache=(database,cache,table,id,option)=>{
         return new Promise((callback)=>{
-            let error = {};
+            let error = null;
             let cache_key_list = '';
             let cache_string_list = '';
             let item_data = Data_Logic.get(table,id);
@@ -394,25 +417,26 @@ class Adapter {
                 },
                 async function(call){
                     const [error,data] = await Cache.delete_value(cache,Adapter.get_cache_item_attr_list_key(table,id));
-                    error[Data_Type.RESULT_OK_DELETE_CACHE] = true;
-                    error.cache_item_attr_list = Adapter.get_cache_item_attr_list_key(table,id);
+                    item_data[Data_Type.RESULT_OK_DELETE_CACHE] = true;
+                    item_data.cache_item_attr_list = Adapter.get_cache_item_attr_list_key(table,id);
                 },
             ]).then(result => {
                 callback([error,item_data]);
             }).catch(error => {
                 Log.error("Data-Adapter-Delete-Item-Cache-5",error);
+                callback([error,null]);
             });
         });
     }
     static delete_item_cache_db = (database,cache,table,id) => {
         return new Promise((callback) => {
-            let error = {};
+            let error = null;
             let cache_key_list = '';
             let cache_string_list = '';
             let data = Data_Logic.get(table,id);
-            error[Data_Type.RESULT_OK_DELETE] = false;
-            error[Data_Type.RESULT_OK_DELETE_CACHE] = false;
-            error[Data_Type.RESULT_OK_DELETE_DATABASE] = false;
+            data[Data_Type.RESULT_OK_DELETE] = false;
+            data[Data_Type.RESULT_OK_DELETE_CACHE] = false;
+            data[Data_Type.RESULT_OK_DELETE_DATABASE] = false;
             async.series([
                 async function(call) {
                     const [biz_error,biz_data] = await Cache.get_value(cache,Adapter.get_cache_item_attr_list_key(table,id));
@@ -430,22 +454,27 @@ class Adapter {
                 },
                 async function(call){
                     const [biz_error,biz_data] = await Cache.delete_value(cache,Adapter.get_cache_item_attr_list_key(table,id));
-                    error[Data_Type.RESULT_OK_DELETE_CACHE] = true;
+                    if(!error){
+                        data[Data_Type.RESULT_OK_DELETE_CACHE] = true;
+                    }
                 },
                 async function(call){
                     const [biz_error,biz_data] = await Mongo.delete_item(database,table,id);
-                    error[Data_Type.RESULT_OK_DELETE_COUNT] = biz_data ? biz_data : 0;
-                    error[Data_Type.RESULT_OK_DELETE_DATABASE] = true;
+                    data[Data_Type.RESULT_OK_DELETE_COUNT] = biz_data ? biz_data.deletedCount : 0;
+                    if(!biz_error){
+                        data[Data_Type.RESULT_OK_DELETE_DATABASE] = true;
+                    }
                 },
                 async function(call){
-                    if(error[Data_Type.RESULT_OK_DELETE_DATABASE] && error[Data_Type.RESULT_OK_DELETE_CACHE]){
-                        error[Data_Type.RESULT_OK_DELETE] = true;
+                    if(data[Data_Type.RESULT_OK_DELETE_DATABASE] && data[Data_Type.RESULT_OK_DELETE_CACHE]){
+                        data[Data_Type.RESULT_OK_DELETE] = true;
                     }
                 }
             ]).then(result => {
                 callback([error,data]);
             }).catch(error => {
                 Log.error("Data-Adapter-Delete-Item-Cache-DB-5",error);
+                callback([error,null]);
             });
         });
     }
@@ -464,15 +493,16 @@ class Adapter {
                 callback([error,item_data]);
             }).catch(error => {
                 Log.error("Data-Adapter-Count-Item-List",error);
+                callback([error,null]);
             });
         });
     }
-    static post_bulk=(database,cache,table,items) => {
+    static post_bulk=(database,cache,table,item_data_list) => {
         return new Promise((callback) => {
             let data ={result_OK:false};
             async.series([
                 async function(call){
-                    const [biz_error,biz_data] = await post_bulk_main(database,table,items);
+                    const [biz_error,biz_data] = await post_bulk_main(database,table,item_data_list);
                     if(biz_data.result_OK){
                         data = biz_data;
                     }
@@ -481,6 +511,7 @@ class Adapter {
                 callback([error,data]);
             }).catch(error => {
                 Log.error("Data-Adapter-Update-Item-Adapter-END",error);
+                callback([error,[]]);
             });
         });
     }
