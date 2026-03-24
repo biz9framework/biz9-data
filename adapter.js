@@ -49,7 +49,6 @@ class Adapter {
                         }
                         go();
                     }, error => {
-                        Log.w('post_items',error);
                     });
                 },
                 async function(call){
@@ -74,7 +73,9 @@ class Adapter {
                             go();
                         }
                     }, error => {
-                        Log.w('post_items-2',error);
+                        if(error){
+                            Log.w('post_items-2-error',error);
+                        }
                     });
                 },
                 async function(call){
