@@ -27,7 +27,7 @@ const {Data_Logic,Data_Value_Type,Data_Table,Data_Field}=require("/home/think1/w
 ---group_add
 */
 /* --- TEST CONFIG START --- */
-const APP_ID = 'test-stage-march23';
+const APP_ID = 'test-stage-march25';
 /* --- TEST CONFIG END --- */
 
 /* --- DATA CONFIG START --- */
@@ -265,9 +265,9 @@ describe('data_delete', function(){ this.timeout(25000);
             });
     });
 });
-//9_delete_search - 9_delete_search
-describe('data_delete_search', function(){ this.timeout(25000);
-    it("_data_delete_search", function(done){
+//9_delete_search - 9_delete_search //data_delete_search
+describe('data_many_delete_search', function(){ this.timeout(25000);
+    it("_data_many_delete_search", function(done){
         console.log('DELETE-SEARCH-START');
         let response={};
         let database = {};
@@ -298,20 +298,20 @@ describe('data_delete_search', function(){ this.timeout(25000);
 describe('data_get', function(){ this.timeout(25000);
     it("_data_get", function(done){
         console.log('GET-START');
-        let error=null;
+        let response={};
         let database = {};
         let data = {};
         let option = {};
-        let post_data = Data_Logic.get(Project_Table.PRODUCT,'200');
+        let post_data = Data_Logic.get(Project_Table.PRODUCT,'452');
         async.series([
             async function(call){
-                const [biz_error,biz_data] = await Database.get(DATA_CONFIG);
+                const [biz_response,biz_data] = await Database.get(DATA_CONFIG);
                 database = biz_data;
             },
             async function(call){
-                const [biz_error,biz_data] = await Data.get(database,post_data.table,post_data.id,option);
+                const [biz_response,biz_data] = await Data.get(database,post_data.table,post_data.id,option);
                 Log.w('biz_data',biz_data);
-                Log.w('biz_error',biz_error);
+                Log.w('biz_response',biz_response);
             },
             async function(call){
                 console.log('GET-SUCCESS');
@@ -327,20 +327,20 @@ describe('data_get', function(){ this.timeout(25000);
 describe('data_post', function(){ this.timeout(25000);
     it("_data_post", function(done){
         console.log('POST-START');
-        let error=null;
+        let response={};
         let database = {};
         let data = {};
         let option = {};
         let post_data = Store_Logic.get_test_product();
         async.series([
             async function(call){
-                const [biz_error,biz_data] = await Database.get(DATA_CONFIG);
+                const [biz_response,biz_data] = await Database.get(DATA_CONFIG);
                 database = biz_data;
             },
             async function(call){
-                const [biz_error,biz_data] = await Data.post(database,post_data.table,post_data,option);
+                const [biz_response,biz_data] = await Data.post(database,post_data.table,post_data,option);
                 Log.w('biz_data',biz_data);
-                Log.w('biz_error',biz_error);
+                Log.w('biz_response',biz_response);
             },
             async function(call){
                 console.log('POST-SUCCESS');
@@ -352,24 +352,24 @@ describe('data_post', function(){ this.timeout(25000);
             });
     });
 });
-//9_post_items - 9_test_post_items
-describe('data_post_items', function(){ this.timeout(25000);
-    it("_data_post_items", function(done){
+//9_post_items - 9_test_post_items //data_post_items
+describe('data_many_post_items', function(){ this.timeout(25000);
+    it("_data_many_post_items", function(done){
         console.log('POST-ITEMS-START');
-        let error=null;
+        let response={};
         let database = {};
         let data = {};
         let option = {};
         let post_data = Store_Logic.get_test_products();
         async.series([
             async function(call){
-                const [biz_error,biz_data] = await Database.get(DATA_CONFIG);
+                const [biz_response,biz_data] = await Database.get(DATA_CONFIG);
                 database = biz_data;
             },
             async function(call){
-                const [biz_error,biz_data] = await Data.post_items(database,post_data,option);
+                const [biz_response,biz_data] = await Data.post_items(database,post_data,option);
                 Log.w('biz_data',biz_data);
-                Log.w('biz_error',biz_error);
+                Log.w('biz_response',biz_response);
             },
             async function(call){
                 console.log('POST-ITEMS-SUCCESS');
@@ -385,20 +385,20 @@ describe('data_post_items', function(){ this.timeout(25000);
 describe('data_search', function(){ this.timeout(25000);
     it("_data_search", function(done){
         console.log('BLANK-START');
-        let error=null;
+        let response={};
         let database = {};
         let data = {};
         let option = {};
         let post_search = Data_Logic.get_search(Project_Table.PRODUCT,{},{},1,0,{});
         async.series([
             async function(call){
-                const [biz_error,biz_data] = await Database.get(DATA_CONFIG);
+                const [biz_response,biz_data] = await Database.get(DATA_CONFIG);
                 database = biz_data;
             },
             async function(call){
-                const [biz_error,biz_data] = await Data.search(database,post_search.table,post_search.filter,post_search.sort_by,post_search.page_current,post_search.page_size,option);
+                const [biz_response,biz_data] = await Data.search(database,post_search.table,post_search.filter,post_search.sort_by,post_search.page_current,post_search.page_size,option);
                 Log.w('biz_data',biz_data);
-                Log.w('biz_error',biz_error);
+                Log.w('biz_response',biz_response);
             },
             async function(call){
                 console.log('BLANK-SUCCESS');
@@ -435,7 +435,7 @@ describe('data_blank', function(){ this.timeout(25000);
             },
         ],
             function(error, result){
-                Log.lerror('BLANK-DONE',error);
+                Log.error('BLANK-DONE',error);
                 done();
             });
     });

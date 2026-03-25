@@ -40,7 +40,7 @@ class Cache {
     }
     static get_value = (client_redis,key) => {
         return new Promise((callback) => {
-            let {} = {};
+            let response = {};
             client_redis.get(key).then((data) => {
                 callback([response,data]);
             }).catch(error => {
