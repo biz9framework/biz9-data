@@ -9,7 +9,6 @@ const {Log} = require("biz9-utility");
 class Cache {
     static get = (data_config) => {
         return new Promise((callback) => {
-            let error = null;
             let set_cache=false;
             let client_redis = redis.createClient(data_config.REDIS_PORT_ID,data_config.REDIS_URL);
             client_redis.connect().then((data) => {
@@ -21,7 +20,6 @@ class Cache {
     }
     static delete = (cache_connect) => {
         return new Promise((callback) => {
-            let error = null;
             let set_cache=false;
             cache_connect.disconnect().then((data) => {
                 callback([null,data]);
@@ -32,9 +30,9 @@ class Cache {
     }
     static delete_value = (client_redis,key) => {
         return new Promise((callback) => {
-            let error = null;
+            let response = {};
             client_redis.del(key).then((data) => {
-                callback([error,data]);
+                callback([response,data]);
             }).catch(error => {
                 Log.error("Data-Redis-Base-Delete-Cache-String-Base-Error",error);
             });
@@ -42,9 +40,9 @@ class Cache {
     }
     static get_value = (client_redis,key) => {
         return new Promise((callback) => {
-            let error = null;
+            let {} = {};
             client_redis.get(key).then((data) => {
-                callback([error,data]);
+                callback([response,data]);
             }).catch(error => {
                 Log.error("Data-Redis-Base-Get-Cache-String-Base-Error",error);
             });
@@ -52,14 +50,14 @@ class Cache {
     }
     static post_value = (client_redis,key,value) => {
         return new Promise((callback) => {
-            let error = null;
+            let response = {};
             let data = null;
             if(!value||value==null||value==undefined){
                 value=" ";
             }
             value=String(value).trim();
             client_redis.set(key,value).then((data) => {
-                callback([error,data]);
+                callback([response,data]);
             }).catch(error => {
                 Log.error("Data-Redis-Base-Set-Cache-String-Base-Error",error);
             });

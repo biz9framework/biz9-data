@@ -54,13 +54,13 @@ class Project_Table{
 //9_connect - 9_test_connect
 describe('connect', function(){ this.timeout(25000);
     it("_connect", function(done){
-        let error=null;
+        let response={};
         let cache=null;
         let database = {};
         let data = {};
         async.series([
             async function(call){
-                const [biz_error,biz_data] = await Database.get(DATA_CONFIG);
+                const [biz_response,biz_data] = await Database.get(DATA_CONFIG);
                 database = biz_data;
             },
             async function(call){
@@ -72,12 +72,12 @@ describe('connect', function(){ this.timeout(25000);
                 // -- parent --
                 //Log.w('33_parent',parent);
                 let parent = Data_Logic.get(Project_Table.PRODUCT,0);
-                const [error,biz_data] = await Data.post(database,parent.table,parent,option);
+                const [response,biz_data] = await Data.post(database,parent.table,parent,option);
                 // -- sub items --
                 //let sub_items = Data_Logic.get(Project_Table.BLANK,0,{count:10,parent:parent,data:{field_1:'value_'+Num.get_id(),field_2:'value_'+Num.get_id()}});
                 //let sub_items = Data_Logic.get(Project_Table.PRODUCT,0,{count:10,data:Store_Logic.get_test_product()});
                 //let sub_items = Data_Logic.get(Project_Table.PRODUCT,0,{count:1,data:User_Logic.get_test_user()});
-                //const [error,biz_data] = await Data.post_items(database,sub_items);
+                //const [response,biz_data] = await Data.post_items(database,sub_items);
                 */
                 // -- POST-END --//
                 //-- GET START --//
@@ -90,7 +90,7 @@ describe('connect', function(){ this.timeout(25000);
                 let foreign_1 = Data_Logic.get_foreign(Data_Value_Type.ITEMS,Project_Table.IMAGE,Form_Field.PARENT_ID,Form_Field.ID,{title:'images'});
                 let option = {groups:[Data_Logic.get_group({foreigns:[foreign_1]})]};
                 let parent = Data_Logic.get(Store_Table.PRODUCT,'117');
-                const [error,biz_data] = await Data.get(database,parent.table,parent.id,option);
+                const [biz_response,biz_data] = await Data.get(database,parent.table,parent.id,option);
                 Log.w('33_result',biz_data);
                 //Log.w('44_result',biz_data.main_images);
                 //Log.w('44_result',biz_data.groups[0]);
@@ -100,7 +100,7 @@ describe('connect', function(){ this.timeout(25000);
                 /*
                 let option = {};
                 let parent = Data_Logic.get(Project_Table.BLOG_POST,'844');
-                const [error,biz_data] = await Data.copy(database,parent.table,parent.id,option);
+                const [biz_response,biz_data] = await Data.copy(database,parent.table,parent.id,option);
                 */
                 //-- COPY END --//
                 //-->
@@ -113,17 +113,17 @@ describe('connect', function(){ this.timeout(25000);
                 let option = {groups:[group_1]};//{joins:[join_1],foreigns:[foreign_1]};
                 */
                 //let search = Data_Logic.get_search(Project_Table.PRODUCT,{},{},1,0,{});
-                //const [error,biz_data] = await Data.search(database,search.table,search.filter,search.sort_by,search.page_current,search.page_size,option);
-                //const [error,biz_data] = await Data.count(database,search.table,search.filter);
+                //const [biz_response,biz_data] = await Data.search(database,search.table,search.filter,search.sort_by,search.page_current,search.page_size,option);
+                //const [biz_response,biz_data] = await Data.count(database,search.table,search.filter);
                 //-- SEARCH START --//
                 // -- DELETE-START --//
                 /*
                 let option = {};
                 // -- parent --
                 //let parent = Data_Logic.get(Project_Table.PRODUCT,'255');
-                //const [error,biz_data] = await Data.delete(database,parent.table,parent.id,option);
+                //const [biz_response,biz_data] = await Data.delete(database,parent.table,parent.id,option);
                 let search = Data_Logic.get_search(Project_Table.PRODUCT,{},{},1,0,{});
-                const [error,biz_data] = await Data.delete_search(database,search.table,search.filter,search.sort_by,search.page_current,search.page_size,option);
+                const [biz_response,biz_data] = await Data.delete_search(database,search.table,search.filter,search.sort_by,search.page_current,search.page_size,option);
                 */
                 // -- DELETE-END --//
 
@@ -143,7 +143,7 @@ describe('connect', function(){ this.timeout(25000);
         cart_item_2.cart_sub_items.push(cart_sub_item_2);
         cart.cart_items.push(cart_item_1);
         cart.cart_items.push(cart_item_2);
-        const [biz_error,biz_data] = await Cart_Data.post(database,cart);
+        const [biz_response,biz_data] = await Cart_Data.post(database,cart);
         Log.w('11_cart_post',biz_data);
         */
                 // -- CART-POST-TEST-2 -- END
@@ -158,7 +158,7 @@ describe('connect', function(){ this.timeout(25000);
 //Log.w('www',foreign_cart_item);
                 let cart_option = { id_field:Store_Field.CART_NUMBER,foreigns:[foreign_user,foreign_cart_item] };
                 let cart_number = 'CA-16399';
-                const [biz_error,biz_data] = await Data.get(database,Store_Table.CART,cart_number,cart_option);
+                const [biz_response,biz_data] = await Data.get(database,Store_Table.CART,cart_number,cart_option);
                 Log.w('33_data',biz_data);
                 Log.w('33_data',biz_data.cart_items);
                 */
@@ -181,7 +181,7 @@ if(print_test){;
 describe('data_count', function(){ this.timeout(25000);
     it("_data_count", function(done){
         console.log('COUNT-START');
-        let error=null;
+        let response={};
         let database = {};
         let data = {};
         let option = {};
@@ -189,13 +189,13 @@ describe('data_count', function(){ this.timeout(25000);
         let post_search = Data_Logic.get_search(Project_Table.PRODUCT,{},{},1,0,{});
         async.series([
             async function(call){
-                const [biz_error,biz_data] = await Database.get(DATA_CONFIG);
+                const [biz_response,biz_data] = await Database.get(DATA_CONFIG);
                 database = biz_data;
             },
             async function(call){
-                const [biz_error,biz_data] = await Data.count(database,post_search.table,post_search.filter,option);
+                const [biz_response,biz_data] = await Data.count(database,post_search.table,post_search.filter,option);
                 Log.w('biz_data',biz_data);
-                Log.w('biz_error',biz_error);
+                Log.w('biz_response',biz_response);
             },
             async function(call){
                 console.log('COUNT-SUCCESS');
@@ -211,27 +211,27 @@ describe('data_count', function(){ this.timeout(25000);
 describe('data_copy', function(){ this.timeout(25000);
     it("_data_copy", function(done){
         console.log('COPY-START');
-        let error=null;
+        let response={};
         let database = {};
         let data = {};
         let option = {};
         let post_data = Data_Logic.get(Project_Table.PRODUCT,'618');
         async.series([
             async function(call){
-                const [biz_error,biz_data] = await Database.get(DATA_CONFIG);
+                const [biz_response,biz_data] = await Database.get(DATA_CONFIG);
                 database = biz_data;
             },
             async function(call){
-                const [biz_error,biz_data] = await Data.copy(database,post_data.table,post_data.id,option);
+                const [biz_response,biz_data] = await Data.copy(database,post_data.table,post_data.id,option);
                 Log.w('biz_data',biz_data);
-                Log.w('biz_error',biz_error);
+                Log.w('biz_response',biz_response);
             },
             async function(call){
                 console.log('COPY-SUCCESS');
             },
         ],
             function(error, result){
-                console.log('COPY-DONE');
+                Log.w.error('COPY-DONE',error);
                 done();
             });
     });
@@ -240,20 +240,20 @@ describe('data_copy', function(){ this.timeout(25000);
 describe('data_delete', function(){ this.timeout(25000);
     it("_data_delete", function(done){
         console.log('DELETE-START');
-        let error=null;
+        let response={};
         let database = {};
         let data = {};
         let option = {};
         let post_data = Data_Logic.get(Project_Table.PRODUCT,'881');
         async.series([
             async function(call){
-                const [biz_error,biz_data] = await Database.get(DATA_CONFIG);
+                const [biz_response,biz_data] = await Database.get(DATA_CONFIG);
                 database = biz_data;
             },
             async function(call){
-                const [biz_error,biz_data] = await Data.delete(database,post_data.table,post_data.id,option);
+                const [biz_response,biz_data] = await Data.delete(database,post_data.table,post_data.id,option);
                 Log.w('biz_data',biz_data);
-                Log.w('biz_error',biz_error);
+                Log.w('biz_response',biz_response);
             },
             async function(call){
                 console.log('DELETE-SUCCESS');
@@ -269,26 +269,26 @@ describe('data_delete', function(){ this.timeout(25000);
 describe('data_delete_search', function(){ this.timeout(25000);
     it("_data_delete_search", function(done){
         console.log('DELETE-SEARCH-START');
-        let error=null;
+        let response={};
         let database = {};
         let data = {};
         let option = {};
         let post_search = Data_Logic.get_search(Project_Table.PRODUCT,{id:'200'},{},1,0,{});
         async.series([
             async function(call){
-                const [biz_error,biz_data] = await Database.get(DATA_CONFIG);
+                const [biz_response,biz_data] = await Database.get(DATA_CONFIG);
                 database = biz_data;
             },
             async function(call){
-                const [biz_error,biz_data] = await Data.delete_search(database,post_search.table,post_search.filter,option);
+                const [biz_response,biz_data] = await Data.delete_search(database,post_search.table,post_search.filter,option);
                 Log.w('biz_data',biz_data);
-                Log.w('biz_error',biz_error);
+                Log.w('biz_response',biz_response);
             },
             async function(call){
                 console.log('DELETE-SEARCH-SUCCESS');
             },
         ],
-            function(error, result){
+            function(response, result){
                 console.log('DELETE-SEARCH-DONE');
                 done();
             });
@@ -414,7 +414,7 @@ describe('data_search', function(){ this.timeout(25000);
 describe('data_blank', function(){ this.timeout(25000);
     it("_data_blank", function(done){
         console.log('BLANK-START');
-        let error=null;
+        let response={};
         let database = {};
         let data = {};
         let option = {};
@@ -422,20 +422,20 @@ describe('data_blank', function(){ this.timeout(25000);
         let post_search = Data_Logic.get_search(Project_Table.PRODUCT,{},{},1,0,{});
         async.series([
             async function(call){
-                const [biz_error,biz_data] = await Database.get(DATA_CONFIG);
+                const [biz_response,biz_data] = await Database.get(DATA_CONFIG);
                 database = biz_data;
             },
             async function(call){
-                const [biz_error,biz_data] = await Data.count(database,post_search.table,post_search.filter,option);
+                const [biz_response,biz_data] = await Data.count(database,post_search.table,post_search.filter,option);
                 Log.w('biz_data',biz_data);
-                Log.w('biz_error',biz_error);
+                Log.w('biz_response',biz_response);
             },
             async function(call){
                 console.log('BLANK-SUCCESS');
             },
         ],
             function(error, result){
-                console.log('BLANK-DONE');
+                Log.lerror('BLANK-DONE',error);
                 done();
             });
     });

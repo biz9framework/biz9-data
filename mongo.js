@@ -12,7 +12,7 @@ let client_db = {};
 class Mongo {
     static get = (data_config,option) => {
         return new Promise((callback) => {
-            let error = null;
+            let response = {};
             const mongo_full_url="mongodb://"+data_config.MONGO_USERNAME_PASSWORD+data_config.MONGO_IP+":"+data_config.MONGO_PORT_ID+"?retryWrites=true&w=majority&maxIdleTimeMS=60000&connectTimeoutMS=150000&socketTimeoutMS=90000&maxPoolSize=900000&maxConnecting=10000";
             client_db = new MongoClient(mongo_full_url);
             client_db.connect(data_config.APP_ID).then((data)=> {
@@ -28,19 +28,19 @@ class Mongo {
                     }
                     reset_cmd = 'ssh '+ data_config.MONGO_SSH_KEY + " " +data_config.MONGO_SERVER_USER +"@"+data_config.MONGO_IP +" -- "+reset_cmd;
                 }
-                dir = exec(reset_cmd, function(error,stdout,stderr){
+                dir = exec(reset_cmd, function(response,stdout,stderr){
                 });
                 dir.on('exit', function (code) {
-                    callback([error,null]);
+                    callback([response,null]);
                 });
             });
         });
     }
     static delete = (database,option) => {
-        let error = null;
+        let response = {};
         return new Promise((callback) => {
             client_db.close().then((data)=> {
-                callback([error,null]);
+                callback([response,null]);
             }).catch(error => {
                 Log.error("DATA-MONGO-BASE-ClOSE-DB-BASE-ERROR",error);
             });
@@ -48,7 +48,7 @@ class Mongo {
     }
     static get_item = (database,table,id,option) => {
         return new Promise((callback) => {
-            let error = null;
+            let response = {};
             let data = null;
             if(!id){
                 id = '0';
@@ -59,7 +59,7 @@ class Mongo {
                         delete data['_id'];
                         data = data;
                     }
-                    callback([error,data]);
+                    callback([response,data]);
                 }).catch(error => {
                     Log.error("DATA-BASE-GET-ITEM-BASE-ERROR",error);
                 });
@@ -82,7 +82,7 @@ class Mongo {
     }
     static post_item = (database,table,item,option) => {
         return new Promise((callback) => {
-            let error = null;
+            let response = {};
             option = !Obj.check_is_empty(option) ? option : {};
             if (Str.check_is_null(item.id)){//insert
                 //item[Type.FIELD_ID] = Str.get_guid();
@@ -92,7 +92,7 @@ class Mongo {
                 if(Mongo.check_database(database)){
                     database.collection(table).insertOne(item).then((data) => {
                         delete item['_id'];
-                        callback([error,item]);
+                        callback([response,item]);
                     }).catch(error => {
                         Log.error("DATA-MONGO-BASE-UPDATE-ITEM-BASE-ERROR",error);
                     });
@@ -102,14 +102,14 @@ class Mongo {
                 if(!option.overwrite){
                     delete item['_id'];
                     database.collection(table).updateOne({id:item.id},{$set: item}).then((data) => {
-                        callback([error,item]);
+                        callback([response,item]);
                     }).catch(error => {
                         Log.error("DATA-MONGO-BASE-UPDATE-ITEM-BASE-ERROR",error);
                     });
                 }else{
                     delete item['_id'];
                     database.collection(table).replaceOne({id:item.id},item).then((data) => {
-                        callback([error,item]);
+                        callback([response,item]);
                     }).catch(error => {
                         Log.error("DATA-MONGO-BASE-UPDATE-ITEM-BASE-ERROR",error);
                     });
@@ -119,7 +119,7 @@ class Mongo {
     }
     static post_bulk_base = (database,table,data_list) => {
         return new Promise((callback) => {
-            let error = null;
+            let response = {};
             let data = {result_OK:false};
             let bulk_list = [];
             let date_create = DateTime.get();
@@ -139,20 +139,20 @@ class Mongo {
                     Log.error("DATA-MONGO-BASE-DELETE-ITEM-BASE-ERROR",error);
                 }
                 data.result_OK= true;
-                callback([error,data]);
+                callback([response,data]);
             }
         });
     }
     static delete_item = (database,table,id,option) => {
         return new Promise((callback) => {
-            let error = null;
+            let response = {};
             let data = null;
             if(Mongo.check_database(database)){
                 database.collection(table).deleteOne({id:id}).then((data) => {
                     if(data){
                         data = data.deletedCount;
                     };
-                    callback([error,data]);
+                    callback([response,data]);
                 }).catch(error => {
                     Log.error("DATA-MONGO-BASE-DELETE-ITEM-BASE-ERROR",error);
                 });
@@ -161,14 +161,14 @@ class Mongo {
     }
     static delete_item_list = (database,table,filter) => {
         return new Promise((callback) => {
-            let error = null;
+            let response = {};
             let data = null;
             if(Mongo.check_database(database)){
                 database.collection(table).deleteMany(filter).then((data) => {
                     if(data){
                         data = data;
                     }
-                    callback([error,data]);
+                    callback([response,data]);
                 }).catch(error => {
                     Log.error("DATA-MONGO-BASE-DELETE-lIST-BASE-ERROR",error);
                 });
@@ -177,7 +177,7 @@ class Mongo {
     }
     static get_id_list = (database,table,filter,sort_by,page_current,page_size,option) => {
         return new Promise((callback) => {
-            let error = null;
+            let response = {};
             let total_count = 0;
             let data_list = [];
             let collection = {};
@@ -211,7 +211,6 @@ class Mongo {
                             call();
                         }).catch(error => {
                             Log.error("DATA-MONGO-BASE-GET-SQL-PAGING-TBlID-BASE-ERROR-3",error);
-                            callback([error,0,[]]);
                         });
                     }else{
                         Log.error("DATA-Mongo-Base-Get-SQL-PAGING-TBLID-BASE-ERROR-4",error);
@@ -225,7 +224,7 @@ class Mongo {
                 }
 
             ]).then(result => {
-                callback([error,total_count,data_list]);
+                callback([response,total_count,data_list]);
             }).catch(error => {
                 Log.error("PROJECT-FILENAME-UPDATE-BLANK-ERROR-5",error);
             });
@@ -233,13 +232,13 @@ class Mongo {
     }
     static get_count_item_list = async (database,table,filter,option) => {
         return new Promise((callback) => {
-            let error = null;
+            let response = {};
             let data = 0;
             database.collection(table).countDocuments(filter).then((data) => {
                 if(data){
                     data = data;
                 }
-                callback([error,data]);
+                callback([response,data]);
             }).catch(error => {
                 Log.error("DATA-MONGO-BASE-COUNT-ITEM-LIST-BASE-ERROR",error);
             });

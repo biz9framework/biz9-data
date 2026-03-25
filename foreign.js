@@ -11,7 +11,7 @@ const {Adapter}  = require('./adapter.js');
 class Foreign {
     static get_data = (database,cache,data_items,option) => {
         return new Promise((callback) => {
-            let error = null;
+            let response = {};
             const foreign_search_items = [];
             async.series([
                 function(call){
@@ -54,10 +54,9 @@ class Foreign {
                     });
                 },
             ]).then(result => {
-                callback([error,data_items]);
+                callback([response,data_items]);
             }).catch(err => {
                 Log.error("Foreign-Get",err);
-                callback([error,[]]);
             });
         });
     };
@@ -85,11 +84,10 @@ class Foreign {
             let search = Data_Logic.get_search(search_item.foreign_table,search_item.query,search_item.sort_by,search_item.page_current,search_item.page_size);
             let foreign_option = search_item.field ? search_item.field : {};
             if(search_item.query.$or.length>0){
-                Adapter.get_item_list(database,cache,search.table,search.filter,search.sort_by,search.page_current,search.page_size,foreign_option).then(([biz_error,items,item_count,page_count])=>{
+                Adapter.get_item_list(database,cache,search.table,search.filter,search.sort_by,search.page_current,search.page_size,foreign_option).then(([biz_response,items,item_count,page_count])=>{
                     resolve(items);
                 }).catch(err => {
                     Log.error('Foreign-Get-Data',err);
-                    error=Log.append(error,err);
                 });
             }else{
                 resolve([]);
@@ -98,7 +96,7 @@ class Foreign {
     }
     static run_search_item_data = (database,cache,search_item)=> {
         return new Promise((callback) => {
-            let error = null;
+            let response = {};
             let data = null;
             async.series([
                 async function(call) {
@@ -113,8 +111,7 @@ class Foreign {
             ]).then(result => {
                 callback(search_item);
             }).catch(err => {
-                Log.error("Blank-Get",err);
-                callback([error,[]]);
+                Log.error("Foreign-Run-Search-Item-Data",err);
             });
         });
     }
@@ -124,12 +121,10 @@ class Foreign {
             function get_data(search_item,query) {
                 return new Promise((resolve2) => {
                     let search = Data_Logic.get_search(search_item.foreign_table,query,search_item.sort_by,search_item.page_current,search_item.page_size);
-                    Adapter.get_count_item_list(database,search.table,search.filter).then(([biz_error,biz_data])=>{
-                        search_item.data = 'applke';
+                    Adapter.get_count_item_list(database,search.table,search.filter).then(([biz_response,biz_data])=>{
                         resolve2(biz_data.count?biz_data.count : 0);
                     }).catch(err => {
                         Log.error('Foreign-Get-Data',err);
-                        error=Log.append(error,err);
                     });
                 });
             }
@@ -150,14 +145,14 @@ class Foreign {
     }
     static get_search_item_data =(database,cache,search_item)=> {
         return new Promise((callback) => {
-            let error = null;
-            let data = null;
+            let response = {};
+            let data = {};
             async.series([
                 async function(call) {
                     search_item = await Foreign.run_search_item_data(database,cache,search_item);
                 },
                 function(call){
-                    Foreign.get_search_item_detail_data(database,cache,search_item).then((error,search_item) => {
+                    Foreign.get_search_item_detail_data(database,cache,search_item).then((biz_response,search_item) => {
                         search_item = search_item;
                         call();
                     });
@@ -166,7 +161,6 @@ class Foreign {
                 callback(search_item);
             }).catch(err => {
                 Log.error("Foreign-Get-Search-Item-Data",err);
-                callback([error,[]]);
             });
         });
     }
@@ -175,7 +169,7 @@ class Foreign {
            - none
            */
         return new Promise((callback) => {
-            let error = null;
+            let response = {};
             var sub_search_foreign_items = [];
             async.series([
                 async function(call){
@@ -246,10 +240,9 @@ class Foreign {
                     }
                 },
             ]).then(result => {
-                callback([error,search_item]);
+                callback([response,search_item]);
             }).catch(err => {
                 Log.error("Get-Search-Item-Detail",err);
-                callback([err,{}]);
             });
         });
     };
@@ -258,26 +251,21 @@ class Foreign {
            - none
            */
         return new Promise((callback) => {
-            let error = null;
+            let response = {};
             let data = {};
             async.series([
                 async function(call){
-                    const [biz_error,biz_data] = await get(database,table,items);
-                    if(biz_error){
-                        error=Log.append(error,biz_error);
-                    }else{
-                        data = biz_data;
-                    }
+                    const [biz_response,biz_data] = await get(database,table,items);
+                    data = biz_data;
                 },
             ]).then(result => {
-                callback([error,data]);
+                callback([response,data]);
             }).catch(err => {
                 Log.error("Blank-Data",err);
                 callback([err,{}]);
             });
         });
     };
-
 }
 module.exports = {
     Foreign

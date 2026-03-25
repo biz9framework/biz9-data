@@ -18,7 +18,7 @@ class Database {
         /* options
         - none
         */
-        let error=null;
+        let response={};
         let data={};
         return new Promise((callback) => {
             option = !Obj.check_is_empty(option) ? option : {biz9_config_file:null,app_id:null};
@@ -31,19 +31,14 @@ class Database {
                 data_config.APP_ID = option.app_id;
             }
             if(data_config.APP_ID==null){
-                error=Log.append(error,"Database Error: Missing app_id.");
+                Log.error('Database-Get-1',"Database Error: Missing app_id.");
             }
-            Adapter.get_database(data_config).then(([biz_error,biz_data])=>{
-                if(biz_error){
-                    error=Log.append(error,biz_error);
-                }else{
-                    biz_data.data_config=data_config;
-                    biz_data.app_id=data_config.APP_ID;
-                    callback([error,biz_data]);
-                }
+            Adapter.get_database(data_config).then(([biz_response,biz_data])=>{
+                biz_data.data_config=data_config;
+                biz_data.app_id=data_config.APP_ID;
+                callback([biz_response,biz_data]);
             }).catch(err => {
-                Log.error('Data-Database-Get',err);
-                error=Log.append(error,err);
+                Log.error('Data-Database-Get-2',err);
             });
         });
     }
@@ -51,19 +46,14 @@ class Database {
         /* options
             - none
             */
-        let error=null;
+        let response={};
         return new Promise((callback) => {
-            Adapter.delete_database(data_config).then(([biz_error,biz_data])=>{
-                if(biz_error){
-                    error=Log.append(error,biz_error);
-                }else{
-                    biz_data.data_config=data_config;
-                    biz_data.app_id=data_config.APP_ID;
-                    callback([err,null]);
-                }
+            Adapter.delete_database(data_config).then(([biz_response,biz_data])=>{
+                biz_data.data_config=data_config;
+                biz_data.app_id=data_config.APP_ID;
+                callback([biz_response,null]);
             }).catch(err => {
                 Log.error('Data-Db-Delete',err);
-                error=Log.append(error,err);
             });
         });
     }
@@ -73,7 +63,7 @@ class Database {
             */
         return new Promise((callback) => {
             let data = [];
-            let error = null;
+            let response = {};
             option = !Obj.check_is_empty(option) ? option : {};
             async.series([
                 async function(call){
@@ -86,10 +76,9 @@ class Database {
                     }
                 },
             ]).then(result => {
-                callback([error,data]);
+                callback([response,data]);
             }).catch(err => {
                 Log.error("Database-Info",err);
-                callback([err,null]);
             });
         });
     }
@@ -103,23 +92,22 @@ class Data {
          * - none
          */
         return new Promise((callback) => {
-            let error = null;
+            let response = {};
             let cache = {};
             let data = {};
             async.series([
                 async function(call) {
-                    const [biz_error,biz_data] = await Cache.get(database.data_config);
+                    const [biz_response,biz_data] = await Cache.get(database.data_config);
                     cache = biz_data;
                 },
                 async function(call){
-                    const [biz_error,biz_data] = await Adapter.get_count_item_list(database,table,search_filter);
+                    const [biz_response,biz_data] = await Adapter.get_count_item_list(database,table,search_filter);
                     data = biz_data.count;
                 },
             ]).then(result => {
-                callback([error,data]);
+                callback([response,data]);
             }).catch(err => {
                 Log.error("Count-List-Data",err);
-                callback([err,{}]);
             });
         });
     };
@@ -132,7 +120,7 @@ class Data {
          * - copy_group / bool
          */
         return new Promise((callback) => {
-            let error = null;
+            let response = {};
             let cache = {};
             let data = Data_Logic.get(table,id);
             let top_data = Data_Logic.get(table,0);
@@ -140,12 +128,12 @@ class Data {
             option = !Obj.check_is_empty(option) ? option : {copy_group:true};
             async.series([
                 async function(call) {
-                    const [biz_error,biz_data] = await Cache.get(database.data_config);
+                    const [biz_response,biz_data] = await Cache.get(database.data_config);
                     cache = biz_data;
                 },
                 async function(call){
                     let data_group_option = Data_Logic.get_group();
-                    const [biz_error,biz_data] = await Data.get(database,table,id,{groups:[data_group_option]});
+                    const [biz_response,biz_data] = await Data.get(database,table,id,{groups:[data_group_option]});
                     top_data=biz_data;
                 },
                 //top_item
@@ -156,7 +144,7 @@ class Data {
                         copy_data[Data_Field.TITLE_URL] = 'copy_'+top_data[Data_Field.TITLE_URL];
                         copy_data[Data_Field.SOURCE_ID] = top_data.id;
                         copy_data[Data_Field.SOURCE_TABLE] = top_data.table;
-                        const [biz_error,biz_data] = await Data.post(database,copy_data.table,copy_data);
+                        const [biz_response,biz_data] = await Data.post(database,copy_data.table,copy_data);
                         copy_data=biz_data;
                     }else{
                         copy_data = Data_Logic.get_not_found(table,id);
@@ -177,16 +165,15 @@ class Data {
                             copy_group[Data_Field.PARENT_ID] = copy_data.id;
                             post_groups.push(copy_group);
                         }
-                        const [biz_error,biz_data] = await Adapter.post_items(database,cache,post_groups);
+                        const [biz_response,biz_data] = await Adapter.post_items(database,cache,post_groups);
                         copy_data.groups=biz_data;
                     }
                 },
             ]).then(result => {
                 data = copy_data;
-                callback([error,data]);
+                callback([response,data]);
             }).catch(err => {
-                Log.error("Copy",err);
-                callback([err,{}]);
+                Log.error("Data-Copy",err);
             });
         });
     };
@@ -199,47 +186,46 @@ class Data {
          * - delete_group / bool
          */
         return new Promise((callback) => {
-            let error = {};
+            let response = {};
             let cache = null;
             let data = Data_Logic.get(table,id);
-            error[Data_Type.RESULT_OK_DELETE] = false;
-            error[Data_Type.RESULT_OK_DELETE_CACHE] = false;
-            error[Data_Type.RESULT_OK_DELETE_DATABASE] = false;
-            error[Data_Type.RESULT_OK_GROUP_DELETE] = false;
-            error[Data_Type.RESULT_OK_DELETE_COUNT] = 0;
+            response[Data_Type.RESULT_OK_DELETE] = false;
+            response[Data_Type.RESULT_OK_DELETE_CACHE] = false;
+            response[Data_Type.RESULT_OK_DELETE_DATABASE] = false;
+            response[Data_Type.RESULT_OK_GROUP_DELETE] = false;
+            response[Data_Type.RESULT_OK_DELETE_COUNT] = 0;
             option = !Obj.check_is_empty(option) ? option : {delete_group:true};
             let delete_group_list = [];
             async.series([
                 async function(call){
-                    const [biz_error,biz_data] = await Cache.get(database.data_config);
+                    const [biz_response,biz_data] = await Cache.get(database.data_config);
                     cache = biz_data;
                 },
                 async function(call){
-                    const [biz_error,biz_data] = await Adapter.delete_item(database,cache,data.table,data.id);
-                    if(biz_error[Data_Type.RESULT_OK_DELETE]){
-                        error[Data_Type.RESULT_OK_DELETE_COUNT]  = biz_error[Data_Type.RESULT_OK_DELETE_COUNT];
-                        if(error[Data_Type.RESULT_OK_DELETE_COUNT] > 0){
-                            error[Data_Type.RESULT_OK_DELETE]  = true;
-                            error[Data_Type.RESULT_OK_DELETE_CACHE] = true;
-                            error[Data_Type.RESULT_OK_DELETE_DATABASE] = true;
+                    const [biz_response,biz_data] = await Adapter.delete_item(database,cache,data.table,data.id);
+                    if(biz_response[Data_Type.RESULT_OK_DELETE]){
+                        response[Data_Type.RESULT_OK_DELETE_COUNT]  = biz_response[Data_Type.RESULT_OK_DELETE_COUNT];
+                        if(response[Data_Type.RESULT_OK_DELETE_COUNT] > 0){
+                            response[Data_Type.RESULT_OK_DELETE]  = true;
+                            response[Data_Type.RESULT_OK_DELETE_CACHE] = true;
+                            response[Data_Type.RESULT_OK_DELETE_DATABASE] = true;
                         }
                     }
                 },
                 async function(call){
                     if(option.delete_group){
-                        error[Data_Type.RESULT_OK_GROUP_DELETE] = false;
+                        response[Data_Type.RESULT_OK_GROUP_DELETE] = false;
                         let filter = {parent_id:data.id};
-                        const [biz_error,biz_data] = await Data.delete_search(database,Data_Table.GROUP,filter);
-                        if(biz_error[Data_Type.RESULT_OK_DELETE]){
-                            error[Data_Type.RESULT_OK_GROUP_DELETE] = true;
+                        const [biz_response,biz_data] = await Data.delete_search(database,Data_Table.GROUP,filter);
+                        if(biz_response[Data_Type.RESULT_OK_DELETE]){
+                            response[Data_Type.RESULT_OK_GROUP_DELETE] = true;
                         }
                     }
                 },
             ]).then(result => {
-                callback([error,data]);
+                callback([response,data]);
             }).catch(err => {
-                Log.error("Delete-Item",err);
-                callback([err,{}]);
+                Log.error("Data-Delete-Item",err);
             });
         });
     };
@@ -252,32 +238,32 @@ class Data {
          * - delete_group / bool
          */
         return new Promise((callback) => {
-            let error = {};
+            let response = {};
             let data = Data_Logic.get(table,0,{data:{filter:filter}});
             let cache = {};
-            error[Data_Type.RESULT_OK_DELETE] = false;
-            error[Data_Type.RESULT_OK_GROUP_DELETE] = false;
-            error[Data_Type.RESULT_OK_DELETE_COUNT] = 0;
-            error[Data_Type.RESULT_OK_DELETE_GROUP_COUNT] = 0;
+            response[Data_Type.RESULT_OK_DELETE] = false;
+            response[Data_Type.RESULT_OK_GROUP_DELETE] = false;
+            response[Data_Type.RESULT_OK_DELETE_COUNT] = 0;
+            response[Data_Type.RESULT_OK_DELETE_GROUP_COUNT] = 0;
             let delete_item_query = { $or: [] };
             let delete_group_items = [];
             let delete_items = [];
             option = !Obj.check_is_empty(option) ? option : {delete_group:true};
             async.series([
                 async function(call) {
-                    const [biz_error,biz_data] = await Cache.get(database.data_config);
+                    const [biz_response,biz_data] = await Cache.get(database.data_config);
                     cache = biz_data;
                 },
                 function(call){
                     let search = Data_Logic.get_search(table,filter,{},1,0);
-                    Adapter.get_item_list(database,cache,search.table,search.filter,search.sort_by,search.page_current,search.page_size,option).then(([biz_error,items,item_count,page_count])=>{
+                    Adapter.get_item_list(database,cache,search.table,search.filter,search.sort_by,search.page_current,search.page_size,option).then(([biz_response,items,item_count,page_count])=>{
                         if(items.length>0){
                             delete_items = items;
                         }
                         call();
                     }).catch(err => {
                         Log.error('Data-Search',err);
-                        error=Log.append(error,err);
+                        response=Log.append(response,err);
                     });
                 },
                 async function(call){
@@ -285,17 +271,17 @@ class Data {
                         let query_field = {};
                         query_field[Data_Field.PARENT_ID] = data_item.id
                         delete_item_query.$or.push(query_field);
-                        error[Data_Type.RESULT_OK_DELETE] = true;
-                        const [biz_error,biz_data] = await Adapter.delete_item(database,cache,data_item.table,data_item.id);
-                        if(parseInt(biz_error[Data_Type.RESULT_OK_DELETE_COUNT]) > 0){
-                            error[Data_Type.RESULT_OK_DELETE_COUNT] = biz_error[Data_Type.RESULT_OK_DELETE_COUNT] + parseInt(error[Data_Type.RESULT_OK_DELETE_COUNT]);
+                        response[Data_Type.RESULT_OK_DELETE] = true;
+                        const [biz_response,biz_data] = await Adapter.delete_item(database,cache,data_item.table,data_item.id);
+                        if(parseInt(biz_response[Data_Type.RESULT_OK_DELETE_COUNT]) > 0){
+                            response[Data_Type.RESULT_OK_DELETE_COUNT] = biz_response[Data_Type.RESULT_OK_DELETE_COUNT] + parseInt(response[Data_Type.RESULT_OK_DELETE_COUNT]);
                         }
                     }
                 },
                 function(call){
                     if(option.delete_group && delete_item_query.$or.length > 0){
                         let search = Data_Logic.get_search(table,delete_item_query,{},1,0,{field:{id:1,title:1,table:1}});
-                        Adapter.get_item_list(database,cache,search.table,search.filter,search.sort_by,search.page_current,search.page_size,option).then(([biz_error,items,item_count,page_count])=>{
+                        Adapter.get_item_list(database,cache,search.table,search.filter,search.sort_by,search.page_current,search.page_size,option).then(([biz_response,items,item_count,page_count])=>{
                             delete_group_items = items;
                             call();
                         });
@@ -307,20 +293,19 @@ class Data {
                     for(const data_item of delete_group_items){
                         let query_field = {};
                         query_field[Data_Field.ID] = data_item.id;
-                        const [biz_error,biz_data] = await Adapter.delete_item(database,cache,data_item.table,data_item.id);
-                        if(parseInt(biz_error[Data_Type.RESULT_OK_DELETE_COUNT]) > 0){
-                            error[Data_Type.RESULT_OK_DELETE_GROUP_COUNT] = biz_error[Data_Type.RESULT_OK_DELETE_GROUP_COUNT] + parseInt(error[Data_Type.RESULT_OK_DELETE_GROUP_COUNT]);
+                        const [biz_response,biz_data] = await Adapter.delete_item(database,cache,data_item.table,data_item.id);
+                        if(parseInt(biz_response[Data_Type.RESULT_OK_DELETE_COUNT]) > 0){
+                            response[Data_Type.RESULT_OK_DELETE_GROUP_COUNT] = biz_response[Data_Type.RESULT_OK_DELETE_GROUP_COUNT] + parseInt(response[Data_Type.RESULT_OK_DELETE_GROUP_COUNT]);
                         }
                     }
-                    if(error[Data_Type.RESULT_OK_DELETE_GROUP_COUNT]>0){
-                        error[Data_Type.RESULT_OK_GROUP_DELETE] = true;
+                    if(response[Data_Type.RESULT_OK_DELETE_GROUP_COUNT]>0){
+                        response[Data_Type.RESULT_OK_GROUP_DELETE] = true;
                     }
                 },
             ]).then(result => {
-                callback([error,data]);
+                callback([response,data]);
             }).catch(err => {
                 Log.error("Delete-List-Data",err);
-                callback([err,[]]);
             });
         });
     };
@@ -339,23 +324,23 @@ class Data {
            - title
       */
         return new Promise((callback) => {
-            let error= {};
+            let response= {};
             let cache = null;
             let data = Data_Logic.get(table,id);
             let field_result_ok = false;
             option = !Obj.check_is_empty(option) ? option : {};
             async.series([
                 async function(call) {
-                    const [biz_error,biz_data] = await Cache.get(database.data_config);
+                    const [biz_response,biz_data] = await Cache.get(database.data_config);
                     cache = biz_data;
                 },
                 function(call){
                     if(option.cache_delete){
-                        Adapter.delete_item_cache(database,cache,data.table,data.id,option).then(([biz_error,biz_data])=>{
+                        Adapter.delete_item_cache(database,cache,data.table,data.id,option).then(([biz_response,biz_data])=>{
                             call();
                         }).catch(err => {
                             Log.error('Data-Delete-Cache',err);
-                            error=Log.append(error,err);
+                            response=Log.append(response,err);
                         });
                     }else{
                         call();
@@ -364,7 +349,7 @@ class Data {
                 //item_by_id
                 //title
                 function(call){
-                    Adapter.get_item(database,cache,data.table,data.id,option).then(([biz_error,biz_data])=>{
+                    Adapter.get_item(database,cache,data.table,data.id,option).then(([biz_response,biz_data])=>{
                         if(!option.title){
                             data = biz_data;
                         }else{
@@ -374,13 +359,12 @@ class Data {
                         call();
                     }).catch(err => {
                         Log.error('Data-Get',err);
-                        error=Log.append(error,err);
                     });
                 },
                 //9_get_join 9_join
                 function(call){
                     if(option.joins){
-                        Join.get_data(database,cache,option).then(([biz_error,biz_data])=>{
+                        Join.get_data(database,cache,option).then(([biz_response,biz_data])=>{
                             for(const search_item of biz_data){
                                 data[search_item.title+"_"+Data_Type.JOIN] = search_item.data;
                                 if(search_item.value_type == Data_Value_Type.ITEMS){
@@ -392,7 +376,6 @@ class Data {
                             call();
                         }).catch(err => {
                             Log.error('Data-Get-Item-Join',err);
-                            error=Log.append(error,err);
                         });
                     }else{
                         call();
@@ -401,12 +384,11 @@ class Data {
                 //9_group 9_item_group
                 function(call){
                     if(option.groups && data.id){
-                        Group.get_data(database,cache,[data],option).then(([biz_error,biz_data])=>{
+                        Group.get_data(database,cache,[data],option).then(([biz_response,biz_data])=>{
                             data = biz_data[0];
                             call();
                         }).catch(err => {
                             Log.error('Data-Item-Group',err);
-                            error=Log.append(error,err);
                         });
                     }else{
                         call();
@@ -415,22 +397,20 @@ class Data {
                 //9_foreigns 9_item_foreign
                 function(call){
                     if(option.foreigns && data.id){
-                        Foreign.get_data(database,cache,[data],option).then(([biz_error,biz_data])=>{
+                        Foreign.get_data(database,cache,[data],option).then(([biz_response,biz_data])=>{
                             data = biz_data[0];
                             call();
                         }).catch(err => {
                             Log.error('Data-Search-Foreign',err);
-                            error=Log.append(error,err);
                         });
                     }else{
                         call();
                     }
                 },
             ]).then(result => {
-                callback([error,data]);
+                callback([response,data]);
             }).catch(err => {
                 Log.error("DATA-GET-ERROR",err);
-                callback([error,{}]);
             });
         });
     };
@@ -446,12 +426,12 @@ class Data {
            - overwrite
         */
         return new Promise((callback) => {
-            let error = null;
+            let response = null;
             let cache = {};
             option = !Obj.check_is_empty(option) ? option : {};
             async.series([
                 async function(call) {
-                    const [biz_error,biz_data] = await Cache.get(database.data_config);
+                    const [biz_response,biz_data] = await Cache.get(database.data_config);
                     cache = biz_data;
                 },
                 //clean
@@ -476,44 +456,40 @@ class Data {
                 //delete cache item
                 function(call){
                     if(option.delete_cache || option.overwrite){
-                        Adapter.delete_item_cache(database,cache,table,data.id).then(([biz_error,biz_data])=>{
+                        Adapter.delete_item_cache(database,cache,table,data.id).then(([biz_response,biz_data])=>{
                             call();
                         }).catch(err => {
                             Log.error('Data-Post-Delete-Cache',err);
-                            error=Log.append(error,err);
                         });
                     }else{
                         call();
                     }
                 },
                 function(call){
-                    Adapter.post_item(database,cache,table,data,option).then(([biz_error,biz_data])=>{
+                    Adapter.post_item(database,cache,table,data,option).then(([biz_response,biz_data])=>{
                         data = biz_data;
                         call();
                     }).catch(err => {
                         Log.error('Data-Post-Post-Item-Apapter',err);
-                        error=Log.append(error,err);
                     });
                 },
                 //reset
                 function(call){
                     if(option.reset && data.id){
-                        Adapter.get_item(database,cache,data.table,data.id).then(([biz_error,biz_data])=>{
+                        Adapter.get_item(database,cache,data.table,data.id).then(([biz_response,biz_data])=>{
                             data = biz_data;
                             call();
                         }).catch(err => {
                             Log.error('Data-Get-Reset',err);
-                            error=Log.append(error,err);
                         });
                     }else{
                         call();
                     }
                 },
             ]).then(result => {
-                callback([error,data]);
+                callback([response,data]);
             }).catch(err => {
                 Log.error("Post-Data",err);
-                callback([err,{}]);
             });
         });
     };
@@ -526,22 +502,21 @@ class Data {
         */
         return new Promise((callback) => {
             let cache = {};
-            let error = null;
+            let response = {};
             async.series([
                 async function(call) {
-                    const [biz_error,biz_data] = await Cache.get(database.data_config);
+                    const [biz_response,biz_data] = await Cache.get(database.data_config);
                     cache = biz_data;
                 },
                 async function(call){
-                    const [biz_error,biz_data] = await Adapter.post_items(database,cache,data_items);
+                    const [biz_response,biz_data] = await Adapter.post_items(database,cache,data_items);
                     data_items = biz_data;
-                    error = biz_error;
+                    response = biz_response;
                 },
             ]).then(result => {
-                callback([error,data_items]);
+                callback([response,data_items]);
             }).catch(err => {
                 Log.error("Post-Items-Data",err);
-                callback([err,{}]);
             });
         });
     };
@@ -557,16 +532,16 @@ class Data {
         return new Promise((callback) => {
             let data = {table:table,item_count:0,page_count:1,filter:{},items:[]};
             let cache = null;
-            let error = {};
+            let response = {};
             option = !Obj.check_is_empty(option) ? option : {};
             async.series([
                 async function(call) {
-                    const [biz_error,biz_data] = await Cache.get(database.data_config);
+                    const [biz_response,biz_data] = await Cache.get(database.data_config);
                     cache = biz_data;
                 },
                 function(call){
                     let search = Data_Logic.get_search(table,filter,sort_by,page_current,page_size);
-                    Adapter.get_item_list(database,cache,search.table,search.filter,search.sort_by,search.page_current,search.page_size,option).then(([biz_error,items,item_count,page_count])=>{
+                    Adapter.get_item_list(database,cache,search.table,search.filter,search.sort_by,search.page_current,search.page_size,option).then(([biz_response,items,item_count,page_count])=>{
                         data.item_count=item_count;
                         data.page_count=page_count;
                         data.search=search;
@@ -574,13 +549,12 @@ class Data {
                         call();
                     }).catch(err => {
                         Log.error('Data-Search',err);
-                        error=Log.append(error,err);
                     });
                 },
                 //9_items_join 9_search_join 9_joins
                 function(call){
                     if(option.joins){
-                        Join.get_data(database,cache,option).then(([biz_error,biz_data])=>{
+                        Join.get_data(database,cache,option).then(([biz_response,biz_data])=>{
                             for(const search_item of biz_data){
                                 data[search_item.title+"_"+Data_Type.JOIN] = search_item.data;
                                 if(search_item.value_type == Data_Value_Type.ITEMS){
@@ -592,7 +566,6 @@ class Data {
                             call();
                         }).catch(err => {
                             Log.error('Data-Get-Item-Join',err);
-                            error=Log.append(error,err);
                         });
                     }else{
                         call();
@@ -601,12 +574,11 @@ class Data {
                 //9_foreign //9_item_foreign
                 function(call){
                     if(option.foreigns && data[Data_Field.ITEMS].length > 0){
-                        Foreign.get_data(database,cache,data[Data_Field.ITEMS],option).then(([biz_error,biz_data])=>{
+                        Foreign.get_data(database,cache,data[Data_Field.ITEMS],option).then(([biz_response,biz_data])=>{
                             data[Data_Field.ITEMS] = biz_data;
                             call();
                         }).catch(err => {
                             Log.error('Data-Search-Foreign',err);
-                            error=Log.append(error,err);
                         });
                     }else{
                         call();
@@ -615,22 +587,20 @@ class Data {
                 //9_group 9_item_group
                 function(call){
                     if(option.groups && data[Data_Field.ITEMS].length>0){
-                        Group.get_data(database,cache,data[Data_Field.ITEMS],option).then(([biz_error,biz_data])=>{
+                        Group.get_data(database,cache,data[Data_Field.ITEMS],option).then(([biz_response,biz_data])=>{
                             data[Data_Field.ITEMS] = biz_data;
                             call();
                         }).catch(err => {
                             Log.error('Data-Item-Group',err);
-                            error=Log.append(error,err);
                         });
                     }else{
                         call();
                     }
                 },
             ]).then(result => {
-                callback([error,data]);
+                callback([response,data]);
             }).catch(err => {
                 Log.error('DATA-SEARCH-ERROR',err);
-                callback([err,[]]);
             });
         });
     };
@@ -640,18 +610,17 @@ class Data {
            - none
            */
         return new Promise((callback) => {
-            let error = null;
+            let response = null;
             let data = Data_Logic.get(table,0);
             async.series([
                 async function(call){
-                    const [biz_error,biz_data] = await Adapter.post_bulk(database,table,items);
+                    const [biz_response,biz_data] = await Adapter.post_bulk(database,table,items);
                     data = biz_data;
                 },
             ]).then(result => {
-                callback([error,data]);
+                callback([response,data]);
             }).catch(err => {
                 Log.error("Post-Bulk-Data",err);
-                callback([err,{}]);
             });
         });
     };
@@ -661,18 +630,18 @@ class Data {
            - none
            */
         return new Promise((callback) => {
-            let error = null;
+            let response = {};
             let data = {};
             async.series([
                 async function(call){
-                    const [biz_error,biz_data] = await get(database,table,items);
+                    const [biz_response,biz_data] = await get(database,table,items);
                     data = biz_data;
+                    response = biz_response;
                 },
             ]).then(result => {
-                callback([error,data]);
+                callback([response,data]);
             }).catch(err => {
                 Log.error("Blank-Data",err);
-                callback([err,{}]);
             });
         });
     };

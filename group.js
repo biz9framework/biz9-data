@@ -12,7 +12,7 @@ const {Foreign} = require('./foreign.js');
 class Group {
     static get_data = (database,cache,data_items,option) => {
         return new Promise((callback) => {
-            let error = null;
+            let response = {};
             let group_search_items = [];
             async.series([
                 function(call){
@@ -80,36 +80,33 @@ class Group {
                     call();
                 },
             ]).then(result => {
-                callback([error,data_items]);
+                callback([response,data_items]);
             }).catch(err => {
                 Log.error("Group-Get-Data",err);
-                callback([error,[]]);
             });
         });
         function get_search_item_data(database,cache,search_item) {
             return new Promise((callback) => {
-                let error = null;
+                let response = {};
                 let data = [];
                 async.series([
                     function(call) {
                         let search = Data_Logic.get_search(Data_Table.GROUP,search_item.query,{},search_item.page_current,search_item.page_size);
                         let option = search_item.field ? search_item.field : {};
-                        Adapter.get_item_list(database,cache,search.table,search.filter,search.sort_by,search.page_current,search.page_size,option).then(([biz_error,items,item_count,page_count])=>{
+                        Adapter.get_item_list(database,cache,search.table,search.filter,search.sort_by,search.page_current,search.page_size,option).then(([biz_response,items,item_count,page_count])=>{
                             data = items;
                             call();
                         }).catch(err => {
                             Log.error('Group-Get-Search-Item-Data',err);
-                            error=Log.append(error,err);
                         });
                     },
                     function(call){
                         if(search_item.foreigns.length>0 && data.length>0){
-                            Foreign.get_data(database,cache,data,{foreigns:search_item.foreigns}).then(([biz_error,biz_data])=>{
+                            Foreign.get_data(database,cache,data,{foreigns:search_item.foreigns}).then(([biz_response,biz_data])=>{
                                 data = biz_data;
                                 call();
                             }).catch(err => {
                                 Log.error('Data-Group-Foreign',err);
-                                error=Log.append(error,err);
                             });
                         }else{
                             call();
@@ -119,7 +116,6 @@ class Group {
                     callback(data);
                 }).catch(err => {
                     Log.error("Group-Get-Search-Item-Data-2",err);
-                    callback([error,[]]);
                 });
             });
         }

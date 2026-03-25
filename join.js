@@ -12,7 +12,7 @@ const {Foreign} = require('./foreign.js');
 class Join {
     static get_data = (database,cache,option) => {
         return new Promise((callback) => {
-            let error = null;
+            let response = {};
             let join_search_items = [];
             async.series([
                 function(call){
@@ -28,7 +28,7 @@ class Join {
                                 search_item.data[search_item.title];
                                 let search = Data_Logic.get_search(search_item.search.table,search_item.search.filter,search_item.search.sort_by,search_item.search.page_current,search_item.search.page_size);
                                 let join_option = {field:search_item.field,distinct:search_item.distinct};
-                                Adapter.get_item_list(database,cache,search.table,search.filter,search.sort_by,search.page_current,search.page_size,join_option).then(([biz_error,items,item_count,page_count])=>{
+                                Adapter.get_item_list(database,cache,search.table,search.filter,search.sort_by,search.page_current,search.page_size,join_option).then(([biz_response,items,item_count,page_count])=>{
                                     search_item.data['count'] = item_count;
                                     search_item.data['page_count'] = page_count;
                                     search_item.data['search'] = search;
@@ -36,30 +36,27 @@ class Join {
                                     resolve();
                                 }).catch(err => {
                                     Log.error('Data-Join-Get-Data',err);
-                                    error=Log.append(error,err);
                                 });
                             }
                             else if(search_item.value_type == Data_Value_Type.COUNT){
                                 let search = Data_Logic.get_search(search_item.search.table,search_item.search.filter,search_item.search.sort_by,search_item.search.page_current,search_item.search.page_size);
                                 let join_option = {field:search_item.field};
-                                Adapter.get_count_item_list(database,search.table,search.filter).then(([biz_error,biz_data])=>{
+                                Adapter.get_count_item_list(database,search.table,search.filter).then(([biz_response,biz_data])=>{
                                     search_item.data = biz_data.count;
                                     resolve();
                                 }).catch(err => {
                                     Log.error('Data-Join-Get-Data-Count',err);
-                                    error=Log.append(error,err);
                                 });
                             }
                             else if(search_item.value_type == Data_Value_Type.ONE){
                                 let search = Data_Logic.get_search(search_item.search.table,search_item.search.filter,search_item.search.sort_by,search_item.search.page_current,search_item.search.page_size);
                                 let join_option = {field:search_item.field};
-                                Adapter.get_item_list(database,cache,search.table,search.filter,search.sort_by,search.page_current,search.page_size,join_option).then(([biz_error,items,item_count,page_count])=>{
+                                Adapter.get_item_list(database,cache,search.table,search.filter,search.sort_by,search.page_current,search.page_size,join_option).then(([biz_response,items,item_count,page_count])=>{
                                     let one_item = items.length>0 ? items[0] : Data_Logic.get_not_found(search_item.search.table,0);
                                     search_item.data = one_item;
                                     resolve();
                                 }).catch(err => {
                                     Log.error('Data-Join-Get-Data-One',err);
-                                    error=Log.append(error,err);
                                 });
                             }
                         });
@@ -77,15 +74,13 @@ class Join {
                 function(call){
                     function get_foreign_data(database,cache,items,search_item) {
                         return new Promise((resolve) => {
-                            Foreign.get_data(database,cache,items,{foreigns:search_item.foreigns}).then(([biz_error,biz_data])=>{
+                            Foreign.get_data(database,cache,items,{foreigns:search_item.foreigns}).then(([biz_response,biz_data])=>{
                                 resolve(biz_data);
                             }).catch(err => {
                                 Log.error('Data-Join-Get-Data-Foreign',err);
-                                error=Log.append(error,err);
                             });
                         }).catch(err => {
                             Log.error("Data-Join-Get-Data-Foreign-2",err);
-                            callback([error,[]]);
                         });
                     }
                     const run = async () => {
@@ -100,10 +95,9 @@ class Join {
                     });
                 },
             ]).then(result => {
-                callback([error,join_search_items]);
+                callback([response,join_search_items]);
             }).catch(err => {
                 Log.error("Data-Join-Get",err);
-                callback([error,[]]);
             });
         });
     };
