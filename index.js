@@ -108,6 +108,8 @@ class Data {
                 async function(call){
                     const biz_data = await Adapter.get_count_item_list(database,table,search_filter);
                     data = biz_data;
+                    response.messages.push(Response_Logic.get_message(Data_Response.ITEMS_COUNT_CONFIRM,Status_Type.SUCCESS,Data_Logic.get_message_by_response(Data_Response.ITEMS_COUNT_CONFIRM)));
+                    response.messages.push(Response_Logic.get_message(Data_Response.RESPONSE_ITEMS_COUNT,Status_Type.OK,data));
                 },
                  async function(call){
                     response = Response_Logic.get_status(response);
@@ -183,6 +185,11 @@ class Data {
                     }
                 },
                 async function(call){
+                    if(!Str.check_is_null(copy_data.id)){
+                        response.messages.push(Response_Logic.get_message(Data_Response.ITEM_COPY_CONFIRM,Status_Type.SUCCESS,Data_Logic.get_message_by_response(Data_Response.ITEM_COPY_CONFIRM)));
+                        }else{
+                        response.messages.push(Response_Logic.get_message(Data_Response.ITEM_COPY_FAIL,Status_Type.FAIL,Data_Logic.get_message_by_response(Data_Response.ITEM_COPY_FAIL)));
+                        }
                     response = Response_Logic.get_status(response);
                 },
             ]).then(result => {
@@ -209,6 +216,7 @@ class Data {
             let delete_group_list = [];
             async.series([
                 async function(call) {
+                    response.messages.push(Response_Logic.get_message(Data_Response.PARAM_APP_ID,Status_Type.OK,database.data_config.APP_ID));
                     response.messages.push(Response_Logic.get_message(Data_Response.PARAM_TABLE,Status_Type.OK,table));
                     response.messages.push(Response_Logic.get_message(Data_Response.PARAM_ID,Status_Type.OK,id));
                 },
@@ -219,7 +227,7 @@ class Data {
                 async function(call){
                     const biz_data = await Adapter.delete_item(database,cache,data.table,data.id);
                         if(!Str.check_is_null(biz_data)){
-                            response.messages.push(Response_Logic.get_message(Data_Response.ITEM_DELETE_CONFIRM,Status_Type.OK,Data_Logic.get_message_by_response(Data_Response.ITEM_DELETE_CONFIRM)));
+                            response.messages.push(Response_Logic.get_message(Data_Response.ITEM_DELETE_CONFIRM,Status_Type.SUCCESS,Data_Logic.get_message_by_response(Data_Response.ITEM_DELETE_CONFIRM)));
                             response.messages.push(Response_Logic.get_message(Data_Response.ITEM_DELETE_COUNT,Status_Type.OK,biz_data));
                             response.messages.push(Response_Logic.get_message(Data_Response.ITEM_CACHE_DELETE,Status_Type.OK,true));
                             response.messages.push(Response_Logic.get_message(Data_Response.ITEM_DATABASE_DELETE,Status_Type.OK,true));
@@ -272,7 +280,7 @@ class Data {
                     response.messages.push(Response_Logic.get_message(Data_Response.PARAM_APP_ID,Status_Type.OK,database.data_config.APP_ID));
                     response.messages.push(Response_Logic.get_message(Data_Response.PARAM_TABLE,Status_Type.OK,table));
                     response.messages.push(Response_Logic.get_message(Data_Response.PARAM_SEARCH,Status_Type.OK,filter));
-                    response.messages.push(Response_Logic.get_message(Data_Field.RESPONSE_OPTION,Status_Type.OK,option));
+                    response.messages.push(Response_Logic.get_message(Data_Response.PARAM_OPTION,Status_Type.OK,option));
                 },
                 async function(call) {
                     const biz_data = await Cache.get(database.data_config);
@@ -292,19 +300,18 @@ class Data {
                 },
                 async function(call){
                     if(delete_items.length>0){
-
-                        response.messages.push(Response_Logic.get_message(Data_Type.RESULT_OK_DELETE,Status_Type.SUCCESS,false));
+                        response.messages.push(Response_Logic.get_message(Data_Response.ITEMS_DELETE_CONFIRM,Status_Type.SUCCESS,Data_Logic.get_message_by_response(Data_Response.ITEMS_DELETE_CONFIRM)));
+                        response.messages.push(Response_Logic.get_message(Data_Response.ITEMS_DELETE_COUNT,Status_Type.OK,delete_items.length));
 
                     for(const data_item of delete_items){
                         let query_field = {};
                         query_field[Data_Field.PARENT_ID] = data_item.id
                         delete_item_query.$or.push(query_field);
-                        response.messages.push(Response_Logic.get_message(Data_Type.RESULT_OK_DELETE,Status_Type.OK,true));
                         const biz_data = await Adapter.delete_item(database,cache,data_item.table,data_item.id);
                     }
                     }else{
-                        response.messages.push(Response_Logic.get_message(Data_Type.RESULT_OK_DELETE,Status_Type.OK,false));
-                        response.messages.push(Response_Logic.get_message(Data_Type.RESULT_OK_DELETE_COUNT,Status_Type.OK,0));
+                       response.messages.push(Response_Logic.get_message(Data_Response.ITEMS_DELETE_FAIL,Status_Type.FAIL,Data_Logic.get_message_by_response(Data_Response.ITEMS_DELETE_FAIL)));
+response.messages.push(Response_Logic.get_message(Data_Response.ITEMS_DELETE_COUNT,Status_Type.OK,0));
                     }
                 },
                 function(call){
@@ -324,17 +331,7 @@ class Data {
                         let query_field = {};
                         query_field[Data_Field.ID] = data_item.id;
                         const biz_data = await Adapter.delete_item(database,cache,data_item.table,data_item.id);
-                        if(parseInt(biz_response[Data_Type.RESULT_OK_DELETE_COUNT]) > 0){
-                            response.messages.push(Response_Logic.get_message(Data_Type.RESULT_OK_DELETE_GROUP_COUNT,Status_Type.OK,biz_response[Data_Type.RESULT_OK_DELETE_COUNT]));
-                        }
                     }
-                    }else{
-                        response.messages.push(Response_Logic.get_message(Data_Type.RESULT_OK_DELETE_GROUP_COUNT,Status_Type.OK,0));
-                    }
-                    if(response[Data_Type.RESULT_OK_DELETE_GROUP_COUNT]>0){
-                        response.messages.push(Response_Logic.get_message(Data_Type.RESULT_OK_GROUP_DELETE,Status_Type.OK,true));
-                    }else{
-                        response.messages.push(Response_Logic.get_message(Data_Type.RESULT_OK_GROUP_DELETE,Status_Type.OK,false));
                     }
                 },
                 async function(call){
@@ -373,7 +370,7 @@ class Data {
                     response.messages.push(Response_Logic.get_message(Data_Response.PARAM_APP_ID,Status_Type.OK,database.data_config.APP_ID));
                     response.messages.push(Response_Logic.get_message(Data_Response.PARAM_TABLE,Status_Type.OK,table));
                     response.messages.push(Response_Logic.get_message(Data_Response.PARAM_ID,Status_Type.OK,id));
-                    response.messages.push(Response_Logic.get_message(Data_Response.OPTION,Status_Type.OK,option));
+                    response.messages.push(Response_Logic.get_message(Data_Response.PARAM_OPTION,Status_Type.OK,option));
                     if(option.field){
                          response.messages.push(Response_Logic.get_message(Data_Response.OPTION_FIELD,Status_Type.OK,option.field));
                     }
@@ -461,6 +458,12 @@ class Data {
                     }
                 },
                 async function(call){
+                        if(!Str.check_is_null(data.id)){
+                            response.messages.push(Response_Logic.get_message(Data_Response.ITEM_GET_CONFIRM,Status_Type.SUCCESS,Data_Logic.get_message_by_response(Data_Response.ITEM_GET_CONFIRM)));
+                        }else{
+                            response.messages.push(Response_Logic.get_message(Data_Response.ITEM_GET_FAIL,Status_Type.FAIL,Data_Logic.get_message_by_response(Data_Response.ITEM_GET_FAIL)));
+                        }
+
                     response = Response_Logic.get_status(response);
                 },
             ]).then(result => {
@@ -551,6 +554,11 @@ class Data {
                     }
                 },
                 async function(call){
+                    if(!Str.check_is_null(data.id)){
+                        response.messages.push(Response_Logic.get_message(Data_Response.ITEM_POST_CONFIRM,Status_Type.SUCCESS,Data_Logic.get_message_by_response(Data_Response.ITEM_POST_CONFIRM)));
+                        }else{
+                        response.messages.push(Response_Logic.get_message(Data_Response.ITEM_POST_FAIL,Status_Type.FAIL,Data_Logic.get_message_by_response(Data_Response.ITEM_POST_FAIL)));
+                        }
                     response = Response_Logic.get_status(response);
                 },
             ]).then(result => {
@@ -585,6 +593,11 @@ class Data {
                     data_items = biz_data;
                 },
                 async function(call){
+                    if(data_items.length>0){
+                        response.messages.push(Response_Logic.get_message(Data_Response.ITEMS_POST_CONFIRM,Status_Type.SUCCESS,Data_Logic.get_message_by_response(Data_Response.ITEMS_POST_CONFIRM)));
+                    }else{
+                        response.messages.push(Response_Logic.get_message(Data_Response.ITEMS_POST_FAIL,Status_Type.FAIL,Data_Logic.get_message_by_response(Data_Response.ITEMS_POST_FAIL)));
+                    }
                     response = Response_Logic.get_status(response);
                 },
             ]).then(result => {
@@ -628,7 +641,7 @@ class Data {
                         data.page_count=page_count;
                         data.search=search;
                         data[Data_Field.ITEMS]=items;
-                        response.messages.push(Response_Logic.get_message(Data_Response.RESPONSE_SEARCH_ITEMS_COUNT,Status_Type.OK,item_count));
+                        response.messages.push(Response_Logic.get_message(Data_Response.RESPONSE_ITEMS_COUNT,Status_Type.OK,item_count));
                         call();
                     }).catch(err => {
                         Log.error('Data-Search',err);
@@ -684,6 +697,11 @@ class Data {
                     }
                 },
                 async function(call){
+                    if(data.items){
+                        response.messages.push(Response_Logic.get_message(Data_Response.ITEM_SEARCH_CONFIRM,Status_Type.SUCCESS,Data_Logic.get_message_by_response(Data_Response.ITEM_SEARCH_CONFIRM)));
+                    }else{
+                        response.messages.push(Response_Logic.get_message(Data_Response.ITEM_SEARCH_FAIL,Status_Type.FAIL,Data_Logic.get_message_by_response(Data_Response.ITEM_SEARCH_FAIL)));
+                    }
                     response = Response_Logic.get_status(response);
                 },
             ]).then(result => {
