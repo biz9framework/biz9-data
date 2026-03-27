@@ -264,7 +264,6 @@ class Data {
             let delete_group_items = [];
             let delete_items = [];
             let delete_item_count = 0;
-            let delete_group_count = 0;
             option = !Obj.check_is_empty(option) ? option : {delete_group:true};
             async.series([
                 async function(call) {
@@ -301,7 +300,10 @@ class Data {
                             delete_item_count = delete_item_count + 1;
                         }
                     }
-                    response.messages.push(Response_Logic.get_message(Data_Type.RESULT_OK_DELETE_COUNT,Status_Type.OK,delete_item_count));
+                    }else{
+                        response.messages.push(Response_Logic.get_message(Data_Type.RESULT_OK_DELETE,Status_Type.OK,false));
+                        response.messages.push(Response_Logic.get_message(Data_Type.RESULT_OK_DELETE_COUNT,Status_Type.OK,0));
+                    }
                 },
                 function(call){
                     if(option.delete_group && delete_item_query.$or.length > 0){
@@ -320,11 +322,10 @@ class Data {
                         let query_field = {};
                         query_field[Data_Field.ID] = data_item.id;
                         const biz_data = await Adapter.delete_item(database,cache,data_item.table,data_item.id);
-                         if(biz_data > 0){
-                            delete_item_count = delete_item_count + 1;
+                        if(parseInt(biz_response[Data_Type.RESULT_OK_DELETE_COUNT]) > 0){
+                            response.messages.push(Response_Logic.get_message(Data_Type.RESULT_OK_DELETE_GROUP_COUNT,Status_Type.OK,biz_response[Data_Type.RESULT_OK_DELETE_COUNT]));
                         }
                     }
-                    response.messages.push(Response_Logic.get_message(Data_Type.RESULT_OK_DELETE_COUNT,Status_Type.OK,delete_item_count));
                     }else{
                         response.messages.push(Response_Logic.get_message(Data_Type.RESULT_OK_DELETE_GROUP_COUNT,Status_Type.OK,0));
                     }
