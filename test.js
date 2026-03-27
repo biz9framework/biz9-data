@@ -7,7 +7,7 @@ Description: BiZ9 Framework: Data - Test
 const async = require('async');
 const assert = require('node:assert');
 const {Database,Data} = require(".");
-const {Log,Num,Str,Obj} = require("biz9-utility");
+const {Log,Str,Obj,Response_Logic,Response_Field,Status_Type}=require("/home/think1/www/doqbox/biz9-framework/biz9-utility/source");
 const {Store_Field,Store_Type,Store_Table,Store_Logic}=require("/home/think1/www/doqbox/biz9-framework/biz9-store/source");
 const {Website_Title,Form_Field,Website_Table}=require("/home/think1/www/doqbox/biz9-framework/biz9-website/source");
 const {Cart_Data}=require("/home/think1/www/doqbox/biz9-framework/biz9-store-data/source");
@@ -181,7 +181,7 @@ if(print_test){;
 describe('data_count', function(){ this.timeout(25000);
     it("_data_count", function(done){
         console.log('COUNT-START');
-        let response={};
+        let response=Response_Logic.get();
         let database = {};
         let data = {};
         let option = {};
@@ -211,11 +211,11 @@ describe('data_count', function(){ this.timeout(25000);
 describe('data_copy', function(){ this.timeout(25000);
     it("_data_copy", function(done){
         console.log('COPY-START');
-        let response={};
+        let response=Response_Logic.get();
         let database = {};
         let data = {};
         let option = {};
-        let post_data = Data_Logic.get(Project_Table.PRODUCT,'618');
+        let post_data = Data_Logic.get(Project_Table.PRODUCT,'917');
         async.series([
             async function(call){
                 const [biz_response,biz_data] = await Database.get(DATA_CONFIG);
@@ -231,7 +231,7 @@ describe('data_copy', function(){ this.timeout(25000);
             },
         ],
             function(error, result){
-                Log.w.error('COPY-DONE',error);
+                console.log('COPY-DONE');
                 done();
             });
     });
@@ -244,7 +244,7 @@ describe('data_delete', function(){ this.timeout(25000);
         let database = {};
         let data = {};
         let option = {};
-        let post_data = Data_Logic.get(Project_Table.PRODUCT,'881');
+        let post_data = Data_Logic.get(Project_Table.PRODUCT,'917');
         async.series([
             async function(call){
                 const [biz_response,biz_data] = await Database.get(DATA_CONFIG);

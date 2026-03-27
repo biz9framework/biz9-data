@@ -152,7 +152,7 @@ class Adapter {
                             index === self.findIndex((t) => t[option.distinct.field] === obj[option.distinct.field])
                         );
                         let distinct_sort_by = option.distinct.sort_by ? option.distinct.sort_by : Data_Type.SORT_BY_ASC;
-                        items = Obj.sort_list_by_field(items,option.distinct.field,distinct_sort_by);
+                        items = Obj.sort_items_by_field(items,option.distinct.field,distinct_sort_by);
                         item_count=items.length;
                     }
                 },

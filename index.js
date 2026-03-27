@@ -7,7 +7,7 @@ Description: BiZ9 Framework: Data
 const async = require('async');
 const {Scriptz}=require("biz9-scriptz");
 const {Data_Logic,Data_Field,Data_Type,Data_Table,Data_Value_Type}=require("/home/think1/www/doqbox/biz9-framework/biz9-data-logic/source");
-const {Log,Str,Obj}=require("biz9-utility");
+const {Log,Str,Obj,Response_Logic,Response_Field,Status_Type}=require("/home/think1/www/doqbox/biz9-framework/biz9-utility/source");
 const {Cache} = require('./redis.js');
 const {Foreign} = require('./foreign.js');
 const {Group} = require('./group.js');
@@ -18,7 +18,7 @@ class Database {
         /* options
         - none
         */
-        let response={};
+        let response=Response_Logic.get();
         let data={};
         return new Promise((callback) => {
             option = !Obj.check_is_empty(option) ? option : {biz9_config_file:null,app_id:null};
@@ -86,16 +86,20 @@ class Database {
 class Data {
     //9_count
     static count = async (database,table,search_filter) => {
-        /* requried
-         * - search obj filter
+        /* --- requried ---
+         * - search  / obj filter
          * option
          * - none
          */
         return new Promise((callback) => {
-            let response = {};
+            let response=Response_Logic.get();
             let cache = {};
             let data = {};
             async.series([
+                async function(call) {
+                    response.messages.push(Response_Logic.get_message(Data_Field.RESPONSE_TABLE,Status_Type.OK,table));
+                    response.messages.push(Response_Logic.get_message(Data_Field.RESPONSE_SEARCH,Status_Type.OK,search_filter));
+                },
                 async function(call) {
                     const [biz_response,biz_data] = await Cache.get(database.data_config);
                     cache = biz_data;
@@ -120,13 +124,17 @@ class Data {
          * - copy_group / bool
          */
         return new Promise((callback) => {
-            let response = {};
+            let response=Response_Logic.get();
             let cache = {};
             let data = Data_Logic.get(table,id);
             let top_data = Data_Logic.get(table,0);
             let copy_data = Data_Logic.get(table,0);
             option = !Obj.check_is_empty(option) ? option : {copy_group:true};
             async.series([
+                async function(call) {
+                    response.messages.push(Response_Logic.get_message(Data_Field.RESPONSE_TABLE,Status_Type.OK,table));
+                    response.messages.push(Response_Logic.get_message(Data_Field.RESPONSE_ID,Status_Type.OK,id));
+                },
                 async function(call) {
                     const [biz_response,biz_data] = await Cache.get(database.data_config);
                     cache = biz_data;
@@ -186,17 +194,16 @@ class Data {
          * - delete_group / bool
          */
         return new Promise((callback) => {
-            let response = {};
+            let response=Response_Logic.get();
             let cache = null;
             let data = Data_Logic.get(table,id);
-            response[Data_Type.RESULT_OK_DELETE] = false;
-            response[Data_Type.RESULT_OK_DELETE_CACHE] = false;
-            response[Data_Type.RESULT_OK_DELETE_DATABASE] = false;
-            response[Data_Type.RESULT_OK_GROUP_DELETE] = false;
-            response[Data_Type.RESULT_OK_DELETE_COUNT] = 0;
             option = !Obj.check_is_empty(option) ? option : {delete_group:true};
             let delete_group_list = [];
             async.series([
+                async function(call) {
+                    response.messages.push(Response_Logic.get_message(Data_Field.RESPONSE_TABLE,Status_Type.OK,table));
+                    response.messages.push(Response_Logic.get_message(Data_Field.RESPONSE_ID,Status_Type.OK,id));
+                },
                 async function(call){
                     const [biz_response,biz_data] = await Cache.get(database.data_config);
                     cache = biz_data;
@@ -204,21 +211,25 @@ class Data {
                 async function(call){
                     const [biz_response,biz_data] = await Adapter.delete_item(database,cache,data.table,data.id);
                     if(biz_response[Data_Type.RESULT_OK_DELETE]){
-                        response[Data_Type.RESULT_OK_DELETE_COUNT]  = biz_response[Data_Type.RESULT_OK_DELETE_COUNT];
-                        if(response[Data_Type.RESULT_OK_DELETE_COUNT] > 0){
-                            response[Data_Type.RESULT_OK_DELETE]  = true;
-                            response[Data_Type.RESULT_OK_DELETE_CACHE] = true;
-                            response[Data_Type.RESULT_OK_DELETE_DATABASE] = true;
+                        response.messages.push(Response_Logic.get_message(Data_Type.RESULT_OK_DELETE_COUNT,Status_Type.OK,biz_response[Data_Type.RESULT_OK_DELETE_COUNT]));
+                        if(biz_response[Data_Type.RESULT_OK_DELETE_COUNT] > 0){
+                            response.messages.push(Response_Logic.get_message(Data_Type.RESULT_OK_DELETE,Status_Type.SUCCESS,true));
+                            response.messages.push(Response_Logic.get_message(Data_Type.RESULT_OK_DELETE_CACHE,Status_Type.SUCCESS,true));
+                            response.messages.push(Response_Logic.get_message(Data_Type.RESULT_OK_DELETE_DATABASE,Status_Type.SUCCESS,true));
+                        }else{
+                            response.messages.push(Response_Logic.get_message(Data_Type.RESULT_OK_DELETE,Status_Type.FAIL,false));
+                            response.messages.push(Response_Logic.get_message(Data_Type.RESULT_OK_DELETE_CACHE,Status_Type.FAIL,false));
+                            response.messages.push(Response_Logic.get_message(Data_Type.RESULT_OK_DELETE_DATABASE,Status_Type.FAIL,false));
                         }
                     }
                 },
                 async function(call){
                     if(option.delete_group){
-                        response[Data_Type.RESULT_OK_GROUP_DELETE] = false;
+                        response.messages.push(Response_Logic.get_message(Data_Type.RESULT_OK_GROUP_DELETE,Status_Type.FAIL,false));
                         let filter = {parent_id:data.id};
                         const [biz_response,biz_data] = await Data.delete_search(database,Data_Table.GROUP,filter);
                         if(biz_response[Data_Type.RESULT_OK_DELETE]){
-                            response[Data_Type.RESULT_OK_GROUP_DELETE] = true;
+                            response.messages.push(Response_Logic.get_message(Data_Type.RESULT_OK_GROUP_DELETE,Status_Type.SUCCESS,true));
                         }
                     }
                 },
@@ -238,18 +249,19 @@ class Data {
          * - delete_group / bool
          */
         return new Promise((callback) => {
-            let response = {};
+            let response=Response_Logic.get();
             let data = Data_Logic.get(table,0,{data:{filter:filter}});
             let cache = {};
-            response[Data_Type.RESULT_OK_DELETE] = false;
-            response[Data_Type.RESULT_OK_GROUP_DELETE] = false;
-            response[Data_Type.RESULT_OK_DELETE_COUNT] = 0;
-            response[Data_Type.RESULT_OK_DELETE_GROUP_COUNT] = 0;
             let delete_item_query = { $or: [] };
             let delete_group_items = [];
             let delete_items = [];
             option = !Obj.check_is_empty(option) ? option : {delete_group:true};
             async.series([
+                async function(call) {
+                    response.messages.push(Response_Logic.get_message(Data_Field.RESPONSE_TABLE,Status_Type.OK,table));
+                    response.messages.push(Response_Logic.get_message(Data_Field.RESPONSE_SEARCH,Status_Type.OK,filter));
+                    response.messages.push(Response_Logic.get_message(Data_Field.RESPONSE_OPTION,Status_Type.OK,option));
+                },
                 async function(call) {
                     const [biz_response,biz_data] = await Cache.get(database.data_config);
                     cache = biz_data;
@@ -267,15 +279,20 @@ class Data {
                     });
                 },
                 async function(call){
+                    if(delete_items.length>0){
                     for(const data_item of delete_items){
                         let query_field = {};
                         query_field[Data_Field.PARENT_ID] = data_item.id
                         delete_item_query.$or.push(query_field);
-                        response[Data_Type.RESULT_OK_DELETE] = true;
+                        response.messages.push(Response_Logic.get_message(Data_Type.RESULT_OK_DELETE,Status_Type.OK,true));
                         const [biz_response,biz_data] = await Adapter.delete_item(database,cache,data_item.table,data_item.id);
                         if(parseInt(biz_response[Data_Type.RESULT_OK_DELETE_COUNT]) > 0){
-                            response[Data_Type.RESULT_OK_DELETE_COUNT] = biz_response[Data_Type.RESULT_OK_DELETE_COUNT] + parseInt(response[Data_Type.RESULT_OK_DELETE_COUNT]);
+                            response.messages.push(Response_Logic.get_message(Data_Type.RESULT_OK_DELETE_COUNT,Status_Type.OK,biz_response[Data_Type.RESULT_OK_DELETE_COUNT]));
                         }
+                    }
+                    }else{
+                        response.messages.push(Response_Logic.get_message(Data_Type.RESULT_OK_DELETE,Status_Type.FAIL,false));
+                        response.messages.push(Response_Logic.get_message(Data_Type.RESULT_OK_DELETE_COUNT,Status_Type.FAIL,0));
                     }
                 },
                 function(call){
@@ -290,16 +307,22 @@ class Data {
                     }
                 },
                 async function(call){
+                    if(delete_group_items.length>0){
                     for(const data_item of delete_group_items){
                         let query_field = {};
                         query_field[Data_Field.ID] = data_item.id;
                         const [biz_response,biz_data] = await Adapter.delete_item(database,cache,data_item.table,data_item.id);
                         if(parseInt(biz_response[Data_Type.RESULT_OK_DELETE_COUNT]) > 0){
-                            response[Data_Type.RESULT_OK_DELETE_GROUP_COUNT] = biz_response[Data_Type.RESULT_OK_DELETE_GROUP_COUNT] + parseInt(response[Data_Type.RESULT_OK_DELETE_GROUP_COUNT]);
+                            response.messages.push(Response_Logic.get_message(Data_Type.RESULT_OK_DELETE_GROUP_COUNT,Status_Type.OK,biz_response[Data_Type.RESULT_OK_DELETE_COUNT]));
                         }
                     }
+                    }else{
+                        response.messages.push(Response_Logic.get_message(Data_Type.RESULT_OK_DELETE_GROUP_COUNT,Status_Type.FAIL,0));
+                    }
                     if(response[Data_Type.RESULT_OK_DELETE_GROUP_COUNT]>0){
-                        response[Data_Type.RESULT_OK_GROUP_DELETE] = true;
+                        response.messages.push(Response_Logic.get_message(Data_Type.RESULT_OK_GROUP_DELETE,Status_Type.OK,true));
+                    }else{
+                        response.messages.push(Response_Logic.get_message(Data_Type.RESULT_OK_GROUP_DELETE,Status_Type.FAIL,false));
                     }
                 },
             ]).then(result => {
@@ -324,12 +347,17 @@ class Data {
            - title
       */
         return new Promise((callback) => {
-            let response= {};
+            let response=Response_Logic.get();
             let cache = null;
             let data = Data_Logic.get(table,id);
             let field_result_ok = false;
             option = !Obj.check_is_empty(option) ? option : {};
             async.series([
+                async function(call) {
+                    response.messages.push(Response_Logic.get_message(Data_Field.RESPONSE_TABLE,Status_Type.OK,table));
+                    response.messages.push(Response_Logic.get_message(Data_Field.RESPONSE_ID,Status_Type.OK,id));
+                    response.messages.push(Response_Logic.get_message(Data_Field.RESPONSE_OPTION,Status_Type.OK,option));
+                },
                 async function(call) {
                     const [biz_response,biz_data] = await Cache.get(database.data_config);
                     cache = biz_data;
@@ -337,6 +365,7 @@ class Data {
                 function(call){
                     if(option.cache_delete){
                         Adapter.delete_item_cache(database,cache,data.table,data.id,option).then(([biz_response,biz_data])=>{
+                            response.messages.push(Response_Logic.get_message(Data_Field.RESPONSE_CACHE_DELETE,Status_Type.OK,true));
                             call();
                         }).catch(err => {
                             Log.error('Data-Delete-Cache',err);
@@ -355,6 +384,7 @@ class Data {
                         }else{
                             data = biz_data;
                             data[option.title] = Obj.merge({},biz_data);;
+                            response.messages.push(Response_Logic.get_message(Data_Field.RESPONSE_TITLE,Status_Type.OK,option.title));
                         }
                         call();
                     }).catch(err => {
@@ -364,6 +394,7 @@ class Data {
                 //9_get_join 9_join
                 function(call){
                     if(option.joins){
+                        response.messages.push(Response_Logic.get_message(Data_Field.RESPONSE_JOINS,Status_Type.OK,option.joins));
                         Join.get_data(database,cache,option).then(([biz_response,biz_data])=>{
                             for(const search_item of biz_data){
                                 data[search_item.title+"_"+Data_Type.JOIN] = search_item.data;
@@ -384,6 +415,7 @@ class Data {
                 //9_group 9_item_group
                 function(call){
                     if(option.groups && data.id){
+                        response.messages.push(Response_Logic.get_message(Data_Field.RESPONSE_GROUPS,Status_Type.OK,option.groups));
                         Group.get_data(database,cache,[data],option).then(([biz_response,biz_data])=>{
                             data = biz_data[0];
                             call();
@@ -397,6 +429,7 @@ class Data {
                 //9_foreigns 9_item_foreign
                 function(call){
                     if(option.foreigns && data.id){
+                        response.messages.push(Response_Logic.get_message(Data_Field.RESPONSE_FOREIGNS,Status_Type.OK,option.foreigns));
                         Foreign.get_data(database,cache,[data],option).then(([biz_response,biz_data])=>{
                             data = biz_data[0];
                             call();
@@ -422,21 +455,26 @@ class Data {
         * option
            - reset
            - clean
-           - delete_cache
+           - cache_delete
            - overwrite
         */
         return new Promise((callback) => {
-            let response = null;
+            let response=Response_Logic.get();
             let cache = {};
             option = !Obj.check_is_empty(option) ? option : {};
             async.series([
-                async function(call) {
+            async function(call) {
+                    response.messages.push(Response_Logic.get_message(Data_Field.RESPONSE_TABLE,Status_Type.OK,table));
+                    response.messages.push(Response_Logic.get_message(Data_Field.RESPONSE_DATA,Status_Type.OK,data));
+            },
+            async function(call) {
                     const [biz_response,biz_data] = await Cache.get(database.data_config);
                     cache = biz_data;
                 },
                 //clean
                 function(call){
                     if(option.clean){
+                        response.messages.push(Response_Logic.get_message(Data_Field.RESPONSE_CLEAN,Status_Type.OK,true));
                         let new_data = {};
                         for(const field in data){
                             if(!Obj.check_is_array(data[field]) &&
@@ -455,7 +493,8 @@ class Data {
                 },
                 //delete cache item
                 function(call){
-                    if(option.delete_cache || option.overwrite){
+                    if(option.cache_delete || option.overwrite){
+                        response.messages.push(Response_Logic.get_message(Data_Field.RESPONSE_CACHE_DELETE,Status_Type.OK,true));
                         Adapter.delete_item_cache(database,cache,table,data.id).then(([biz_response,biz_data])=>{
                             call();
                         }).catch(err => {
@@ -476,6 +515,7 @@ class Data {
                 //reset
                 function(call){
                     if(option.reset && data.id){
+                        response.messages.push(Response_Logic.get_message(Data_Field.RESPONSE_RESET,Status_Type.OK,true));
                         Adapter.get_item(database,cache,data.table,data.id).then(([biz_response,biz_data])=>{
                             data = biz_data;
                             call();
@@ -502,8 +542,11 @@ class Data {
         */
         return new Promise((callback) => {
             let cache = {};
-            let response = {};
+            let response=Response_Logic.get();
             async.series([
+                async function(call) {
+                    response.messages.push(Response_Logic.get_message(Data_Field.RESPONSE_DATA_ITEMS,Status_Type.OK,data_items));
+                },
                 async function(call) {
                     const [biz_response,biz_data] = await Cache.get(database.data_config);
                     cache = biz_data;
@@ -532,9 +575,16 @@ class Data {
         return new Promise((callback) => {
             let data = {table:table,item_count:0,page_count:1,filter:{},items:[]};
             let cache = null;
-            let response = {};
+            let response=Response_Logic.get();
             option = !Obj.check_is_empty(option) ? option : {};
             async.series([
+                async function(call) {
+                    response.messages.push(Response_Logic.get_message(Data_Field.RESPONSE_TABLE,Status_Type.OK,table));
+                    response.messages.push(Response_Logic.get_message(Data_Field.RESPONSE_SEARCH,Status_Type.OK,filter));
+                    response.messages.push(Response_Logic.get_message(Data_Field.RESPONSE_SORT_BY,Status_Type.OK,sort_by));
+                    response.messages.push(Response_Logic.get_message(Data_Field.RESPONSE_PAGE_CURRENT,Status_Type.OK,page_current));
+                    response.messages.push(Response_Logic.get_message(Data_Field.RESPONSE_PAGE_SIZE,Status_Type.OK,page_size));
+                },
                 async function(call) {
                     const [biz_response,biz_data] = await Cache.get(database.data_config);
                     cache = biz_data;
@@ -555,6 +605,7 @@ class Data {
                 function(call){
                     if(option.joins){
                         Join.get_data(database,cache,option).then(([biz_response,biz_data])=>{
+                            response.messages.push(Response_Logic.get_message(Data_Field.RESPONSE_JOINS,Status_Type.SUCCESS,option.joins));
                             for(const search_item of biz_data){
                                 data[search_item.title+"_"+Data_Type.JOIN] = search_item.data;
                                 if(search_item.value_type == Data_Value_Type.ITEMS){
@@ -575,6 +626,7 @@ class Data {
                 function(call){
                     if(option.foreigns && data[Data_Field.ITEMS].length > 0){
                         Foreign.get_data(database,cache,data[Data_Field.ITEMS],option).then(([biz_response,biz_data])=>{
+                            response.messages.push(Response_Logic.get_message(Data_Field.RESPONSE_FOREIGNS,Status_Type.SUCCESS,option.foreigns));
                             data[Data_Field.ITEMS] = biz_data;
                             call();
                         }).catch(err => {
@@ -588,6 +640,7 @@ class Data {
                 function(call){
                     if(option.groups && data[Data_Field.ITEMS].length>0){
                         Group.get_data(database,cache,data[Data_Field.ITEMS],option).then(([biz_response,biz_data])=>{
+                            response.messages.push(Response_Logic.get_message(Data_Field.RESPONSE_GROUPS,Status_Type.SUCCESS,option.groups));
                             data[Data_Field.ITEMS] = biz_data;
                             call();
                         }).catch(err => {
@@ -630,7 +683,7 @@ class Data {
            - none
            */
         return new Promise((callback) => {
-            let response = {};
+            let response=Response_Logic.get();
             let data = {};
             async.series([
                 async function(call){
