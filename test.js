@@ -27,7 +27,7 @@ const {Data_Logic,Data_Value_Type,Data_Table,Data_Field}=require("/home/think1/w
 ---group_add
 */
 /* --- TEST CONFIG START --- */
-const APP_ID = 'test-stage-march25';
+const APP_ID = 'test-stage-march27';
 /* --- TEST CONFIG END --- */
 
 /* --- DATA CONFIG START --- */
@@ -202,8 +202,8 @@ describe('data_count', function(){ this.timeout(25000);
             },
         ],
             function(error, result){
-                console.log('COUNT-DONE');
-                done();
+                //console.log('COUNT-DONE');
+                //done();
             });
     });
 });
@@ -215,7 +215,7 @@ describe('data_copy', function(){ this.timeout(25000);
         let database = {};
         let data = {};
         let option = {};
-        let post_data = Data_Logic.get(Project_Table.PRODUCT,'917');
+        let post_data = Data_Logic.get(Project_Table.PRODUCT,'247');
         async.series([
             async function(call){
                 const [biz_response,biz_data] = await Database.get(DATA_CONFIG);
@@ -244,7 +244,7 @@ describe('data_delete', function(){ this.timeout(25000);
         let database = {};
         let data = {};
         let option = {};
-        let post_data = Data_Logic.get(Project_Table.PRODUCT,'917');
+        let post_data = Data_Logic.get(Project_Table.PRODUCT,'182');
         async.series([
             async function(call){
                 const [biz_response,biz_data] = await Database.get(DATA_CONFIG);
@@ -273,7 +273,7 @@ describe('data_many_delete_search', function(){ this.timeout(25000);
         let database = {};
         let data = {};
         let option = {};
-        let post_search = Data_Logic.get_search(Project_Table.PRODUCT,{id:'200'},{},1,0,{});
+        let post_search = Data_Logic.get_search(Project_Table.PRODUCT,{id:'946'},{},1,0,{});
         async.series([
             async function(call){
                 const [biz_response,biz_data] = await Database.get(DATA_CONFIG);
@@ -302,7 +302,7 @@ describe('data_get', function(){ this.timeout(25000);
         let database = {};
         let data = {};
         let option = {};
-        let post_data = Data_Logic.get(Project_Table.PRODUCT,'452');
+        let post_data = Data_Logic.get(Project_Table.PRODUCT,'182');
         async.series([
             async function(call){
                 const [biz_response,biz_data] = await Database.get(DATA_CONFIG);

@@ -6,7 +6,7 @@ Description: BiZ9 Framework: Data
 */
 const async = require('async');
 const {Scriptz}=require("biz9-scriptz");
-const {Data_Logic,Data_Field,Data_Type,Data_Table,Data_Value_Type}=require("/home/think1/www/doqbox/biz9-framework/biz9-data-logic/source");
+const {Data_Logic,Data_Response,Data_Field,Data_Type,Data_Table,Data_Value_Type}=require("/home/think1/www/doqbox/biz9-framework/biz9-data-logic/source");
 const {Log,Str,Obj,Response_Logic,Response_Field,Status_Type}=require("/home/think1/www/doqbox/biz9-framework/biz9-utility/source");
 const {Cache} = require('./redis.js');
 const {Foreign} = require('./foreign.js');
@@ -33,10 +33,10 @@ class Database {
             if(data_config.APP_ID==null){
                 Log.error('Database-Get-1',"Database Error: Missing app_id.");
             }
-            Adapter.get_database(data_config).then(([biz_response,biz_data])=>{
+            Adapter.get_database(data_config).then((biz_data)=>{
                 biz_data.data_config=data_config;
                 biz_data.app_id=data_config.APP_ID;
-                callback([biz_response,biz_data]);
+                callback([response,biz_data]);
             }).catch(err => {
                 Log.error('Data-Database-Get-2',err);
             });
@@ -48,7 +48,7 @@ class Database {
             */
         let response={};
         return new Promise((callback) => {
-            Adapter.delete_database(data_config).then(([biz_response,biz_data])=>{
+            Adapter.delete_database(data_config).then((biz_data)=>{
                 biz_data.data_config=data_config;
                 biz_data.app_id=data_config.APP_ID;
                 callback([biz_response,null]);
@@ -97,16 +97,20 @@ class Data {
             let data = {};
             async.series([
                 async function(call) {
-                    response.messages.push(Response_Logic.get_message(Data_Field.RESPONSE_TABLE,Status_Type.OK,table));
-                    response.messages.push(Response_Logic.get_message(Data_Field.RESPONSE_SEARCH,Status_Type.OK,search_filter));
+                    response.messages.push(Response_Logic.get_message(Data_Response.APP_ID,Status_Type.OK,database.data_config.APP_ID));
+                    response.messages.push(Response_Logic.get_message(Data_Response.TABLE,Status_Type.OK,table));
+                    response.messages.push(Response_Logic.get_message(Data_Response.SEARCH,Status_Type.OK,search_filter));
                 },
                 async function(call) {
-                    const [biz_response,biz_data] = await Cache.get(database.data_config);
+                    const biz_data = await Cache.get(database.data_config);
                     cache = biz_data;
                 },
                 async function(call){
-                    const [biz_response,biz_data] = await Adapter.get_count_item_list(database,table,search_filter);
-                    data = biz_data.count;
+                    const biz_data = await Adapter.get_count_item_list(database,table,search_filter);
+                    data = biz_data;
+                },
+                 async function(call){
+                    response = Response_Logic.get_status(response);
                 },
             ]).then(result => {
                 callback([response,data]);
@@ -132,11 +136,12 @@ class Data {
             option = !Obj.check_is_empty(option) ? option : {copy_group:true};
             async.series([
                 async function(call) {
-                    response.messages.push(Response_Logic.get_message(Data_Field.RESPONSE_TABLE,Status_Type.OK,table));
-                    response.messages.push(Response_Logic.get_message(Data_Field.RESPONSE_ID,Status_Type.OK,id));
+                    response.messages.push(Response_Logic.get_message(Data_Response.APP_ID,Status_Type.OK,database.data_config.APP_ID));
+                    response.messages.push(Response_Logic.get_message(Data_Response.TABLE,Status_Type.OK,table));
+                    response.messages.push(Response_Logic.get_message(Data_Response.ID,Status_Type.OK,id));
                 },
                 async function(call) {
-                    const [biz_response,biz_data] = await Cache.get(database.data_config);
+                    const biz_data = await Cache.get(database.data_config);
                     cache = biz_data;
                 },
                 async function(call){
@@ -173,9 +178,12 @@ class Data {
                             copy_group[Data_Field.PARENT_ID] = copy_data.id;
                             post_groups.push(copy_group);
                         }
-                        const [biz_response,biz_data] = await Adapter.post_items(database,cache,post_groups);
+                        const biz_data = await Adapter.post_items(database,cache,post_groups);
                         copy_data.groups=biz_data;
                     }
+                },
+                async function(call){
+                    response = Response_Logic.get_status(response);
                 },
             ]).then(result => {
                 data = copy_data;
@@ -201,37 +209,37 @@ class Data {
             let delete_group_list = [];
             async.series([
                 async function(call) {
-                    response.messages.push(Response_Logic.get_message(Data_Field.RESPONSE_TABLE,Status_Type.OK,table));
-                    response.messages.push(Response_Logic.get_message(Data_Field.RESPONSE_ID,Status_Type.OK,id));
+                    response.messages.push(Response_Logic.get_message(Data_Response.TABLE,Status_Type.OK,table));
+                    response.messages.push(Response_Logic.get_message(Data_Response.ID,Status_Type.OK,id));
                 },
                 async function(call){
-                    const [biz_response,biz_data] = await Cache.get(database.data_config);
+                    const biz_data = await Cache.get(database.data_config);
                     cache = biz_data;
                 },
                 async function(call){
-                    const [biz_response,biz_data] = await Adapter.delete_item(database,cache,data.table,data.id);
-                    if(biz_response[Data_Type.RESULT_OK_DELETE]){
-                        response.messages.push(Response_Logic.get_message(Data_Type.RESULT_OK_DELETE_COUNT,Status_Type.OK,biz_response[Data_Type.RESULT_OK_DELETE_COUNT]));
-                        if(biz_response[Data_Type.RESULT_OK_DELETE_COUNT] > 0){
-                            response.messages.push(Response_Logic.get_message(Data_Type.RESULT_OK_DELETE,Status_Type.SUCCESS,true));
-                            response.messages.push(Response_Logic.get_message(Data_Type.RESULT_OK_DELETE_CACHE,Status_Type.SUCCESS,true));
-                            response.messages.push(Response_Logic.get_message(Data_Type.RESULT_OK_DELETE_DATABASE,Status_Type.SUCCESS,true));
+                    const biz_data = await Adapter.delete_item(database,cache,data.table,data.id);
+                        response.messages.push(Response_Logic.get_message(Data_Type.RESULT_OK_DELETE_COUNT,Status_Type.OK,biz_data));
+                        if(biz_data > 0){
+                            response.messages.push(Response_Logic.get_message(Data_Response.ITEM_CACHE_DELETE,Status_Type.SUCCESS,true));
+                            response.messages.push(Response_Logic.get_message(Data_Response.ITEM_CACHE_DELETE,Status_Type.SUCCESS,true));
                         }else{
-                            response.messages.push(Response_Logic.get_message(Data_Type.RESULT_OK_DELETE,Status_Type.FAIL,false));
-                            response.messages.push(Response_Logic.get_message(Data_Type.RESULT_OK_DELETE_CACHE,Status_Type.FAIL,false));
-                            response.messages.push(Response_Logic.get_message(Data_Type.RESULT_OK_DELETE_DATABASE,Status_Type.FAIL,false));
+                            response.messages.push(Response_Logic.get_message(Data_Response.ITEM_CACHE_DELETE,Status_Type.OK,null));
+                            response.messages.push(Response_Logic.get_message(Data_Response.ITEM_CACHE_DELETE,Status_Type.OK,null));
                         }
-                    }
                 },
                 async function(call){
                     if(option.delete_group){
-                        response.messages.push(Response_Logic.get_message(Data_Type.RESULT_OK_GROUP_DELETE,Status_Type.FAIL,false));
+                        response.messages.push(Response_Logic.get_message(Data_Response.ITEM_GROUP_DELETE,Status_Type.OK,null));
                         let filter = {parent_id:data.id};
-                        const [biz_response,biz_data] = await Data.delete_search(database,Data_Table.GROUP,filter);
-                        if(biz_response[Data_Type.RESULT_OK_DELETE]){
-                            response.messages.push(Response_Logic.get_message(Data_Type.RESULT_OK_GROUP_DELETE,Status_Type.SUCCESS,true));
+                        const biz_data = await Data.delete_search(database,Data_Table.GROUP,filter);
+                        if(biz_data > 0){
+                            response.messages.push(Response_Logic.get_message(Data_Response.ITEM_GROUP_DELETE,Status_Type.OK,null));
                         }
                     }
+                },
+                //check all
+                async function(call){
+                    response = Response_Logic.get_status(response);
                 },
             ]).then(result => {
                 callback([response,data]);
@@ -255,20 +263,23 @@ class Data {
             let delete_item_query = { $or: [] };
             let delete_group_items = [];
             let delete_items = [];
+            let delete_item_count = 0;
+            let delete_group_count = 0;
             option = !Obj.check_is_empty(option) ? option : {delete_group:true};
             async.series([
                 async function(call) {
-                    response.messages.push(Response_Logic.get_message(Data_Field.RESPONSE_TABLE,Status_Type.OK,table));
-                    response.messages.push(Response_Logic.get_message(Data_Field.RESPONSE_SEARCH,Status_Type.OK,filter));
+                    response.messages.push(Response_Logic.get_message(Data_Response.APP_ID,Status_Type.OK,database.data_config.APP_ID));
+                    response.messages.push(Response_Logic.get_message(Data_Response.TABLE,Status_Type.OK,table));
+                    response.messages.push(Response_Logic.get_message(Data_Response.SEARCH,Status_Type.OK,filter));
                     response.messages.push(Response_Logic.get_message(Data_Field.RESPONSE_OPTION,Status_Type.OK,option));
                 },
                 async function(call) {
-                    const [biz_response,biz_data] = await Cache.get(database.data_config);
+                    const biz_data = await Cache.get(database.data_config);
                     cache = biz_data;
                 },
                 function(call){
                     let search = Data_Logic.get_search(table,filter,{},1,0);
-                    Adapter.get_item_list(database,cache,search.table,search.filter,search.sort_by,search.page_current,search.page_size,option).then(([biz_response,items,item_count,page_count])=>{
+                    Adapter.get_item_list(database,cache,search.table,search.filter,search.sort_by,search.page_current,search.page_size,option).then(([items,item_count,page_count])=>{
                         if(items.length>0){
                             delete_items = items;
                         }
@@ -285,20 +296,17 @@ class Data {
                         query_field[Data_Field.PARENT_ID] = data_item.id
                         delete_item_query.$or.push(query_field);
                         response.messages.push(Response_Logic.get_message(Data_Type.RESULT_OK_DELETE,Status_Type.OK,true));
-                        const [biz_response,biz_data] = await Adapter.delete_item(database,cache,data_item.table,data_item.id);
-                        if(parseInt(biz_response[Data_Type.RESULT_OK_DELETE_COUNT]) > 0){
-                            response.messages.push(Response_Logic.get_message(Data_Type.RESULT_OK_DELETE_COUNT,Status_Type.OK,biz_response[Data_Type.RESULT_OK_DELETE_COUNT]));
+                        const biz_data = await Adapter.delete_item(database,cache,data_item.table,data_item.id);
+                        if(biz_data > 0){
+                            delete_item_count = delete_item_count + 1;
                         }
                     }
-                    }else{
-                        response.messages.push(Response_Logic.get_message(Data_Type.RESULT_OK_DELETE,Status_Type.FAIL,false));
-                        response.messages.push(Response_Logic.get_message(Data_Type.RESULT_OK_DELETE_COUNT,Status_Type.FAIL,0));
-                    }
+                    response.messages.push(Response_Logic.get_message(Data_Type.RESULT_OK_DELETE_COUNT,Status_Type.OK,delete_item_count));
                 },
                 function(call){
                     if(option.delete_group && delete_item_query.$or.length > 0){
                         let search = Data_Logic.get_search(table,delete_item_query,{},1,0,{field:{id:1,title:1,table:1}});
-                        Adapter.get_item_list(database,cache,search.table,search.filter,search.sort_by,search.page_current,search.page_size,option).then(([biz_response,items,item_count,page_count])=>{
+                        Adapter.get_item_list(database,cache,search.table,search.filter,search.sort_by,search.page_current,search.page_size,option).then(([items,item_count,page_count])=>{
                             delete_group_items = items;
                             call();
                         });
@@ -311,19 +319,23 @@ class Data {
                     for(const data_item of delete_group_items){
                         let query_field = {};
                         query_field[Data_Field.ID] = data_item.id;
-                        const [biz_response,biz_data] = await Adapter.delete_item(database,cache,data_item.table,data_item.id);
-                        if(parseInt(biz_response[Data_Type.RESULT_OK_DELETE_COUNT]) > 0){
-                            response.messages.push(Response_Logic.get_message(Data_Type.RESULT_OK_DELETE_GROUP_COUNT,Status_Type.OK,biz_response[Data_Type.RESULT_OK_DELETE_COUNT]));
+                        const biz_data = await Adapter.delete_item(database,cache,data_item.table,data_item.id);
+                         if(biz_data > 0){
+                            delete_item_count = delete_item_count + 1;
                         }
                     }
+                    response.messages.push(Response_Logic.get_message(Data_Type.RESULT_OK_DELETE_COUNT,Status_Type.OK,delete_item_count));
                     }else{
-                        response.messages.push(Response_Logic.get_message(Data_Type.RESULT_OK_DELETE_GROUP_COUNT,Status_Type.FAIL,0));
+                        response.messages.push(Response_Logic.get_message(Data_Type.RESULT_OK_DELETE_GROUP_COUNT,Status_Type.OK,0));
                     }
                     if(response[Data_Type.RESULT_OK_DELETE_GROUP_COUNT]>0){
                         response.messages.push(Response_Logic.get_message(Data_Type.RESULT_OK_GROUP_DELETE,Status_Type.OK,true));
                     }else{
-                        response.messages.push(Response_Logic.get_message(Data_Type.RESULT_OK_GROUP_DELETE,Status_Type.FAIL,false));
+                        response.messages.push(Response_Logic.get_message(Data_Type.RESULT_OK_GROUP_DELETE,Status_Type.OK,false));
                     }
+                },
+                async function(call){
+                    response = Response_Logic.get_status(response);
                 },
             ]).then(result => {
                 callback([response,data]);
@@ -354,18 +366,19 @@ class Data {
             option = !Obj.check_is_empty(option) ? option : {};
             async.series([
                 async function(call) {
-                    response.messages.push(Response_Logic.get_message(Data_Field.RESPONSE_TABLE,Status_Type.OK,table));
-                    response.messages.push(Response_Logic.get_message(Data_Field.RESPONSE_ID,Status_Type.OK,id));
-                    response.messages.push(Response_Logic.get_message(Data_Field.RESPONSE_OPTION,Status_Type.OK,option));
+                    response.messages.push(Response_Logic.get_message(Data_Response.APP_ID,Status_Type.OK,database.data_config.APP_ID));
+                    response.messages.push(Response_Logic.get_message(Data_Response.TABLE,Status_Type.OK,table));
+                    response.messages.push(Response_Logic.get_message(Data_Response.ID,Status_Type.OK,id));
+                    response.messages.push(Response_Logic.get_message(Data_Response.OPTION,Status_Type.OK,option));
                 },
                 async function(call) {
-                    const [biz_response,biz_data] = await Cache.get(database.data_config);
+                    const biz_data = await Cache.get(database.data_config);
                     cache = biz_data;
                 },
                 function(call){
                     if(option.cache_delete){
-                        Adapter.delete_item_cache(database,cache,data.table,data.id,option).then(([biz_response,biz_data])=>{
-                            response.messages.push(Response_Logic.get_message(Data_Field.RESPONSE_CACHE_DELETE,Status_Type.OK,true));
+                        Adapter.delete_item_cache(database,cache,data.table,data.id,option).then((biz_data)=>{
+                            response.messages.push(Response_Logic.get_message(Data_Response.CACHE_DELETE,Status_Type.OK,true));
                             call();
                         }).catch(err => {
                             Log.error('Data-Delete-Cache',err);
@@ -378,13 +391,13 @@ class Data {
                 //item_by_id
                 //title
                 function(call){
-                    Adapter.get_item(database,cache,data.table,data.id,option).then(([biz_response,biz_data])=>{
+                    Adapter.get_item(database,cache,data.table,data.id,option).then((biz_data)=>{
                         if(!option.title){
                             data = biz_data;
                         }else{
                             data = biz_data;
                             data[option.title] = Obj.merge({},biz_data);;
-                            response.messages.push(Response_Logic.get_message(Data_Field.RESPONSE_TITLE,Status_Type.OK,option.title));
+                            response.messages.push(Response_Logic.get_message(Data_Response.TITLE,Status_Type.OK,option.title));
                         }
                         call();
                     }).catch(err => {
@@ -394,7 +407,7 @@ class Data {
                 //9_get_join 9_join
                 function(call){
                     if(option.joins){
-                        response.messages.push(Response_Logic.get_message(Data_Field.RESPONSE_JOINS,Status_Type.OK,option.joins));
+                        response.messages.push(Response_Logic.get_message(Data_Response.JOINS,Status_Type.OK,option.joins));
                         Join.get_data(database,cache,option).then(([biz_response,biz_data])=>{
                             for(const search_item of biz_data){
                                 data[search_item.title+"_"+Data_Type.JOIN] = search_item.data;
@@ -415,7 +428,7 @@ class Data {
                 //9_group 9_item_group
                 function(call){
                     if(option.groups && data.id){
-                        response.messages.push(Response_Logic.get_message(Data_Field.RESPONSE_GROUPS,Status_Type.OK,option.groups));
+                        response.messages.push(Response_Logic.get_message(Data_Response.GROUPS,Status_Type.OK,option.groups));
                         Group.get_data(database,cache,[data],option).then(([biz_response,biz_data])=>{
                             data = biz_data[0];
                             call();
@@ -429,7 +442,7 @@ class Data {
                 //9_foreigns 9_item_foreign
                 function(call){
                     if(option.foreigns && data.id){
-                        response.messages.push(Response_Logic.get_message(Data_Field.RESPONSE_FOREIGNS,Status_Type.OK,option.foreigns));
+                        response.messages.push(Response_Logic.get_message(Data_Response.FOREIGNS,Status_Type.OK,option.foreigns));
                         Foreign.get_data(database,cache,[data],option).then(([biz_response,biz_data])=>{
                             data = biz_data[0];
                             call();
@@ -439,6 +452,9 @@ class Data {
                     }else{
                         call();
                     }
+                },
+                async function(call){
+                    response = Response_Logic.get_status(response);
                 },
             ]).then(result => {
                 callback([response,data]);
@@ -464,17 +480,18 @@ class Data {
             option = !Obj.check_is_empty(option) ? option : {};
             async.series([
             async function(call) {
-                    response.messages.push(Response_Logic.get_message(Data_Field.RESPONSE_TABLE,Status_Type.OK,table));
-                    response.messages.push(Response_Logic.get_message(Data_Field.RESPONSE_DATA,Status_Type.OK,data));
+                    response.messages.push(Response_Logic.get_message(Data_Response.APP_ID,Status_Type.OK,database.data_config.APP_ID));
+                    response.messages.push(Response_Logic.get_message(Data_Response.TABLE,Status_Type.OK,table));
+                    response.messages.push(Response_Logic.get_message(Data_Response.DATA,Status_Type.OK,data));
             },
             async function(call) {
-                    const [biz_response,biz_data] = await Cache.get(database.data_config);
+                    const biz_data = await Cache.get(database.data_config);
                     cache = biz_data;
                 },
                 //clean
                 function(call){
                     if(option.clean){
-                        response.messages.push(Response_Logic.get_message(Data_Field.RESPONSE_CLEAN,Status_Type.OK,true));
+                        response.messages.push(Response_Logic.get_message(Data_Response.CLEAN,Status_Type.OK,true));
                         let new_data = {};
                         for(const field in data){
                             if(!Obj.check_is_array(data[field]) &&
@@ -494,8 +511,8 @@ class Data {
                 //delete cache item
                 function(call){
                     if(option.cache_delete || option.overwrite){
-                        response.messages.push(Response_Logic.get_message(Data_Field.RESPONSE_CACHE_DELETE,Status_Type.OK,true));
-                        Adapter.delete_item_cache(database,cache,table,data.id).then(([biz_response,biz_data])=>{
+                        response.messages.push(Response_Logic.get_message(Data_Response.CACHE_DELETE,Status_Type.OK,true));
+                        Adapter.delete_item_cache(database,cache,table,data.id).then((biz_data)=>{
                             call();
                         }).catch(err => {
                             Log.error('Data-Post-Delete-Cache',err);
@@ -505,7 +522,7 @@ class Data {
                     }
                 },
                 function(call){
-                    Adapter.post_item(database,cache,table,data,option).then(([biz_response,biz_data])=>{
+                    Adapter.post_item(database,cache,table,data,option).then((biz_data)=>{
                         data = biz_data;
                         call();
                     }).catch(err => {
@@ -515,8 +532,8 @@ class Data {
                 //reset
                 function(call){
                     if(option.reset && data.id){
-                        response.messages.push(Response_Logic.get_message(Data_Field.RESPONSE_RESET,Status_Type.OK,true));
-                        Adapter.get_item(database,cache,data.table,data.id).then(([biz_response,biz_data])=>{
+                        response.messages.push(Response_Logic.get_message(Data_Response.RESET,Status_Type.OK,true));
+                        Adapter.get_item(database,cache,data.table,data.id).then((biz_data)=>{
                             data = biz_data;
                             call();
                         }).catch(err => {
@@ -525,6 +542,9 @@ class Data {
                     }else{
                         call();
                     }
+                },
+                async function(call){
+                    response = Response_Logic.get_status(response);
                 },
             ]).then(result => {
                 callback([response,data]);
@@ -545,16 +565,20 @@ class Data {
             let response=Response_Logic.get();
             async.series([
                 async function(call) {
-                    response.messages.push(Response_Logic.get_message(Data_Field.RESPONSE_DATA_ITEMS,Status_Type.OK,data_items));
+                    response.messages.push(Response_Logic.get_message(Data_Response.APP_ID,Status_Type.OK,database.data_config.APP_ID));
+                    response.messages.push(Response_Logic.get_message(Data_Response.DATA_ITEMS,Status_Type.OK,data_items));
                 },
                 async function(call) {
-                    const [biz_response,biz_data] = await Cache.get(database.data_config);
+                    const biz_data = await Cache.get(database.data_config);
                     cache = biz_data;
                 },
                 async function(call){
-                    const [biz_response,biz_data] = await Adapter.post_items(database,cache,data_items);
+                    const biz_data = await Adapter.post_items(database,cache,data_items);
                     data_items = biz_data;
                     response = biz_response;
+                },
+                async function(call){
+                    response = Response_Logic.get_status(response);
                 },
             ]).then(result => {
                 callback([response,data_items]);
@@ -579,19 +603,20 @@ class Data {
             option = !Obj.check_is_empty(option) ? option : {};
             async.series([
                 async function(call) {
-                    response.messages.push(Response_Logic.get_message(Data_Field.RESPONSE_TABLE,Status_Type.OK,table));
-                    response.messages.push(Response_Logic.get_message(Data_Field.RESPONSE_SEARCH,Status_Type.OK,filter));
-                    response.messages.push(Response_Logic.get_message(Data_Field.RESPONSE_SORT_BY,Status_Type.OK,sort_by));
-                    response.messages.push(Response_Logic.get_message(Data_Field.RESPONSE_PAGE_CURRENT,Status_Type.OK,page_current));
-                    response.messages.push(Response_Logic.get_message(Data_Field.RESPONSE_PAGE_SIZE,Status_Type.OK,page_size));
+                    response.messages.push(Response_Logic.get_message(Data_Response.APP_ID,Status_Type.OK,database.data_config.APP_ID));
+                    response.messages.push(Response_Logic.get_message(Data_Response.TABLE,Status_Type.OK,table));
+                    response.messages.push(Response_Logic.get_message(Data_Response.SEARCH,Status_Type.OK,filter));
+                    response.messages.push(Response_Logic.get_message(Data_Response.SORT_BY,Status_Type.OK,sort_by));
+                    response.messages.push(Response_Logic.get_message(Data_Response.PAGE_CURRENT,Status_Type.OK,page_current));
+                    response.messages.push(Response_Logic.get_message(Data_Response.PAGE_SIZE,Status_Type.OK,page_size));
                 },
                 async function(call) {
-                    const [biz_response,biz_data] = await Cache.get(database.data_config);
+                    const biz_data = await Cache.get(database.data_config);
                     cache = biz_data;
                 },
                 function(call){
                     let search = Data_Logic.get_search(table,filter,sort_by,page_current,page_size);
-                    Adapter.get_item_list(database,cache,search.table,search.filter,search.sort_by,search.page_current,search.page_size,option).then(([biz_response,items,item_count,page_count])=>{
+                    Adapter.get_item_list(database,cache,search.table,search.filter,search.sort_by,search.page_current,search.page_size,option).then(([items,item_count,page_count])=>{
                         data.item_count=item_count;
                         data.page_count=page_count;
                         data.search=search;
@@ -605,7 +630,7 @@ class Data {
                 function(call){
                     if(option.joins){
                         Join.get_data(database,cache,option).then(([biz_response,biz_data])=>{
-                            response.messages.push(Response_Logic.get_message(Data_Field.RESPONSE_JOINS,Status_Type.SUCCESS,option.joins));
+                            response.messages.push(Response_Logic.get_message(Data_Response.JOINS,Status_Type.SUCCESS,option.joins));
                             for(const search_item of biz_data){
                                 data[search_item.title+"_"+Data_Type.JOIN] = search_item.data;
                                 if(search_item.value_type == Data_Value_Type.ITEMS){
@@ -640,7 +665,7 @@ class Data {
                 function(call){
                     if(option.groups && data[Data_Field.ITEMS].length>0){
                         Group.get_data(database,cache,data[Data_Field.ITEMS],option).then(([biz_response,biz_data])=>{
-                            response.messages.push(Response_Logic.get_message(Data_Field.RESPONSE_GROUPS,Status_Type.SUCCESS,option.groups));
+                            response.messages.push(Response_Logic.get_message(Data_Response.GROUPS,Status_Type.SUCCESS,option.groups));
                             data[Data_Field.ITEMS] = biz_data;
                             call();
                         }).catch(err => {
@@ -649,6 +674,9 @@ class Data {
                     }else{
                         call();
                     }
+                },
+                async function(call){
+                    response = Response_Logic.get_status(response);
                 },
             ]).then(result => {
                 callback([response,data]);
@@ -667,7 +695,7 @@ class Data {
             let data = Data_Logic.get(table,0);
             async.series([
                 async function(call){
-                    const [biz_response,biz_data] = await Adapter.post_bulk(database,table,items);
+                    const biz_data = await Adapter.post_bulk(database,table,items);
                     data = biz_data;
                 },
             ]).then(result => {
@@ -678,7 +706,7 @@ class Data {
         });
     };
     //9_blank
-    static blank = async (database,table,items) => {
+    static blank = async (database,table) => {
         /* options
            - none
            */
@@ -686,10 +714,17 @@ class Data {
             let response=Response_Logic.get();
             let data = {};
             async.series([
+                async function(call) {
+                    response.messages.push(Response_Logic.get_message(Data_Response.APP_ID,Status_Type.OK,database.data_config.APP_ID));
+                    response.messages.push(Response_Logic.get_message(Data_Response.TABLE,Status_Type.OK,table));
+                },
                 async function(call){
                     const [biz_response,biz_data] = await get(database,table,items);
                     data = biz_data;
                     response = biz_response;
+                },
+                async function(call){
+                    response = Response_Logic.get_status(response);
                 },
             ]).then(result => {
                 callback([response,data]);

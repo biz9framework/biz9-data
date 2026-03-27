@@ -12,22 +12,20 @@ const {Log,Str,Num,Obj}=require("/home/think1/www/doqbox/biz9-framework/biz9-uti
 class Adapter {
     static get_database=(data_config,option)=>{
         return new Promise((callback) => {
-            async function main() {
-                const [biz_response,biz_data] = await Mongo.get(data_config);
+            (async () => {
+                const biz_data = await Mongo.get(data_config);
                 biz_data.data_config=data_config;
-                callback([biz_response,biz_data]);
-            }
-            main();
+                callback(biz_data);
+            })();
         });
     }
     static delete_database=(database,option)=>{
         return new Promise((callback) => {
-            async function main() {
-                const [biz_response,biz_data] = await Mongo.delete(database);
+            (async () => {
+                const biz_data = await Mongo.delete(database);
                 biz_data.data_config=data_config;
-                callback([biz_response,biz_data]);
-            }
-            main();
+                callback(biz_data);
+            })();
         });
     }
     static check_database=(database,option)=>{
@@ -35,7 +33,6 @@ class Adapter {
     }
     static post_items=(database,cache,items,option)=>{
         return new Promise((callback) => {
-            let response = {};
             let item_data_new_list=[];
             async.series([
                 async function(call){
@@ -58,10 +55,10 @@ class Adapter {
                     async.forEachOf(items,(item,key,go)=>{
                         if(item){
                             async function main() {
-                                const [response,data] = await Mongo.post_item(database,item.table,item);
+                                const data = await Mongo.post_item(database,item.table,item);
                                 if(data){
                                     item.id=data.id;
-                                    Cache.delete_value(cache,Adapter.get_cache_item_attr_list_key(item.table,data.id)).then(([response,data]) => {
+                                    Cache.delete_value(cache,Adapter.get_cache_item_attr_list_key(item.table,data.id)).then((data) => {
                                         go();
                                     }).catch(error => {
                                         Log.error("Data-Adapter-Update-Item-List-2",error);
@@ -88,7 +85,7 @@ class Adapter {
                     }
                 },
             ]).then(result=>{
-                callback([response,item_data_new_list]);
+                callback(item_data_new_list);
             }).catch(error => {
                 Log.error("Data-Adapter-Update-Item-List-5",error);
             });
@@ -96,10 +93,9 @@ class Adapter {
     }
     static post_item=(database,cache,table,item_data,option) => {
         return new Promise((callback) => {
-            let response = {};
             async.series([
                 async function(call){
-                    const [biz_response,biz_data] = await Mongo.post_item(database,table,item_data,option);
+                    const biz_data = await Mongo.post_item(database,table,item_data,option);
                 },
                 async function(call){
                     if(item_data.id){
@@ -107,10 +103,10 @@ class Adapter {
                     }
                 },
                 async function(call){
-                    const [response,data] = await Cache.delete_value(cache,Adapter.get_cache_item_attr_list_key(item_data.table,item_data.id));
+                    const data = await Cache.delete_value(cache,Adapter.get_cache_item_attr_list_key(item_data.table,item_data.id));
                 },
             ]).then(result => {
-                callback([response,item_data]);
+                callback(item_data);
             }).catch(error => {
                 Log.error("Data-Adapter-Update-Item-Adapter-2",error);
             });
@@ -118,7 +114,6 @@ class Adapter {
     }
     static get_item_list = (database,cache,table,filter,sort_by,page_current,page_size,option) => {
         return new Promise((callback) => {
-            let response = {};
             let item_id_list = [];
             let items = [];
             let item_count = 0;
@@ -128,7 +123,7 @@ class Adapter {
                     if(!page_current){
                         page_current=1;
                     }
-                    const [response,total_count,data_list] = await Mongo.get_id_list(database,table,filter,sort_by,page_current,page_size,option);
+                    const [total_count,data_list] = await Mongo.get_id_list(database,table,filter,sort_by,page_current,page_size,option);
                     if(data_list.length>0){
                         item_count=total_count;
                         item_id_list=data_list;
@@ -137,7 +132,7 @@ class Adapter {
                 async function(call) {
                     if(item_id_list.length>0){
                         for(const item of item_id_list) {
-                            const [biz_response,biz_data] = await Adapter.get_item_cache_db(database,cache,table,item.id,option);
+                            const biz_data = await Adapter.get_item_cache_db(database,cache,table,item.id,option);
                             if(biz_data){
                                 delete biz_data['_id'];
                                 items.push(biz_data);
@@ -163,7 +158,7 @@ class Adapter {
                     page_size = Str.check_is_null(page_size) ? "0" : page_size;
                 }
             ]).then(result => {
-                callback([response,items,item_count,page_count]);
+                callback([items,item_count,page_count]);
             }).catch(error => {
                 Log.error("Get-Item-List-Adapter-3",error);
             });
@@ -171,7 +166,6 @@ class Adapter {
     }
     static get_item = (database,cache,table,id,option) => {
         return new Promise((callback) => {
-            let response = {};
             if(!option){
                 option = {};
             }
@@ -180,7 +174,7 @@ class Adapter {
             async.series([
                 async function(call) {
                     if(!option.id_field){
-                        const [biz_response,biz_data] = await Adapter.get_item_cache_db(database,cache,data.table,data.id,option);
+                        const biz_data = await Adapter.get_item_cache_db(database,cache,data.table,data.id,option);
                         if(biz_data.id){
                             data = biz_data;
                         }else{
@@ -191,7 +185,7 @@ class Adapter {
                         query_field[option.id_field] = id;
                         let page_current=1;
                         let page_size=0;
-                        const [biz_response,biz_data] = await Adapter.get_item_list(database,cache,table,query_field,{},page_current,page_size,option);
+                        const biz_data = await Adapter.get_item_list(database,cache,table,query_field,{},page_current,page_size,option);
                         if(biz_data.length>0){
                             delete biz_data['_id'];
                             data = biz_data[0];
@@ -202,7 +196,7 @@ class Adapter {
                     }
                 },
             ]).then(result => {
-                callback([response,data]);
+                callback(data);
             }).catch(error => {
                 Log.error("Adapter-Get-Item-Adapter-5",error);
             });
@@ -210,14 +204,13 @@ class Adapter {
     }
     static post_cache_item = (cache,table,id,item_data) => {
         return new Promise((callback) => {
-            let response = {};
             let cache_string_str = '';
             let prop_list = [];
             async.series([
                 async function(call) {
                     for (const prop in item_data) { if(prop != Data_Field.SOURCE){
-                            prop_list.push({title:prop,value:item_data[prop]});
-                        }
+                        prop_list.push({title:prop,value:item_data[prop]});
+                    }
                     }
                 },
                 async function(call) {
@@ -227,10 +220,10 @@ class Adapter {
                     }
                 },
                 async function(call) {
-                    const [response,data] = await Cache.post_value(cache,Adapter.get_cache_item_attr_list_key(table,id),cache_string_str);
+                    const data = await Cache.post_value(cache,Adapter.get_cache_item_attr_list_key(table,id),cache_string_str);
                 },
             ]).then(result => {
-                callback([response,item_data]);
+                callback(item_data);
             }).catch(error => {
                 Log.error("Data-Adapter-Set-Cache-Item-2",error);
             });
@@ -238,22 +231,14 @@ class Adapter {
     }
     static delete_item = (database,cache,table,id,option) => {
         return new Promise((callback) => {
-            let response = {};
             let data = Data_Logic.get(table,id);
-            response[Data_Type.RESULT_OK_DELETE] = false;
-            response[Data_Type.RESULT_OK_DELETE_CACHE] = false;
-            response[Data_Type.RESULT_OK_DELETE_DATABASE] = false;
             async.series([
                 async function(call) {
-                    const [biz_response,biz_data] = await Adapter.delete_item_cache_db(database,cache,table,id);
+                    const biz_data = await Adapter.delete_item_cache_db(database,cache,table,id);
                     data = biz_data;
-                    response[Data_Type.RESULT_OK_DELETE_COUNT] = biz_response[Data_Type.RESULT_OK_DELETE_COUNT];
-                    response[Data_Type.RESULT_OK_DELETE] = true;
-                    response[Data_Type.RESULT_OK_DELETE_CACHE] = true;
-                    response[Data_Type.RESULT_OK_DELETE_DATABASE] = true;
                 },
             ]).then(result => {
-                callback([response,data]);
+                callback(data);
             }).catch(error => {
                 Log.error("Adapter-Get-Item-Adapter-4",error);
             });
@@ -261,7 +246,6 @@ class Adapter {
     }
     static get_item_cache_db = (database,cache,table,id,option) => {
         return new Promise((callback) => {
-            let response = {};
             let cache_key_list = [];
             let item_data = Data_Logic.get(table,id);
             let field_list = [];
@@ -270,7 +254,7 @@ class Adapter {
             async.series([
                 //cache_field_list
                 async function(call) {
-                    const [response,data] = await Cache.get_value(cache,Adapter.get_cache_item_attr_list_key(table,id));
+                    const data = await Cache.get_value(cache,Adapter.get_cache_item_attr_list_key(table,id));
                     if(data){
                         cache_key_list=data.split(',');
                     }
@@ -278,11 +262,11 @@ class Adapter {
                 async function(call) {
                     if(cache_key_list.length==0){
                         //db
-                        const [response,data] = await Mongo.get_item(database,table,id);
+                        const data = await Mongo.get_item(database,table,id);
                         if(data){
                             delete data['_id'];
                             item_data = data;
-                            const [response,data2] = await Adapter.post_cache_item(cache,table,id,data);
+                            const data2 = await Adapter.post_cache_item(cache,table,id,data);
                             item_data[Data_Type.SOURCE] = Data_Title.SOURCE_DATABASE;
                         }else{
                             item_data  = Data_Logic.get_not_found(table,id);
@@ -291,7 +275,7 @@ class Adapter {
                         //cache
                         for(const item of cache_key_list) {
                             if(item){
-                                const [response,val] = await Cache.get_value(cache,Adapter.get_cache_item_attr_key(table,id,item));
+                                const val = await Cache.get_value(cache,Adapter.get_cache_item_attr_key(table,id,item));
                                 if(val){
                                     item_data[item] = val;
                                 }else{
@@ -337,7 +321,7 @@ class Adapter {
                     }
                 },
             ]).then(result => {
-                callback([response,item_data]);
+                callback(item_data);
             }).catch(error => {
                 Log.error("Data-Adapter-Get-Item-Cache-DB",error);
             });
@@ -345,29 +329,28 @@ class Adapter {
     }
     static delete_item_list = (database,cache,table,filter,option) => {
         return new Promise((callback) => {
-            let response = {};
             let item_id_list = [];
             let item_count = 0;
             let item_data_new_list = [];
             option = option ? option : {};
             async.series([
                 async function(call) {
-                    const [response,total_count,data_list] = await Mongo.get_id_list(database,table,filter,{},0,9999,option);
+                    const [total_count,data_list] = await Mongo.get_id_list(database,table,filter,{},0,9999,option);
                     item_count=total_count;
                     item_id_list=data_list;
                 },
                 async function(call){
-                    const [response,data] = await Mongo.delete_item_list(database,table,filter);
+                    const data = await Mongo.delete_item_list(database,table,filter);
                 },
                 async function(call) {
                     var list = [];
                     for(const item of item_id_list) {
-                        const [biz_response,biz_data] = await Adapter.delete_item_cache_db(database,cache,table,item.id);
+                        const biz_data = await Adapter.delete_item_cache_db(database,cache,table,item.id);
                         item_data_new_list.push(biz_data);
                     };
                 },
             ]).then(result => {
-                callback([response,item_data_new_list]);
+                callback(item_data_new_list);
             }).catch(error => {
                 Log.error("Data-Adapter-Delete-Item-List-Adapter-3",error);
             });
@@ -375,13 +358,12 @@ class Adapter {
     }
     static delete_item_cache=(database,cache,table,id,option)=>{
         return new Promise((callback)=>{
-            let response = {};
             let cache_key_list = '';
             let cache_string_list = '';
             let item_data = Data_Logic.get(table,id);
             async.series([
                 async function(call) {
-                    const [response,data] = await Cache.get_value(cache,Adapter.get_cache_item_attr_list_key(table,id));
+                    const data = await Cache.get_value(cache,Adapter.get_cache_item_attr_list_key(table,id));
                     cache_key_list=data;
                 },
                 async function(call) {
@@ -390,17 +372,15 @@ class Adapter {
                     }
                     for(const item of cache_string_list) {
                         if(item){
-                            const [response,val] = await Cache.delete_value(cache,Adapter.get_cache_item_attr_key(table,id,item));
+                            const val = await Cache.delete_value(cache,Adapter.get_cache_item_attr_key(table,id,item));
                         }
                     }
                 },
                 async function(call){
-                    const [response,data] = await Cache.delete_value(cache,Adapter.get_cache_item_attr_list_key(table,id));
-                    response[Data_Type.RESULT_OK_DELETE_CACHE] = true;
-                    response.cache_item_attr_list = Adapter.get_cache_item_attr_list_key(table,id);
+                    const data = await Cache.delete_value(cache,Adapter.get_cache_item_attr_list_key(table,id));
                 },
             ]).then(result => {
-                callback([response,item_data]);
+                callback(item_data);
             }).catch(error => {
                 Log.error("Data-Adapter-Delete-Item-Cache-5",error);
             });
@@ -408,16 +388,13 @@ class Adapter {
     }
     static delete_item_cache_db = (database,cache,table,id) => {
         return new Promise((callback) => {
-            let response = {};
             let cache_key_list = '';
             let cache_string_list = '';
             let data = Data_Logic.get(table,id);
-            response[Data_Type.RESULT_OK_DELETE] = false;
-            response[Data_Type.RESULT_OK_DELETE_CACHE] = false;
-            response[Data_Type.RESULT_OK_DELETE_DATABASE] = false;
+            let delete_count = 0;
             async.series([
                 async function(call) {
-                    const [biz_response,biz_data] = await Cache.get_value(cache,Adapter.get_cache_item_attr_list_key(table,id));
+                    const biz_data = await Cache.get_value(cache,Adapter.get_cache_item_attr_list_key(table,id));
                     cache_key_list=biz_data;
                 },
                 async function(call) {
@@ -426,26 +403,19 @@ class Adapter {
                     }
                     for(const item of cache_string_list) {
                         if(item){
-                            const [biz_response,val] = await Cache.delete_value(cache,Adapter.get_cache_item_attr_key(table,id,item));
+                            const val = await Cache.delete_value(cache,Adapter.get_cache_item_attr_key(table,id,item));
                         }
                     }
                 },
                 async function(call){
-                    const [biz_response,biz_data] = await Cache.delete_value(cache,Adapter.get_cache_item_attr_list_key(table,id));
-                    response[Data_Type.RESULT_OK_DELETE_CACHE] = true;
+                    const biz_data = await Cache.delete_value(cache,Adapter.get_cache_item_attr_list_key(table,id));
                 },
                 async function(call){
-                    const [biz_response,biz_data] = await Mongo.delete_item(database,table,id);
-                    response[Data_Type.RESULT_OK_DELETE_COUNT] = biz_data ? biz_data : 0;
-                    response[Data_Type.RESULT_OK_DELETE_DATABASE] = true;
+                    const biz_data = await Mongo.delete_item(database,table,id);
+                    delete_count = biz_data;
                 },
-                async function(call){
-                    if(response[Data_Type.RESULT_OK_DELETE_DATABASE] && response[Data_Type.RESULT_OK_DELETE_CACHE]){
-                        response[Data_Type.RESULT_OK_DELETE] = true;
-                    }
-                }
             ]).then(result => {
-                callback([response,data]);
+                callback(delete_count);
             }).catch(error => {
                 Log.error("Data-Adapter-Delete-Item-Cache-DB-5",error);
             });
@@ -453,17 +423,14 @@ class Adapter {
     }
     static get_count_item_list = (database,table,filter) => {
         return new Promise((callback) => {
-            let response = {};
-            let item_data = {};
+            let data = {};
             async.series([
                 async function(call) {
-                    const [response,data] = await Mongo.get_count_item_list(database,table,filter);
-                    item_data.count = data;
-                    item_data.table = table;
-                    item_data.filter = filter;
+                    const biz_data = await Mongo.get_count_item_list(database,table,filter);
+                    data = biz_data;
                 },
             ]).then(result => {
-                callback([response,item_data]);
+                callback(data);
             }).catch(error => {
                 Log.error("Data-Adapter-Count-Item-List",error);
             });
@@ -474,13 +441,13 @@ class Adapter {
             let data ={result_OK:false};
             async.series([
                 async function(call){
-                    const [biz_response,biz_data] = await post_bulk_main(database,table,items);
+                    const biz_data = await post_bulk_main(database,table,items);
                     if(biz_data.result_OK){
                         data = biz_data;
                     }
                 },
             ]).then(result => {
-                callback([error,data]);
+                callback(data);
             }).catch(error => {
                 Log.error("Data-Adapter-Update-Item-Adapter-END",error);
             });
