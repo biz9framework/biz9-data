@@ -427,7 +427,7 @@ class Adapter {
             async.series([
                 async function(call) {
                     const biz_data = await Mongo.get_count_item_list(database,table,filter);
-                    data = biz_data;
+                    data =  Str.check_is_null(biz_data) ?0 : biz_data;
                 },
             ]).then(result => {
                 callback(data);

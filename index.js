@@ -218,11 +218,13 @@ class Data {
                 },
                 async function(call){
                     const biz_data = await Adapter.delete_item(database,cache,data.table,data.id);
-                        response.messages.push(Response_Logic.get_message(Data_Type.RESULT_OK_DELETE_COUNT,Status_Type.OK,biz_data));
-                        if(biz_data > 0){
-                            response.messages.push(Response_Logic.get_message(Data_Response.ITEM_CACHE_DELETE,Status_Type.SUCCESS,true));
-                            response.messages.push(Response_Logic.get_message(Data_Response.ITEM_DATABASE_DELETE,Status_Type.SUCCESS,true));
+                        if(!Str.check_is_null(biz_data)){
+                            response.messages.push(Response_Logic.get_message(Data_Response.ITEM_DELETE_CONFIRM,Status_Type.OK,Data_Logic.get_message_by_response(Data_Response.ITEM_DELETE_CONFIRM)));
+                            response.messages.push(Response_Logic.get_message(Data_Response.ITEM_DELETE_COUNT,Status_Type.OK,biz_data));
+                            response.messages.push(Response_Logic.get_message(Data_Response.ITEM_CACHE_DELETE,Status_Type.OK,true));
+                            response.messages.push(Response_Logic.get_message(Data_Response.ITEM_DATABASE_DELETE,Status_Type.OK,true));
                         }else{
+                            response.messages.push(Response_Logic.get_message(Data_Response.ITEM_DELETE_FAIL,Status_Type.FAIL,Data_Logic.get_message_by_response(Data_Response.ITEM_DELETE_FAIL)));
                             response.messages.push(Response_Logic.get_message(Data_Response.ITEM_CACHE_DELETE,Status_Type.OK,null));
                             response.messages.push(Response_Logic.get_message(Data_Response.ITEM_DATABASE_DELETE,Status_Type.OK,null));
                         }
@@ -290,15 +292,15 @@ class Data {
                 },
                 async function(call){
                     if(delete_items.length>0){
+
+                        response.messages.push(Response_Logic.get_message(Data_Type.RESULT_OK_DELETE,Status_Type.SUCCESS,false));
+
                     for(const data_item of delete_items){
                         let query_field = {};
                         query_field[Data_Field.PARENT_ID] = data_item.id
                         delete_item_query.$or.push(query_field);
                         response.messages.push(Response_Logic.get_message(Data_Type.RESULT_OK_DELETE,Status_Type.OK,true));
                         const biz_data = await Adapter.delete_item(database,cache,data_item.table,data_item.id);
-                        if(biz_data > 0){
-                            delete_item_count = delete_item_count + 1;
-                        }
                     }
                     }else{
                         response.messages.push(Response_Logic.get_message(Data_Type.RESULT_OK_DELETE,Status_Type.OK,false));
@@ -339,6 +341,7 @@ class Data {
                     response = Response_Logic.get_status(response);
                 },
             ]).then(result => {
+                Log.w('55_data_delete_items',delete_item_count);
                 callback([response,data]);
             }).catch(err => {
                 Log.error("Delete-List-Data",err);
