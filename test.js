@@ -301,8 +301,13 @@ describe('data_get', function(){ this.timeout(25000);
         let response={};
         let database = {};
         let data = {};
-        let option = {};
-        let post_data = Data_Logic.get(Project_Table.PRODUCT,'182');
+        //let option = {};
+        let option = {
+            //cache_delete:true,
+            //field:{id:1,title:1}
+            foreigns:[Data_Logic.get_foreign(Data_Value_Type.COUNT,Store_Table.PRODUCT,Data_Field.ID,Data_Field.PARENT_ID,{title:'parent'})]
+        };
+        let post_data = Data_Logic.get(Project_Table.PRODUCT,'829');
         async.series([
             async function(call){
                 const [biz_response,biz_data] = await Database.get(DATA_CONFIG);
@@ -311,7 +316,7 @@ describe('data_get', function(){ this.timeout(25000);
             async function(call){
                 const [biz_response,biz_data] = await Data.get(database,post_data.table,post_data.id,option);
                 Log.w('biz_data',biz_data);
-                Log.w('biz_response',biz_response);
+                //Log.w('biz_response',biz_response);
             },
             async function(call){
                 console.log('GET-SUCCESS');
@@ -332,6 +337,7 @@ describe('data_post', function(){ this.timeout(25000);
         let data = {};
         let option = {};
         let post_data = Store_Logic.get_test_product();
+        post_data.parent_id = '490';
         async.series([
             async function(call){
                 const [biz_response,biz_data] = await Database.get(DATA_CONFIG);

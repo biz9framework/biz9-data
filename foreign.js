@@ -84,7 +84,7 @@ class Foreign {
             let search = Data_Logic.get_search(search_item.foreign_table,search_item.query,search_item.sort_by,search_item.page_current,search_item.page_size);
             let foreign_option = search_item.field ? search_item.field : {};
             if(search_item.query.$or.length>0){
-                Adapter.get_item_list(database,cache,search.table,search.filter,search.sort_by,search.page_current,search.page_size,foreign_option).then(([biz_response,items,item_count,page_count])=>{
+                Adapter.get_item_list(database,cache,search.table,search.filter,search.sort_by,search.page_current,search.page_size,foreign_option).then(([items,item_count,page_count])=>{
                     resolve(items);
                 }).catch(err => {
                     Log.error('Foreign-Get-Data',err);
@@ -100,10 +100,11 @@ class Foreign {
             let data = null;
             async.series([
                 async function(call) {
-                    if(search_item.value_type == Data_Value_Type.ITEMS || search_item.value_type == Data_Value_Type.ONE ){
+                    if(search_item.value_type == Data_Value_Type.ITEMS || search_item.value_type == Data_Value_Type.ONE){
                         const biz_data = await Foreign.get_items_data(database,cache,search_item);
                         search_item.items = [...biz_data];
-                    }else if(search_item.value_type == Data_Value_Type.COUNT){
+                    }
+                    else if(search_item.value_type == Data_Value_Type.COUNT){
                         const biz_data = await Foreign.get_count_data(database,search_item);
                         search_item.data = biz_data;
                     }
@@ -121,8 +122,8 @@ class Foreign {
             function get_data(search_item,query) {
                 return new Promise((resolve2) => {
                     let search = Data_Logic.get_search(search_item.foreign_table,query,search_item.sort_by,search_item.page_current,search_item.page_size);
-                    Adapter.get_count_item_list(database,search.table,search.filter).then(([biz_response,biz_data])=>{
-                        resolve2(biz_data.count?biz_data.count : 0);
+                    Adapter.get_count_item_list(database,search.table,search.filter).then((biz_data)=>{
+                        resolve2(biz_data?biz_data : 0);
                     }).catch(err => {
                         Log.error('Foreign-Get-Data',err);
                     });

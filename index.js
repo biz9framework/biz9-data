@@ -97,9 +97,9 @@ class Data {
             let data = {};
             async.series([
                 async function(call) {
-                    response.messages.push(Response_Logic.get_message(Data_Response.APP_ID,Status_Type.OK,database.data_config.APP_ID));
-                    response.messages.push(Response_Logic.get_message(Data_Response.TABLE,Status_Type.OK,table));
-                    response.messages.push(Response_Logic.get_message(Data_Response.SEARCH,Status_Type.OK,search_filter));
+                    response.messages.push(Response_Logic.get_message(Data_Response.PARAM_APP_ID,Status_Type.OK,database.data_config.APP_ID));
+                    response.messages.push(Response_Logic.get_message(Data_Response.PARAM_TABLE,Status_Type.OK,table));
+                    response.messages.push(Response_Logic.get_message(Data_Response.PARAM_SEARCH,Status_Type.OK,search_filter));
                 },
                 async function(call) {
                     const biz_data = await Cache.get(database.data_config);
@@ -136,9 +136,9 @@ class Data {
             option = !Obj.check_is_empty(option) ? option : {copy_group:true};
             async.series([
                 async function(call) {
-                    response.messages.push(Response_Logic.get_message(Data_Response.APP_ID,Status_Type.OK,database.data_config.APP_ID));
-                    response.messages.push(Response_Logic.get_message(Data_Response.TABLE,Status_Type.OK,table));
-                    response.messages.push(Response_Logic.get_message(Data_Response.ID,Status_Type.OK,id));
+                    response.messages.push(Response_Logic.get_message(Data_Response.PARAM_APP_ID,Status_Type.OK,database.data_config.APP_ID));
+                    response.messages.push(Response_Logic.get_message(Data_Response.PARAM_TABLE,Status_Type.OK,table));
+                    response.messages.push(Response_Logic.get_message(Data_Response.PARAM_ID,Status_Type.OK,id));
                 },
                 async function(call) {
                     const biz_data = await Cache.get(database.data_config);
@@ -209,8 +209,8 @@ class Data {
             let delete_group_list = [];
             async.series([
                 async function(call) {
-                    response.messages.push(Response_Logic.get_message(Data_Response.TABLE,Status_Type.OK,table));
-                    response.messages.push(Response_Logic.get_message(Data_Response.ID,Status_Type.OK,id));
+                    response.messages.push(Response_Logic.get_message(Data_Response.PARAM_TABLE,Status_Type.OK,table));
+                    response.messages.push(Response_Logic.get_message(Data_Response.PARAM_ID,Status_Type.OK,id));
                 },
                 async function(call){
                     const biz_data = await Cache.get(database.data_config);
@@ -221,10 +221,10 @@ class Data {
                         response.messages.push(Response_Logic.get_message(Data_Type.RESULT_OK_DELETE_COUNT,Status_Type.OK,biz_data));
                         if(biz_data > 0){
                             response.messages.push(Response_Logic.get_message(Data_Response.ITEM_CACHE_DELETE,Status_Type.SUCCESS,true));
-                            response.messages.push(Response_Logic.get_message(Data_Response.ITEM_CACHE_DELETE,Status_Type.SUCCESS,true));
+                            response.messages.push(Response_Logic.get_message(Data_Response.ITEM_DATABASE_DELETE,Status_Type.SUCCESS,true));
                         }else{
                             response.messages.push(Response_Logic.get_message(Data_Response.ITEM_CACHE_DELETE,Status_Type.OK,null));
-                            response.messages.push(Response_Logic.get_message(Data_Response.ITEM_CACHE_DELETE,Status_Type.OK,null));
+                            response.messages.push(Response_Logic.get_message(Data_Response.ITEM_DATABASE_DELETE,Status_Type.OK,null));
                         }
                 },
                 async function(call){
@@ -267,9 +267,9 @@ class Data {
             option = !Obj.check_is_empty(option) ? option : {delete_group:true};
             async.series([
                 async function(call) {
-                    response.messages.push(Response_Logic.get_message(Data_Response.APP_ID,Status_Type.OK,database.data_config.APP_ID));
-                    response.messages.push(Response_Logic.get_message(Data_Response.TABLE,Status_Type.OK,table));
-                    response.messages.push(Response_Logic.get_message(Data_Response.SEARCH,Status_Type.OK,filter));
+                    response.messages.push(Response_Logic.get_message(Data_Response.PARAM_APP_ID,Status_Type.OK,database.data_config.APP_ID));
+                    response.messages.push(Response_Logic.get_message(Data_Response.PARAM_TABLE,Status_Type.OK,table));
+                    response.messages.push(Response_Logic.get_message(Data_Response.PARAM_SEARCH,Status_Type.OK,filter));
                     response.messages.push(Response_Logic.get_message(Data_Field.RESPONSE_OPTION,Status_Type.OK,option));
                 },
                 async function(call) {
@@ -367,10 +367,13 @@ class Data {
             option = !Obj.check_is_empty(option) ? option : {};
             async.series([
                 async function(call) {
-                    response.messages.push(Response_Logic.get_message(Data_Response.APP_ID,Status_Type.OK,database.data_config.APP_ID));
-                    response.messages.push(Response_Logic.get_message(Data_Response.TABLE,Status_Type.OK,table));
-                    response.messages.push(Response_Logic.get_message(Data_Response.ID,Status_Type.OK,id));
+                    response.messages.push(Response_Logic.get_message(Data_Response.PARAM_APP_ID,Status_Type.OK,database.data_config.APP_ID));
+                    response.messages.push(Response_Logic.get_message(Data_Response.PARAM_TABLE,Status_Type.OK,table));
+                    response.messages.push(Response_Logic.get_message(Data_Response.PARAM_ID,Status_Type.OK,id));
                     response.messages.push(Response_Logic.get_message(Data_Response.OPTION,Status_Type.OK,option));
+                    if(option.field){
+                         response.messages.push(Response_Logic.get_message(Data_Response.OPTION_FIELD,Status_Type.OK,option.field));
+                    }
                 },
                 async function(call) {
                     const biz_data = await Cache.get(database.data_config);
@@ -379,7 +382,7 @@ class Data {
                 function(call){
                     if(option.cache_delete){
                         Adapter.delete_item_cache(database,cache,data.table,data.id,option).then((biz_data)=>{
-                            response.messages.push(Response_Logic.get_message(Data_Response.CACHE_DELETE,Status_Type.OK,true));
+                            response.messages.push(Response_Logic.get_message(Data_Response.OPTION_CACHE_DELETE,Status_Type.OK,true));
                             call();
                         }).catch(err => {
                             Log.error('Data-Delete-Cache',err);
@@ -398,7 +401,7 @@ class Data {
                         }else{
                             data = biz_data;
                             data[option.title] = Obj.merge({},biz_data);;
-                            response.messages.push(Response_Logic.get_message(Data_Response.TITLE,Status_Type.OK,option.title));
+                            response.messages.push(Response_Logic.get_message(Data_Response.OPTION_TITLE,Status_Type.OK,option.title));
                         }
                         call();
                     }).catch(err => {
@@ -408,7 +411,7 @@ class Data {
                 //9_get_join 9_join
                 function(call){
                     if(option.joins){
-                        response.messages.push(Response_Logic.get_message(Data_Response.JOINS,Status_Type.OK,option.joins));
+                        response.messages.push(Response_Logic.get_message(Data_Response.OPTION_JOINS,Status_Type.OK,option.joins));
                         Join.get_data(database,cache,option).then(([biz_response,biz_data])=>{
                             for(const search_item of biz_data){
                                 data[search_item.title+"_"+Data_Type.JOIN] = search_item.data;
@@ -429,7 +432,7 @@ class Data {
                 //9_group 9_item_group
                 function(call){
                     if(option.groups && data.id){
-                        response.messages.push(Response_Logic.get_message(Data_Response.GROUPS,Status_Type.OK,option.groups));
+                        response.messages.push(Response_Logic.get_message(Data_Response.OPTION_GROUPS,Status_Type.OK,option.groups));
                         Group.get_data(database,cache,[data],option).then(([biz_response,biz_data])=>{
                             data = biz_data[0];
                             call();
@@ -443,7 +446,7 @@ class Data {
                 //9_foreigns 9_item_foreign
                 function(call){
                     if(option.foreigns && data.id){
-                        response.messages.push(Response_Logic.get_message(Data_Response.FOREIGNS,Status_Type.OK,option.foreigns));
+                        response.messages.push(Response_Logic.get_message(Data_Response.OPTION_FOREIGNS,Status_Type.OK,option.foreigns));
                         Foreign.get_data(database,cache,[data],option).then(([biz_response,biz_data])=>{
                             data = biz_data[0];
                             call();
@@ -481,9 +484,9 @@ class Data {
             option = !Obj.check_is_empty(option) ? option : {};
             async.series([
             async function(call) {
-                    response.messages.push(Response_Logic.get_message(Data_Response.APP_ID,Status_Type.OK,database.data_config.APP_ID));
-                    response.messages.push(Response_Logic.get_message(Data_Response.TABLE,Status_Type.OK,table));
-                    response.messages.push(Response_Logic.get_message(Data_Response.DATA,Status_Type.OK,data));
+                    response.messages.push(Response_Logic.get_message(Data_Response.PARAM_APP_ID,Status_Type.OK,database.data_config.APP_ID));
+                    response.messages.push(Response_Logic.get_message(Data_Response.PARAM_TABLE,Status_Type.OK,table));
+                    response.messages.push(Response_Logic.get_message(Data_Response.PARAM_DATA,Status_Type.OK,data));
             },
             async function(call) {
                     const biz_data = await Cache.get(database.data_config);
@@ -492,7 +495,7 @@ class Data {
                 //clean
                 function(call){
                     if(option.clean){
-                        response.messages.push(Response_Logic.get_message(Data_Response.CLEAN,Status_Type.OK,true));
+                        response.messages.push(Response_Logic.get_message(Data_Response.OPTION_CLEAN,Status_Type.OK,true));
                         let new_data = {};
                         for(const field in data){
                             if(!Obj.check_is_array(data[field]) &&
@@ -512,7 +515,7 @@ class Data {
                 //delete cache item
                 function(call){
                     if(option.cache_delete || option.overwrite){
-                        response.messages.push(Response_Logic.get_message(Data_Response.CACHE_DELETE,Status_Type.OK,true));
+                        response.messages.push(Response_Logic.get_message(Data_Response.OPTION_CACHE_DELETE,Status_Type.OK,true));
                         Adapter.delete_item_cache(database,cache,table,data.id).then((biz_data)=>{
                             call();
                         }).catch(err => {
@@ -533,7 +536,7 @@ class Data {
                 //reset
                 function(call){
                     if(option.reset && data.id){
-                        response.messages.push(Response_Logic.get_message(Data_Response.RESET,Status_Type.OK,true));
+                        response.messages.push(Response_Logic.get_message(Data_Response.OPTION_RESET,Status_Type.OK,true));
                         Adapter.get_item(database,cache,data.table,data.id).then((biz_data)=>{
                             data = biz_data;
                             call();
@@ -566,8 +569,8 @@ class Data {
             let response=Response_Logic.get();
             async.series([
                 async function(call) {
-                    response.messages.push(Response_Logic.get_message(Data_Response.APP_ID,Status_Type.OK,database.data_config.APP_ID));
-                    response.messages.push(Response_Logic.get_message(Data_Response.DATA_ITEMS,Status_Type.OK,data_items));
+                    response.messages.push(Response_Logic.get_message(Data_Response.PARAM_APP_ID,Status_Type.OK,database.data_config.APP_ID));
+                    response.messages.push(Response_Logic.get_message(Data_Response.PARAM_DATA_ITEMS,Status_Type.OK,data_items));
                 },
                 async function(call) {
                     const biz_data = await Cache.get(database.data_config);
@@ -604,12 +607,12 @@ class Data {
             option = !Obj.check_is_empty(option) ? option : {};
             async.series([
                 async function(call) {
-                    response.messages.push(Response_Logic.get_message(Data_Response.APP_ID,Status_Type.OK,database.data_config.APP_ID));
-                    response.messages.push(Response_Logic.get_message(Data_Response.TABLE,Status_Type.OK,table));
-                    response.messages.push(Response_Logic.get_message(Data_Response.SEARCH,Status_Type.OK,filter));
-                    response.messages.push(Response_Logic.get_message(Data_Response.SORT_BY,Status_Type.OK,sort_by));
-                    response.messages.push(Response_Logic.get_message(Data_Response.PAGE_CURRENT,Status_Type.OK,page_current));
-                    response.messages.push(Response_Logic.get_message(Data_Response.PAGE_SIZE,Status_Type.OK,page_size));
+                    response.messages.push(Response_Logic.get_message(Data_Response.PARAM_APP_ID,Status_Type.OK,database.data_config.APP_ID));
+                    response.messages.push(Response_Logic.get_message(Data_Response.PARAM_TABLE,Status_Type.OK,table));
+                    response.messages.push(Response_Logic.get_message(Data_Response.PARAM_SEARCH,Status_Type.OK,filter));
+                    response.messages.push(Response_Logic.get_message(Data_Response.PARAM_SORT_BY,Status_Type.OK,sort_by));
+                    response.messages.push(Response_Logic.get_message(Data_Response.PARAM_PAGE_CURRENT,Status_Type.OK,page_current));
+                    response.messages.push(Response_Logic.get_message(Data_Response.PARAM_PAGE_SIZE,Status_Type.OK,page_size));
                 },
                 async function(call) {
                     const biz_data = await Cache.get(database.data_config);
@@ -631,7 +634,7 @@ class Data {
                 function(call){
                     if(option.joins){
                         Join.get_data(database,cache,option).then(([biz_response,biz_data])=>{
-                            response.messages.push(Response_Logic.get_message(Data_Response.JOINS,Status_Type.SUCCESS,option.joins));
+                            response.messages.push(Response_Logic.get_message(Data_Response.OPTION_JOINS,Status_Type.SUCCESS,option.joins));
                             for(const search_item of biz_data){
                                 data[search_item.title+"_"+Data_Type.JOIN] = search_item.data;
                                 if(search_item.value_type == Data_Value_Type.ITEMS){
@@ -666,7 +669,7 @@ class Data {
                 function(call){
                     if(option.groups && data[Data_Field.ITEMS].length>0){
                         Group.get_data(database,cache,data[Data_Field.ITEMS],option).then(([biz_response,biz_data])=>{
-                            response.messages.push(Response_Logic.get_message(Data_Response.GROUPS,Status_Type.SUCCESS,option.groups));
+                            response.messages.push(Response_Logic.get_message(Data_Response.OPTION_GROUPS,Status_Type.SUCCESS,option.groups));
                             data[Data_Field.ITEMS] = biz_data;
                             call();
                         }).catch(err => {
@@ -716,8 +719,8 @@ class Data {
             let data = {};
             async.series([
                 async function(call) {
-                    response.messages.push(Response_Logic.get_message(Data_Response.APP_ID,Status_Type.OK,database.data_config.APP_ID));
-                    response.messages.push(Response_Logic.get_message(Data_Response.TABLE,Status_Type.OK,table));
+                    response.messages.push(Response_Logic.get_message(Data_Response.PARAM_APP_ID,Status_Type.OK,database.data_config.APP_ID));
+                    response.messages.push(Response_Logic.get_message(Data_Response.PARAM_TABLE,Status_Type.OK,table));
                 },
                 async function(call){
                     const [biz_response,biz_data] = await get(database,table,items);
