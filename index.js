@@ -571,6 +571,7 @@ class Data {
                 async function(call) {
                     response.messages.push(Response_Logic.get_message(Data_Response.PARAM_APP_ID,Status_Type.OK,database.data_config.APP_ID));
                     response.messages.push(Response_Logic.get_message(Data_Response.PARAM_DATA_ITEMS,Status_Type.OK,data_items));
+                    response.messages.push(Response_Logic.get_message(Data_Response.PARAM_DATA_ITEMS_COUNT,Status_Type.OK,data_items.length));
                 },
                 async function(call) {
                     const biz_data = await Cache.get(database.data_config);
@@ -579,7 +580,6 @@ class Data {
                 async function(call){
                     const biz_data = await Adapter.post_items(database,cache,data_items);
                     data_items = biz_data;
-                    response = biz_response;
                 },
                 async function(call){
                     response = Response_Logic.get_status(response);
@@ -625,6 +625,7 @@ class Data {
                         data.page_count=page_count;
                         data.search=search;
                         data[Data_Field.ITEMS]=items;
+                        response.messages.push(Response_Logic.get_message(Data_Response.RESPONSE_SEARCH_ITEMS_COUNT,Status_Type.OK,item_count));
                         call();
                     }).catch(err => {
                         Log.error('Data-Search',err);

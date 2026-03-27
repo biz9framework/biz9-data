@@ -67,115 +67,13 @@ describe('connect', function(){ this.timeout(25000);
                 //-->
                 let print_test = false;
                 // -- POST-START --//
-                /*
-                let option = {};
-                // -- parent --
-                //Log.w('33_parent',parent);
-                let parent = Data_Logic.get(Project_Table.PRODUCT,0);
-                const [response,biz_data] = await Data.post(database,parent.table,parent,option);
-                // -- sub items --
-                //let sub_items = Data_Logic.get(Project_Table.BLANK,0,{count:10,parent:parent,data:{field_1:'value_'+Num.get_id(),field_2:'value_'+Num.get_id()}});
-                //let sub_items = Data_Logic.get(Project_Table.PRODUCT,0,{count:10,data:Store_Logic.get_test_product()});
-                //let sub_items = Data_Logic.get(Project_Table.PRODUCT,0,{count:1,data:User_Logic.get_test_user()});
-                //const [response,biz_data] = await Data.post_items(database,sub_items);
-                */
-                // -- POST-END --//
-                //-- GET START --//
-                //let foreign_2 = Data_Logic.get_foreign(Data_Value_Type.ITEMS,Project_Table.IMAGE,Data_Field.PARENT_ID,Field.ID,{title:'images'});
-                //let join_search_1 = Data_Logic.get_search(Project_Table.PRODUCT,{},{},1,2,{});
-                //let join_1 = Data_Logic.get_join(Data_Value_Type.ITEMS,join_search_1,{title:'apple'});
-                //let option = {title:'cool',joins:[join_1]};//{{joins:[join_1]};foreigns:[foreign_1]};
-                //option = Obj.merge(option,{title:'cool',id_field:Form_Field.TITLE_URL});
-                //let foreign_sub_value = Data_Logic.get_foreign(Data_Value_Type.ITEMS,Website_Table.SUB_VALUE,Form_Field.PARENT_ID,Form_Field.ID,{title:'sub_values'});
-                let foreign_1 = Data_Logic.get_foreign(Data_Value_Type.ITEMS,Project_Table.IMAGE,Form_Field.PARENT_ID,Form_Field.ID,{title:'images'});
-                let option = {groups:[Data_Logic.get_group({foreigns:[foreign_1]})]};
-                let parent = Data_Logic.get(Store_Table.PRODUCT,'117');
-                const [biz_response,biz_data] = await Data.get(database,parent.table,parent.id,option);
-                Log.w('33_result',biz_data);
-                //Log.w('44_result',biz_data.main_images);
-                //Log.w('44_result',biz_data.groups[0]);
-                //Log.w('44_result',biz_data.groups[0].images);
-                //-- GET END --//
-                //-- COPY START --//
-                /*
-                let option = {};
-                let parent = Data_Logic.get(Project_Table.BLOG_POST,'844');
-                const [biz_response,biz_data] = await Data.copy(database,parent.table,parent.id,option);
-                */
-                //-- COPY END --//
-                //-->
-                //-- SEARCH START --//
-                /*
-                let join_search_1 = Data_Logic.get_search(Project_Table.BLANK,{},{},1,0,{});
-                let join_1 = Data_Logic.get_join(Data_Value_Type.ITEMS,join_search_1);
-                let foreign_1 = Data_Logic.get_foreign(Data_Value_Type.ITEMS,Project_Table.BLANK,Data_Field.PARENT_ID,Field.ID);
-                let group_1 = Data_Logic.get_group();
-                let option = {groups:[group_1]};//{joins:[join_1],foreigns:[foreign_1]};
-                */
-                //let search = Data_Logic.get_search(Project_Table.PRODUCT,{},{},1,0,{});
-                //const [biz_response,biz_data] = await Data.search(database,search.table,search.filter,search.sort_by,search.page_current,search.page_size,option);
-                //const [biz_response,biz_data] = await Data.count(database,search.table,search.filter);
-                //-- SEARCH START --//
-                // -- DELETE-START --//
-                /*
-                let option = {};
-                // -- parent --
-                //let parent = Data_Logic.get(Project_Table.PRODUCT,'255');
-                //const [biz_response,biz_data] = await Data.delete(database,parent.table,parent.id,option);
-                let search = Data_Logic.get_search(Project_Table.PRODUCT,{},{},1,0,{});
-                const [biz_response,biz_data] = await Data.delete_search(database,search.table,search.filter,search.sort_by,search.page_current,search.page_size,option);
-                */
-                // -- DELETE-END --//
-
-                // -- CART-POST-TEST-- START
-                /*
-        let user = Data_Logic.get(User_Table.USER,'228');
-        let cart = Store_Logic.get_cart(user.id,{cart_code:'CA'});
-        let product_1 = Data_Logic.get(Project_Table.PRODUCT,'518');
-        let product_2 = Data_Logic.get(Project_Table.PRODUCT,'860');
-        let product_sub_1 = Data_Logic.get(Project_Table.PRODUCT,'129');
-        let product_sub_2 = Data_Logic.get(Project_Table.PRODUCT,'92');
-        let cart_item_1 = Store_Logic.get_cart_item(product_1.table,product_1.id,1,Store_Logic.get_test_cost());
-        let cart_sub_item_1 = Store_Logic.get_cart_sub_item(cart_item_1.id,Store_Type.CART_SUB_TYPE_STANDARD,product_sub_1.table,product_sub_1.id,1,Store_Logic.get_test_cost());
-        cart_item_1.cart_sub_items.push(cart_sub_item_1);
-        let cart_item_2 = Store_Logic.get_cart_item(product_2.table,product_2.id,1,Store_Logic.get_test_cost());
-        let cart_sub_item_2 = Store_Logic.get_cart_sub_item(cart_item_2.id,Store_Type.CART_SUB_TYPE_STANDARD,product_sub_2.table,product_sub_2.id,1,Store_Logic.get_test_cost());
-        cart_item_2.cart_sub_items.push(cart_sub_item_2);
-        cart.cart_items.push(cart_item_1);
-        cart.cart_items.push(cart_item_2);
-        const [biz_response,biz_data] = await Cart_Data.post(database,cart);
-        Log.w('11_cart_post',biz_data);
-        */
-                // -- CART-POST-TEST-2 -- END
-
-
-                // -- CART-GET-FOREIGN-START -- //
-                /*
-                let foreign_user = Data_Logic.get_foreign(Data_Value_Type.ONE,User_Table.USER,Data_Field.ID,User_Field.USER_ID,{title:'user'});
-                let foreign_cart_item_parent = Data_Logic.get_foreign(Data_Value_Type.ONE,Store_Table.PRODUCT,'Data_Field.ID',Data_Field.PARENT_ID,{title:'parent'});
-                let foreign_cart_item = Data_Logic.get_foreign(Data_Value_Type.ONE,Store_Table.CART_ITEM,Store_Field.CART_ID,Data_Field.ID,{title:'cart_items',foreigns:[foreign_cart_item_parent]});
-//let foreign_cart_item = Data_Logic.get_foreign(Data_Value_Type.ITEMS,Store_Table.CART_ITEM,Store_Field.CART_ID,Data_Field.ID,{title:'cart_items'});
-//Log.w('www',foreign_cart_item);
-                let cart_option = { id_field:Store_Field.CART_NUMBER,foreigns:[foreign_user,foreign_cart_item] };
-                let cart_number = 'CA-16399';
-                const [biz_response,biz_data] = await Data.get(database,Store_Table.CART,cart_number,cart_option);
-                Log.w('33_data',biz_data);
-                Log.w('33_data',biz_data.cart_items);
-                */
-// -- CART-GET-FOREIGN-END -- //
-
-
-//---
-if(print_test){;
-    Log.w('99_biz_data',biz_data);
-}
-},
+            },
         ],
             function(error, result){
                 console.log('CONNECT-DONE');
                 done();
             });
-});
+    });
 });
 //9_count - 9_test_count
 describe('data_count', function(){ this.timeout(25000);
@@ -202,8 +100,8 @@ describe('data_count', function(){ this.timeout(25000);
             },
         ],
             function(error, result){
-                //console.log('COUNT-DONE');
-                //done();
+                console.log('COUNT-DONE');
+                done();
             });
     });
 });
@@ -302,10 +200,13 @@ describe('data_get', function(){ this.timeout(25000);
         let database = {};
         let data = {};
         //let option = {};
+        let option_foreign_blank = Data_Logic.get_foreign(Data_Value_Type.COUNT,Store_Table.BLANK,Data_Field.ID,Data_Field.PARENT_ID,{title:'blank_me'});
+        let join_search = Data_Logic.get_search(Project_Table.BLANK,{},{},1,0);
         let option = {
             //cache_delete:true,
             //field:{id:1,title:1}
-            foreigns:[Data_Logic.get_foreign(Data_Value_Type.COUNT,Store_Table.PRODUCT,Data_Field.ID,Data_Field.PARENT_ID,{title:'parent'})]
+            //foreigns:[Data_Logic.get_foreign(Data_Value_Type.COUNT,Store_Table.PRODUCT,Data_Field.ID,Data_Field.PARENT_ID,{title:'parent'})]
+            //joins:[Data_Logic.get_join(Data_Value_Type.ITEMS,join_search)]
         };
         let post_data = Data_Logic.get(Project_Table.PRODUCT,'829');
         async.series([
@@ -316,7 +217,7 @@ describe('data_get', function(){ this.timeout(25000);
             async function(call){
                 const [biz_response,biz_data] = await Data.get(database,post_data.table,post_data.id,option);
                 Log.w('biz_data',biz_data);
-                //Log.w('biz_response',biz_response);
+                Log.w('biz_response',biz_response);
             },
             async function(call){
                 console.log('GET-SUCCESS');
@@ -338,6 +239,8 @@ describe('data_post', function(){ this.timeout(25000);
         let option = {};
         let post_data = Store_Logic.get_test_product();
         post_data.parent_id = '490';
+        post_data.blank_id = '266';
+        post_data.table = Project_Table.BLANK;
         async.series([
             async function(call){
                 const [biz_response,biz_data] = await Database.get(DATA_CONFIG);

@@ -28,7 +28,7 @@ class Join {
                                 search_item.data[search_item.title];
                                 let search = Data_Logic.get_search(search_item.search.table,search_item.search.filter,search_item.search.sort_by,search_item.search.page_current,search_item.search.page_size);
                                 let join_option = {field:search_item.field,distinct:search_item.distinct};
-                                Adapter.get_item_list(database,cache,search.table,search.filter,search.sort_by,search.page_current,search.page_size,join_option).then(([biz_response,items,item_count,page_count])=>{
+                                Adapter.get_item_list(database,cache,search.table,search.filter,search.sort_by,search.page_current,search.page_size,join_option).then(([items,item_count,page_count])=>{
                                     search_item.data['count'] = item_count;
                                     search_item.data['page_count'] = page_count;
                                     search_item.data['search'] = search;
@@ -41,7 +41,7 @@ class Join {
                             else if(search_item.value_type == Data_Value_Type.COUNT){
                                 let search = Data_Logic.get_search(search_item.search.table,search_item.search.filter,search_item.search.sort_by,search_item.search.page_current,search_item.search.page_size);
                                 let join_option = {field:search_item.field};
-                                Adapter.get_count_item_list(database,search.table,search.filter).then(([biz_response,biz_data])=>{
+                                Adapter.get_count_item_list(database,search.table,search.filter).then((biz_data)=>{
                                     search_item.data = biz_data.count;
                                     resolve();
                                 }).catch(err => {
@@ -51,7 +51,7 @@ class Join {
                             else if(search_item.value_type == Data_Value_Type.ONE){
                                 let search = Data_Logic.get_search(search_item.search.table,search_item.search.filter,search_item.search.sort_by,search_item.search.page_current,search_item.search.page_size);
                                 let join_option = {field:search_item.field};
-                                Adapter.get_item_list(database,cache,search.table,search.filter,search.sort_by,search.page_current,search.page_size,join_option).then(([biz_response,items,item_count,page_count])=>{
+                                Adapter.get_item_list(database,cache,search.table,search.filter,search.sort_by,search.page_current,search.page_size,join_option).then(([items,item_count,page_count])=>{
                                     let one_item = items.length>0 ? items[0] : Data_Logic.get_not_found(search_item.search.table,0);
                                     search_item.data = one_item;
                                     resolve();
