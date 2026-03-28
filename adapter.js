@@ -185,10 +185,10 @@ class Adapter {
                         query_field[option.id_field] = id;
                         let page_current=1;
                         let page_size=0;
-                        const biz_data = await Adapter.get_item_list(database,cache,table,query_field,{},page_current,page_size,option);
-                        if(biz_data.length>0){
-                            delete biz_data['_id'];
-                            data = biz_data[0];
+                        const [items,item_count,page_count] = await Adapter.get_item_list(database,cache,table,query_field,{},page_current,page_size,option);
+                        if(items.length>0){
+                            delete items[0]['_id'];
+                            data = items[0];
                         }else{
                             data = Data_Logic.get_not_found(table,id);
                             data.id_field = option.id_field ? option.id_field : Data_Field.ID;

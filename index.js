@@ -286,17 +286,12 @@ class Data {
                     const biz_data = await Cache.get(database.data_config);
                     cache = biz_data;
                 },
-                function(call){
+                async function(call){
                     let search = Data_Logic.get_search(table,filter,{},1,0);
-                    Adapter.get_item_list(database,cache,search.table,search.filter,search.sort_by,search.page_current,search.page_size,option).then(([items,item_count,page_count])=>{
-                        if(items.length>0){
-                            delete_items = items;
-                        }
-                        call();
-                    }).catch(err => {
-                        Log.error('Data-Search',err);
-                        response=Log.append(response,err);
-                    });
+                    const [items,item_count,page_count] = await Adapter.get_item_list(database,cache,search.table,search.filter,search.sort_by,search.page_current,search.page_size,option);
+                    if(items.length>0){
+                        delete_items = items;
+                    }
                 },
                 async function(call){
                     if(delete_items.length>0){
@@ -309,15 +304,11 @@ class Data {
                     }
                     }
                 },
-                function(call){
+                async function(call){
                     if(option.delete_group && delete_item_query.$or.length > 0){
                         let search = Data_Logic.get_search(table,delete_item_query,{},1,0,{field:{id:1,title:1,table:1}});
-                        Adapter.get_item_list(database,cache,search.table,search.filter,search.sort_by,search.page_current,search.page_size,option).then(([items,item_count,page_count])=>{
-                            delete_group_items = items;
-                            call();
-                        });
-                    }else{
-                        call();
+                        const [items,item_count,page_count] = await Adapter.get_item_list(database,cache,search.table,search.filter,search.sort_by,search.page_current,search.page_size,option);
+                        delete_group_items = items;
                     }
                 },
                 async function(call){
@@ -331,19 +322,13 @@ class Data {
                 },
                 async function(call){
                     if(delete_items.length>0){
-                        console.log('aaaaaaaaaaaa');
-                        console.log('aaaaaaaaaaaa');
                         response.messages.push(Response_Logic.get_message(Data_Response.ITEMS_DELETE_CONFIRM,Status_Type.SUCCESS,Data_Logic.get_message_by_response(Data_Response.ITEMS_DELETE_CONFIRM)));
                     }else{
-                        console.log('bbbbbbb');
-                        console.log('bbbbbbb');
                         response.messages.push(Response_Logic.get_message(Data_Response.ITEMS_DELETE_CONFIRM,Status_Type.FAIL,Data_Logic.get_message_by_response(Data_Response.ITEMS_DELETE_FAIL)));
                     }
-                    Log.w('rrrr',response);
                     response = Response_Logic.get_status(response);
                 },
             ]).then(result => {
-                Log.w('55_data_delete_items',delete_item_count);
                 callback([response,data]);
             }).catch(err => {
                 Log.error("Delete-List-Data",err);
@@ -384,39 +369,24 @@ class Data {
                     const biz_data = await Cache.get(database.data_config);
                     cache = biz_data;
                 },
-                function(call){
+                async function(call){
                     if(option.cache_delete){
-                        Adapter.delete_item_cache(database,cache,data.table,data.id,option).then((biz_data)=>{
-                            response.messages.push(Response_Logic.get_message(Data_Response.OPTION_CACHE_DELETE,Status_Type.OK,true));
-                            call();
-                        }).catch(err => {
-                            Log.error('Data-Delete-Cache',err);
-                            response=Log.append(response,err);
-                        });
-                    }else{
-                        call();
+                        const biz_data = await Adapter.delete_item_cache(database,cache,data.table,data.id,option);
+                        response.messages.push(Response_Logic.get_message(Data_Response.OPTION_CACHE_DELETE,Status_Type.OK,true));
                     }
                 },
                 //item_by_id
                 //title
-                function(call){
-                    Adapter.get_item(database,cache,data.table,data.id,option).then((biz_data)=>{
+                async function(call){
+                    const biz_data = await Adapter.get_item(database,cache,data.table,data.id,option);
                         if(!option.title){
-                            console.log('aaaaaa');
                             data = biz_data;
                         }else{
-                            console.log('bbbbbb');
                             data = biz_data;
                             data[option.title] = Obj.merge({},biz_data);;
                             response.messages.push(Response_Logic.get_message(Data_Response.OPTION_TITLE,Status_Type.OK,option.title));
                         }
-                        Log.w('11_data',data);
-                        //call();
-                    }).catch(err => {
-                        Log.error('Data-Get',err);
-                    });
                 },
-                /*
                 //9_get_join 9_join
                 function(call){
                     if(option.joins){
@@ -453,17 +423,11 @@ class Data {
                     }
                 },
                 //9_foreigns 9_item_foreign
-                function(call){
+                async function(call){
                     if(option.foreigns && data.id){
                         response.messages.push(Response_Logic.get_message(Data_Response.OPTION_FOREIGNS,Status_Type.OK,option.foreigns));
-                        Foreign.get_data(database,cache,[data],option).then(([biz_response,biz_data])=>{
-                            data = biz_data[0];
-                            call();
-                        }).catch(err => {
-                            Log.error('Data-Search-Foreign',err);
-                        });
-                    }else{
-                        call();
+                        const [biz_response,biz_data] = await Foreign.get_data(database,cache,[data],option);
+                        data = biz_data[0];
                     }
                 },
                 async function(call){
@@ -475,9 +439,8 @@ class Data {
 
                     response = Response_Logic.get_status(response);
                 },
-                */
             ]).then(result => {
-                //callback([response,data]);
+                callback([response,data]);
             }).catch(err => {
                 Log.error("DATA-GET-ERROR",err);
             });
@@ -529,38 +492,22 @@ class Data {
                     }
                 },
                 //delete cache item
-                function(call){
+                async function(call){
                     if(option.cache_delete || option.overwrite){
                         response.messages.push(Response_Logic.get_message(Data_Response.OPTION_CACHE_DELETE,Status_Type.OK,true));
-                        Adapter.delete_item_cache(database,cache,table,data.id).then((biz_data)=>{
-                            call();
-                        }).catch(err => {
-                            Log.error('Data-Post-Delete-Cache',err);
-                        });
-                    }else{
-                        call();
+                        const biz_data = await Adapter.delete_item_cache(database,cache,table,data.id);
                     }
                 },
-                function(call){
-                    Adapter.post_item(database,cache,table,data,option).then((biz_data)=>{
-                        data = biz_data;
-                        call();
-                    }).catch(err => {
-                        Log.error('Data-Post-Post-Item-Apapter',err);
-                    });
+                async function(call){
+                    const biz_data = await Adapter.post_item(database,cache,table,data,option);
+                    data = biz_data;
                 },
                 //reset
-                function(call){
+                async function(call){
                     if(option.reset && data.id){
                         response.messages.push(Response_Logic.get_message(Data_Response.OPTION_RESET,Status_Type.OK,true));
-                        Adapter.get_item(database,cache,data.table,data.id).then((biz_data)=>{
-                            data = biz_data;
-                            call();
-                        }).catch(err => {
-                            Log.error('Data-Get-Reset',err);
-                        });
-                    }else{
-                        call();
+                        const biz_data = await Adapter.get_item(database,cache,data.table,data.id);
+                        data = biz_data;
                     }
                 },
                 async function(call){
@@ -644,22 +591,20 @@ class Data {
                     const biz_data = await Cache.get(database.data_config);
                     cache = biz_data;
                 },
-                function(call){
+                async function(call){
                     let search = Data_Logic.get_search(table,filter,sort_by,page_current,page_size);
-                    Adapter.get_item_list(database,cache,search.table,search.filter,search.sort_by,search.page_current,search.page_size,option).then(([items,item_count,page_count])=>{
+                        const [items,item_count,page_count] = await Adapter.get_item_list(database,cache,search.table,search.filter,search.sort_by,search.page_current,search.page_size,option);
                         data.item_count=item_count;
                         data.page_count=page_count;
                         data.search=search;
                         data[Data_Field.ITEMS]=items;
                         response.messages.push(Response_Logic.get_message(Data_Response.RESPONSE_ITEMS_COUNT,Status_Type.OK,item_count));
-                        call();
-                    }).catch(err => {
-                        Log.error('Data-Search',err);
-                    });
                 },
                 //9_items_join 9_search_join 9_joins
                 function(call){
                     if(option.joins){
+                        const biz_data = await Join.get_data(database,cache,option);
+                        here
                         Join.get_data(database,cache,option).then(([biz_response,biz_data])=>{
                             response.messages.push(Response_Logic.get_message(Data_Response.OPTION_JOINS,Status_Type.SUCCESS,option.joins));
                             for(const search_item of biz_data){
@@ -679,31 +624,19 @@ class Data {
                     }
                 },
                 //9_foreign //9_item_foreign
-                function(call){
+                async function(call){
                     if(option.foreigns && data[Data_Field.ITEMS].length > 0){
-                        Foreign.get_data(database,cache,data[Data_Field.ITEMS],option).then(([biz_response,biz_data])=>{
-                            response.messages.push(Response_Logic.get_message(Data_Field.RESPONSE_FOREIGNS,Status_Type.SUCCESS,option.foreigns));
-                            data[Data_Field.ITEMS] = biz_data;
-                            call();
-                        }).catch(err => {
-                            Log.error('Data-Search-Foreign',err);
-                        });
-                    }else{
-                        call();
+                        const [biz_response,biz_data] = await Foreign.get_data(database,cache,data[Data_Field.ITEMS],option);
+                        response.messages.push(Response_Logic.get_message(Data_Field.RESPONSE_FOREIGNS,Status_Type.SUCCESS,option.foreigns));
+                        data[Data_Field.ITEMS] = biz_data;
                     }
                 },
                 //9_group 9_item_group
-                function(call){
+                async function(call){
                     if(option.groups && data[Data_Field.ITEMS].length>0){
-                        Group.get_data(database,cache,data[Data_Field.ITEMS],option).then(([biz_response,biz_data])=>{
+                        const [biz_response,biz_data] = await Group.get_data(database,cache,data[Data_Field.ITEMS],option);
                             response.messages.push(Response_Logic.get_message(Data_Response.OPTION_GROUPS,Status_Type.SUCCESS,option.groups));
                             data[Data_Field.ITEMS] = biz_data;
-                            call();
-                        }).catch(err => {
-                            Log.error('Data-Item-Group',err);
-                        });
-                    }else{
-                        call();
                     }
                 },
                 async function(call){

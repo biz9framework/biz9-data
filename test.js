@@ -208,7 +208,7 @@ describe('data_get', function(){ this.timeout(25000);
             //foreigns:[Data_Logic.get_foreign(Data_Value_Type.COUNT,Store_Table.PRODUCT,Data_Field.ID,Data_Field.PARENT_ID,{title:'parent'})]
             //joins:[Data_Logic.get_join(Data_Value_Type.ITEMS,join_search)]
         };
-        let post_data = Data_Logic.get(Project_Table.PRODUCT,'829');
+        let post_data = Data_Logic.get(Project_Table.PRODUCT,'340');
         async.series([
             async function(call){
                 const [biz_response,biz_data] = await Database.get(DATA_CONFIG);
