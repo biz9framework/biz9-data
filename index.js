@@ -402,17 +402,21 @@ class Data {
                 function(call){
                     Adapter.get_item(database,cache,data.table,data.id,option).then((biz_data)=>{
                         if(!option.title){
+                            console.log('aaaaaa');
                             data = biz_data;
                         }else{
+                            console.log('bbbbbb');
                             data = biz_data;
                             data[option.title] = Obj.merge({},biz_data);;
                             response.messages.push(Response_Logic.get_message(Data_Response.OPTION_TITLE,Status_Type.OK,option.title));
                         }
-                        call();
+                        Log.w('11_data',data);
+                        //call();
                     }).catch(err => {
                         Log.error('Data-Get',err);
                     });
                 },
+                /*
                 //9_get_join 9_join
                 function(call){
                     if(option.joins){
@@ -471,8 +475,9 @@ class Data {
 
                     response = Response_Logic.get_status(response);
                 },
+                */
             ]).then(result => {
-                callback([response,data]);
+                //callback([response,data]);
             }).catch(err => {
                 Log.error("DATA-GET-ERROR",err);
             });

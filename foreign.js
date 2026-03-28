@@ -36,8 +36,9 @@ class Foreign {
                             }else if(search_item.value_type == Data_Value_Type.COUNT){
                                 data_item[search_item.title] = search_item.data;
                             }else if(search_item.value_type == Data_Value_Type.ONE){
-                                if(search_item.items.length>0){
-                                    data_item[search_item.title] = search_item.items[0];
+                                const match_item = search_item.items.find(item_find => item_find[search_item.foreign_field] === data_item[search_item.parent_field]);
+                                if(match_item){
+                                    data_item[search_item.title] = match_item;
                                 }else{
                                     data_item[search_item.title] = Data_Logic.get_not_found(search_item.foreign_table,0);
                                 }
