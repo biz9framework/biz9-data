@@ -171,7 +171,7 @@ describe('data_many_delete_search', function(){ this.timeout(25000);
         let database = {};
         let data = {};
         let option = {};
-        let post_search = Data_Logic.get_search(Project_Table.PRODUCT,{id:'649'},{},1,0,{});
+        let post_search = Data_Logic.get_search(Project_Table.PRODUCT,{},{},1,0,{});
         async.series([
             async function(call){
                 const [biz_response,biz_data] = await Database.get(DATA_CONFIG);
@@ -298,7 +298,7 @@ describe('data_search', function(){ this.timeout(25000);
         let database = {};
         let data = {};
         let option = {};
-        let post_search = Data_Logic.get_search(Project_Table.PRODUCT,{id:'33333333333'},{},1,0,{});
+        let post_search = Data_Logic.get_search(Project_Table.PRODUCT,{},{},1,0,{});
         async.series([
             async function(call){
                 const [biz_response,biz_data] = await Database.get(DATA_CONFIG);

@@ -300,18 +300,13 @@ class Data {
                 },
                 async function(call){
                     if(delete_items.length>0){
-                        response.messages.push(Response_Logic.get_message(Data_Response.ITEMS_DELETE_CONFIRM,Status_Type.SUCCESS,Data_Logic.get_message_by_response(Data_Response.ITEMS_DELETE_CONFIRM)));
                         response.messages.push(Response_Logic.get_message(Data_Response.ITEMS_DELETE_COUNT,Status_Type.OK,delete_items.length));
-
                     for(const data_item of delete_items){
                         let query_field = {};
                         query_field[Data_Field.PARENT_ID] = data_item.id
                         delete_item_query.$or.push(query_field);
                         const biz_data = await Adapter.delete_item(database,cache,data_item.table,data_item.id);
                     }
-                    }else{
-                       response.messages.push(Response_Logic.get_message(Data_Response.ITEMS_DELETE_FAIL,Status_Type.FAIL,Data_Logic.get_message_by_response(Data_Response.ITEMS_DELETE_FAIL)));
-response.messages.push(Response_Logic.get_message(Data_Response.ITEMS_DELETE_COUNT,Status_Type.OK,0));
                     }
                 },
                 function(call){
@@ -335,6 +330,16 @@ response.messages.push(Response_Logic.get_message(Data_Response.ITEMS_DELETE_COU
                     }
                 },
                 async function(call){
+                    if(delete_items.length>0){
+                        console.log('aaaaaaaaaaaa');
+                        console.log('aaaaaaaaaaaa');
+                        response.messages.push(Response_Logic.get_message(Data_Response.ITEMS_DELETE_CONFIRM,Status_Type.SUCCESS,Data_Logic.get_message_by_response(Data_Response.ITEMS_DELETE_CONFIRM)));
+                    }else{
+                        console.log('bbbbbbb');
+                        console.log('bbbbbbb');
+                        response.messages.push(Response_Logic.get_message(Data_Response.ITEMS_DELETE_CONFIRM,Status_Type.FAIL,Data_Logic.get_message_by_response(Data_Response.ITEMS_DELETE_FAIL)));
+                    }
+                    Log.w('rrrr',response);
                     response = Response_Logic.get_status(response);
                 },
             ]).then(result => {
