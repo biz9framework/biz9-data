@@ -85,11 +85,11 @@ class Foreign {
             let search = Data_Logic.get_search(search_item.foreign_table,search_item.query,search_item.sort_by,search_item.page_current,search_item.page_size);
             let foreign_option = search_item.field ? search_item.field : {};
             if(search_item.query.$or.length>0){
-                Adapter.get_item_list(database,cache,search.table,search.filter,search.sort_by,search.page_current,search.page_size,foreign_option).then(([items,item_count,page_count])=>{
+                (async () => {
+                    const [items,item_count,page_count] = await Adapter.get_item_list(database,cache,search.table,search.filter,search.sort_by,search.page_current,search.page_size,foreign_option);
                     resolve(items);
-                }).catch(err => {
-                    Log.error('Foreign-Get-Data',err);
-                });
+
+                })();
             }else{
                 resolve([]);
             }
@@ -123,11 +123,15 @@ class Foreign {
             function get_data(search_item,query) {
                 return new Promise((resolve2) => {
                     let search = Data_Logic.get_search(search_item.foreign_table,query,search_item.sort_by,search_item.page_current,search_item.page_size);
-                    Adapter.get_count_item_list(database,search.table,search.filter).then((biz_data)=>{
+                    (async () => {
+                const biz_data = await Mongo.get(data_config);
+                biz_data.data_config=data_config;
+                callback(biz_data);
+            })();
+                (async () => {
+                    const biz_data = await Adapter.get_count_item_list(database,search.table,search.filter);
                         resolve2(biz_data?biz_data : 0);
-                    }).catch(err => {
-                        Log.error('Foreign-Get-Data',err);
-                    });
+                })();
                 });
             }
             const run = async () => {

@@ -39,6 +39,16 @@ class Database {
                 biz_data.app_id=data_config.APP_ID;
                 callback([response,biz_data]);
             })();
+
+            /*
+            Adapter.get_database(data_config).then((biz_data)=>{
+                biz_data.data_config=data_config;
+                biz_data.app_id=data_config.APP_ID;
+                callback([response,biz_data]);
+            }).catch(err => {
+                Log.error('Data-Database-Get-2',err);
+            });
+            */
         });
     }
     static delete = async (database) => {
@@ -47,12 +57,13 @@ class Database {
             */
         let response={};
         return new Promise((callback) => {
-            (async () => {
-                const biz_data = await Adapter.delete_database(data_config);
+            Adapter.delete_database(data_config).then((biz_data)=>{
                 biz_data.data_config=data_config;
                 biz_data.app_id=data_config.APP_ID;
                 callback([biz_response,null]);
-            })();
+            }).catch(err => {
+                Log.error('Data-Db-Delete',err);
+            });
         });
     }
     static info = async (database,option) => {
@@ -407,11 +418,17 @@ class Data {
                     }
                 },
                 //9_group 9_item_group
-                async function(call){
+                function(call){
                     if(option.groups && data.id){
                         response.messages.push(Response_Logic.get_message(Data_Response.OPTION_GROUPS,Status_Type.OK,option.groups));
-                        const [biz_response,biz_data] = await Group.get_data(database,cache,[data],option);
-                        data = biz_data[0];
+                        Group.get_data(database,cache,[data],option).then(([biz_response,biz_data])=>{
+                            data = biz_data[0];
+                            call();
+                        }).catch(err => {
+                            Log.error('Data-Item-Group',err);
+                        });
+                    }else{
+                        call();
                     }
                 },
                 //9_foreigns 9_item_foreign

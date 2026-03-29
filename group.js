@@ -90,26 +90,16 @@ class Group {
                 let response = {};
                 let data = [];
                 async.series([
-                    function(call) {
+                    async function(call) {
                         let search = Data_Logic.get_search(Data_Table.GROUP,search_item.query,{},search_item.page_current,search_item.page_size);
                         let option = search_item.field ? search_item.field : {};
-                        Adapter.get_item_list(database,cache,search.table,search.filter,search.sort_by,search.page_current,search.page_size,option).then(([biz_response,items,item_count,page_count])=>{
+                            const [biz_response,items,item_count,page_count] = await Adapter.get_item_list(database,cache,search.table,search.filter,search.sort_by,search.page_current,search.page_size,option);
                             data = items;
-                            call();
-                        }).catch(err => {
-                            Log.error('Group-Get-Search-Item-Data',err);
-                        });
                     },
-                    function(call){
+                    async function(call){
                         if(search_item.foreigns.length>0 && data.length>0){
-                            Foreign.get_data(database,cache,data,{foreigns:search_item.foreigns}).then(([biz_response,biz_data])=>{
-                                data = biz_data;
-                                call();
-                            }).catch(err => {
-                                Log.error('Data-Group-Foreign',err);
-                            });
-                        }else{
-                            call();
+                            const biz_data = await Foreign.get_data(database,cache,data,{foreigns:search_item.foreigns});
+                            data = biz_data;
                         }
                     },
                 ]).then(result => {
