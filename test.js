@@ -12,7 +12,7 @@ const {Store_Field,Store_Type,Store_Table,Store_Logic}=require("/home/think1/www
 const {Website_Title,Form_Field,Website_Table}=require("/home/think1/www/doqbox/biz9-framework/biz9-website/source");
 const {Cart_Data}=require("/home/think1/www/doqbox/biz9-framework/biz9-store-data/source");
 const {User_Field,User_Type,User_Table,User_Logic}=require("/home/think1/www/doqbox/biz9-framework/biz9-user/source");
-const {Data_Logic,Data_Value_Type,Data_Table,Data_Field}=require("/home/think1/www/doqbox/biz9-framework/biz9-data-logic/source");
+const {Data_Logic,Data_Value_Type,Data_Table,Data_Field,Data_Response_Field}=require("/home/think1/www/doqbox/biz9-framework/biz9-data-logic/source");
 /*
  * availble tests
 - connect
@@ -27,7 +27,7 @@ const {Data_Logic,Data_Value_Type,Data_Table,Data_Field}=require("/home/think1/w
 ---group_add
 */
 /* --- TEST CONFIG START --- */
-const APP_ID = 'test-stage-march27';
+const APP_ID = 'test-stage-march29';
 /* --- TEST CONFIG END --- */
 
 /* --- DATA CONFIG START --- */
@@ -142,7 +142,7 @@ describe('data_delete', function(){ this.timeout(25000);
         let database = {};
         let data = {};
         let option = {};
-        let post_data = Data_Logic.get(Project_Table.PRODUCT,'126');
+        let post_data = Data_Logic.get(Project_Table.PRODUCT,'924');
         async.series([
             async function(call){
                 const [biz_response,biz_data] = await Database.get(DATA_CONFIG);
@@ -208,7 +208,7 @@ describe('data_get', function(){ this.timeout(25000);
             //foreigns:[Data_Logic.get_foreign(Data_Value_Type.COUNT,Store_Table.PRODUCT,Data_Field.ID,Data_Field.PARENT_ID,{title:'parent'})]
             //joins:[Data_Logic.get_join(Data_Value_Type.ITEMS,join_search)]
         };
-        let post_data = Data_Logic.get(Project_Table.PRODUCT,'340');
+        let post_data = Data_Logic.get(Project_Table.PRODUCT,'940');
         async.series([
             async function(call){
                 const [biz_response,biz_data] = await Database.get(DATA_CONFIG);
