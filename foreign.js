@@ -123,11 +123,6 @@ class Foreign {
             function get_data(search_item,query) {
                 return new Promise((resolve2) => {
                     let search = Data_Logic.get_search(search_item.foreign_table,query,search_item.sort_by,search_item.page_current,search_item.page_size);
-                    (async () => {
-                const biz_data = await Mongo.get(data_config);
-                biz_data.data_config=data_config;
-                callback(biz_data);
-            })();
                 (async () => {
                     const biz_data = await Adapter.get_count_item_list(database,search.table,search.filter);
                         resolve2(biz_data?biz_data : 0);
