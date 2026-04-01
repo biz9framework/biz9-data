@@ -142,7 +142,7 @@ describe('data_delete', function(){ this.timeout(25000);
         let database = {};
         let data = {};
         let option = {};
-        let post_data = Data_Logic.get(Project_Table.PRODUCT,'924');
+        let post_data = Data_Logic.get(Project_Table.PRODUCT,'290');
         async.series([
             async function(call){
                 const [biz_response,biz_data] = await Database.get(DATA_CONFIG);
@@ -208,7 +208,7 @@ describe('data_get', function(){ this.timeout(25000);
             //foreigns:[Data_Logic.get_foreign(Data_Value_Type.COUNT,Store_Table.PRODUCT,Data_Field.ID,Data_Field.PARENT_ID,{title:'parent'})]
             //joins:[Data_Logic.get_join(Data_Value_Type.ITEMS,join_search)]
         };
-        let post_data = Data_Logic.get(Project_Table.PRODUCT,'940');
+        let post_data = Data_Logic.get(Project_Table.PRODUCT,'185');
         async.series([
             async function(call){
                 const [biz_response,biz_data] = await Database.get(DATA_CONFIG);
@@ -240,7 +240,7 @@ describe('data_post', function(){ this.timeout(25000);
         let post_data = Store_Logic.get_test_product();
         post_data.parent_id = '490';
         post_data.blank_id = '266';
-        post_data.table = Project_Table.BLANK;
+        post_data.table = Project_Table.PRODUCT;
         async.series([
             async function(call){
                 const [biz_response,biz_data] = await Database.get(DATA_CONFIG);

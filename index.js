@@ -106,7 +106,7 @@ class Data {
                 async function(call){
                     const biz_data = await Adapter.get_count_item_list(database,table,search_filter);
                     data = biz_data;
-                    response.messages.push(Response_Logic.get_message(Data_Response_Field.ITEMS_COUNT_CONFIRM,Status_Type.SUCCESS,Data_Logic.get_message_by_response_field_field(Data_Response_Field.ITEMS_COUNT_CONFIRM)));
+                    response.messages.push(Response_Logic.get_message(Data_Response_Field.ITEMS_COUNT_CONFIRM,Status_Type.SUCCESS,Data_Logic.get_message_by_response_field(Data_Response_Field.ITEMS_COUNT_CONFIRM)));
                     response.messages.push(Response_Logic.get_message(Data_Response_Field.RESPONSE_ITEMS_COUNT,Status_Type.OK,data));
                 },
                  async function(call){
@@ -184,9 +184,9 @@ class Data {
                 },
                 async function(call){
                     if(!Str.check_is_null(copy_data.id)){
-                        response.messages.push(Response_Logic.get_message(Data_Response_Field.ITEM_COPY_CONFIRM,Status_Type.SUCCESS,Data_Logic.get_message_by_response_field_field(Data_Response_Field.ITEM_COPY_CONFIRM)));
+                        response.messages.push(Response_Logic.get_message(Data_Response_Field.ITEM_COPY_CONFIRM,Status_Type.SUCCESS,Data_Logic.get_message_by_response_field(Data_Response_Field.ITEM_COPY_CONFIRM)));
                         }else{
-                        response.messages.push(Response_Logic.get_message(Data_Response_Field.ITEM_COPY_FAIL,Status_Type.FAIL,Data_Logic.get_message_by_response_field_field(Data_Response_Field.ITEM_COPY_FAIL)));
+                        response.messages.push(Response_Logic.get_message(Data_Response_Field.ITEM_COPY_FAIL,Status_Type.FAIL,Data_Logic.get_message_by_response_field(Data_Response_Field.ITEM_COPY_FAIL)));
                         }
                     response = Response_Logic.get_status(response);
                 },
@@ -225,12 +225,12 @@ class Data {
                 async function(call){
                     const biz_data = await Adapter.delete_item(database,cache,data.table,data.id);
                         if(!Str.check_is_null(biz_data)){
-                            response.messages.push(Response_Logic.get_message(Response_Field.DELETE_CONFIRM,Status_Type.SUCCESS,Data_Logic.get_message_by_response_field_field(Response_Field.DELETE_CONFIRM)));
+                            response.messages.push(Response_Logic.get_message(Response_Field.DELETE_CONFIRM,Status_Type.SUCCESS,Data_Logic.get_message_by_response_field(Response_Field.DELETE_CONFIRM)));
                             response.messages.push(Response_Logic.get_message(Data_Response_Field.ITEM_DELETE_COUNT,Status_Type.OK,biz_data));
                             response.messages.push(Response_Logic.get_message(Data_Response_Field.ITEM_CACHE_DELETE,Status_Type.OK,true));
                             response.messages.push(Response_Logic.get_message(Data_Response_Field.ITEM_DATABASE_DELETE,Status_Type.OK,true));
                         }else{
-                            response.messages.push(Response_Logic.get_message(Response_Field.DELETE_FAIL,Status_Type.FAIL,Data_Logic.get_message_by_response_field_field(Response_Field.DELETE_FAIL)));
+                            response.messages.push(Response_Logic.get_message(Response_Field.DELETE_FAIL,Status_Type.FAIL,Data_Logic.get_message_by_response_field(Response_Field.DELETE_FAIL)));
                             response.messages.push(Response_Logic.get_message(Data_Response_Field.ITEM_CACHE_DELETE,Status_Type.OK,null));
                             response.messages.push(Response_Logic.get_message(Data_Response_Field.ITEM_DATABASE_DELETE,Status_Type.OK,null));
                         }
@@ -320,9 +320,9 @@ class Data {
                 },
                 async function(call){
                     if(delete_items.length>0){
-                        response.messages.push(Response_Logic.get_message(Data_Response_Field.ITEMS_DELETE_CONFIRM,Status_Type.SUCCESS,Data_Logic.get_message_by_response_field_field(Data_Response_Field.ITEMS_DELETE_CONFIRM)));
+                        response.messages.push(Response_Logic.get_message(Data_Response_Field.ITEMS_DELETE_CONFIRM,Status_Type.SUCCESS,Data_Logic.get_message_by_response_field(Data_Response_Field.ITEMS_DELETE_CONFIRM)));
                     }else{
-                        response.messages.push(Response_Logic.get_message(Data_Response_Field.ITEMS_DELETE_CONFIRM,Status_Type.FAIL,Data_Logic.get_message_by_response_field_field(Data_Response_Field.ITEMS_DELETE_FAIL)));
+                        response.messages.push(Response_Logic.get_message(Data_Response_Field.ITEMS_DELETE_CONFIRM,Status_Type.FAIL,Data_Logic.get_message_by_response_field(Data_Response_Field.ITEMS_DELETE_FAIL)));
                     }
                     response = Response_Logic.get_status(response);
                 },
@@ -424,9 +424,9 @@ class Data {
                 },
                 async function(call){
                         if(!Str.check_is_null(data.id)){
-                            response.messages.push(Response_Logic.get_message(Response_Field.GET_CONFIRM,Status_Type.SUCCESS,Data_Logic.get_message_by_response_field_field(Response_Field.GET_CONFIRM)));
+                            response.messages.push(Response_Logic.get_message(Response_Field.GET_CONFIRM,Status_Type.SUCCESS,Data_Logic.get_message_by_response_field(Response_Field.GET_CONFIRM)));
                         }else{
-                            response.messages.push(Response_Logic.get_message(Response_Field.GET_FAIL,Status_Type.FAIL,Data_Logic.get_message_by_response_field_field(Response_Field.GET_FAIL)));
+                            response.messages.push(Response_Logic.get_message(Response_Field.GET_FAIL,Status_Type.FAIL,Data_Logic.get_message_by_response_field(Response_Field.GET_FAIL)));
                         }
 
                     response = Response_Logic.get_status(response);
@@ -505,9 +505,9 @@ class Data {
                 },
                 async function(call){
                     if(!Str.check_is_null(data.id)){
-                        response.messages.push(Response_Logic.get_message(Response_Field.POST_CONFIRM,Status_Type.SUCCESS,Data_Logic.get_message_by_response_field_field(Response_Field.POST_CONFIRM)));
+                        response.messages.push(Response_Logic.get_message(Response_Field.POST_CONFIRM,Status_Type.SUCCESS,Data_Logic.get_message_by_response_field(Response_Field.POST_CONFIRM)));
                         }else{
-                        response.messages.push(Response_Logic.get_message(Response_Field.POST_FAIL,Status_Type.FAIL,Data_Logic.get_message_by_response_field_field(Response_Field.POST_FAIL)));
+                        response.messages.push(Response_Logic.get_message(Response_Field.POST_FAIL,Status_Type.FAIL,Data_Logic.get_message_by_response_field(Response_Field.POST_FAIL)));
                         }
                     response = Response_Logic.get_status(response);
                 },
@@ -544,11 +544,11 @@ class Data {
                 },
                 async function(call){
                     if(data_items.length>0){
-                        response.messages.push(Response_Logic.get_message(Data_Response_Field.ITEMS_POST_CONFIRM,Status_Type.SUCCESS,Data_Logic.get_message_by_response_field_field(Data_Response_Field.ITEMS_POST_CONFIRM)));
+                        response.messages.push(Response_Logic.get_message(Data_Response_Field.ITEMS_POST_CONFIRM,Status_Type.SUCCESS,Data_Logic.get_message_by_response_field(Data_Response_Field.ITEMS_POST_CONFIRM)));
                         response.messages.push(Response_Logic.get_message(Data_Response_Field.RESPONSE_ITEMS_COUNT,Status_Type.OK,data_items.length));
 
                     }else{
-                        response.messages.push(Response_Logic.get_message(Data_Response_Field.ITEMS_POST_FAIL,Status_Type.FAIL,Data_Logic.get_message_by_response_field_field(Data_Response_Field.ITEMS_POST_FAIL)));
+                        response.messages.push(Response_Logic.get_message(Data_Response_Field.ITEMS_POST_FAIL,Status_Type.FAIL,Data_Logic.get_message_by_response_field(Data_Response_Field.ITEMS_POST_FAIL)));
                     }
                     response = Response_Logic.get_status(response);
                 },
@@ -628,9 +628,9 @@ class Data {
                 },
                 async function(call){
                     if(data.items){
-                        response.messages.push(Response_Logic.get_message(Data_Response_Field.ITEMS_SEARCH_CONFIRM,Status_Type.SUCCESS,Data_Logic.get_message_by_response_field_field(Data_Response_Field.ITEMS_SEARCH_CONFIRM)));
+                        response.messages.push(Response_Logic.get_message(Data_Response_Field.ITEMS_SEARCH_CONFIRM,Status_Type.SUCCESS,Data_Logic.get_message_by_response_field(Data_Response_Field.ITEMS_SEARCH_CONFIRM)));
                     }else{
-                        response.messages.push(Response_Logic.get_message(Data_Response_Field.ITEMS_SEARCH_FAIL,Status_Type.FAIL,Data_Logic.get_message_by_response_field_field(Data_Response_Field.ITEMS_SEARCH_FAIL)));
+                        response.messages.push(Response_Logic.get_message(Data_Response_Field.ITEMS_SEARCH_FAIL,Status_Type.FAIL,Data_Logic.get_message_by_response_field(Data_Response_Field.ITEMS_SEARCH_FAIL)));
                     }
                     response = Response_Logic.get_status(response);
                 },
