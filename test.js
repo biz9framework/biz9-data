@@ -6,6 +6,8 @@ Description: BiZ9 Framework: Data - Test
 */
 const async = require('async');
 const assert = require('node:assert');
+const {Config}=require('./project');
+BIZ9_CONFIG=Config.get_biz9_config();
 const {Database,Data} = require(".");
 const {Log,Str,Obj,Response_Logic,Response_Field,Status_Type}=require("/home/think1/www/doqbox/biz9-framework/biz9-utility/source");
 const {Store_Field,Store_Type,Store_Table,Store_Logic}=require("/home/think1/www/doqbox/biz9-framework/biz9-store/source");
@@ -27,7 +29,7 @@ const {Data_Logic,Data_Value_Type,Data_Table,Data_Field,Data_Response_Field}=req
 ---group_add
 */
 /* --- TEST CONFIG START --- */
-const APP_ID = 'test-stage-march29';
+const APP_ID = 'test-stage-april';
 /* --- TEST CONFIG END --- */
 
 /* --- DATA CONFIG START --- */
@@ -49,6 +51,7 @@ class Project_Table{
     static PAGE = 'page_biz';
     static GROUP = 'group_biz';
     static IMAGE = 'image_biz';
+    static IMAGE_GALLERY = 'image_gallery_biz';
 }
 /* --- DATA CONFIG END --- */
 //9_connect - 9_test_connect
@@ -113,7 +116,7 @@ describe('data_copy', function(){ this.timeout(25000);
         let database = {};
         let data = {};
         let option = {};
-        let post_data = Data_Logic.get(Project_Table.PRODUCT,'241');
+        let post_data = Data_Logic.get(Project_Table.PRODUCT,'460');
         async.series([
             async function(call){
                 const [biz_response,biz_data] = await Database.get(DATA_CONFIG);
@@ -142,7 +145,7 @@ describe('data_delete', function(){ this.timeout(25000);
         let database = {};
         let data = {};
         let option = {};
-        let post_data = Data_Logic.get(Project_Table.PRODUCT,'290');
+        let post_data = Data_Logic.get(Project_Table.PRODUCT,'531');
         async.series([
             async function(call){
                 const [biz_response,biz_data] = await Database.get(DATA_CONFIG);
@@ -298,7 +301,7 @@ describe('data_search', function(){ this.timeout(25000);
         let database = {};
         let data = {};
         let option = {};
-        let post_search = Data_Logic.get_search(Project_Table.PRODUCT,{},{},1,0,{});
+        let post_search = Data_Logic.get_search(Project_Table.IMAGE_GALLERY,{parent_id:'49'},{},1,0,{});
         async.series([
             async function(call){
                 const [biz_response,biz_data] = await Database.get(DATA_CONFIG);
