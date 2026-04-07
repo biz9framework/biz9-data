@@ -357,7 +357,7 @@ class Data {
                 },
                 //9_foreigns 9_item_foreign
                 async function(call){
-                    if(option.foreigns && data.id){
+                    if(option.foreigns && !Str.check_is_null(data.id)){
                         response.messages.push(Response_Logic.get_message(Data_Response_Field.OPTION_FOREIGNS,Status_Type.OK,option.foreigns,{title:BIZ9_CONFIG.TITLE}));
                         const [biz_response,biz_data] = await Foreign.get_data(database,cache,[data],option);
                         data = biz_data[0];
@@ -517,6 +517,7 @@ class Data {
                 async function(call) {
                     response.messages.push(Response_Logic.get_message(Data_Response_Field.PARAM_APP_ID,Status_Type.OK,database.data_config.APP_ID,{title:BIZ9_CONFIG.TITLE}));
                     response.messages.push(Response_Logic.get_message(Data_Response_Field.PARAM_TABLE,Status_Type.OK,table,{title:BIZ9_CONFIG.TITLE}));
+                    response.messages.push(Response_Logic.get_message(Data_Response_Field.PARAM_OPTION,Status_Type.OK,option,{title:BIZ9_CONFIG.TITLE}));
                     response.messages.push(Response_Logic.get_message(Data_Response_Field.PARAM_SEARCH,Status_Type.OK,filter,{title:BIZ9_CONFIG.TITLE}));
                     response.messages.push(Response_Logic.get_message(Data_Response_Field.PARAM_SORT_BY,Status_Type.OK,sort_by,{title:BIZ9_CONFIG.TITLE}));
                     response.messages.push(Response_Logic.get_message(Data_Response_Field.PARAM_PAGE_CURRENT,Status_Type.OK,page_current,{title:BIZ9_CONFIG.TITLE}));
@@ -533,7 +534,8 @@ class Data {
                         data.page_count=page_count;
                         data.search=search;
                         data[Data_Field.ITEMS]=items;
-                        response.messages.push(Response_Logic.get_message(Data_Response_Field.RESPONSE_ITEMS_COUNT,Status_Type.OK,item_count,{title:BIZ9_CONFIG.TITLE}));
+                        response.messages.push(Response_Logic.get_message(Data_Response_Field.RESPONSE_ITEMS_COUNT,Status_Type.OK,items.length,{title:BIZ9_CONFIG.TITLE}));
+                        response.messages.push(Response_Logic.get_message(Data_Response_Field.RESPONSE_TOTAL_ITEMS_COUNT,Status_Type.OK,item_count,{title:BIZ9_CONFIG.TITLE}));
                 },
                 //9_items_join 9_search_join 9_joins
                 async function(call){

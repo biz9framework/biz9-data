@@ -42,7 +42,7 @@ class Join {
                                 let join_option = {field:search_item.field};
                                 (async () => {
                                     const biz_data = await Adapter.get_count_item_list(database,search.table,search.filter);
-                                    search_item.data = biz_data.count;
+                                    search_item.data = biz_data;
                                     resolve();
                                 })();
                             }
@@ -81,8 +81,11 @@ class Join {
                     }
                     const run = async () => {
                         for(const search_item of join_search_items){
-                            if(search_item.value_type != Data_Value_Type.COUNT){
-                                const biz_data = await get_foreign_data(database,cache,search_item.data[search_item.title+"_"+Data_Field.ITEMS],search_item);
+                            if(search_item.value_type == Data_Value_Type.ITEMS){
+                                const biz_data = await get_foreign_data(database,cache,search_item.data.items,search_item);
+                            }
+                            else if(search_item.value_type == Data_Value_Type.ONE){
+                                const biz_data = await get_foreign_data(database,cache,[search_item.data],search_item);
                             }
                         }
                     }

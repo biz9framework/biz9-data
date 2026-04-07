@@ -15,6 +15,7 @@ class Foreign {
             const foreign_search_items = [];
             async.series([
                 function(call){
+                    if(data_items.length>0){
                     for(const option_foreign of option.foreigns){
                         let foreign_item = Foreign.get_search(option_foreign);
                         for(const data_item of data_items){
@@ -23,6 +24,7 @@ class Foreign {
                             foreign_item.query.$or.push(query_field);
                         }
                         foreign_search_items.push(foreign_item);
+                    }
                     }
                     const run_data = async (database,cache,search_item) => {
                         await Foreign.get_search_item_data(database,cache,search_item);

@@ -11,7 +11,7 @@ BIZ9_CONFIG=Config.get_biz9_config();
 const {Database,Data} = require(".");
 const {Log,Str,Obj,Response_Logic,Response_Field,Status_Type}=require("/home/think1/www/doqbox/biz9-framework/biz9-utility/source");
 const {Store_Field,Store_Type,Store_Table,Store_Logic}=require("/home/think1/www/doqbox/biz9-framework/biz9-store/source");
-const {Website_Title,Form_Field,Website_Table}=require("/home/think1/www/doqbox/biz9-framework/biz9-website/source");
+const {Website_Title,Form_Field,Website_Table,Website_Logic}=require("/home/think1/www/doqbox/biz9-framework/biz9-website/source");
 const {Cart_Data}=require("/home/think1/www/doqbox/biz9-framework/biz9-store-data/source");
 const {User_Field,User_Type,User_Table,User_Logic}=require("/home/think1/www/doqbox/biz9-framework/biz9-user/source");
 const {Data_Logic,Data_Value_Type,Data_Table,Data_Field,Data_Response_Field}=require("/home/think1/www/doqbox/biz9-framework/biz9-data-logic/source");
@@ -49,6 +49,7 @@ class Project_Table{
     static BLOG_POST = 'blog_post_biz';
     static PRODUCT = 'product_biz';
     static PAGE = 'page_biz';
+    static USER = 'user_biz';
     static GROUP = 'group_biz';
     static IMAGE = 'image_biz';
     static IMAGE_GALLERY = 'image_gallery_biz';
@@ -202,16 +203,22 @@ describe('data_get', function(){ this.timeout(25000);
         let response={};
         let database = {};
         let data = {};
-        //let option = {};
+
+        // -- Get Image Gallery Images Start --
+        let option_join_image_gallery_main_images = Website_Logic.get_image_gallery_join_images(Data_Value_Type.ITEMS,'main');
+        let option_join_image_gallery_info_images = Website_Logic.get_image_gallery_join_images(Data_Value_Type.ITEMS,'demo');
+        option = {joins:[option_join_image_gallery_main_images]};
+        let post_data = Data_Logic.get(Project_Table.PRODUCT,'137');
+        // -- Get Image Gallery Images Start --
+
+        /*
+        // -- Basic Get Start --
         let option_foreign_blank = Data_Logic.get_foreign(Data_Value_Type.COUNT,Store_Table.BLANK,Data_Field.ID,Data_Field.PARENT_ID,{title:'blank_me'});
         let join_search = Data_Logic.get_search(Project_Table.BLANK,{},{},1,0);
-        let option = {
-            //cache_delete:true,
-            //field:{id:1,title:1}
-            //foreigns:[Data_Logic.get_foreign(Data_Value_Type.COUNT,Store_Table.PRODUCT,Data_Field.ID,Data_Field.PARENT_ID,{title:'parent'})]
-            //joins:[Data_Logic.get_join(Data_Value_Type.ITEMS,join_search)]
-        };
         let post_data = Data_Logic.get(Project_Table.PRODUCT,'185');
+        //-- Basic Get End --
+        */
+
         async.series([
             async function(call){
                 const [biz_response,biz_data] = await Database.get(DATA_CONFIG);
@@ -219,8 +226,9 @@ describe('data_get', function(){ this.timeout(25000);
             },
             async function(call){
                 const [biz_response,biz_data] = await Data.get(database,post_data.table,post_data.id,option);
-                Log.w('biz_data',biz_data);
-                Log.w('biz_response',biz_response);
+                Log.w('99_biz_data',biz_data);
+                //Log.w('biz_data',biz_data);
+                //Log.w('biz_response',biz_response);
             },
             async function(call){
                 console.log('GET-SUCCESS');
@@ -301,7 +309,8 @@ describe('data_search', function(){ this.timeout(25000);
         let database = {};
         let data = {};
         let option = {};
-        let post_search = Data_Logic.get_search(Project_Table.IMAGE_GALLERY,{parent_id:'49'},{},1,0,{});
+        option = {field:{id:1,username:1,name:1,email:1,role:1,gender:1,image_filename:1}};
+        let post_search = Data_Logic.get_search(Project_Table.USER,{},{},1,5,{});
         async.series([
             async function(call){
                 const [biz_response,biz_data] = await Database.get(DATA_CONFIG);
@@ -310,6 +319,7 @@ describe('data_search', function(){ this.timeout(25000);
             async function(call){
                 const [biz_response,biz_data] = await Data.search(database,post_search.table,post_search.filter,post_search.sort_by,post_search.page_current,post_search.page_size,option);
                 Log.w('biz_data',biz_data);
+                Log.w('biz_data_length',biz_data.items.length);
                 Log.w('biz_response',biz_response);
             },
             async function(call){
