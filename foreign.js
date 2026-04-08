@@ -19,15 +19,17 @@ class Foreign {
                     for(const option_foreign of option.foreigns){
                         let foreign_item = Foreign.get_search(option_foreign);
                         for(const data_item of data_items){
-                            let query_field = {};
-                            query_field[foreign_item.foreign_field] = data_item[foreign_item.parent_field];
-                            foreign_item.query.$or.push(query_field);
+                            if(!Str.check_is_null(data_item.id)){
+                                let query_field = {};
+                                query_field[foreign_item.foreign_field] = data_item[foreign_item.parent_field];
+                                foreign_item.query.$or.push(query_field);
+                            }
                         }
                         foreign_search_items.push(foreign_item);
                     }
                     }
                     const run_data = async (database,cache,search_item) => {
-                        await Foreign.get_search_item_data(database,cache,search_item);
+                        search_item = await Foreign.get_search_item_data(database,cache,search_item);
                         for(const data_item of data_items){
                             if(search_item.value_type == Data_Value_Type.ITEMS){
                                 const match_items = search_item.items.filter(item_find => item_find[search_item.foreign_field] === data_item[search_item.parent_field]);
@@ -168,9 +170,6 @@ class Foreign {
         });
     }
     static get_search_item_detail_data = async (database,cache,search_item) => {
-        /* options
-           - none
-           */
         return new Promise((callback) => {
             let response = {};
             var sub_search_foreign_items = [];

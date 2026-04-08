@@ -355,7 +355,7 @@ class Data {
                         call();
                     }
                 },
-                //9_foreigns 9_item_foreign
+                //9_foreign 9_item_foreign
                 async function(call){
                     if(option.foreigns && !Str.check_is_null(data.id)){
                         response.messages.push(Response_Logic.get_message(Data_Response_Field.OPTION_FOREIGNS,Status_Type.OK,option.foreigns,{title:BIZ9_CONFIG.TITLE}));
@@ -552,7 +552,7 @@ class Data {
                             }
                     }
                 },
-                //9_foreign //9_item_foreign
+                //9_foreigns //9_items_foreign
                 async function(call){
                     if(option.foreigns && data[Data_Field.ITEMS].length > 0){
                         const [biz_response,biz_data] = await Foreign.get_data(database,cache,data[Data_Field.ITEMS],option);

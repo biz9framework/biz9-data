@@ -205,19 +205,23 @@ describe('data_get', function(){ this.timeout(25000);
         let data = {};
 
         // -- Get Image Gallery Images Start --
-        let option_join_image_gallery_main_images = Website_Logic.get_image_gallery_join_images(Data_Value_Type.ITEMS,'main');
-        let option_join_image_gallery_info_images = Website_Logic.get_image_gallery_join_images(Data_Value_Type.ITEMS,'demo');
-        option = {joins:[option_join_image_gallery_main_images]};
+        /*
+        let option_foreign_image_gallery_main_images = Website_Logic.get_foreign_image_gallery_images(Data_Value_Type.ITEMS,'main');
+        let option_foreign_image_gallery_info_images = Website_Logic.get_foreign_image_gallery_images(Data_Value_Type.ITEMS,'info');
+        let option_foreign_image_gallery_demo_images = Website_Logic.get_foreign_image_gallery_images(Data_Value_Type.ITEMS,'demo');
+        let option = {foreigns:[option_foreign_image_gallery_main_images,option_foreign_image_gallery_info_images,option_foreign_image_gallery_demo_images]};
         let post_data = Data_Logic.get(Project_Table.PRODUCT,'137');
         // -- Get Image Gallery Images Start --
-
-        /*
-        // -- Basic Get Start --
-        let option_foreign_blank = Data_Logic.get_foreign(Data_Value_Type.COUNT,Store_Table.BLANK,Data_Field.ID,Data_Field.PARENT_ID,{title:'blank_me'});
-        let join_search = Data_Logic.get_search(Project_Table.BLANK,{},{},1,0);
-        let post_data = Data_Logic.get(Project_Table.PRODUCT,'185');
-        //-- Basic Get End --
         */
+
+        // -- Basic Get Start --
+       // let option_foreign_blank = Data_Logic.get_foreign(Data_Value_Type.COUNT,Store_Table.BLANK,Data_Field.ID,Data_Field.PARENT_ID,{title:'blank_me'});
+        let foreign_cart_item = Data_Logic.get_foreign(Data_Value_Type.ITEMS,Store_Table.CART_ITEM,'cart_number','cart_number',{title:'cool'});
+        Log.w('rrr',foreign_cart_item);
+
+        //let join_search = Data_Logic.get_search(Project_Table.BLANK,{},{},1,0);
+        let post_data = Data_Logic.get(Store_Table.CART,'997');
+        //-- Basic Get End --
 
         async.series([
             async function(call){
@@ -225,6 +229,9 @@ describe('data_get', function(){ this.timeout(25000);
                 database = biz_data;
             },
             async function(call){
+                console.log('before');
+                Log.w('rrrr',post_data);
+                let option = {foreigns:[foreign_cart_item]};
                 const [biz_response,biz_data] = await Data.get(database,post_data.table,post_data.id,option);
                 Log.w('99_biz_data',biz_data);
                 //Log.w('biz_data',biz_data);
