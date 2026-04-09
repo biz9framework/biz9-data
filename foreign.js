@@ -21,8 +21,10 @@ class Foreign {
                             for(const data_item of data_items){
                                 if(!Str.check_is_null(data_item.id)){
                                     let query_field = {};
-                                    query_field[foreign_item.foreign_field] = data_item[foreign_item.parent_field];
-                                    foreign_item.query.$or.push(query_field);
+                                    if(!Str.check_is_null(data_item[foreign_item.parent_field]){
+                                        query_field[foreign_item.foreign_field] = data_item[foreign_item.parent_field];
+                                        foreign_item.query.$or.push(query_field);
+                                    }
                                 }
                             }
                             foreign_search_items.push(foreign_item);
@@ -132,8 +134,11 @@ class Foreign {
             function get_data(search_item,query) {
                 return new Promise((resolve2) => {
                     let search = Data_Logic.get_search(search_item.foreign_table,query,search_item.sort_by,search_item.page_current,search_item.page_size);
+                    Log.w('33_search',search_item);
                     (async () => {
                         const biz_data = await Adapter.get_count_item_list(database,search.table,search.filter);
+                        Log.w('44_data',search.filter);
+                        Log.w('44_data',biz_data);
                         resolve2(biz_data?biz_data : 0);
                     })();
                 });
@@ -227,8 +232,10 @@ class Foreign {
                                 let search_item_data_result = {};
                                 for(const data_item of foreign_reseult_items){
                                     let query_field = {};
+                                    if(!Str.check_is_null(data_item[sub_search_foreign_item.parent_field])){
                                     query_field[sub_search_foreign_item.foreign_field] = data_item[sub_search_foreign_item.parent_field];
                                     sub_search_foreign_item.query.$or.push(query_field);
+                                    }
                                 }
                                 search_item_data_result = await Foreign.run_search_item_data(database,cache,sub_search_foreign_item);
                                 for(const item of search_item_data_result.items){
@@ -257,6 +264,7 @@ class Foreign {
                                     }
                                     if(sub_search_foreign_item.value_type == Data_Value_Type.COUNT){
                                         Log.w('sssss',sub_search_foreign_item);
+                                        Log.w('sssss_query',sub_search_foreign_item.query);
                                         /*
                                         if(!data_item[sub_foreign_search_item.title] ){
                                             data_item[sub_foreign_search_item.title] = 0;
