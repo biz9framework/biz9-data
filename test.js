@@ -202,7 +202,7 @@ describe('data_get', function(){ this.timeout(25000);
         console.log('GET-START');
         let response={};
         let database = {};
-        let parent = Data_Logic.get(Store_Table.CART,'630');
+        let parent = Data_Logic.get(Store_Table.CART,'385');
         let data = {};
         async.series([
             async function(call){
@@ -219,13 +219,21 @@ describe('data_get', function(){ this.timeout(25000);
 
                 let option = { foreigns:[foreign_user,foreign_cart_item] };
 
-                const [biz_response,biz_data] = await Data.get(database,parent.table,parent.id,option);
+
                 /*
+                let foreign_cart_sub_item_parent = Data_Logic.get_foreign(Data_Value_Type.COUNT,Store_Table.PRODUCT,Data_Field.ID,Data_Field.PARENT_ID,{title:'parent'});
+                let foreign_cart_sub_item = Data_Logic.get_foreign(Data_Value_Type.ITEMS,Store_Table.CART_SUB_ITEM,Store_Field.CART_NUMBER,Store_Field.CART_NUMBER,{title:'cart_sub_items',foreigns:[foreign_cart_sub_item_parent]});
+                let foreign_cart_item = Data_Logic.get_foreign(Data_Value_Type.ITEMS,Store_Table.CART_ITEM,Store_Field.CART_NUMBER,Store_Field.CART_NUMBER,{title:'cart_items',foreigns:[foreign_cart_sub_item]});
+                let option = { foreigns:[foreign_cart_item] };
+                */
+                const [biz_response,biz_data] = await Data.get(database,parent.table,parent.id,option);
+
+
                 Log.w('biz_response',biz_response);
                 Log.w('biz_option',option);
                 Log.w('biz_data',biz_data);
                 Log.w('biz_data_cart_items',biz_data.cart_items[0]);
-                */
+
 
                 // --- Get Store Cart End ---
 

@@ -1,6 +1,59 @@
 -------------------------------- BiZ9 START - 2-9-2026 -----------------------------------------------------------
 -- Blank
 -------------------------------- BiZ9 END - 2-9-2026 -------------------------------------------------------------
+-------------------------------- BiZ9 START - 4-9-2026 -----------------------------------------------------------
+-- Foreign -get_foreign_search_details.
+
+       /*
+                async function(call){
+                    var sub_child_search_foreign_items = [];
+                    //Log.w('11_search_item',search_item);
+                    //Log.w('11_sub_search_foreign_items',sub_search_foreign_items);
+                    for(const sub_search_main_foreign_item of sub_search_foreign_items){
+                        for(const sub_search_sub_foreign of sub_search_main_foreign_item.foreigns){
+                            let sub_search_foreign_item = Foreign.get_search(sub_search_sub_foreign);
+                            for(const sub_child_query_item of sub_search_main_foreign_item.items){
+                                let query_field = {};
+                                query_field[sub_search_foreign_item.foreign_field] = sub_child_query_item[sub_search_foreign_item.parent_field];
+                                sub_search_foreign_item.query.$or.push(query_field);
+                            }
+                            sub_search_foreign_item = await Foreign.run_search_item_data(database,cache,sub_search_foreign_item); //here3
+                            console.log('aaaaaaaa');
+                            console.log('eeeeee');
+                            for(const data_item of sub_search_main_foreign_item.items){
+                                console.log('fffff');
+                                if(sub_search_foreign_item.value_type == Data_Value_Type.ITEMS){
+                                    console.log('eeeeeeeee');
+                                    const match_items = sub_search_foreign_item.items.filter(item_find => item_find[sub_search_foreign_item.foreign_field] === data_item[sub_search_foreign_item.parent_field]);
+                                    Log.w('22_match_items',match_items);
+                                    if(match_items.length>0){
+                                        if(!data_item[sub_search_foreign_item.title] ){
+                                            data_item[sub_search_foreign_item.title] = [];
+                                        }
+                                        data_item[sub_search_foreign_item.title] = [...match_items];
+                                    }
+                                }else if(sub_search_foreign_item.value_type == Data_Value_Type.COUNT){
+                                    data_item[sub_search_foreign_item.title] = sub_search_foreign_item.data;
+                                }else if(sub_search_foreign_item.value_type == Data_Value_Type.ONE){
+                                    const match_items = sub_search_foreign_item.items.filter(item_find => item_find[sub_search_foreign_item.foreign_field] === data_item[sub_search_foreign_item.parent_field]);
+                                    if(match_items.length>0){
+                                        data_item[sub_search_foreign_item.title] = {};
+                                        data_item[sub_search_foreign_item.title] = match_items[0];
+                                    }else{
+                                        data_item[sub_search_foreign_item.title] = Data_Logic.get_not_found(sub_search_sub_foreign.foreign_table,0);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                */
+
+
+-------------------------------- BiZ9 END - 4-9-2026 -------------------------------------------------------------
+
+
+
 -------------------------------- BiZ9 START - 2-18-2026 -----------------------------------------------------------
 -- BK Index.js
 --
