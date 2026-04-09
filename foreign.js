@@ -31,10 +31,15 @@ class Foreign {
                     const run_data = async (database,cache,search_item) => {
                         search_item = await Foreign.get_search_item_data(database,cache,search_item);
                         for(const data_item of data_items){
+                            if(!data_item[search_item.title]){
+                                data_item[search_item.title] = [];
+                            }
                             if(search_item.value_type == Data_Value_Type.ITEMS){
                                 const match_items = search_item.items.filter(item_find => item_find[search_item.foreign_field] === data_item[search_item.parent_field]);
-                                data_item[search_item.title] = [];
                                 if(match_items.length>0){
+                                    if(!data_item[search_item.title]){
+                                        data_item[search_item.title] = [];
+                                    }
                                     data_item[search_item.title] = [...match_items];
                                 }
                             }else if(search_item.value_type == Data_Value_Type.COUNT){
@@ -189,8 +194,10 @@ class Foreign {
                             for(const data_item of search_item.items){
                                 if(sub_search_foreign_item.value_type == Data_Value_Type.ITEMS){
                                     const match_items = sub_search_foreign_item.items.filter(item_find => item_find[sub_search_foreign_item.foreign_field] === data_item[sub_search_foreign_item.parent_field]);
-                                    data_item[sub_search_foreign_item.title] = [];
                                     if(match_items.length>0){
+                                       if(!data_item[sub_search_foreign_item.title]){
+                                        data_item[sub_search_foreign_item.title] = [];
+                                       }
                                         data_item[sub_search_foreign_item.title] = [...match_items];
                                     }
                                 }else if(sub_search_foreign_item.value_type == Data_Value_Type.COUNT){
@@ -219,11 +226,17 @@ class Foreign {
                                 sub_search_foreign_item.query.$or.push(query_field);
                             }
                             sub_search_foreign_item = await Foreign.run_search_item_data(database,cache,sub_search_foreign_item); //here3
+                            console.log('aaaaaaaa');
+                            Log.w('bbbbb',sub_search_main_foreign_item);
+                            console.log('ccccccc');
                             for(const data_item of sub_search_main_foreign_item.items){
                                 if(sub_search_foreign_item.value_type == Data_Value_Type.ITEMS){
                                     const match_items = sub_search_foreign_item.items.filter(item_find => item_find[sub_search_foreign_item.foreign_field] === data_item[sub_search_foreign_item.parent_field]);
-                                    data_item[sub_search_foreign_item.title] = [];
+                                    Log.w('22_match_items',match_items);
                                     if(match_items.length>0){
+                                        if(!data_item[sub_search_foreign_item.title] ){
+                                            data_item[sub_search_foreign_item.title] = [];
+                                        }
                                         data_item[sub_search_foreign_item.title] = [...match_items];
                                     }
                                 }else if(sub_search_foreign_item.value_type == Data_Value_Type.COUNT){
@@ -242,6 +255,8 @@ class Foreign {
                     }
                 },
             ]).then(result => {
+                //Log.w('rr',search_item);
+                //Log.w('rr',search_item.items);
                 callback([response,search_item]);
             }).catch(err => {
                 Log.error("Get-Search-Item-Detail",err);

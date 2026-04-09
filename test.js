@@ -202,40 +202,41 @@ describe('data_get', function(){ this.timeout(25000);
         console.log('GET-START');
         let response={};
         let database = {};
+        let parent = Data_Logic.get(Store_Table.CART,'630');
         let data = {};
-
-        // -- Get Image Gallery Images Start --
-        /*
-        let option_foreign_image_gallery_main_images = Website_Logic.get_foreign_image_gallery_images(Data_Value_Type.ITEMS,'main');
-        let option_foreign_image_gallery_info_images = Website_Logic.get_foreign_image_gallery_images(Data_Value_Type.ITEMS,'info');
-        let option_foreign_image_gallery_demo_images = Website_Logic.get_foreign_image_gallery_images(Data_Value_Type.ITEMS,'demo');
-        let option = {foreigns:[option_foreign_image_gallery_main_images,option_foreign_image_gallery_info_images,option_foreign_image_gallery_demo_images]};
-        let post_data = Data_Logic.get(Project_Table.PRODUCT,'137');
-        // -- Get Image Gallery Images Start --
-        */
-
-        // -- Basic Get Start --
-       // let option_foreign_blank = Data_Logic.get_foreign(Data_Value_Type.COUNT,Store_Table.BLANK,Data_Field.ID,Data_Field.PARENT_ID,{title:'blank_me'});
-        let foreign_cart_item = Data_Logic.get_foreign(Data_Value_Type.ITEMS,Store_Table.CART_ITEM,'cart_number','cart_number',{title:'cool'});
-        Log.w('rrr',foreign_cart_item);
-
-        //let join_search = Data_Logic.get_search(Project_Table.BLANK,{},{},1,0);
-        let post_data = Data_Logic.get(Store_Table.CART,'997');
-        //-- Basic Get End --
-
         async.series([
             async function(call){
                 const [biz_response,biz_data] = await Database.get(DATA_CONFIG);
                 database = biz_data;
             },
             async function(call){
-                console.log('before');
-                Log.w('rrrr',post_data);
+                // --- Get Store Cart Start ---
+                let foreign_user = Data_Logic.get_foreign(Data_Value_Type.ONE,User_Table.USER,Data_Field.ID,User_Field.USER_ID,{title:'user'});
+                let foreign_cart_item_parent = Data_Logic.get_foreign(Data_Value_Type.ONE,Store_Table.PRODUCT,Data_Field.ID,Data_Field.PARENT_ID,{title:'parent'});
+                let foreign_cart_sub_item_parent = Data_Logic.get_foreign(Data_Value_Type.ONE,Store_Table.PRODUCT,Data_Field.ID,[Data_Field.PARENT_ID],{title:'parent'});
+                let foreign_cart_sub_item = Data_Logic.get_foreign(Data_Value_Type.ITEMS,Store_Table.CART_SUB_ITEM,Store_Field.CART_NUMBER,Store_Field.CART_NUMBER,{title:'cart_sub_items',foreigns:[foreign_cart_sub_item_parent]});
+                let foreign_cart_item = Data_Logic.get_foreign(Data_Value_Type.ITEMS,Store_Table.CART_ITEM,Store_Field.CART_NUMBER,Store_Field.CART_NUMBER,{title:'cart_items',foreigns:[foreign_cart_sub_item,foreign_cart_item_parent]});
+
+                let option = { foreigns:[foreign_user,foreign_cart_item] };
+
+                const [biz_response,biz_data] = await Data.get(database,parent.table,parent.id,option);
+                /*
+                Log.w('biz_response',biz_response);
+                Log.w('biz_option',option);
+                Log.w('biz_data',biz_data);
+                Log.w('biz_data_cart_items',biz_data.cart_items[0]);
+                */
+
+                // --- Get Store Cart End ---
+
+                // --- Get Start ---
+                /*
                 let option = {foreigns:[foreign_cart_item]};
                 const [biz_response,biz_data] = await Data.get(database,post_data.table,post_data.id,option);
-                Log.w('99_biz_data',biz_data);
-                //Log.w('biz_data',biz_data);
-                //Log.w('biz_response',biz_response);
+                Log.w('biz_data',biz_data);
+                Log.w('biz_response',biz_response);
+                */
+                // --- Get END ---
             },
             async function(call){
                 console.log('GET-SUCCESS');
