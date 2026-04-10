@@ -44,10 +44,12 @@ class Foreign {
                                     }
                                     data_item[search_item.title] = [...match_items];
                                 }
-                            }else if(search_item.value_type == Data_Value_Type.COUNT){
-                                data_item[search_item.title] = search_item.data;
-                            }else if(search_item.value_type == Data_Value_Type.ONE){
+                            }if(search_item.value_type == Data_Value_Type.COUNT){
+                               data_item[search_item.title] = search_item.data;
+                            }if(search_item.value_type == Data_Value_Type.ONE){
                                 const match_item = search_item.items.find(item_find => item_find[search_item.foreign_field] === data_item[search_item.parent_field]);
+                                Log.w('qqqq',search_item.items);
+                                Log.w('rrr',match_item);
                                 if(match_item){
                                     data_item[search_item.title] = match_item;
                                 }else{
@@ -66,7 +68,7 @@ class Foreign {
                     });
                 },
             ]).then(result => {
-                callback([response,data_items]);
+                //callback([response,data_items]);
             }).catch(err => {
                 Log.error("Foreign-Get",err);
             });
@@ -116,7 +118,7 @@ class Foreign {
                         const biz_data = await Foreign.get_items_data(database,cache,search_item);
                         search_item.items = [...biz_data];
                     }
-                    else if(search_item.value_type == Data_Value_Type.COUNT){
+                  if(search_item.value_type == Data_Value_Type.COUNT){
                         const biz_data = await Foreign.get_count_data(database,search_item);
                         search_item.data = biz_data;
                     }
@@ -134,11 +136,8 @@ class Foreign {
             function get_data(search_item,query) {
                 return new Promise((resolve2) => {
                     let search = Data_Logic.get_search(search_item.foreign_table,query,search_item.sort_by,search_item.page_current,search_item.page_size);
-                    Log.w('33_search',search_item);
                     (async () => {
                         const biz_data = await Adapter.get_count_item_list(database,search.table,search.filter);
-                        Log.w('44_data',search.filter);
-                        Log.w('44_data',biz_data);
                         resolve2(biz_data?biz_data : 0);
                     })();
                 });
@@ -185,8 +184,10 @@ class Foreign {
             var sub_search_foreign_items = [];
             let foreign_reseult_items = [];
             let foreign_sub_reseult_items = [];
+            let foreign_sub_reseult_data = 0;
             async.series([
                 async function(call){
+                    Log.w('0000',search_item);
                     for(const sub_search_item of search_item.foreigns){
                         let sub_search_foreign_item = Foreign.get_search(sub_search_item);
                         let search_item_data_result = {};
@@ -198,12 +199,15 @@ class Foreign {
                             }
                         }
                         search_item_data_result = await Foreign.run_search_item_data(database,cache,sub_search_foreign_item); //here1
-                        Log.w('111_search_item_data_result',search_item_data_result);
-                        for(const item of search_item_data_result.items){
-                            foreign_reseult_items.push(item);
+                        if(sub_search_foreign_item.type != Data_Value_Type.COUNT){
+                            for(const item of search_item_data_result.items){
+                                foreign_reseult_items.push(item);
+                            }
+                        }else{
+                            foreign_sub_reseult_data = search_item_data_result.data;
+                            this is a count... below cannot even run.
                         }
                     }
-                    Log.w('111_foreign_result_items',foreign_reseult_items);
                 },
                 async function(call){
                     for(const sub_search_item of search_item.foreigns){
@@ -217,7 +221,10 @@ class Foreign {
                                     sub_search_foreign_item.query.$or.push(query_field);
                                 }
                             }
+                            console.log('111');
                             search_item_data_result = await Foreign.run_search_item_data(database,cache,sub_search_foreign_item);
+                            Log.w('111_cool',search_item_data_result);
+                            /*
                             for(const item of search_item_data_result.items){
                                 foreign_sub_reseult_items.push(item);
                             }
@@ -230,7 +237,7 @@ class Foreign {
                                     if(match_item){
                                         data_item[sub_foreign_search_item.title] = match_item;
                                     }else{
-                                        data_item[sub_foreign_search_item.title] = Data_Logic.get_not_found(sub_foreign_search_item.foreign_table,0);
+                                        data_item[sub_foreign_search_item.title] = Data_Logic.get_not_found('sub_foreign_search_item.foreign_table',0);
                                     }
                                 }
                                 if(sub_search_foreign_item.value_type == Data_Value_Type.ITEMS){
@@ -244,14 +251,16 @@ class Foreign {
                                 }
                                 if(sub_search_foreign_item.value_type == Data_Value_Type.COUNT){
                                     if(!data_item[sub_foreign_search_item.title] ){
-                                        data_item[sub_foreign_search_item.title] = 0;
+                                        data_item[sub_foreign_search_item.title] = match;
                                     }
                                     data_item[sub_foreign_search_item.title] = sub_search_foreign_item.data;
                                 }
                             }
+                            */
                         }
                     }
                 },
+                /*
                 async function(call){
                     for(const sub_search_item of search_item.foreigns){
                         if(search_item.value_type == Data_Value_Type.ITEMS){
@@ -265,10 +274,33 @@ class Foreign {
                                 }
                             }
                         }
+                        if(search_item.value_type == Data_Value_Type.ONE){
+                            for(const data_item of search_item.items){
+                                const match_item = foreign_reseult_items.find(item_find => item_find[sub_search_item.foreign_field] === data_item[sub_search_item.parent_field]);
+                                if(!data_item[sub_search_item.title] ){
+                                    data_item[sub_search_item.title] = {};
+                                }
+                                if(match_item){
+                                   data_item[sub_search_item.title] = match_item;
+                                }else{
+                                    data_item[sub_search_item.title] = Data_Logic.get_not_found(sub_search_item.foreign_table,0);
+                                }
+                            }
+                        }
+                        if(search_item.value_type == Data_Value_Type.COUNT){
+                            for(const data_item of search_item.items){
+                                if(!Str.check_is_null(search_item.data)){
+                                   data_item[sub_search_item.title] = search_item.data;
+                                }else{
+                                    data_item[sub_search_item.title] = 0;
+                                }
+                            }
+                        }
                     }
                 },
+                */
             ]).then(result => {
-                callback([response,search_item]);
+                //callback([response,search_item]);
             }).catch(err => {
                 Log.error("Get-Search-Item-Detail",err);
             });
