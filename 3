@@ -50,29 +50,22 @@ class Foreign {
            async.series([
                 async function(call){
                     console.log('aaaaaaa');
-                    const run_data = async (database,cache,item) => {
-                        const biz_data = await Foreign.get_foreign_item_data(database,cache,data_items,item);
-                        return biz_data;
+                    const run_data = async (database,cache,data_items,item) => {
+                        console.log('2222222');
+                        await Foreign.get_foreign_item_data(database,cache,data_items,item);
                     }
-                    const run = async (database,cache,option) => {
+                    const run = async (database,cache,data_items,option) => {
+                        console.log('ggggggg');
                         for(const item of option.foreigns){
-                            const biz_data = await run_data(database,cache,item);
-                            item.data = biz_data;
-                            Log.w('rr',item.data);
-                            //data_items = biz_data;
-                            //for(const sub_item of item.foreigns){
-                                //await run_data(database,cache,sub_item);
-                            //}
+                            await run_data(database,cache,data_items,item);
                         }
                     }
-                    run(database,cache,option).then(() => {
+                    run(database,cache,data_items,option).then(() => {
                         call();
                     });
 
                 },
             ]).then(result => {
-                Log.w('99_option',option);
-                //Log.w('99_data_items',data_items);
                 //callback([response,data]);
             }).catch(err => {
                 Log.error("Blank-Data",err);
@@ -97,9 +90,13 @@ class Foreign {
             let sub_sub = {};
             let sub_sub_sub = {};
             */
+            console.log('111111111');
             let search_item = Foreign.get_search(foreign);
+            Log.w('11_search_item',search_item);
             async.series([
                 async function(call){
+                    Log.w('11_foreign',foreign);
+                    Log.w('11_foreign.foreigns',foreign.foreigns);
                     if(foreign){
                         has_parent = true;
                     }
@@ -112,10 +109,10 @@ class Foreign {
                     if(foreign?.foreigns?.foreigns?.foreigns){
                         has_sub_sub_sub = true;
                     }
-                    //Log.w('has_parent',has_parent);
-                    //Log.w('has_sub',has_sub);
-                    //Log.w('has_sub_sub',has_sub_sub);
-                    //Log.w('has_sub_sub_sub',has_sub_sub_sub);
+                    Log.w('has_parent',has_parent);
+                    Log.w('has_sub',has_sub);
+                    Log.w('has_sub_sub',has_sub_sub);
+                    Log.w('has_sub_sub_sub',has_sub_sub_sub);
                 },
                 async function(call){
                     if(has_parent){
@@ -165,12 +162,10 @@ class Foreign {
                                 }
                         }
                     }
-                        /*
                     Log.w('333_search_item',search_item);
                     Log.w('333_search_item',search_item.query);
                     Log.w('333_data',data_items);
                     Log.w('333_data_0',data_items[0]);
-                    */
                 }
                 },
                 async function(call){
@@ -179,7 +174,7 @@ class Foreign {
                 },
 
             ]).then(result => {
-               callback(data_items);
+               //callback([response,data]);
             }).catch(err => {
                 Log.error("Blank-Data",err);
                 callback([err,{}]);
@@ -244,6 +239,8 @@ class Foreign {
                     });
                 },
             ]).then(result => {
+                Log.w('66_done',data_items[0]);
+                Log.w('66_done',data_items[0].cart_items);
                 //callback([response,data_items]);
             }).catch(err => {
                 Log.error("Foreign-Get",err);
