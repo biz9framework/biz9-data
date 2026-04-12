@@ -56,7 +56,7 @@ class Foreign {
                     }
                 },
                 async function(call){
-                    Log.w('66_data_items',data_items);
+                    //Log.w('66_data_items',data_items);
                 },
             ]).then(result => {
                 //Log.w('99_option',option);
@@ -84,21 +84,22 @@ class Foreign {
                     if(foreign){
                         has_parent = true;
                     }
-                    if(foreign?.foreigns){
+                    if(foreign){
                         has_sub = true;
                     }
-                    if(foreign?.foreigns.foreigns){
+                    if(foreign?.foreigns[0]?.foreigns?.foreigns){
                         has_sub_sub = true;
                     }
                     if(foreign?.foreigns?.foreigns?.foreigns){
                         has_sub_sub_sub = true;
                     }
-                    /*
                     Log.w('has_parent',has_parent);
                     Log.w('has_sub',has_sub);
                     Log.w('has_sub_sub',has_sub_sub);
                     Log.w('has_sub_sub_sub',has_sub_sub_sub);
-                    */
+                    Log.w('11_foreign',foreign);
+                    Log.w('22_foreign',foreign.foreigns[0].foreigns[0]);
+
                 },
 
                 async function(call){
@@ -153,7 +154,7 @@ class Foreign {
                 async function(call){
                     if(has_sub){
                         for(const item of foreign.foreigns){
-                            console.log(item);
+                            //console.log(item);
                             // Get_Parent
                             const biz_data = await Foreign.get_foreign_sub(database,cache,item,parent_search_item,data_items);
                             //Log.w('22_sub_data',biz_data);
@@ -175,16 +176,10 @@ class Foreign {
            - none
            */
         return new Promise((callback) => {
-            let response = {};
-            let data = {};
             async.series([
                 async function(call){
                     // -- get sub
                     let sub_search_item = Foreign.get_search(foreign);
-                    //Log.w('parent_search',parent_search_item);
-                    //Log.w('sub_search',sub_search_item);
-                    //Log.w('data_items',data_items);
-                    //
                         for(const data_item of data_items){
                             for(const data_item of data_items){
                                 if(!Str.check_is_null(data_item.id)){
@@ -235,6 +230,74 @@ class Foreign {
                 },
             ]).then(result => {
                 callback(data_items);
+            }).catch(err => {
+                Log.error("Blank-Data",err);
+                callback([err,{}]);
+            });
+        });
+    };
+    static get_foreign_sub_sub = async (database,cache,foreign,sub_search_item,data_items) => {
+        /* options
+           - none
+           */
+        return new Promise((callback) => {
+            async.series([
+               async function(call){
+                    // -- get sub_sub
+                    let sub_sub_search_item = Foreign.get_search(foreign);
+                        for(const data_item of data_items){
+                            for(const data_item of data_items){
+                                if(!Str.check_is_null(data_item.id)){
+                                    let query_field = {};
+                                    if(!Str.check_is_null(data_item[sub_sub_search_item.parent_field])){
+                                        query_field[sub_sub_search_item.foreign_field] = data_item[sub_search_item.parent_field];
+                                        sub_sub_search_item.query.$or.push(query_field);
+                                    }
+                                }
+                            }
+                        }
+                   Log.w('22_sub_sub_search_item',sub_sub_search_item);
+                   /*
+                        if(sub_sub_search_item.value_type == Data_Value_Type.ITEMS){
+                            const biz_data = await Foreign.get_items_data(database,cache,sub_sub_search_item);
+                            for(const data_item of data_items){
+                                const match_items = biz_data.filter(item_find => item_find[sub_sub_search_item.foreign_field] === data_item[sub_search_item.parent_field]);
+                                if(match_items.length>0){
+                                    if(!data_item[sub_sub_search_item.title]){
+                                        data_item[sub_sub_search_item.title] = [];
+                                    }
+                                    data_item[sub_sub_search_item.title] = [...match_items];
+                                }
+                            }
+                        }
+                        if(sub_sub_search_item.value_type == Data_Value_Type.COUNT){
+                            const biz_data = await Foreign.get_items_data(database,cache,sub_sub_search_item);
+                            for(const data_item of data_items){
+                                const match_items = biz_data.filter(item_find => item_find[sub_sub_search_item.foreign_field] === data_item[sub_search_item.parent_field]);
+                                if(match_items.length>0){
+                                    if(!data_item[sub_sub_search_item.title]){
+                                        data_item[sub_sub_search_item.title] = 0;
+                                    }
+                                    data_item[sub_sub_search_item.title] = match_items.length;
+                                }
+                            }
+                        }
+                        if(sub_sub_search_item.value_type == Data_Value_Type.ONE){
+                            const biz_data = await Foreign.get_items_data(database,cache,sub_sub_search_item);
+                            for(const data_item of data_items){
+                                const match_items = biz_data.filter(item_find => item_find[sub_sub_search_item.foreign_field] === data_item[sub_search_item.parent_field]);
+                                if(match_items.length>0){
+                                    if(!data_item[sub_sub_search_item.title]){
+                                        data_item[sub_sub_search_item.title] = {};
+                                    }
+                                    data_item[sub_sub_search_item.title] = match_items[0];
+                                }
+                            }
+                        }
+                        */
+                },
+              ]).then(result => {
+                //callback(data_items);
             }).catch(err => {
                 Log.error("Blank-Data",err);
                 callback([err,{}]);
@@ -448,9 +511,9 @@ static get_old_foreign_parent_data = async (database,cache,foreign,data_items) =
                     return biz_data;
                 }
                 const run = async (database,cache,foreign,data_items) => {
-                    console.log('aaaaaaaaaa');
-                    console.log(foreign);
-                    console.log('bbbbbbbb');
+                    //console.log('aaaaaaaaaa');
+                    //console.log(foreign);
+                    //console.log('bbbbbbbb');
                     for(const item of option.foreigns){
                         const biz_data = await Foreign.get_foreign_detail_data(database,cache,item);
                     }

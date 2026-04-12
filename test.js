@@ -9,7 +9,7 @@ const assert = require('node:assert');
 const {Config}=require('./project');
 BIZ9_CONFIG=Config.get_biz9_config();
 const {Database,Data} = require(".");
-const {Log,Str,Obj,Response_Logic,Response_Field,Status_Type}=require("/home/think1/www/doqbox/biz9-framework/biz9-utility/source");
+const {Log,Str,Obj,Response_Logic,Response_Field,Status_Type,Num}=require("/home/think1/www/doqbox/biz9-framework/biz9-utility/source");
 const {Store_Field,Store_Type,Store_Table,Store_Logic}=require("/home/think1/www/doqbox/biz9-framework/biz9-store/source");
 const {Website_Title,Form_Field,Website_Table,Website_Logic}=require("/home/think1/www/doqbox/biz9-framework/biz9-website/source");
 const {Cart_Data}=require("/home/think1/www/doqbox/biz9-framework/biz9-store-data/source");
@@ -264,10 +264,17 @@ describe('data_post', function(){ this.timeout(25000);
         let database = {};
         let data = {};
         let option = {};
+        // -- PRODUCT
+        /*
         let post_data = Store_Logic.get_test_product();
+        post_data.table = Project_Table.PRODUCT;
         post_data.parent_id = '490';
         post_data.blank_id = '266';
-        post_data.table = Project_Table.PRODUCT;
+        */
+        // -- IMAGE
+        let post_data = Data_Logic.get(Project_Table.IMAGE,0,{data:{title:'Image_'+Num.get_id(),sub_note:'Sub_Note_'+Num.get_id()}});
+        post_data.user_id = '899';
+        Log.w('11_image',post_data);
         async.series([
             async function(call){
                 const [biz_response,biz_data] = await Database.get(DATA_CONFIG);
