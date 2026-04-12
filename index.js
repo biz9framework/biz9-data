@@ -359,11 +359,10 @@ class Data {
                 async function(call){
                     if(option.foreigns && !Str.check_is_null(data.id)){
                         response.messages.push(Response_Logic.get_message(Data_Response_Field.OPTION_FOREIGNS,Status_Type.OK,option.foreigns,{title:BIZ9_CONFIG.TITLE}));
-                        const [biz_response,biz_data] = await Foreign.get_data(database,cache,[data],option);
-                        //data = biz_data[0];
+                        const biz_data = await Foreign.get_data(database,cache,[data],option);
+                        data = biz_data[0];
                     }
                 },
-                /*
                 async function(call){
                         if(!Str.check_is_null(data.id)){
                             response.messages.push(Response_Logic.get_message(Response_Field.GET_CONFIRM,Status_Type.SUCCESS,Data_Logic.get_message_by_response_field(Response_Field.GET_CONFIRM,{title:BIZ9_CONFIG.TITLE})));
@@ -373,9 +372,8 @@ class Data {
 
                     response = Response_Logic.get_status(response);
                 },
-                */
             ]).then(result => {
-                //callback([response,data]);
+                callback([response,data]);
             }).catch(err => {
                 Log.error("DATA-GET-ERROR",err);
             });
