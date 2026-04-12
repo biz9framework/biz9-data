@@ -76,7 +76,6 @@ class Foreign {
             let has_parent = false;
             let has_sub = false;
             let has_sub_sub = false;
-            let has_sub_sub_sub = false;
 
             let parent_search_item = Foreign.get_search(foreign);
             async.series([
@@ -84,24 +83,19 @@ class Foreign {
                     if(foreign){
                         has_parent = true;
                     }
-                    if(foreign){
+                    if(foreign?.foreigns[0]){
                         has_sub = true;
                     }
-                    if(foreign?.foreigns[0]?.foreigns?.foreigns){
+                    if(foreign?.foreigns[0]?.foreigns[0]){
                         has_sub_sub = true;
-                    }
-                    if(foreign?.foreigns?.foreigns?.foreigns){
-                        has_sub_sub_sub = true;
                     }
                     Log.w('has_parent',has_parent);
                     Log.w('has_sub',has_sub);
                     Log.w('has_sub_sub',has_sub_sub);
-                    Log.w('has_sub_sub_sub',has_sub_sub_sub);
                     Log.w('11_foreign',foreign);
-                    Log.w('22_foreign',foreign.foreigns[0].foreigns[0]);
+                    Log.w('22_foreign',foreign.foreigns[0]);
 
                 },
-
                 async function(call){
                     if(has_parent){
                         for(const data_item of data_items){
@@ -152,10 +146,10 @@ class Foreign {
                     }
                 },
                 async function(call){
+                    //works stop here.... this is the last sub.. is working.. after this run.. will make sub_sub_sub
                     if(has_sub){
                         for(const item of foreign.foreigns){
-                            //console.log(item);
-                            // Get_Parent
+                            Log.w('33_item',item);
                             const biz_data = await Foreign.get_foreign_sub(database,cache,item,parent_search_item,data_items);
                             //Log.w('22_sub_data',biz_data);
                             data_items = biz_data;
@@ -164,7 +158,9 @@ class Foreign {
                     }
                 },
             ]).then(result => {
-                callback(data_items);
+                Log.w('44_data_items',data_items);
+                Log.w('44_data_items',data_items[0]);
+                //callback(data_items);
             }).catch(err => {
                 Log.error("Blank-Data",err);
                 callback([err,{}]);
@@ -313,7 +309,7 @@ class Foreign {
                 async function(call){
                     // - get parent
                     const biz_data = await Foreign.get_foreign_parent(database,cache,foreign,data_items);
-                    Log.w('rrr',biz_data);
+                    //Log.w('rrr',biz_data);
                 },
                 /*
                 async function(call){
@@ -376,6 +372,7 @@ class Foreign {
                     Log.w('has_sub',has_sub);
                     Log.w('has_sub_sub',has_sub_sub);
                     Log.w('has_sub_sub_sub',has_sub_sub_sub);
+                    Log.w('333_foreign',foreign.foreigns[0].foreigns);
                 },
                 /*
                 async function(call){
@@ -602,7 +599,6 @@ static get_foreign_detail_data = async (database,cache,data_items,foreign) => {
                             }
                         }
                     }
-                    console.log('222222');
                     if(search_item.value_type == Data_Value_Type.ITEMS){
                         const biz_data = await Foreign.get_items_data(database,cache,search_item);
                         for(const data_item of data_items){
@@ -639,7 +635,6 @@ static get_foreign_detail_data = async (database,cache,data_items,foreign) => {
                             }
                         }
                     }
-                    console.log('333333');
                     Log.w('333_search_item',search_item);
                     Log.w('333_search_item',search_item.query);
                     Log.w('333_data',data_items);
