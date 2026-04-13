@@ -290,7 +290,7 @@ class Adapter {
                 async function(call) {
                     // -- option-field-logic
                     if(option.field){
-                        option.field = Obj.merge(option.field,{id:1});
+                        //option.field = Obj.merge(option.field,{id:1});
                         for(const field in option.field) {
                             if(field){
                                 let new_item = {};

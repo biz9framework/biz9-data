@@ -246,28 +246,24 @@ describe('data_get', function(){ this.timeout(25000);
                 //option = {foreigns:[foreign_search_1],/*,distinct:{field:'title'},*/field:{title:1,product_count:1}};
                 //option = {foreigns:[foreign_search_1]};
                 //search = Data_Logic.get_search(Project_Table.CATEGORY,{category:'Product'},{},1,0);
-                // -- FOREIGN-2-START --
-                // -- RUN-START --
-                option = {field:{title:1}};
-                parent = Data_Logic.get(Project_Table.PRODUCT,'291');
-                const [biz_response,biz_data] = await Data.get(database,parent.table,parent.id,option);
-                Log.w('biz_data',biz_data);
+                //option = {field:{title:1}};
+                //let option = {foreigns:[foreign_cart_item]};
+                //parent = Data_Logic.get(Project_Table.PRODUCT,'291');
+                //const [biz_response,biz_data] = await Data.get(database,parent.table,parent.id,option);
+                //Log.w('biz_data',biz_data);
                 //Log.w('biz_response',biz_response);
                 //Log.w('biz_option',option);
                 //Log.w('biz_data_cart_items',biz_data.cart_items[0]);
+                // -- FOREIGN-2-START --
 
-                // -- RUN-END --
-
-                // --- Get Store Cart End ---
-
-                // --- Get Start ---
-                /*
-                let option = {foreigns:[foreign_cart_item]};
-                const [biz_response,biz_data] = await Data.get(database,post_data.table,post_data.id,option);
+                // -- JOIN-START --
+                let join_1 = Data_Logic.get_join(Data_Value_Type.ITEMS,Data_Logic.get_search(Project_Table.PRODUCT,{},{view_count:-1},1,12),{title:'popular_products'});
+                option = {joins:[join_1]};
+                parent = Data_Logic.get(Project_Table.PRODUCT,'636');
+                const [biz_response,biz_data] = await Data.get(database,parent.table,parent.id,option);
                 Log.w('biz_data',biz_data);
-                Log.w('biz_response',biz_response);
-                */
-                // --- Get END ---
+
+                // -- JOIN-END --
             },
             async function(call){
                 console.log('GET-SUCCESS');
