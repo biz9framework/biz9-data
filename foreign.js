@@ -20,8 +20,7 @@ class Foreign {
                     }
                 },
             ]).then(result => {
-                Log.w('rrrr',data_items);
-                //callback(data_items);
+                callback(data_items);
             }).catch(err => {
                 Log.error("Blank-Data",err);
                 callback([err,{}]);

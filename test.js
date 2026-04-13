@@ -208,7 +208,6 @@ describe('data_get', function(){ this.timeout(25000);
         let data = {};
         async.series([
             async function(call){
-                console.log('111111111');
                 const [biz_response,biz_data] = await Database.get(DATA_CONFIG);
                 database = biz_data;
             },
@@ -234,15 +233,24 @@ describe('data_get', function(){ this.timeout(25000);
                 */
 
                 // -- FOREIGN-START --
+                /*
                 let foreign_search_3 = Data_Logic.get_foreign(Data_Value_Type.ITEMS,Project_Table.CATEGORY,Form_Field.TITLE,Form_Field.CATEGORY,{title:'foreign_search_3'});
                 let foreign_search_2 = Data_Logic.get_foreign(Data_Value_Type.ITEMS,Project_Table.PRODUCT,Form_Field.CATEGORY,Form_Field.CATEGORY,{title:'foreign_search_2',foreigns:[foreign_search_3]});
                 let foreign_search_1 = Data_Logic.get_foreign(Data_Value_Type.ITEMS,Project_Table.CATEGORY,Form_Field.TITLE,Form_Field.CATEGORY,{title:'foreign_search_1'});
                 option = {foreigns:[foreign_search_1,foreign_search_2]};
+                */
                 // -- FOREIGN-END --
 
+                // -- FOREIGN-2-START --
+                //let foreign_search_1 = Data_Logic.get_foreign(Data_Value_Type.COUNT,Project_Table.CATEGORY,Form_Field.TITLE,Form_Field.CATEGORY,{title:'foreign_search_1'});
+                //option = {foreigns:[foreign_search_1],/*,distinct:{field:'title'},*/field:{title:1,product_count:1}};
+                //option = {foreigns:[foreign_search_1]};
+                //search = Data_Logic.get_search(Project_Table.CATEGORY,{category:'Product'},{},1,0);
+                // -- FOREIGN-2-START --
 
-                Log.w('11_parent',parent);
-                Log.w('11)_oiption',option);
+
+                //Log.w('11_parent',parent);
+                //Log.w('11)_oiption',option);
                 const [biz_response,biz_data] = await Data.get(database,parent.table,parent.id,option);
                 Log.w('biz_data',biz_data);
                 //Log.w('biz_response',biz_response);
@@ -351,27 +359,37 @@ describe('data_search', function(){ this.timeout(25000);
             async function(call){
                 const [biz_response,biz_data] = await Database.get(DATA_CONFIG);
                 database = biz_data;
+                let option = {};
+                let search = Data_Logic.get_search(Project_Table.PRODUCT,{},{},1,0);
             },
             async function(call){
                 // -- SEARCH-FIELD-START --
-                let option = {};
                 /*
                 option = {field:{id:1,username:1,name:1,email:1,role:1,gender:1,image_filename:1}};
                 let search = Data_Logic.get_search(Project_Table.USER,{},{},1,5,{});
                 */
                 // -- SEARCH-FIELD-END --
 
-                // -- FOREIGN-START --
+                // -- FOREIGN-1-START --
+                /*
                 //let foreign_search_3 = Data_Logic.get_foreign(Data_Value_Type.ITEMS,Project_Table.CATEGORY,Form_Field.TITLE,Form_Field.CATEGORY,{title:'foreign_search_3'});
                 let foreign_search_2 = Data_Logic.get_foreign(Data_Value_Type.COUNT,Project_Table.PRODUCT,Form_Field.CATEGORY,Form_Field.CATEGORY,{title:'foreign_search_2',foreigns:[]});
                 let foreign_search_1 = Data_Logic.get_foreign(Data_Value_Type.ITEMS,Project_Table.CATEGORY,Form_Field.TITLE,Form_Field.CATEGORY,{title:'foreign_search_1'});
                 option = {foreigns:[foreign_search_2]};
-                // -- FOREIGN-END --
-
-
                 let search = Data_Logic.get_search(Project_Table.PRODUCT,{},{},1,3,{});
+                */
+                // -- FOREIGN-1-END --
+
+                // -- FOREIGN-2-START --
+                let foreign_search_1 = Data_Logic.get_foreign(Data_Value_Type.ITEMS,Project_Table.PRODUCT,Form_Field.CATEGORY,Form_Field.TITLE,{title:'foreign_search_1'});
+                //option = {foreigns:[foreign_search_1],/*,distinct:{field:'title'},*/field:{title:1,product_count:1}};
+                option = {foreigns:[foreign_search_1],distinct:{field:'title'}};
+                search = Data_Logic.get_search(Project_Table.CATEGORY,{category:'Product'},{},1,0);
+                // -- FOREIGN-2-START --
+
                 const [biz_response,biz_data] = await Data.search(database,search.table,search.filter,search.sort_by,search.page_current,search.page_size,option);
                 Log.w('biz_data',biz_data);
+                Log.w('biz_data_items',biz_data.items);
                 Log.w('biz_data_length',biz_data.items.length);
                 //Log.w('biz_response',biz_response);
 
