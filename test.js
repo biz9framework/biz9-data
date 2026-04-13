@@ -48,6 +48,7 @@ class Project_Table{
     static BLANK = 'blank_biz';
     static BLOG_POST = 'blog_post_biz';
     static PRODUCT = 'product_biz';
+    static CATEGORY = 'category_biz';
     static PAGE = 'page_biz';
     static USER = 'user_biz';
     static GROUP = 'group_biz';
@@ -202,15 +203,18 @@ describe('data_get', function(){ this.timeout(25000);
         console.log('GET-START');
         let response={};
         let database = {};
-        let parent = Data_Logic.get(Store_Table.CART,'870');
+        let option = {};
+        let parent = Data_Logic.get(Project_Table.PRODUCT,'291');
         let data = {};
         async.series([
             async function(call){
+                console.log('111111111');
                 const [biz_response,biz_data] = await Database.get(DATA_CONFIG);
                 database = biz_data;
             },
             async function(call){
-                // --- Get Store Cart Start ---
+                // --- GET-STORE-CART-START ---
+                /*
                 let foreign_user = Data_Logic.get_foreign(Data_Value_Type.ONE,User_Table.USER,Data_Field.ID,User_Field.USER_ID,{title:'user'});
                 let foreign_cart_item_parent = Data_Logic.get_foreign(Data_Value_Type.ONE,Store_Table.PRODUCT,Data_Field.ID,Data_Field.PARENT_ID,{title:'parent'});
                 let foreign_cart_sub_item_parent = Data_Logic.get_foreign(Data_Value_Type.ONE,Store_Table.PRODUCT,Data_Field.ID,[Data_Field.PARENT_ID],{title:'parent'});
@@ -218,6 +222,8 @@ describe('data_get', function(){ this.timeout(25000);
                 let foreign_cart_item = Data_Logic.get_foreign(Data_Value_Type.ITEMS,Store_Table.CART_ITEM,Store_Field.CART_NUMBER,Store_Field.CART_NUMBER,{title:'cart_items',foreigns:[foreign_cart_sub_item,foreign_cart_item_parent]});
 
                 let option = { foreigns:[foreign_user,foreign_cart_item] };
+                */
+                // --- GET-STORE-CART-END ---
 
 
                 /*
@@ -226,13 +232,22 @@ describe('data_get', function(){ this.timeout(25000);
                 let foreign_cart_item = Data_Logic.get_foreign(Data_Value_Type.ITEMS,Store_Table.CART_ITEM,Store_Field.CART_NUMBER,Store_Field.CART_NUMBER,{title:'cart_items',foreigns:[foreign_cart_sub_item]});
                 let option = { foreigns:[foreign_cart_item] };
                 */
+
+                // -- FOREIGN-START --
+                let foreign_search_3 = Data_Logic.get_foreign(Data_Value_Type.ITEMS,Project_Table.CATEGORY,Form_Field.TITLE,Form_Field.CATEGORY,{title:'foreign_search_3'});
+                let foreign_search_2 = Data_Logic.get_foreign(Data_Value_Type.ITEMS,Project_Table.PRODUCT,Form_Field.CATEGORY,Form_Field.CATEGORY,{title:'foreign_search_2',foreigns:[foreign_search_3]});
+                let foreign_search_1 = Data_Logic.get_foreign(Data_Value_Type.ITEMS,Project_Table.CATEGORY,Form_Field.TITLE,Form_Field.CATEGORY,{title:'foreign_search_1'});
+                option = {foreigns:[foreign_search_1,foreign_search_2]};
+                // -- FOREIGN-END --
+
+
+                Log.w('11_parent',parent);
+                Log.w('11)_oiption',option);
                 const [biz_response,biz_data] = await Data.get(database,parent.table,parent.id,option);
-
-
-                Log.w('biz_response',biz_response);
-                Log.w('biz_option',option);
                 Log.w('biz_data',biz_data);
-                Log.w('biz_data_cart_items',biz_data.cart_items[0]);
+                //Log.w('biz_response',biz_response);
+                //Log.w('biz_option',option);
+                //Log.w('biz_data_cart_items',biz_data.cart_items[0]);
 
 
                 // --- Get Store Cart End ---
@@ -327,30 +342,46 @@ describe('data_many_post_items', function(){ this.timeout(25000);
 //9_search - 9_test_search
 describe('data_search', function(){ this.timeout(25000);
     it("_data_search", function(done){
-        console.log('BLANK-START');
+        console.log('DATA-SEARCH-START');
         let response={};
         let database = {};
         let data = {};
         let option = {};
-        option = {field:{id:1,username:1,name:1,email:1,role:1,gender:1,image_filename:1}};
-        let post_search = Data_Logic.get_search(Project_Table.USER,{},{},1,5,{});
-        async.series([
+       async.series([
             async function(call){
                 const [biz_response,biz_data] = await Database.get(DATA_CONFIG);
                 database = biz_data;
             },
             async function(call){
-                const [biz_response,biz_data] = await Data.search(database,post_search.table,post_search.filter,post_search.sort_by,post_search.page_current,post_search.page_size,option);
+                // -- SEARCH-FIELD-START --
+                let option = {};
+                /*
+                option = {field:{id:1,username:1,name:1,email:1,role:1,gender:1,image_filename:1}};
+                let search = Data_Logic.get_search(Project_Table.USER,{},{},1,5,{});
+                */
+                // -- SEARCH-FIELD-END --
+
+                // -- FOREIGN-START --
+                //let foreign_search_3 = Data_Logic.get_foreign(Data_Value_Type.ITEMS,Project_Table.CATEGORY,Form_Field.TITLE,Form_Field.CATEGORY,{title:'foreign_search_3'});
+                let foreign_search_2 = Data_Logic.get_foreign(Data_Value_Type.COUNT,Project_Table.PRODUCT,Form_Field.CATEGORY,Form_Field.CATEGORY,{title:'foreign_search_2',foreigns:[]});
+                let foreign_search_1 = Data_Logic.get_foreign(Data_Value_Type.ITEMS,Project_Table.CATEGORY,Form_Field.TITLE,Form_Field.CATEGORY,{title:'foreign_search_1'});
+                option = {foreigns:[foreign_search_2]};
+                // -- FOREIGN-END --
+
+
+                let search = Data_Logic.get_search(Project_Table.PRODUCT,{},{},1,3,{});
+                const [biz_response,biz_data] = await Data.search(database,search.table,search.filter,search.sort_by,search.page_current,search.page_size,option);
                 Log.w('biz_data',biz_data);
                 Log.w('biz_data_length',biz_data.items.length);
-                Log.w('biz_response',biz_response);
+                //Log.w('biz_response',biz_response);
+
             },
             async function(call){
-                console.log('BLANK-SUCCESS');
+                console.log('DATA-SEARCH-SUCCESS');
             },
         ],
             function(error, result){
-                console.log('BLANK-DONE');
+                console.log('DATA-SEARCH-DONE');
                 done();
             });
     });

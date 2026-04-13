@@ -9,41 +9,8 @@ const {Log,Str,Num,Obj,DateTime}=require("/home/think1/www/doqbox/biz9-framework
 const {Data_Value_Type,Data_Logic,Data_Table}=require("/home/think1/www/doqbox/biz9-framework/biz9-data-logic/source");
 const {Adapter}  = require('./adapter.js');
 class Foreign {
-    //9_search 9_get_search
-    static get_search = (foreign_item) => {
-        return {
-            value_type : foreign_item.value_type ? foreign_item.value_type : Data_Value_Type.ITEMS,
-            foreign_table : foreign_item.foreign_table,
-            foreign_field : foreign_item.foreign_field,
-            parent_field : foreign_item.parent_field,
-            parent_value : '',
-            field : foreign_item.field ? foreign_item.field : null,
-            title : foreign_item.title ? foreign_item.title : foreign_item.foreign_table,
-            page_current : foreign_item.page_current ? foreign_item.page_current : 1,
-            page_size : foreign_item.page_size ? foreign_item.page_size : 0,
-            sort_by : foreign_item.sort_by ? foreign_item.sort_by : {},
-            foreigns : foreign_item.foreigns ? foreign_item.foreigns : [],
-            items : [],
-            query : { $or: [] },
-            data : null
-        }
-    };
-    static get_data = async (database,cache,data_items,option) => {
-        /* options
-           - none
-           */
+   static get_data = async (database,cache,data_items,option) => {
         return new Promise((callback) => {
-            let response = {};
-            let data = [];
-            let full_list = [];
-            let type_parent = 'TYPE_PARENT';
-            let type_sub = 'TYPE_SUB';
-            let type_sub_sub = 'TYPE_SUB_SUB';
-            let type_sub_sub_sub = 'TYPE_SUB_SUB_SUB';
-            let parent = {};
-            let sub = {};
-            let sub_sub = {};
-            let sub_sub_sub = {};
             async.series([
                 async function(call){
                     for(const item of option.foreigns){
@@ -53,7 +20,8 @@ class Foreign {
                     }
                 },
             ]).then(result => {
-                callback(data_items);
+                Log.w('rrrr',data_items);
+                //callback(data_items);
             }).catch(err => {
                 Log.error("Blank-Data",err);
                 callback([err,{}]);
@@ -335,6 +303,25 @@ class Foreign {
             }
         });
     }
+    //9_search 9_get_search
+    static get_search = (foreign_item) => {
+        return {
+            value_type : foreign_item.value_type ? foreign_item.value_type : Data_Value_Type.ITEMS,
+            foreign_table : foreign_item.foreign_table,
+            foreign_field : foreign_item.foreign_field,
+            parent_field : foreign_item.parent_field,
+            parent_value : '',
+            field : foreign_item.field ? foreign_item.field : null,
+            title : foreign_item.title ? foreign_item.title : foreign_item.foreign_table,
+            page_current : foreign_item.page_current ? foreign_item.page_current : 1,
+            page_size : foreign_item.page_size ? foreign_item.page_size : 0,
+            sort_by : foreign_item.sort_by ? foreign_item.sort_by : {},
+            foreigns : foreign_item.foreigns ? foreign_item.foreigns : [],
+            items : [],
+            query : { $or: [] },
+            data : null
+        }
+    };
     static blank = async (database,table,items) => {
         /* options
            - none

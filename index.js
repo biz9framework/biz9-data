@@ -555,11 +555,13 @@ class Data {
                 //9_foreigns //9_items_foreign
                 async function(call){
                     if(option.foreigns && data[Data_Field.ITEMS].length > 0){
+                        console.log('hre');
                         const [biz_response,biz_data] = await Foreign.get_data(database,cache,data[Data_Field.ITEMS],option);
-                        response.messages.push(Response_Logic.get_message(Data_Field.RESPONSE_FOREIGNS,Status_Type.SUCCESS,option.foreigns),{title:BIZ9_CONFIG.TITLE});
-                        data[Data_Field.ITEMS] = biz_data;
+                        //response.messages.push(Response_Logic.get_message(Data_Field.RESPONSE_FOREIGNS,Status_Type.SUCCESS,option.foreigns),{title:BIZ9_CONFIG.TITLE});
+                        //data[Data_Field.ITEMS] = biz_data;
                     }
                 },
+                /*
                 async function(call){
                     if(data.items){
                         response.messages.push(Response_Logic.get_message(Data_Response_Field.ITEMS_SEARCH_CONFIRM,Status_Type.SUCCESS,Data_Logic.get_message_by_response_field(Data_Response_Field.ITEMS_SEARCH_CONFIRM,{title:BIZ9_CONFIG.TITLE})));
@@ -568,8 +570,9 @@ class Data {
                     }
                     response = Response_Logic.get_status(response);
                 },
+                */
             ]).then(result => {
-                callback([response,data]);
+                //callback([response,data]);
             }).catch(err => {
                 Log.error('DATA-SEARCH-ERROR',err);
             });
