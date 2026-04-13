@@ -14,7 +14,6 @@ class Foreign {
             async.series([
                 async function(call){
                     for(const item of option.foreigns){
-                        // Get_Parent
                         const biz_data = await Foreign.get_foreign_data(database,cache,item,data_items);
                         data_items = biz_data;
                     }
@@ -22,7 +21,7 @@ class Foreign {
             ]).then(result => {
                 callback(data_items);
             }).catch(err => {
-                Log.error("Blank-Data",err);
+                Log.error("Foreign-Get-Data",err);
                 callback([err,{}]);
             });
         });
@@ -112,7 +111,7 @@ class Foreign {
             ]).then(result => {
                 callback(data_items);
             }).catch(err => {
-                Log.error("Blank-Data",err);
+                Log.error("Foreign-Get-Foreign-Data",err);
                 callback([err,{}]);
             });
         });
@@ -201,7 +200,7 @@ class Foreign {
             ]).then(result => {
                 callback(data_items);
             }).catch(err => {
-                Log.error("Blank-Data",err);
+                Log.error("Foreign-Get-Foreign-Sub",err);
                 callback([err,{}]);
             });
         });
@@ -281,7 +280,7 @@ class Foreign {
             ]).then(result => {
                 callback(data_items);
             }).catch(err => {
-                Log.error("Blank-Data",err);
+                Log.error("Foreign-Get-Foreign-Sub-Sub",err);
                 callback([err,{}]);
             });
         });

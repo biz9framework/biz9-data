@@ -173,6 +173,7 @@ class Adapter {
             option = option ?? {};
             async.series([
                 async function(call) {
+                    // --- option-id_field-logic --
                     if(!option.id_field){
                         const biz_data = await Adapter.get_item_cache_db(database,cache,data.table,data.id,option);
                         if(biz_data.id){
@@ -261,7 +262,7 @@ class Adapter {
                 },
                 async function(call) {
                     if(cache_key_list.length==0){
-                        //db
+                        // -- db-logic
                         const data = await Mongo.get_item(database,table,id);
                         if(data){
                             delete data['_id'];
@@ -272,7 +273,7 @@ class Adapter {
                             item_data  = Data_Logic.get_not_found(table,id);
                         }
                     }else{
-                        //cache
+                        // -- cache-logic
                         for(const item of cache_key_list) {
                             if(item){
                                 const val = await Cache.get_value(cache,Adapter.get_cache_item_attr_key(table,id,item));
@@ -287,14 +288,20 @@ class Adapter {
                     }
                 },
                 async function(call) {
+                    // -- option-field-logic
                     if(option.field){
+                        option.field = Obj.merge(option.field,{id:1});
                         for(const field in option.field) {
-                            let new_item = {};
-                            new_item[field] = option.field[field];
-                            if(new_item[field]){
-                                field_list.push({field:field,value:new_item[field]});
-                            }else{
-                                hide_field_list.push({field:field,value:new_item[field]});
+                            if(field){
+                                let new_item = {};
+                                new_item[field] = option.field[field];
+                                if(new_item[field]){
+                                    field_list.push({field:field,value:new_item[field]});
+                                }else{
+                                    if(field != Data_Field.ID){
+                                        hide_field_list.push({field:field,value:new_item[field]});
+                                    }
+                                }
                             }
                         }
                     }

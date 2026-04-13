@@ -555,9 +555,9 @@ class Data {
                 //9_foreigns //9_items_foreign
                 async function(call){
                     if(option.foreigns && data[Data_Field.ITEMS].length > 0){
-                        const [biz_response,biz_data] = await Foreign.get_data(database,cache,data[Data_Field.ITEMS],option);
-                        response.messages.push(Response_Logic.get_message(Data_Field.RESPONSE_FOREIGNS,Status_Type.SUCCESS,option.foreigns),{title:BIZ9_CONFIG.TITLE});
+                        const biz_data = await Foreign.get_data(database,cache,data[Data_Field.ITEMS],option);
                         data[Data_Field.ITEMS] = biz_data;
+                        response.messages.push(Response_Logic.get_message(Data_Field.RESPONSE_FOREIGNS,Status_Type.SUCCESS,option.foreigns),{title:BIZ9_CONFIG.TITLE});
                     }
                 },
                 async function(call){

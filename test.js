@@ -203,9 +203,9 @@ describe('data_get', function(){ this.timeout(25000);
         console.log('GET-START');
         let response={};
         let database = {};
-        let option = {};
-        let parent = Data_Logic.get(Project_Table.PRODUCT,'291');
-        let data = {};
+       let option = {};
+       let data = {};
+       let parent = {};
         async.series([
             async function(call){
                 const [biz_response,biz_data] = await Database.get(DATA_CONFIG);
@@ -247,16 +247,16 @@ describe('data_get', function(){ this.timeout(25000);
                 //option = {foreigns:[foreign_search_1]};
                 //search = Data_Logic.get_search(Project_Table.CATEGORY,{category:'Product'},{},1,0);
                 // -- FOREIGN-2-START --
-
-
-                //Log.w('11_parent',parent);
-                //Log.w('11)_oiption',option);
+                // -- RUN-START --
+                option = {field:{title:1}};
+                parent = Data_Logic.get(Project_Table.PRODUCT,'291');
                 const [biz_response,biz_data] = await Data.get(database,parent.table,parent.id,option);
                 Log.w('biz_data',biz_data);
                 //Log.w('biz_response',biz_response);
                 //Log.w('biz_option',option);
                 //Log.w('biz_data_cart_items',biz_data.cart_items[0]);
 
+                // -- RUN-END --
 
                 // --- Get Store Cart End ---
 
@@ -381,16 +381,18 @@ describe('data_search', function(){ this.timeout(25000);
                 // -- FOREIGN-1-END --
 
                 // -- FOREIGN-2-START --
-                let foreign_search_1 = Data_Logic.get_foreign(Data_Value_Type.ITEMS,Project_Table.PRODUCT,Form_Field.CATEGORY,Form_Field.TITLE,{title:'foreign_search_1'});
-                //option = {foreigns:[foreign_search_1],/*,distinct:{field:'title'},*/field:{title:1,product_count:1}};
-                option = {foreigns:[foreign_search_1],distinct:{field:'title'}};
+                let foreign_search_1 = Data_Logic.get_foreign(Data_Value_Type.COUNT,Project_Table.PRODUCT,Form_Field.CATEGORY,Form_Field.TITLE,{title:'product_count'});
+                option = {foreigns:[foreign_search_1],distinct:{field:'title'},field:{title:1,product_count:1,category:1}};
+                //option = {foreigns:[foreign_search_1]};
+                //option = {foreigns:[foreign_search_1],distinct:{field:1}};
+                //option = {field:{title:1}};
                 search = Data_Logic.get_search(Project_Table.CATEGORY,{category:'Product'},{},1,0);
                 // -- FOREIGN-2-START --
 
                 const [biz_response,biz_data] = await Data.search(database,search.table,search.filter,search.sort_by,search.page_current,search.page_size,option);
                 Log.w('biz_data',biz_data);
-                Log.w('biz_data_items',biz_data.items);
-                Log.w('biz_data_length',biz_data.items.length);
+                //Log.w('biz_data_items',biz_data.items);
+                //Log.w('biz_data_length',biz_data.items.length);
                 //Log.w('biz_response',biz_response);
 
             },
