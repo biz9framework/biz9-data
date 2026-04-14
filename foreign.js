@@ -9,7 +9,7 @@ const {Log,Str,Num,Obj,DateTime}=require("/home/think1/www/doqbox/biz9-framework
 const {Data_Value_Type,Data_Logic,Data_Table}=require("/home/think1/www/doqbox/biz9-framework/biz9-data-logic/source");
 const {Adapter}  = require('./adapter.js');
 class Foreign {
-   static get_data = async (database,cache,data_items,option) => {
+    static get_data = async (database,cache,data_items,option) => {
         return new Promise((callback) => {
             async.series([
                 async function(call){
@@ -44,7 +44,7 @@ class Foreign {
                     }
                 },
                 async function(call){
-                    if(has_parent){
+                    if(has_parent && data_items){
                         for(let data_item of data_items){
                             if(!Str.check_is_null(data_item.id)){
                                 let query_field = {};
@@ -126,21 +126,25 @@ class Foreign {
                 async function(call){
                     // -- get sub
                     sub_search_item = Foreign.get_search(foreign);
-                    if(parent_search_item.type == Data_Value_Type.ITEMS){
-                    for(let data_item of data_items){
-                        if(data_item[parent_search_item.title]){
-                            for(let sub_data_item of data_item[parent_search_item.title]){
-                                if(!Str.check_is_null(sub_data_item.id)){
-                                    let query_field = {};
-                                    if(!Str.check_is_null(sub_data_item[sub_search_item.parent_field])){
-                                        query_field[sub_search_item.foreign_field] = sub_data_item[sub_search_item.parent_field];
-                                        sub_search_item.query.$or.push(query_field);
+                        for(let data_item of data_items){
+                            if(data_item[parent_search_item.title]){
+                                if(data_item[parent_search_item.title].length>0){
+                                if(!data_item[parent_search_item.title]){
+                                    data_item[parent_search_item.title] = [];
+                                }
+                                for(let sub_data_item of data_item[parent_search_item.title]){
+                                    if(!Str.check_is_null(sub_data_item.id)){
+                                        let query_field = {};
+                                        if(!Str.check_is_null(sub_data_item[sub_search_item.parent_field])){
+                                            query_field[sub_search_item.foreign_field] = sub_data_item[sub_search_item.parent_field];
+                                            sub_search_item.query.$or.push(query_field);
+                                        }
                                     }
                                 }
+                                    }
+
                             }
                         }
-                    }
-                    }
                     if(sub_search_item.value_type == Data_Value_Type.ITEMS){
                         if(sub_search_item.query.$or.length>0){
                             const biz_data = await Foreign.get_items_data(database,cache,sub_search_item);
