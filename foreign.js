@@ -126,6 +126,7 @@ class Foreign {
                 async function(call){
                     // -- get sub
                     sub_search_item = Foreign.get_search(foreign);
+                    if(parent_search_item.type == Data_Value_Type.ITEMS){
                     for(let data_item of data_items){
                         if(data_item[parent_search_item.title]){
                             for(let sub_data_item of data_item[parent_search_item.title]){
@@ -138,6 +139,7 @@ class Foreign {
                                 }
                             }
                         }
+                    }
                     }
                     if(sub_search_item.value_type == Data_Value_Type.ITEMS){
                         if(sub_search_item.query.$or.length>0){

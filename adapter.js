@@ -316,6 +316,7 @@ class Adapter {
                                 field_data[item.field] = '';
                             }
                         }
+                        field_data[Data_Field.ID] = item_data[Data_Field.ID];
                         item_data = field_data;
                     }
                 },
@@ -323,10 +324,13 @@ class Adapter {
                     if(hide_field_list.length>0){
                         let field_data = {};
                         for(const item of hide_field_list) {
-                            delete item_data[item.field];
+                            if(item.field != Data_Field.ID){
+                                delete item_data[item.field];
+                            }
                         }
                     }
                 },
+
             ]).then(result => {
                 callback(item_data);
             }).catch(error => {
