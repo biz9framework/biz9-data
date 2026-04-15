@@ -298,7 +298,7 @@ class Foreign {
             let foreign_option = search_item.field ? search_item.field : {};
             if(search_item.query.$or.length>0){
                 (async () => {
-                    const [items,item_count,page_count] = await Adapter.get_item_list(database,cache,search.table,search.filter,search.sort_by,search.page_current,search.page_size,foreign_option);
+                    const [items,item_count,page_count] = await Adapter.get_items(database,cache,search.table,search.filter,search.sort_by,search.page_current,search.page_size,foreign_option);
                     resolve(items);
 
                 })();

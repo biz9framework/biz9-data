@@ -88,17 +88,18 @@ describe('data_count', function(){ this.timeout(25000);
         let database = {};
         let data = {};
         let option = {};
-        let post_data = Data_Logic.get(Project_Table.PRODUCT,'929');
-        let post_search = Data_Logic.get_search(Project_Table.PRODUCT,{},{},1,0,{});
         async.series([
             async function(call){
                 const [biz_response,biz_data] = await Database.get(DATA_CONFIG);
                 database = biz_data;
             },
             async function(call){
+                // -- SEARCH-COUNT-START
+                let post_search = Data_Logic.get_search(Project_Table.PRODUCT,{},{},1,0,{});
                 const [biz_response,biz_data] = await Data.count(database,post_search.table,post_search.filter,option);
+                // -- SEARCH-COUNT-END
+                //Log.w('biz_response',biz_response);
                 Log.w('biz_data',biz_data);
-                Log.w('biz_response',biz_response);
             },
             async function(call){
                 console.log('COUNT-SUCCESS');
@@ -118,7 +119,7 @@ describe('data_copy', function(){ this.timeout(25000);
         let database = {};
         let data = {};
         let option = {};
-        let post_data = Data_Logic.get(Project_Table.PRODUCT,'460');
+        let post_data = Data_Logic.get(Project_Table.PRODUCT,'69df012d3168d87e9bb24d02');
         async.series([
             async function(call){
                 const [biz_response,biz_data] = await Database.get(DATA_CONFIG);
@@ -126,8 +127,8 @@ describe('data_copy', function(){ this.timeout(25000);
             },
             async function(call){
                 const [biz_response,biz_data] = await Data.copy(database,post_data.table,post_data.id,option);
+                //Log.w('biz_response',biz_response);
                 Log.w('biz_data',biz_data);
-                Log.w('biz_response',biz_response);
             },
             async function(call){
                 console.log('COPY-SUCCESS');
@@ -147,7 +148,7 @@ describe('data_delete', function(){ this.timeout(25000);
         let database = {};
         let data = {};
         let option = {};
-        let post_data = Data_Logic.get(Project_Table.PRODUCT,'531');
+        let post_data = Data_Logic.get(Project_Table.PRODUCT,'69df088b98790df133c9a10c');
         async.series([
             async function(call){
                 const [biz_response,biz_data] = await Database.get(DATA_CONFIG);
@@ -155,8 +156,8 @@ describe('data_delete', function(){ this.timeout(25000);
             },
             async function(call){
                 const [biz_response,biz_data] = await Data.delete(database,post_data.table,post_data.id,option);
-                Log.w('biz_data',biz_data);
-                Log.w('biz_response',biz_response);
+                Log.w('99_biz_response',biz_response);
+                Log.w('99_biz_data',biz_data);
             },
             async function(call){
                 console.log('DELETE-SUCCESS');
@@ -183,9 +184,11 @@ describe('data_many_delete_search', function(){ this.timeout(25000);
                 database = biz_data;
             },
             async function(call){
+                //-- DELETE-SEARCH-START
                 const [biz_response,biz_data] = await Data.delete_search(database,post_search.table,post_search.filter,option);
-                Log.w('biz_data',biz_data);
                 Log.w('biz_response',biz_response);
+                Log.w('biz_data',biz_data);
+                //-- DELETE-SEARCH-END
             },
             async function(call){
                 console.log('DELETE-SEARCH-SUCCESS');
@@ -212,6 +215,13 @@ describe('data_get', function(){ this.timeout(25000);
                 database = biz_data;
             },
             async function(call){
+                // -- GET-START --
+                parent = Data_Logic.get(Project_Table.PRODUCT,'69df0bce1b66def9a73c1b98');
+                const [biz_response,biz_data] = await Data.get(database,parent.table,parent.id,option);
+                Log.w('biz_data',biz_data);
+                // -- GET-END --
+
+
                 // --- GET-STORE-CART-START ---
                 /*
                 let foreign_user = Data_Logic.get_foreign(Data_Value_Type.ONE,User_Table.USER,Data_Field.ID,User_Field.USER_ID,{title:'user'});
@@ -257,14 +267,16 @@ describe('data_get', function(){ this.timeout(25000);
                 // -- FOREIGN-2-START --
 
                 // -- JOIN-START --
+                /*
                 let join_1 = Data_Logic.get_join(Data_Value_Type.ITEMS,Data_Logic.get_search(Project_Table.PRODUCT,{},{view_count:-1},1,12),{title:'popular_products'});
                 option = {joins:[join_1]};
                 parent = Data_Logic.get(Project_Table.PRODUCT,'636');
                 const [biz_response,biz_data] = await Data.get(database,parent.table,parent.id,option);
                 Log.w('biz_data',biz_data);
-
+                */
                 // -- JOIN-END --
-            },
+                //
+                          },
             async function(call){
                 console.log('GET-SUCCESS');
             },
@@ -291,18 +303,21 @@ describe('data_post', function(){ this.timeout(25000);
         post_data.blank_id = '266';
         */
         // -- IMAGE
-        let post_data = Data_Logic.get(Project_Table.IMAGE,0,{data:{title:'Image_'+Num.get_id(),sub_note:'Sub_Note_'+Num.get_id()}});
-        post_data.user_id = '899';
-        Log.w('11_image',post_data);
+        //let post_data = Data_Logic.get(Project_Table.IMAGE,0,{data:{title:'Image_'+Num.get_id(),sub_note:'Sub_Note_'+Num.get_id()}});
+        //post_data.user_id = '899';
         async.series([
             async function(call){
                 const [biz_response,biz_data] = await Database.get(DATA_CONFIG);
                 database = biz_data;
             },
             async function(call){
+                // -- POST-START --
+                let post_data = Store_Logic.get_test_product({title:'Product '+Str.get_id()});
                 const [biz_response,biz_data] = await Data.post(database,post_data.table,post_data,option);
+                //Log.w('biz_response',biz_response);
                 Log.w('biz_data',biz_data);
-                Log.w('biz_response',biz_response);
+                // -- POST-END --
+
             },
             async function(call){
                 console.log('POST-SUCCESS');
@@ -359,10 +374,17 @@ describe('data_search', function(){ this.timeout(25000);
             async function(call){
                 const [biz_response,biz_data] = await Database.get(DATA_CONFIG);
                 database = biz_data;
-                let option = {};
-                let search = Data_Logic.get_search(Project_Table.PRODUCT,{},{},1,0);
             },
             async function(call){
+                // -- SEARCH-START --
+                let search = Data_Logic.get_search(Project_Table.PRODUCT,{},{},1,0,{});
+                const [biz_response,biz_data] = await Data.search(database,search.table,search.filter,search.sort_by,search.page_current,search.page_size,option);
+                Log.w('biz_data',biz_data);
+                //Log.w('biz_data_items',biz_data.items);
+                //Log.w('biz_data_length',biz_data.items.length);
+                //Log.w('biz_response',biz_response);
+                // -- SEARCH-END --
+
                 // -- SEARCH-FIELD-START --
                 /*
                 option = {field:{id:1,username:1,name:1,email:1,role:1,gender:1,image_filename:1}};
@@ -381,21 +403,17 @@ describe('data_search', function(){ this.timeout(25000);
                 // -- FOREIGN-1-END --
 
                 // -- FOREIGN-2-START --
+                /*
                 let foreign_search_1 = Data_Logic.get_foreign(Data_Value_Type.COUNT,Project_Table.PRODUCT,Form_Field.CATEGORY,Form_Field.TITLE,{title:'product_count'});
                 option = {foreigns:[foreign_search_1],distinct:{field:'title'},field:{title:1,product_count:1,category:1}};
                 //option = {foreigns:[foreign_search_1]};
                 //option = {foreigns:[foreign_search_1],distinct:{field:1}};
                 //option = {field:{title:1}};
                 search = Data_Logic.get_search(Project_Table.CATEGORY,{category:'Product'},{},1,0);
+                */
                 // -- FOREIGN-2-START --
 
-                const [biz_response,biz_data] = await Data.search(database,search.table,search.filter,search.sort_by,search.page_current,search.page_size,option);
-                Log.w('biz_data',biz_data);
-                //Log.w('biz_data_items',biz_data.items);
-                //Log.w('biz_data_length',biz_data.items.length);
-                //Log.w('biz_response',biz_response);
-
-            },
+                         },
             async function(call){
                 console.log('DATA-SEARCH-SUCCESS');
             },

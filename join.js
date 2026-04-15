@@ -29,7 +29,7 @@ class Join {
                                 let search = Data_Logic.get_search(search_item.search.table,search_item.search.filter,search_item.search.sort_by,search_item.search.page_current,search_item.search.page_size);
                                 let join_option = {field:search_item.field,distinct:search_item.distinct};
                                 (async () => {
-                                    const [items,item_count,page_count] = await Adapter.get_item_list(database,cache,search.table,search.filter,search.sort_by,search.page_current,search.page_size,join_option);
+                                    const [items,item_count,page_count] = await Adapter.get_items(database,cache,search.table,search.filter,search.sort_by,search.page_current,search.page_size,join_option);
                                     search_item.data['count'] = item_count;
                                     search_item.data['page_count'] = page_count;
                                     search_item.data['search'] = search;
@@ -41,7 +41,7 @@ class Join {
                                 let search = Data_Logic.get_search(search_item.search.table,search_item.search.filter,search_item.search.sort_by,search_item.search.page_current,search_item.search.page_size);
                                 let join_option = {field:search_item.field};
                                 (async () => {
-                                    const biz_data = await Adapter.get_count_item_list(database,search.table,search.filter);
+                                    const biz_data = await Adapter.get_count_items(database,search.table,search.filter);
                                     search_item.data = biz_data;
                                     resolve();
                                 })();
@@ -50,7 +50,7 @@ class Join {
                                 let search = Data_Logic.get_search(search_item.search.table,search_item.search.filter,search_item.search.sort_by,search_item.search.page_current,search_item.search.page_size);
                                 let join_option = {field:search_item.field};
                                 (async () => {
-                                    const [items,item_count,page_count] = await Adapter.get_item_list(database,cache,search.table,search.filter,search.sort_by,search.page_current,search.page_size,join_option);
+                                    const [items,item_count,page_count] = await Adapter.get_items(database,cache,search.table,search.filter,search.sort_by,search.page_current,search.page_size,join_option);
                                     let one_item = items.length>0 ? items[0] : Data_Logic.get_not_found(search_item.search.table,0);
                                     search_item.data = one_item;
                                     resolve();

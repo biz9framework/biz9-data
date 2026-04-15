@@ -71,7 +71,7 @@ class Database {
                         const collectionName = collectionInfo.name;
                         const collection = database.collection(collectionName);
                         const count = await collection.estimatedDocumentCount();
-                        data.push({title:collectionName,item_count:count});
+                        data.push({title:collectionName,delete_count:count});
                     }
                 },
             ]).then(result => {
@@ -202,6 +202,7 @@ class Data {
                 },
                 async function(call){
                     const biz_data = await Adapter.delete_item(database,cache,data.table,data.id);
+                    Log.w('ddddd',biz_data);
                         if(!Str.check_is_null(biz_data)){
                             response.messages.push(Response_Logic.get_message(Response_Field.DELETE_CONFIRM,Status_Type.SUCCESS,Data_Logic.get_message_by_response_field(Response_Field.DELETE_CONFIRM,{title:BIZ9_CONFIG.TITLE})));
                             response.messages.push(Response_Logic.get_message(Data_Response_Field.ITEM_DELETE_COUNT,Status_Type.OK,biz_data,{title:BIZ9_CONFIG.TITLE}));
@@ -252,7 +253,7 @@ class Data {
                 },
                 async function(call){
                     let search = Data_Logic.get_search(table,filter,{},1,0);
-                    const [items,item_count,page_count] = await Adapter.get_item_list(database,cache,search.table,search.filter,search.sort_by,search.page_current,search.page_size,option);
+                    const [items,item_count,page_count] = await Adapter.get_items(database,cache,search.table,search.filter,search.sort_by,search.page_current,search.page_size,option);
                     if(items.length>0){
                         delete_items = items;
                     }
@@ -529,7 +530,7 @@ class Data {
                 },
                 async function(call){
                     let search = Data_Logic.get_search(table,filter,sort_by,page_current,page_size);
-                        const [items,item_count,page_count] = await Adapter.get_item_list(database,cache,search.table,search.filter,search.sort_by,search.page_current,search.page_size,option);
+                        const [items,item_count,page_count] = await Adapter.get_items(database,cache,search.table,search.filter,search.sort_by,search.page_current,search.page_size,option);
                         data.item_count=item_count;
                         data.page_count=page_count;
                         data.search=search;

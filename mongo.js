@@ -7,7 +7,7 @@ Description: BiZ9 Framework: Data - Mongo
 const async = require('async');
 const {Num,Log,Str,Obj,DateTime} = require("/home/think1/www/doqbox/biz9-framework/biz9-utility/source");
 const {Data_Field} = require("/home/think1/www/doqbox/biz9-framework/biz9-data-logic/source");
-const {MongoClient} = require("mongodb");
+const {MongoClient,ObjectId} = require("mongodb");
 let client_db = {};
 class Mongo {
     static get = async (data_config,option) => {
@@ -51,10 +51,11 @@ class Mongo {
                 id = '0';
             }
             if(Mongo.check_database(database)){
-                database.collection(table).findOne({id:String(id)}).then((data) => {
+                const query = { _id: new ObjectId(id) };
+                database.collection(table).findOne(query).then((data) => {
                     if(data){
+                        data.id = id;
                         delete data['_id'];
-                        data = data;
                     }
                     callback(data);
                 }).catch(error => {
@@ -81,12 +82,12 @@ class Mongo {
         return new Promise((callback) => {
             option = !Obj.check_is_empty(option) ? option : {};
             if (Str.check_is_null(item.id)){//insert
-                //item[Type.FIELD_ID] = Str.get_guid();
-                item[Data_Field.ID] = String(Num.get_id(999));
+                delete item['id'];
                 item[Data_Field.DATE_CREATE] = DateTime.get();
                 item[Data_Field.DATE_SAVE] = DateTime.get();
                 if(Mongo.check_database(database)){
                     database.collection(table).insertOne(item).then((data) => {
+                        item.id = data.insertedId.toString();
                         delete item['_id'];
                         callback(item);
                     }).catch(error => {
@@ -96,14 +97,13 @@ class Mongo {
             }else{
                 item.date_save = DateTime.get();
                 if(!option.overwrite){
-                    delete item['_id'];
-                    database.collection(table).updateOne({id:item.id},{$set: item}).then((data) => {
+                    const query = { _id: new ObjectId(item.id) };
+                    database.collection(table).updateOne(query,{$set: item}).then((data) => {
                         callback(item);
                     }).catch(error => {
                         Log.error("DATA-MONGO-BASE-UPDATE-ITEM-BASE-ERROR",error);
                     });
                 }else{
-                    delete item['_id'];
                     database.collection(table).replaceOne({id:item.id},item).then((data) => {
                         callback(item);
                     }).catch(error => {
@@ -113,15 +113,14 @@ class Mongo {
             }
         });
     }
-    static post_bulk_base = (database,table,data_list) => {
+    static post_bulk_base = (database,table,data_items) => {
         return new Promise((callback) => {
             let data = {result_OK:false};
             let bulk_list = [];
             let date_create = DateTime.get();
-            for(let a = 0; a < data_list.length; a++){
-                let item = {insertOne:{document:data_list[a]}};
-                data_list[a].id = Str.get_guid();
-                data_list[a].date_create = date_create;
+            for(let a = 0; a < data_items.length; a++){
+                let item = {insertOne:{document:data_items[a]}};
+                data_items[a].date_create = date_create;
                 bulk_list.push(item);
             }
 
@@ -142,7 +141,8 @@ class Mongo {
         return new Promise((callback) => {
             let data = null;
             if(Mongo.check_database(database)){
-                database.collection(table).deleteOne({id:id}).then((data) => {
+                const query = { _id: new ObjectId(id) };
+                database.collection(table).deleteOne(query).then((data) => {
                     if(data){
                         data = data.deletedCount;
                     };
@@ -153,7 +153,7 @@ class Mongo {
             }
         });
     }
-    static delete_item_list = (database,table,filter) => {
+    static delete_items = (database,table,filter) => {
         return new Promise((callback) => {
             let data = null;
             if(Mongo.check_database(database)){
@@ -168,10 +168,10 @@ class Mongo {
             }
         });
     }
-    static get_id_list = (database,table,filter,sort_by,page_current,page_size,option) => {
+    static get_ids = (database,table,filter,sort_by,page_current,page_size,option) => {
         return new Promise((callback) => {
             let total_count = 0;
-            let data_list = [];
+            let data_items = [];
             let collection = {};
             async.series([
                 function(call) {
@@ -196,9 +196,9 @@ class Mongo {
                     if(Mongo.check_database(database)){
                         page_current = parseInt(page_current);
                         page_size = parseInt(page_size);
-                        database.collection(table).find(filter).sort(sort_by).collation({locale:"en_US",numericOrdering:true}).skip(page_current>0?((page_current-1)*page_size):0).limit(page_size).project({id:1,table:1,_id:0}).toArray().then((data) => {
+                        database.collection(table).find(filter).sort(sort_by).collation({locale:"en_US",numericOrdering:true}).skip(page_current>0?((page_current-1)*page_size):0).limit(page_size).project({table:1,_id:1}).toArray().then((data) => {
                             if(data){
-                                data_list = data;
+                                data_items = [...data];
                             }
                             call();
                         }).catch(error => {
@@ -209,14 +209,21 @@ class Mongo {
                     }
                 },
                 function(call) {
+                    for(const item of data_items){
+                        item['id'] = new ObjectId(item['_id']).toString();
+                        delete item['_id'];
+                    }
+                    call();
+                },
+                function(call) {
                     if(page_size==0){
-                        total_count = data_list.length;
+                        total_count = data_items.length;
                     }
                     call();
                 }
 
             ]).then(result => {
-                callback([total_count,data_list]);
+                callback([total_count,data_items]);
             }).catch(error => {
                 Log.error("PROJECT-FILENAME-UPDATE-BLANK-ERROR-5",error);
             });
