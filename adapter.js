@@ -36,52 +36,32 @@ class Adapter {
             let item_data_new_list=[];
             async.series([
                 async function(call){
-                    async.forEachOf(items,(item,key,go)=>{
-                        for(property in item[key]){
+                    for(const item of items){
+                        for(const property in item){
                             if(property!=Data_Field.ID&&property!=Data_Field.TABLE){
-                                if(!item[key][property]){
-                                    delete item[key][property];
+                                if(!item[property]){
+                                    delete item[property];
                                 }
                             }
                         }
-                        go();
-                    }, error => {
-                        if(error){
-                            Log.error('Data-Adapter-Post-Items',error);
-                        }
-                    });
+                    }
                 },
                 async function(call){
-                    async.forEachOf(items,(item,key,go)=>{
-                        if(item){
-                            async function main() {
-                                const data = await Mongo.post_item(database,item.table,item);
-                                if(data){
-                                    item.id=data.id;
-                                    Cache.delete_value(cache,Adapter.get_cache_item_attr_list_key(item.table,data.id)).then((data) => {
-                                        go();
-                                    }).catch(error => {
-                                        Log.error("Data-Adapter-Update-Item-List-2",error);
-                                    });
-                                }else{
-                                    go();
-                                }
-                            };
-                            main();
-                        }else{
-                            go();
+                    for(const item of items){
+                        const data = await Mongo.post_item(database,item.table,item);
+                        if(!Str.check_is_null(data.id)){
+                            item_data_new_list.push(data);
+                            Cache.delete_value(cache,Adapter.get_cache_item_attr_list_key(item.table,data.id)).then((data) => {
+                            }).catch(error => {
+                                Log.error("Data-Adapter-Update-Item-List-2",error);
+                            });
                         }
-                    }, error => {
-                        if(error){
-                            Log.error('post_items-2-error',error);
-                        }
-                    });
+                    }
                 },
                 async function(call){
-                    for(const item of items) {
+                    for(const item of item_data_new_list) {
                         item.source=Data_Title.SOURCE_DATABASE;
                         delete item._id;
-                        item_data_new_list.push(item);
                     }
                 },
             ]).then(result=>{

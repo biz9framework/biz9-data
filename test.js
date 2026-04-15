@@ -323,6 +323,9 @@ describe('data_many_post_items', function(){ this.timeout(25000);
         let data = {};
         let option = {};
         let post_data = Store_Logic.get_test_products();
+        post_data = Obj.merge_items(Store_Logic.get_test_products(),post_data);
+        post_data = Obj.merge_items(Store_Logic.get_test_products(),post_data);
+        post_data = Obj.merge_items(Store_Logic.get_test_products(),post_data);
         async.series([
             async function(call){
                 const [biz_response,biz_data] = await Database.get(DATA_CONFIG);
@@ -330,8 +333,9 @@ describe('data_many_post_items', function(){ this.timeout(25000);
             },
             async function(call){
                 const [biz_response,biz_data] = await Data.post_items(database,post_data,option);
-                Log.w('biz_data',biz_data);
-                Log.w('biz_response',biz_response);
+                Log.w('99_biz_data',biz_data);
+                Log.w('99_biz_data',biz_data.length);
+                //Log.w('99_biz_response',biz_response);
             },
             async function(call){
                 console.log('POST-ITEMS-SUCCESS');
