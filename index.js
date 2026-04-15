@@ -105,7 +105,7 @@ class Data {
                     cache = biz_data;
                 },
                 async function(call){
-                    const biz_data = await Adapter.get_count_item_list(database,table,search_filter);
+                    const biz_data = await Adapter.get_count_items(database,table,search_filter);
                     data = biz_data;
                     response.messages.push(Response_Logic.get_message(Data_Response_Field.ITEMS_COUNT_CONFIRM,Status_Type.SUCCESS,Data_Logic.get_message_by_response_field(Data_Response_Field.ITEMS_COUNT_CONFIRM,{title:BIZ9_CONFIG.TITLE})));
                     response.messages.push(Response_Logic.get_message(Data_Response_Field.RESPONSE_ITEMS_COUNT,Status_Type.OK,data,{title:BIZ9_CONFIG.TITLE}));
@@ -202,7 +202,6 @@ class Data {
                 },
                 async function(call){
                     const biz_data = await Adapter.delete_item(database,cache,data.table,data.id);
-                    Log.w('ddddd',biz_data);
                         if(!Str.check_is_null(biz_data)){
                             response.messages.push(Response_Logic.get_message(Response_Field.DELETE_CONFIRM,Status_Type.SUCCESS,Data_Logic.get_message_by_response_field(Response_Field.DELETE_CONFIRM,{title:BIZ9_CONFIG.TITLE})));
                             response.messages.push(Response_Logic.get_message(Data_Response_Field.ITEM_DELETE_COUNT,Status_Type.OK,biz_data,{title:BIZ9_CONFIG.TITLE}));

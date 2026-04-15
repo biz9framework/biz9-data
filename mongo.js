@@ -5,7 +5,7 @@ License GNU General Public License v3.0
 Description: BiZ9 Framework: Data - Mongo
 */
 const async = require('async');
-const {Num,Log,Str,Obj,DateTime} = require("/home/think1/www/doqbox/biz9-framework/biz9-utility/source");
+const {Log,Str,Obj,DateTime} = require("/home/think1/www/doqbox/biz9-framework/biz9-utility/source");
 const {Data_Field} = require("/home/think1/www/doqbox/biz9-framework/biz9-data-logic/source");
 const {MongoClient,ObjectId} = require("mongodb");
 let client_db = {};
@@ -55,7 +55,7 @@ class Mongo {
                 database.collection(table).findOne(query).then((data) => {
                     if(data){
                         data.id = id;
-                        delete data['_id'];
+                        delete data[Data_Field._ID];
                     }
                     callback(data);
                 }).catch(error => {
@@ -81,30 +81,36 @@ class Mongo {
     static post_item = (database,table,item,option) => {
         return new Promise((callback) => {
             option = !Obj.check_is_empty(option) ? option : {};
-            if (Str.check_is_null(item.id)){//insert
-                delete item['id'];
-                item[Data_Field.DATE_CREATE] = DateTime.get();
-                item[Data_Field.DATE_SAVE] = DateTime.get();
-                if(Mongo.check_database(database)){
+            if (Str.check_is_null(item.id)){// --insert --
+               if(Mongo.check_database(database)){
+                    delete item[Data_Field.ID];
+                    item[Data_Field.DATE_CREATE] = DateTime.get();
+                    item[Data_Field.DATE_SAVE] = DateTime.get();
+                    item[Data_Field._ID] = new ObjectId();
+                    item[Data_Field.ID] = item[Data_Field._ID].toString();
                     database.collection(table).insertOne(item).then((data) => {
-                        item.id = data.insertedId.toString();
-                        delete item['_id'];
+                        delete item[Data_Field._ID];
                         callback(item);
                     }).catch(error => {
                         Log.error("DATA-MONGO-BASE-UPDATE-ITEM-BASE-ERROR",error);
                     });
                 }
-            }else{
+            }else{ // -- update --
                 item.date_save = DateTime.get();
                 if(!option.overwrite){
-                    const query = { _id: new ObjectId(item.id) };
+                    const update_id = new ObjectId(item[Data_Field.ID]);
+                    const query = { _id: update_id };
+                    delete item[Data_Field.ID];
                     database.collection(table).updateOne(query,{$set: item}).then((data) => {
+                        item[Data_Field.ID] = update_id.toString();
                         callback(item);
                     }).catch(error => {
                         Log.error("DATA-MONGO-BASE-UPDATE-ITEM-BASE-ERROR",error);
                     });
                 }else{
-                    database.collection(table).replaceOne({id:item.id},item).then((data) => {
+                    const query = { _id: new ObjectId(item[Data_Field.ID]) };
+                    delete item[Data_Field.ID];
+                    database.collection(table).replaceOne(query,item).then((data) => {
                         callback(item);
                     }).catch(error => {
                         Log.error("DATA-MONGO-BASE-UPDATE-ITEM-BASE-ERROR",error);
@@ -116,17 +122,17 @@ class Mongo {
     static post_bulk_base = (database,table,data_items) => {
         return new Promise((callback) => {
             let data = {result_OK:false};
-            let bulk_list = [];
+            let bulk_items = [];
             let date_create = DateTime.get();
             for(let a = 0; a < data_items.length; a++){
                 let item = {insertOne:{document:data_items[a]}};
                 data_items[a].date_create = date_create;
-                bulk_list.push(item);
+                bulk_items.push(item);
             }
 
             if(Mongo.check_database(database)){
                 try {
-                    database.collection(table).bulkWrite(bulk_list,
+                    database.collection(table).bulkWrite(bulk_items,
                         { ordered: false } )
                 } catch( error ) {
                     Log.w('bulk_write_error',error);
@@ -210,8 +216,8 @@ class Mongo {
                 },
                 function(call) {
                     for(const item of data_items){
-                        item['id'] = new ObjectId(item['_id']).toString();
-                        delete item['_id'];
+                        item[Data_Field.ID] = new ObjectId(item[Data_Field._ID]).toString();
+                        delete item[Data_Field._ID];
                     }
                     call();
                 },
@@ -229,7 +235,7 @@ class Mongo {
             });
         });
     }
-    static get_count_item_list = async (database,table,filter,option) => {
+    static get_count_items = async (database,table,filter,option) => {
         return new Promise((callback) => {
             let data = 0;
             database.collection(table).countDocuments(filter).then((data) => {

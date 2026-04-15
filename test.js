@@ -148,7 +148,7 @@ describe('data_delete', function(){ this.timeout(25000);
         let database = {};
         let data = {};
         let option = {};
-        let post_data = Data_Logic.get(Project_Table.PRODUCT,'69df088b98790df133c9a10c');
+        let post_data = Data_Logic.get(Project_Table.PRODUCT,'69dfa9ff1e803c0c468ae60a');
         async.series([
             async function(call){
                 const [biz_response,biz_data] = await Database.get(DATA_CONFIG);
@@ -216,7 +216,7 @@ describe('data_get', function(){ this.timeout(25000);
             },
             async function(call){
                 // -- GET-START --
-                parent = Data_Logic.get(Project_Table.PRODUCT,'69df0bce1b66def9a73c1b98');
+                parent = Data_Logic.get(Project_Table.PRODUCT,'69dfa9ff1e803c0c468ae60a');
                 const [biz_response,biz_data] = await Data.get(database,parent.table,parent.id,option);
                 Log.w('biz_data',biz_data);
                 // -- GET-END --
@@ -294,17 +294,8 @@ describe('data_post', function(){ this.timeout(25000);
         let response={};
         let database = {};
         let data = {};
+        let post_data = {};
         let option = {};
-        // -- PRODUCT
-        /*
-        let post_data = Store_Logic.get_test_product();
-        post_data.table = Project_Table.PRODUCT;
-        post_data.parent_id = '490';
-        post_data.blank_id = '266';
-        */
-        // -- IMAGE
-        //let post_data = Data_Logic.get(Project_Table.IMAGE,0,{data:{title:'Image_'+Num.get_id(),sub_note:'Sub_Note_'+Num.get_id()}});
-        //post_data.user_id = '899';
         async.series([
             async function(call){
                 const [biz_response,biz_data] = await Database.get(DATA_CONFIG);
@@ -312,7 +303,9 @@ describe('data_post', function(){ this.timeout(25000);
             },
             async function(call){
                 // -- POST-START --
-                let post_data = Store_Logic.get_test_product({title:'Product '+Str.get_id()});
+                post_data = Store_Logic.get_test_product({title:'Product '+Str.get_id()});
+                post_data.id = '69dfa80dda6242ed2bdba57c';
+                post_data.cool = 'butter';
                 const [biz_response,biz_data] = await Data.post(database,post_data.table,post_data,option);
                 //Log.w('biz_response',biz_response);
                 Log.w('biz_data',biz_data);

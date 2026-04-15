@@ -164,7 +164,7 @@ class Adapter {
                         query_field[option.id_field] = id;
                         let page_current=1;
                         let page_size=0;
-                        const [items,item_count,page_count] = await Mongo.get_ids(database,cache,table,query_field,{},page_current,page_size,option);
+                        const [items,item_count,page_count] = await Adapter.get_items(database,cache,table,query_field,{},page_current,page_size,option);
                         if(items.length>0){
                             data = items[0];
                         }else{
