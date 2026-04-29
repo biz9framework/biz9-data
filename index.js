@@ -115,7 +115,7 @@ class Data {
                 async function(call){
                     const biz_data = await Adapter.get_count_items(database,table,search_filter);
                     data = biz_data;
-                    response.messages.push(Response_Logic.get_message(Data_Response_Field.ITEMS_COUNT_CONFIRM,Status_Type.SUCCESS,Data_Logic.get_message_by_response_field(Data_Response_Field.ITEMS_COUNT_CONFIRM,{title:Config.TITLE})));
+                    response.messages.push(Response_Logic.get_message(Data_Response_Field.ITEMS_COUNT_CONFIRM,Status_Type.SUCCESS,Data_Logic.get_message_by_response_field(Data_Response_Field.ITEMS_COUNT_CONFIRM),{title:Config.TITLE}));
                     response.messages.push(Response_Logic.get_message(Data_Response_Field.RESPONSE_ITEMS_COUNT,Status_Type.OK,data,{title:Config.TITLE}));
                 },
                  async function(call){
