@@ -25,31 +25,6 @@ const {Data_Logic,Data_Value_Type,Data_Table,Data_Field,Data_Response_Field}=req
 -- data_post_items
 -- data_search
 */
-/* --- DATA CONFIG END --- */
-//9_connect - 9_test_connect
-describe('connect', function(){ this.timeout(25000);
-    it("_connect", function(done){
-        let response={};
-        let cache=null;
-        let database = {};
-        let data = {};
-        async.series([
-            async function(call){
-                const [biz_response,biz_data] = await Database.get(Data_Config);
-                database = biz_data;
-            },
-            async function(call){
-                //-->
-                let print_test = false;
-                // -- POST-START --//
-            },
-        ],
-            function(error, result){
-                console.log('CONNECT-DONE');
-                done();
-            });
-    });
-});
 //9_count - 9_test_count
 describe('data_count', function(){ this.timeout(25000);
     it("_data_count", function(done){
@@ -208,8 +183,6 @@ describe('data_get', function(){ this.timeout(25000);
                 let option = { foreigns:[foreign_user,foreign_cart_item] };
                 */
                 // --- GET-STORE-CART-END ---
-
-
                 /*
                 let foreign_cart_sub_item_parent = Data_Logic.get_foreign(Data_Value_Type.COUNT,Store_Table.PRODUCT,Data_Field.ID,Data_Field.PARENT_ID,{title:'parent'});
                 let foreign_cart_sub_item = Data_Logic.get_foreign(Data_Value_Type.ITEMS,Store_Table.CART_SUB_ITEM,Store_Field.CART_NUMBER,Store_Field.CART_NUMBER,{title:'cart_sub_items',foreigns:[foreign_cart_sub_item_parent]});
