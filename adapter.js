@@ -75,6 +75,7 @@ class Adapter {
             async.series([
                 async function(call){
                     const biz_data = await Mongo.post_item(database,table,item_data,option);
+                    item_data = biz_data;
                 },
                 async function(call){
                     if(item_data.id){

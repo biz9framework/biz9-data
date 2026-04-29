@@ -5,8 +5,7 @@ License GNU General Public License v3.0
 Description: BiZ9 Framework: Data
 */
 const async = require('async');
-const {Config}=require('./project');
-BIZ9_CONFIG=Config.get_biz9_config();
+const {Config}=require('./constant');
 const {Scriptz}=require("biz9-scriptz");
 const {Data_Logic,Data_Response_Field,Data_Field,Data_Type,Data_Table,Data_Value_Type}=require("/home/think1/www/doqbox/biz9-framework/biz9-data-logic/source");
 const {Log,Str,Obj,Response_Logic,Response_Field,Status_Type}=require("/home/think1/www/doqbox/biz9-framework/biz9-utility/source");
@@ -96,9 +95,9 @@ class Data {
             let data = {};
             async.series([
                 async function(call) {
-                    response.messages.push(Response_Logic.get_message(Data_Response_Field.PARAM_APP_ID,Status_Type.OK,database.data_config.APP_ID,{title:BIZ9_CONFIG.TITLE}));
-                    response.messages.push(Response_Logic.get_message(Data_Response_Field.PARAM_TABLE,Status_Type.OK,table,{title:BIZ9_CONFIG.TITLE}));
-                    response.messages.push(Response_Logic.get_message(Data_Response_Field.PARAM_SEARCH,Status_Type.OK,search_filter,{title:BIZ9_CONFIG.TITLE}));
+                    response.messages.push(Response_Logic.get_message(Data_Response_Field.PARAM_APP_ID,Status_Type.OK,database.data_config.APP_ID,{title:Config.TITLE}));
+                    response.messages.push(Response_Logic.get_message(Data_Response_Field.PARAM_TABLE,Status_Type.OK,table,{title:Config.TITLE}));
+                    response.messages.push(Response_Logic.get_message(Data_Response_Field.PARAM_SEARCH,Status_Type.OK,search_filter,{title:Config.TITLE}));
                 },
                 async function(call) {
                     const biz_data = await Cache.get(database.data_config);
@@ -107,8 +106,8 @@ class Data {
                 async function(call){
                     const biz_data = await Adapter.get_count_items(database,table,search_filter);
                     data = biz_data;
-                    response.messages.push(Response_Logic.get_message(Data_Response_Field.ITEMS_COUNT_CONFIRM,Status_Type.SUCCESS,Data_Logic.get_message_by_response_field(Data_Response_Field.ITEMS_COUNT_CONFIRM,{title:BIZ9_CONFIG.TITLE})));
-                    response.messages.push(Response_Logic.get_message(Data_Response_Field.RESPONSE_ITEMS_COUNT,Status_Type.OK,data,{title:BIZ9_CONFIG.TITLE}));
+                    response.messages.push(Response_Logic.get_message(Data_Response_Field.ITEMS_COUNT_CONFIRM,Status_Type.SUCCESS,Data_Logic.get_message_by_response_field(Data_Response_Field.ITEMS_COUNT_CONFIRM,{title:Config.TITLE})));
+                    response.messages.push(Response_Logic.get_message(Data_Response_Field.RESPONSE_ITEMS_COUNT,Status_Type.OK,data,{title:Config.TITLE}));
                 },
                  async function(call){
                     response = Response_Logic.get_status(response);
@@ -136,9 +135,9 @@ class Data {
             option = !Obj.check_is_empty(option) ? option : {};
             async.series([
                 async function(call) {
-                    response.messages.push(Response_Logic.get_message(Data_Response_Field.PARAM_APP_ID,Status_Type.OK,database.data_config.APP_ID,{title:BIZ9_CONFIG.TITLE}));
-                    response.messages.push(Response_Logic.get_message(Data_Response_Field.PARAM_TABLE,Status_Type.OK,table,{title:BIZ9_CONFIG.TITLE}));
-                    response.messages.push(Response_Logic.get_message(Data_Response_Field.PARAM_ID,Status_Type.OK,id,{title:BIZ9_CONFIG.TITLE}));
+                    response.messages.push(Response_Logic.get_message(Data_Response_Field.PARAM_APP_ID,Status_Type.OK,database.data_config.APP_ID,{title:Config.TITLE}));
+                    response.messages.push(Response_Logic.get_message(Data_Response_Field.PARAM_TABLE,Status_Type.OK,table,{title:Config.TITLE}));
+                    response.messages.push(Response_Logic.get_message(Data_Response_Field.PARAM_ID,Status_Type.OK,id,{title:Config.TITLE}));
                 },
                 async function(call) {
                     const biz_data = await Cache.get(database.data_config);
@@ -164,9 +163,9 @@ class Data {
                 },
                 async function(call){
                     if(!Str.check_is_null(copy_data.id)){
-                        response.messages.push(Response_Logic.get_message(Data_Response_Field.ITEM_COPY_CONFIRM,Status_Type.SUCCESS,Data_Logic.get_message_by_response_field(Data_Response_Field.ITEM_COPY_CONFIRM,{title:BIZ9_CONFIG.TITLE})));
+                        response.messages.push(Response_Logic.get_message(Data_Response_Field.ITEM_COPY_CONFIRM,Status_Type.SUCCESS,Data_Logic.get_message_by_response_field(Data_Response_Field.ITEM_COPY_CONFIRM),{title:Config.TITLE}));
                         }else{
-                        response.messages.push(Response_Logic.get_message(Data_Response_Field.ITEM_COPY_FAIL,Status_Type.FAIL,Data_Logic.get_message_by_response_field(Data_Response_Field.ITEM_COPY_FAIL,{title:BIZ9_CONFIG.TITLE})));
+                        response.messages.push(Response_Logic.get_message(Data_Response_Field.ITEM_COPY_FAIL,Status_Type.FAIL,Data_Logic.get_message_by_response_field(Data_Response_Field.ITEM_COPY_FAIL),{title:Config.TITLE}));
                         }
                     response = Response_Logic.get_status(response);
                 },
@@ -192,9 +191,9 @@ class Data {
             option = !Obj.check_is_empty(option) ? option : {};
             async.series([
                 async function(call) {
-                    response.messages.push(Response_Logic.get_message(Data_Response_Field.PARAM_APP_ID,Status_Type.OK,database.data_config.APP_ID,{title:BIZ9_CONFIG.TITLE}));
-                    response.messages.push(Response_Logic.get_message(Data_Response_Field.PARAM_TABLE,Status_Type.OK,table,{title:BIZ9_CONFIG.TITLE}));
-                    response.messages.push(Response_Logic.get_message(Data_Response_Field.PARAM_ID,Status_Type.OK,id,{title:BIZ9_CONFIG.TITLE}));
+                    response.messages.push(Response_Logic.get_message(Data_Response_Field.PARAM_APP_ID,Status_Type.OK,database.data_config.APP_ID,{title:Config.TITLE}));
+                    response.messages.push(Response_Logic.get_message(Data_Response_Field.PARAM_TABLE,Status_Type.OK,table,{title:Config.TITLE}));
+                    response.messages.push(Response_Logic.get_message(Data_Response_Field.PARAM_ID,Status_Type.OK,id,{title:Config.TITLE}));
                 },
                 async function(call){
                     const biz_data = await Cache.get(database.data_config);
@@ -203,14 +202,14 @@ class Data {
                 async function(call){
                     const biz_data = await Adapter.delete_item(database,cache,data.table,data.id);
                         if(!Str.check_is_null(biz_data)){
-                            response.messages.push(Response_Logic.get_message(Response_Field.DELETE_CONFIRM,Status_Type.SUCCESS,Data_Logic.get_message_by_response_field(Response_Field.DELETE_CONFIRM,{title:BIZ9_CONFIG.TITLE})));
-                            response.messages.push(Response_Logic.get_message(Data_Response_Field.ITEM_DELETE_COUNT,Status_Type.OK,biz_data,{title:BIZ9_CONFIG.TITLE}));
-                            response.messages.push(Response_Logic.get_message(Data_Response_Field.ITEM_CACHE_DELETE,Status_Type.OK,true,{title:BIZ9_CONFIG.TITLE}));
-                            response.messages.push(Response_Logic.get_message(Data_Response_Field.ITEM_DATABASE_DELETE,Status_Type.OK,true,{title:BIZ9_CONFIG.TITLE}));
+                            response.messages.push(Response_Logic.get_message(Response_Field.DELETE_CONFIRM,Status_Type.SUCCESS,Data_Logic.get_message_by_response_field(Response_Field.DELETE_CONFIRM,{title:Config.TITLE})));
+                            response.messages.push(Response_Logic.get_message(Data_Response_Field.ITEM_DELETE_COUNT,Status_Type.OK,biz_data,{title:Config.TITLE}));
+                            response.messages.push(Response_Logic.get_message(Data_Response_Field.ITEM_CACHE_DELETE,Status_Type.OK,true,{title:Config.TITLE}));
+                            response.messages.push(Response_Logic.get_message(Data_Response_Field.ITEM_DATABASE_DELETE,Status_Type.OK,true,{title:Config.TITLE}));
                         }else{
-                            response.messages.push(Response_Logic.get_message(Response_Field.DELETE_FAIL,Status_Type.FAIL,Data_Logic.get_message_by_response_field(Response_Field.DELETE_FAIL,{title:BIZ9_CONFIG.TITLE})));
-                            response.messages.push(Response_Logic.get_message(Data_Response_Field.ITEM_CACHE_DELETE,Status_Type.OK,null,{title:BIZ9_CONFIG.TITLE}));
-                            response.messages.push(Response_Logic.get_message(Data_Response_Field.ITEM_DATABASE_DELETE,Status_Type.OK,null,{title:BIZ9_CONFIG.TITLE}));
+                            response.messages.push(Response_Logic.get_message(Response_Field.DELETE_FAIL,Status_Type.FAIL,Data_Logic.get_message_by_response_field(Response_Field.DELETE_FAIL,{title:Config.TITLE})));
+                            response.messages.push(Response_Logic.get_message(Data_Response_Field.ITEM_CACHE_DELETE,Status_Type.OK,null,{title:Config.TITLE}));
+                            response.messages.push(Response_Logic.get_message(Data_Response_Field.ITEM_DATABASE_DELETE,Status_Type.OK,null,{title:Config.TITLE}));
                         }
                 },
                 //check all
@@ -241,10 +240,10 @@ class Data {
             option = !Obj.check_is_empty(option) ? option : {};
             async.series([
                 async function(call) {
-                    response.messages.push(Response_Logic.get_message(Data_Response_Field.PARAM_APP_ID,Status_Type.OK,database.data_config.APP_ID,{title:BIZ9_CONFIG.TITLE}));
-                    response.messages.push(Response_Logic.get_message(Data_Response_Field.PARAM_TABLE,Status_Type.OK,table,{title:BIZ9_CONFIG.TITLE}));
-                    response.messages.push(Response_Logic.get_message(Data_Response_Field.PARAM_SEARCH,Status_Type.OK,filter,{title:BIZ9_CONFIG.TITLE}));
-                    response.messages.push(Response_Logic.get_message(Data_Response_Field.PARAM_OPTION,Status_Type.OK,option,{title:BIZ9_CONFIG.TITLE}));
+                    response.messages.push(Response_Logic.get_message(Data_Response_Field.PARAM_APP_ID,Status_Type.OK,database.data_config.APP_ID,{title:Config.TITLE}));
+                    response.messages.push(Response_Logic.get_message(Data_Response_Field.PARAM_TABLE,Status_Type.OK,table,{title:Config.TITLE}));
+                    response.messages.push(Response_Logic.get_message(Data_Response_Field.PARAM_SEARCH,Status_Type.OK,filter,{title:Config.TITLE}));
+                    response.messages.push(Response_Logic.get_message(Data_Response_Field.PARAM_OPTION,Status_Type.OK,option,{title:Config.TITLE}));
                 },
                 async function(call) {
                     const biz_data = await Cache.get(database.data_config);
@@ -259,7 +258,7 @@ class Data {
                 },
                 async function(call){
                     if(delete_items.length>0){
-                        response.messages.push(Response_Logic.get_message(Data_Response_Field.ITEMS_DELETE_COUNT,Status_Type.OK,delete_items.length,{title:BIZ9_CONFIG.TITLE}));
+                        response.messages.push(Response_Logic.get_message(Data_Response_Field.ITEMS_DELETE_COUNT,Status_Type.OK,delete_items.length,{title:Config.TITLE}));
                     for(const data_item of delete_items){
                         let query_field = {};
                         query_field[Data_Field.PARENT_ID] = data_item.id
@@ -270,9 +269,9 @@ class Data {
                 },
                 async function(call){
                     if(delete_items.length>0){
-                        response.messages.push(Response_Logic.get_message(Data_Response_Field.ITEMS_DELETE_CONFIRM,Status_Type.SUCCESS,Data_Logic.get_message_by_response_field(Data_Response_Field.ITEMS_DELETE_CONFIRM,{title:BIZ9_CONFIG.TITLE})));
+                        response.messages.push(Response_Logic.get_message(Data_Response_Field.ITEMS_DELETE_CONFIRM,Status_Type.SUCCESS,Data_Logic.get_message_by_response_field(Data_Response_Field.ITEMS_DELETE_CONFIRM),{title:Config.TITLE}));
                     }else{
-                        response.messages.push(Response_Logic.get_message(Data_Response_Field.ITEMS_DELETE_CONFIRM,Status_Type.FAIL,Data_Logic.get_message_by_response_field(Data_Response_Field.ITEMS_DELETE_FAIL,{title:BIZ9_CONFIG.TITLE})));
+                        response.messages.push(Response_Logic.get_message(Data_Response_Field.ITEMS_DELETE_CONFIRM,Status_Type.FAIL,Data_Logic.get_message_by_response_field(Data_Response_Field.ITEMS_DELETE_FAIL),{title:Config.TITLE}));
                     }
                     response = Response_Logic.get_status(response);
                 },
@@ -305,11 +304,11 @@ class Data {
             async.series([
                 async function(call) {
                     response.messages.push(Response_Logic.get_message(Data_Response_Field.PARAM_APP_ID,Status_Type.OK,database.data_config.APP_ID));
-                    response.messages.push(Response_Logic.get_message(Data_Response_Field.PARAM_TABLE,Status_Type.OK,table,{title:BIZ9_CONFIG.TITLE}));
-                    response.messages.push(Response_Logic.get_message(Data_Response_Field.PARAM_ID,Status_Type.OK,id,{title:BIZ9_CONFIG.TITLE}));
-                    response.messages.push(Response_Logic.get_message(Data_Response_Field.PARAM_OPTION,Status_Type.OK,option,{title:BIZ9_CONFIG.TITLE}));
+                    response.messages.push(Response_Logic.get_message(Data_Response_Field.PARAM_TABLE,Status_Type.OK,table,{title:Config.TITLE}));
+                    response.messages.push(Response_Logic.get_message(Data_Response_Field.PARAM_ID,Status_Type.OK,id,{title:Config.TITLE}));
+                    response.messages.push(Response_Logic.get_message(Data_Response_Field.PARAM_OPTION,Status_Type.OK,option,{title:Config.TITLE}));
                     if(option.field){
-                         response.messages.push(Response_Logic.get_message(Data_Response_Field.OPTION_FIELD,Status_Type.OK,option.field,{title:BIZ9_CONFIG.TITLE}));
+                         response.messages.push(Response_Logic.get_message(Data_Response_Field.OPTION_FIELD,Status_Type.OK,option.field,{title:Config.TITLE}));
                     }
                 },
                 async function(call) {
@@ -319,7 +318,7 @@ class Data {
                 async function(call){
                     if(option.cache_delete){
                         const biz_data = await Adapter.delete_item_cache(database,cache,data.table,data.id,option);
-                        response.messages.push(Response_Logic.get_message(Data_Response_Field.OPTION_CACHE_DELETE,Status_Type.OK,true,{title:BIZ9_CONFIG.TITLE}));
+                        response.messages.push(Response_Logic.get_message(Data_Response_Field.OPTION_CACHE_DELETE,Status_Type.OK,true,{title:Config.TITLE}));
                     }
                 },
                 //item_by_id
@@ -331,13 +330,13 @@ class Data {
                         }else{
                             data = biz_data;
                             data[option.title] = Obj.merge({},biz_data);;
-                            response.messages.push(Response_Logic.get_message(Data_Response_Field.OPTION_TITLE,Status_Type.OK,option.title,{title:BIZ9_CONFIG.TITLE}));
+                            response.messages.push(Response_Logic.get_message(Data_Response_Field.OPTION_TITLE,Status_Type.OK,option.title,{title:Config.TITLE}));
                         }
                 },
                 //9_get_join 9_join
                 function(call){
                     if(option.joins){
-                        response.messages.push(Response_Logic.get_message(Data_Response_Field.OPTION_JOINS,Status_Type.OK,option.joins,{title:BIZ9_CONFIG.TITLE}));
+                        response.messages.push(Response_Logic.get_message(Data_Response_Field.OPTION_JOINS,Status_Type.OK,option.joins,{title:Config.TITLE}));
                         Join.get_data(database,cache,option).then(([biz_response,biz_data])=>{
                             for(const search_item of biz_data){
                                 data[search_item.title+"_"+Data_Type.JOIN] = search_item.data;
@@ -358,16 +357,16 @@ class Data {
                 //9_foreign 9_item_foreign
                 async function(call){
                     if(option.foreigns && !Str.check_is_null(data.id)){
-                        response.messages.push(Response_Logic.get_message(Data_Response_Field.OPTION_FOREIGNS,Status_Type.OK,option.foreigns,{title:BIZ9_CONFIG.TITLE}));
+                        response.messages.push(Response_Logic.get_message(Data_Response_Field.OPTION_FOREIGNS,Status_Type.OK,option.foreigns,{title:Config.TITLE}));
                         const biz_data = await Foreign.get_data(database,cache,[data],option);
                         data = biz_data[0];
                     }
                 },
                 async function(call){
                         if(!Str.check_is_null(data.id)){
-                            response.messages.push(Response_Logic.get_message(Response_Field.GET_CONFIRM,Status_Type.SUCCESS,Data_Logic.get_message_by_response_field(Response_Field.GET_CONFIRM,{title:BIZ9_CONFIG.TITLE})));
+                            response.messages.push(Response_Logic.get_message(Response_Field.GET_CONFIRM,Status_Type.SUCCESS,Data_Logic.get_message_by_response_field(Response_Field.GET_CONFIRM,{title:Config.TITLE})));
                         }else{
-                            response.messages.push(Response_Logic.get_message(Response_Field.GET_FAIL,Status_Type.FAIL,Data_Logic.get_message_by_response_field(Response_Field.GET_FAIL,{title:BIZ9_CONFIG.TITLE})));
+                            response.messages.push(Response_Logic.get_message(Response_Field.GET_FAIL,Status_Type.FAIL,Data_Logic.get_message_by_response_field(Response_Field.GET_FAIL,{title:Config.TITLE})));
                         }
 
                     response = Response_Logic.get_status(response);
@@ -396,10 +395,10 @@ class Data {
             option = !Obj.check_is_empty(option) ? option : {};
             async.series([
             async function(call) {
-                    response.messages.push(Response_Logic.get_message(Data_Response_Field.PARAM_APP_ID,Status_Type.OK,database.data_config.APP_ID,{title:BIZ9_CONFIG.TITLE}));
-                    response.messages.push(Response_Logic.get_message(Data_Response_Field.PARAM_TABLE,Status_Type.OK,table,{title:BIZ9_CONFIG.TITLE}));
-                    response.messages.push(Response_Logic.get_message(Data_Response_Field.PARAM_DATA,Status_Type.OK,data,{title:BIZ9_CONFIG.TITLE}));
-                    response.messages.push(Response_Logic.get_message(Data_Response_Field.PARAM_ID,Status_Type.OK,data.id,{title:BIZ9_CONFIG.TITLE}));
+                    response.messages.push(Response_Logic.get_message(Data_Response_Field.PARAM_APP_ID,Status_Type.OK,database.data_config.APP_ID,{title:Config.TITLE}));
+                    response.messages.push(Response_Logic.get_message(Data_Response_Field.PARAM_TABLE,Status_Type.OK,table,{title:Config.TITLE}));
+                    response.messages.push(Response_Logic.get_message(Data_Response_Field.PARAM_DATA,Status_Type.OK,data,{title:Config.TITLE}));
+                    response.messages.push(Response_Logic.get_message(Data_Response_Field.PARAM_ID,Status_Type.OK,data.id,{title:Config.TITLE}));
             },
             async function(call) {
                     const biz_data = await Cache.get(database.data_config);
@@ -408,7 +407,7 @@ class Data {
                 //clean
                 function(call){
                     if(option.clean){
-                        response.messages.push(Response_Logic.get_message(Data_Response_Field.OPTION_CLEAN,Status_Type.OK,true,{title:BIZ9_CONFIG.TITLE}));
+                        response.messages.push(Response_Logic.get_message(Data_Response_Field.OPTION_CLEAN,Status_Type.OK,true,{title:Config.TITLE}));
                         let new_data = {};
                         for(const field in data){
                             if(!Obj.check_is_array(data[field]) &&
@@ -428,7 +427,7 @@ class Data {
                 //delete cache item
                 async function(call){
                     if(option.cache_delete || option.overwrite){
-                        response.messages.push(Response_Logic.get_message(Data_Response_Field.OPTION_CACHE_DELETE,Status_Type.OK,true,{title:BIZ9_CONFIG.TITLE}));
+                        response.messages.push(Response_Logic.get_message(Data_Response_Field.OPTION_CACHE_DELETE,Status_Type.OK,true,{title:Config.TITLE}));
                         const biz_data = await Adapter.delete_item_cache(database,cache,table,data.id);
                     }
                 },
@@ -439,16 +438,16 @@ class Data {
                 //reset
                 async function(call){
                     if(option.reset && data.id){
-                        response.messages.push(Response_Logic.get_message(Data_Response_Field.OPTION_RESET,Status_Type.OK,true,{title:BIZ9_CONFIG.TITLE}));
+                        response.messages.push(Response_Logic.get_message(Data_Response_Field.OPTION_RESET,Status_Type.OK,true,{title:Config.TITLE}));
                         const biz_data = await Adapter.get_item(database,cache,data.table,data.id);
                         data = biz_data;
                     }
                 },
                 async function(call){
                     if(!Str.check_is_null(data.id)){
-                        response.messages.push(Response_Logic.get_message(Response_Field.POST_CONFIRM,Status_Type.SUCCESS,Data_Logic.get_message_by_response_field(Response_Field.POST_CONFIRM,{title:BIZ9_CONFIG.TITLE})));
+                        response.messages.push(Response_Logic.get_message(Response_Field.POST_CONFIRM,Status_Type.SUCCESS,Data_Logic.get_message_by_response_field(Response_Field.POST_CONFIRM,{title:Config.TITLE})));
                         }else{
-                        response.messages.push(Response_Logic.get_message(Response_Field.POST_FAIL,Status_Type.FAIL,Data_Logic.get_message_by_response_field(Response_Field.POST_FAIL,{title:BIZ9_CONFIG.TITLE})));
+                        response.messages.push(Response_Logic.get_message(Response_Field.POST_FAIL,Status_Type.FAIL,Data_Logic.get_message_by_response_field(Response_Field.POST_FAIL,{title:Config.TITLE})));
                         }
                     response = Response_Logic.get_status(response);
                 },
@@ -471,9 +470,9 @@ class Data {
             let response=Response_Logic.get();
             async.series([
                 async function(call) {
-                    response.messages.push(Response_Logic.get_message(Data_Response_Field.PARAM_APP_ID,Status_Type.OK,database.data_config.APP_ID,{title:BIZ9_CONFIG.TITLE}));
-                    response.messages.push(Response_Logic.get_message(Data_Response_Field.PARAM_DATA_ITEMS,Status_Type.OK,data_items,{title:BIZ9_CONFIG.TITLE}));
-                    response.messages.push(Response_Logic.get_message(Data_Response_Field.PARAM_DATA_ITEMS_COUNT,Status_Type.OK,data_items.length,{title:BIZ9_CONFIG.TITLE}));
+                    response.messages.push(Response_Logic.get_message(Data_Response_Field.PARAM_APP_ID,Status_Type.OK,database.data_config.APP_ID,{title:Config.TITLE}));
+                    response.messages.push(Response_Logic.get_message(Data_Response_Field.PARAM_DATA_ITEMS,Status_Type.OK,data_items,{title:Config.TITLE}));
+                    response.messages.push(Response_Logic.get_message(Data_Response_Field.PARAM_DATA_ITEMS_COUNT,Status_Type.OK,data_items.length,{title:Config.TITLE}));
                 },
                 async function(call) {
                     const biz_data = await Cache.get(database.data_config);
@@ -485,11 +484,12 @@ class Data {
                 },
                 async function(call){
                     if(data_items.length>0){
-                        response.messages.push(Response_Logic.get_message(Data_Response_Field.ITEMS_POST_CONFIRM,Status_Type.SUCCESS,Data_Logic.get_message_by_response_field(Data_Response_Field.ITEMS_POST_CONFIRM,{title:BIZ9_CONFIG.TITLE})));
-                        response.messages.push(Response_Logic.get_message(Data_Response_Field.RESPONSE_ITEMS_COUNT,Status_Type.OK,data_items.length,{title:BIZ9_CONFIG.TITLE}));
+                            response.messages.push(Response_Logic.get_message(Data_Response_Field.ITEMS_POST_CONFIRM,Status_Type.SUCCESS,Data_Logic.get_message_by_response_field(Data_Response_Field.ITEMS_POST_CONFIRM),{title:Config.TITLE}));
+                        response.messages.push(Response_Logic.get_message(Data_Response_Field.RESPONSE_ITEMS_COUNT,Status_Type.OK,data_items.length,{title:Config.TITLE}));
 
                     }else{
-                        response.messages.push(Response_Logic.get_message(Data_Response_Field.ITEMS_POST_FAIL,Status_Type.FAIL,Data_Logic.get_message_by_response_field(Data_Response_Field.ITEMS_POST_FAIL,{title:BIZ9_CONFIG.TITLE})));
+                        response.messages.push(Response_Logic.get_message(Data_Response_Field.ITEMS_POST_FAIL,Status_Type.FAIL,Data_Logic.get_message_by_response_field(Data_Response_Field.ITEMS_POST_FAIL),{title:Config.TITLE}));
+
                     }
                     response = Response_Logic.get_status(response);
                 },
@@ -515,13 +515,13 @@ class Data {
             option = !Obj.check_is_empty(option) ? option : {};
             async.series([
                 async function(call) {
-                    response.messages.push(Response_Logic.get_message(Data_Response_Field.PARAM_APP_ID,Status_Type.OK,database.data_config.APP_ID,{title:BIZ9_CONFIG.TITLE}));
-                    response.messages.push(Response_Logic.get_message(Data_Response_Field.PARAM_TABLE,Status_Type.OK,table,{title:BIZ9_CONFIG.TITLE}));
-                    response.messages.push(Response_Logic.get_message(Data_Response_Field.PARAM_OPTION,Status_Type.OK,option,{title:BIZ9_CONFIG.TITLE}));
-                    response.messages.push(Response_Logic.get_message(Data_Response_Field.PARAM_SEARCH,Status_Type.OK,filter,{title:BIZ9_CONFIG.TITLE}));
-                    response.messages.push(Response_Logic.get_message(Data_Response_Field.PARAM_SORT_BY,Status_Type.OK,sort_by,{title:BIZ9_CONFIG.TITLE}));
-                    response.messages.push(Response_Logic.get_message(Data_Response_Field.PARAM_PAGE_CURRENT,Status_Type.OK,page_current,{title:BIZ9_CONFIG.TITLE}));
-                    response.messages.push(Response_Logic.get_message(Data_Response_Field.PARAM_PAGE_SIZE,Status_Type.OK,page_size,{title:BIZ9_CONFIG.TITLE}));
+                    response.messages.push(Response_Logic.get_message(Data_Response_Field.PARAM_APP_ID,Status_Type.OK,database.data_config.APP_ID,{title:Config.TITLE}));
+                    response.messages.push(Response_Logic.get_message(Data_Response_Field.PARAM_TABLE,Status_Type.OK,table,{title:Config.TITLE}));
+                    response.messages.push(Response_Logic.get_message(Data_Response_Field.PARAM_OPTION,Status_Type.OK,option,{title:Config.TITLE}));
+                    response.messages.push(Response_Logic.get_message(Data_Response_Field.PARAM_SEARCH,Status_Type.OK,filter,{title:Config.TITLE}));
+                    response.messages.push(Response_Logic.get_message(Data_Response_Field.PARAM_SORT_BY,Status_Type.OK,sort_by,{title:Config.TITLE}));
+                    response.messages.push(Response_Logic.get_message(Data_Response_Field.PARAM_PAGE_CURRENT,Status_Type.OK,page_current,{title:Config.TITLE}));
+                    response.messages.push(Response_Logic.get_message(Data_Response_Field.PARAM_PAGE_SIZE,Status_Type.OK,page_size,{title:Config.TITLE}));
                 },
                 async function(call) {
                     const biz_data = await Cache.get(database.data_config);
@@ -534,14 +534,14 @@ class Data {
                         data.page_count=page_count;
                         data.search=search;
                         data[Data_Field.ITEMS]=items;
-                        response.messages.push(Response_Logic.get_message(Data_Response_Field.RESPONSE_ITEMS_COUNT,Status_Type.OK,items.length,{title:BIZ9_CONFIG.TITLE}));
-                        response.messages.push(Response_Logic.get_message(Data_Response_Field.RESPONSE_TOTAL_ITEMS_COUNT,Status_Type.OK,item_count,{title:BIZ9_CONFIG.TITLE}));
+                        response.messages.push(Response_Logic.get_message(Data_Response_Field.RESPONSE_ITEMS_COUNT,Status_Type.OK,items.length,{title:Config.TITLE}));
+                        response.messages.push(Response_Logic.get_message(Data_Response_Field.RESPONSE_TOTAL_ITEMS_COUNT,Status_Type.OK,item_count,{title:Config.TITLE}));
                 },
                 //9_items_join 9_search_join 9_joins
                 async function(call){
                     if(option.joins){
                         const [biz_response,biz_data] = await Join.get_data(database,cache,option);
-                            response.messages.push(Response_Logic.get_message(Data_Response_Field.OPTION_JOINS,Status_Type.SUCCESS,option.joins,{title:BIZ9_CONFIG.TITLE}));
+                            response.messages.push(Response_Logic.get_message(Data_Response_Field.OPTION_JOINS,Status_Type.SUCCESS,option.joins,{title:Config.TITLE}));
                             for(const search_item of biz_data){
                                 data[search_item.title+"_"+Data_Type.JOIN] = search_item.data;
                                 if(search_item.value_type == Data_Value_Type.ITEMS){
@@ -557,14 +557,14 @@ class Data {
                     if(option.foreigns && data[Data_Field.ITEMS].length > 0){
                         const biz_data = await Foreign.get_data(database,cache,data[Data_Field.ITEMS],option);
                         data[Data_Field.ITEMS] = biz_data;
-                        response.messages.push(Response_Logic.get_message(Data_Field.RESPONSE_FOREIGNS,Status_Type.SUCCESS,option.foreigns),{title:BIZ9_CONFIG.TITLE});
+                        response.messages.push(Response_Logic.get_message(Data_Field.RESPONSE_FOREIGNS,Status_Type.SUCCESS,option.foreigns),{title:Config.TITLE});
                     }
                 },
                 async function(call){
                     if(data.items){
-                        response.messages.push(Response_Logic.get_message(Data_Response_Field.ITEMS_SEARCH_CONFIRM,Status_Type.SUCCESS,Data_Logic.get_message_by_response_field(Data_Response_Field.ITEMS_SEARCH_CONFIRM,{title:BIZ9_CONFIG.TITLE})));
+                        response.messages.push(Response_Logic.get_message(Data_Response_Field.ITEMS_SEARCH_CONFIRM,Status_Type.SUCCESS,Data_Logic.get_message_by_response_field(Data_Response_Field.ITEMS_SEARCH_CONFIRM),{title:Config.TITLE}));
                     }else{
-                        response.messages.push(Response_Logic.get_message(Data_Response_Field.ITEMS_SEARCH_FAIL,Status_Type.FAIL,Data_Logic.get_message_by_response_field(Data_Response_Field.ITEMS_SEARCH_FAIL,{title:BIZ9_CONFIG.TITLE})));
+                        response.messages.push(Response_Logic.get_message(Data_Response_Field.ITEMS_SEARCH_FAIL,Status_Type.FAIL,Data_Logic.get_message_by_response_field(Data_Response_Field.ITEMS_SEARCH_FAIL),{title:Config.TITLE}));
                     }
                     response = Response_Logic.get_status(response);
                 },
@@ -605,8 +605,8 @@ class Data {
             let data = {};
             async.series([
                 async function(call) {
-                    response.messages.push(Response_Logic.get_message(Data_Response_Field.PARAM_APP_ID,Status_Type.OK,database.data_config.APP_ID,{title:BIZ9_CONFIG.TITLE}));
-                    response.messages.push(Response_Logic.get_message(Data_Response_Field.PARAM_TABLE,Status_Type.OK,table,{title:BIZ9_CONFIG.TITLE}));
+                    response.messages.push(Response_Logic.get_message(Data_Response_Field.PARAM_APP_ID,Status_Type.OK,database.data_config.APP_ID,{title:Config.TITLE}));
+                    response.messages.push(Response_Logic.get_message(Data_Response_Field.PARAM_TABLE,Status_Type.OK,table,{title:Config.TITLE}));
                 },
                 async function(call){
                     const [biz_response,biz_data] = await get(database,table,items);

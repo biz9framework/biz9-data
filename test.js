@@ -16,8 +16,7 @@ const {Cart_Data}=require("/home/think1/www/doqbox/biz9-framework/biz9-store-dat
 const {User_Field,User_Type,User_Table,User_Logic}=require("/home/think1/www/doqbox/biz9-framework/biz9-user/source");
 const {Data_Logic,Data_Value_Type,Data_Table,Data_Field,Data_Response_Field}=require("/home/think1/www/doqbox/biz9-framework/biz9-data-logic/source");
 /*
- * availble tests
-- connect
+ * 9_define
 -- data_count
 -- data_copy
 -- data_delete
@@ -26,7 +25,6 @@ const {Data_Logic,Data_Value_Type,Data_Table,Data_Field,Data_Response_Field}=req
 -- data_post
 -- data_post_items
 -- data_search
----group_add
 */
 /* --- TEST CONFIG START --- */
 const APP_ID = 'test-stage-april';
@@ -50,6 +48,7 @@ class Project_Table{
     static PRODUCT = 'product_biz';
     static CATEGORY = 'category_biz';
     static PAGE = 'page_biz';
+    static ORDER = 'order_biz';
     static USER = 'user_biz';
     static GROUP = 'group_biz';
     static IMAGE = 'image_biz';
@@ -98,7 +97,7 @@ describe('data_count', function(){ this.timeout(25000);
                 let post_search = Data_Logic.get_search(Project_Table.PRODUCT,{},{},1,0,{});
                 const [biz_response,biz_data] = await Data.count(database,post_search.table,post_search.filter,option);
                 // -- SEARCH-COUNT-END
-                //Log.w('biz_response',biz_response);
+                Log.w('biz_response',biz_response);
                 Log.w('biz_data',biz_data);
             },
             async function(call){
@@ -119,7 +118,7 @@ describe('data_copy', function(){ this.timeout(25000);
         let database = {};
         let data = {};
         let option = {};
-        let post_data = Data_Logic.get(Project_Table.PRODUCT,'69df012d3168d87e9bb24d02');
+        let post_data = Data_Logic.get(Project_Table.PRODUCT,'69f18aaf4f3f5c3a6h343134');
         async.series([
             async function(call){
                 const [biz_response,biz_data] = await Database.get(DATA_CONFIG);
@@ -127,7 +126,7 @@ describe('data_copy', function(){ this.timeout(25000);
             },
             async function(call){
                 const [biz_response,biz_data] = await Data.copy(database,post_data.table,post_data.id,option);
-                //Log.w('biz_response',biz_response);
+                Log.w('biz_response',biz_response);
                 Log.w('biz_data',biz_data);
             },
             async function(call){
@@ -148,7 +147,7 @@ describe('data_delete', function(){ this.timeout(25000);
         let database = {};
         let data = {};
         let option = {};
-        let post_data = Data_Logic.get(Project_Table.PRODUCT,'69dfa9ff1e803c0c468ae60a');
+        let post_data = Data_Logic.get(Project_Table.PRODUCT,'69f18aaf4f3f5c9a67c9d13f');
         async.series([
             async function(call){
                 const [biz_response,biz_data] = await Database.get(DATA_CONFIG);
@@ -216,9 +215,10 @@ describe('data_get', function(){ this.timeout(25000);
             },
             async function(call){
                 // -- GET-START --
-                parent = Data_Logic.get(Project_Table.PRODUCT,'69dfa9ff1e803c0c468ae60a');
+                parent = Data_Logic.get(Project_Table.PRODUCT,'69f117bffd2c4642efcaa8b8');
                 const [biz_response,biz_data] = await Data.get(database,parent.table,parent.id,option);
-                Log.w('biz_data',biz_data);
+                Log.w('99_biz_response',biz_response);
+                Log.w('99_biz_data',biz_data);
                 // -- GET-END --
 
 
@@ -294,7 +294,6 @@ describe('data_post', function(){ this.timeout(25000);
         let response={};
         let database = {};
         let data = {};
-        let post_data = {};
         let option = {};
         async.series([
             async function(call){
@@ -303,11 +302,12 @@ describe('data_post', function(){ this.timeout(25000);
             },
             async function(call){
                 // -- POST-START --
+                // --- update ---
+                //let post_data = Data_Logic.get(Project_Table.PRODUCT,'69ebead4510257017a5a6a86');
+                // --- new ---
                 post_data = Store_Logic.get_test_product({title:'Product '+Str.get_id()});
-                post_data.id = '69dfa80dda6242ed2bdba57c';
-                post_data.cool = 'butter';
                 const [biz_response,biz_data] = await Data.post(database,post_data.table,post_data,option);
-                //Log.w('biz_response',biz_response);
+                Log.w('biz_response',biz_response);
                 Log.w('biz_data',biz_data);
                 // -- POST-END --
 
@@ -341,9 +341,9 @@ describe('data_many_post_items', function(){ this.timeout(25000);
             },
             async function(call){
                 const [biz_response,biz_data] = await Data.post_items(database,post_data,option);
+                Log.w('99_biz_response',biz_response);
                 Log.w('99_biz_data',biz_data);
                 Log.w('99_biz_data',biz_data.length);
-                //Log.w('99_biz_response',biz_response);
             },
             async function(call){
                 console.log('POST-ITEMS-SUCCESS');
@@ -373,9 +373,9 @@ describe('data_search', function(){ this.timeout(25000);
                 let search = Data_Logic.get_search(Project_Table.PRODUCT,{},{},1,0,{});
                 const [biz_response,biz_data] = await Data.search(database,search.table,search.filter,search.sort_by,search.page_current,search.page_size,option);
                 Log.w('biz_data',biz_data);
+                Log.w('biz_response',biz_response);
                 //Log.w('biz_data_items',biz_data.items);
                 //Log.w('biz_data_length',biz_data.items.length);
-                //Log.w('biz_response',biz_response);
                 // -- SEARCH-END --
 
                 // -- SEARCH-FIELD-START --
@@ -405,6 +405,19 @@ describe('data_search', function(){ this.timeout(25000);
                 search = Data_Logic.get_search(Project_Table.CATEGORY,{category:'Product'},{},1,0);
                 */
                 // -- FOREIGN-2-START --
+
+                // -- FOREIGN-3-START --
+                /*
+                let foreign_user = User_Logic.get_foreign_user();
+                option = {foreigns:[foreign_user]};
+                let search = Data_Logic.get_search(Project_Table.ORDER,{},{},1,0,{});
+                const [biz_response,biz_data] = await Data.search(database,search.table,search.filter,search.sort_by,search.page_current,search.page_size,option);
+                Log.w('99_biz_data',biz_data);
+                for(const item of biz_data.items){
+                    console.log(item.user);
+                }
+                */
+                // -- FOREIGN-3-END --
 
                          },
             async function(call){

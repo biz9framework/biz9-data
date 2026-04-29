@@ -94,7 +94,7 @@ class Foreign {
                                     }
                                     data_item[parent_search_item.title] = match_items[0];
                                 }else{
-                                    data_item[parent_search_item.title] = Data_Logic.get_not_found(parent_search_item.foreign_table,0);
+                                    data_item[parent_search_item.title] = Foreign.get_not_found(parent_search_item.not_found,parent_search_item.foreign_table,0);
                                 }
                             }
                         }
@@ -186,7 +186,7 @@ class Foreign {
                                     }
                                     sub_data_item[sub_search_item.title] = match_items[0];
                                 }else{
-                                    sub_data_item[sub_search_item.title] = Data_Logic.get_not_found(sub_search_item.foreign_table,0);
+                                    sub_data_item[sub_search_item.title] = Foreign.get_not_found(sub_search_item.not_found,search_item.foreign_table,0);
                                 }
                             }
                         }
@@ -276,7 +276,7 @@ class Foreign {
                                         sub_sub_data_item[sub_sub_search_item.title] = match_items[0];
                                     }
                                     else{
-                                        sub_data_item[sub_sub_search_item.title] = Data_Logic.get_not_found(sub_sub_search_item.foreign_table,0);
+                                        sub_data_item[sub_sub_search_item.title] = Foreign.get_not_found(sub_sub_search_item.not_found,sub_sub_search_item.foreign_table,0);
                                     }
                                 }
                             }
@@ -312,6 +312,7 @@ class Foreign {
         return {
             value_type : foreign_item.value_type ? foreign_item.value_type : Data_Value_Type.ITEMS,
             foreign_table : foreign_item.foreign_table,
+            not_found : foreign_item.not_found,
             foreign_field : foreign_item.foreign_field,
             parent_field : foreign_item.parent_field,
             parent_value : '',
@@ -326,6 +327,11 @@ class Foreign {
             data : null
         }
     };
+    static get_not_found = (not_found_obj,table,id) => {
+        not_found_obj.table = table;
+        not_found_obj.id = id;
+        return not_found_obj;
+    }
     static blank = async (database,table,items) => {
         /* options
            - none

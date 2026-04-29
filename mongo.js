@@ -108,9 +108,11 @@ class Mongo {
                         Log.error("DATA-MONGO-BASE-UPDATE-ITEM-BASE-ERROR",error);
                     });
                 }else{
-                    const query = { _id: new ObjectId(item[Data_Field.ID]) };
+                    const update_id = new ObjectId(item[Data_Field.ID]);
+                    const query = { _id: update_id };
                     delete item[Data_Field.ID];
                     database.collection(table).replaceOne(query,item).then((data) => {
+                        item[Data_Field.ID] = update_id.toString();
                         callback(item);
                     }).catch(error => {
                         Log.error("DATA-MONGO-BASE-UPDATE-ITEM-BASE-ERROR",error);
