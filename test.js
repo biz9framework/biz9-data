@@ -186,13 +186,17 @@ describe('data_get', function(){ this.timeout(25000);
             },
             async function(call){
                 // -- GET-START --
-                parent = Data_Logic.get(Project_Table.PRODUCT,'69f18aaf4f3f5c9a67c9d13d');
+                parent = Data_Logic.get(Project_Table.PRODUCT,'69f27448789c484d1601d3c2');
+                // -- foreigns
+                //let foreign_user = Data_Logic.get_foreign(Data_Value_Type.ONE,User_Table.USER,Data_Field.ID,User_Field.USER_ID,{title:'user'});
+                //option = {foreigns:[foreign_user]};
+                // -- joins
+                let join_1 = Data_Logic.get_join(Data_Value_Type.ITEMS,Data_Logic.get_search(Project_Table.PRODUCT,{},{view_count:-1},1,12),{title:'popular_products'});
+                option = {joins:[join_1]};
                 const [biz_response,biz_data] = await Data.get(database,parent.table,parent.id,option);
                 Log.w('99_biz_response',biz_response);
                 Log.w('99_biz_data',biz_data);
                 // -- GET-END --
-
-
                 // --- GET-STORE-CART-START ---
                 /*
                 let foreign_user = Data_Logic.get_foreign(Data_Value_Type.ONE,User_Table.USER,Data_Field.ID,User_Field.USER_ID,{title:'user'});
@@ -341,7 +345,16 @@ describe('data_search', function(){ this.timeout(25000);
             },
             async function(call){
                 // -- SEARCH-START --
-                let search = Data_Logic.get_search(Project_Table.PRODUCT,{},{},1,0,{});
+                let search = Data_Logic.get_search(Project_Table.PRODUCT,{},{},1,3,{});
+                // -- foreigns
+                //let foreign_search_1 = Data_Logic.get_foreign(Data_Value_Type.ITEMS,Project_Table.CATEGORY,Form_Field.TITLE,Form_Field.CATEGORY,{title:'foreign_search_1'});
+                //option = {foreigns:[foreign_search_1]};
+                // -- joins
+                //let join_1 = Data_Logic.get_join(Data_Value_Type.ITEMS,Data_Logic.get_search(Project_Table.PRODUCT,{},{view_count:-1},1,12),{title:'popular_products'});
+                //option = {joins:[join_1]};
+                // -- field
+                option = {field:{title:0}};
+
                 const [biz_response,biz_data] = await Data.search(database,search.table,search.filter,search.sort_by,search.page_current,search.page_size,option);
                 Log.w('biz_data',biz_data);
                 Log.w('biz_response',biz_response);

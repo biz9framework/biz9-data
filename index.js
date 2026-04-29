@@ -317,7 +317,7 @@ class Data {
                     response.messages.push(Response_Logic.get_message(Data_Response_Field.PARAM_ID,Status_Type.OK,id,{title:Config.TITLE}));
                     response.messages.push(Response_Logic.get_message(Data_Response_Field.PARAM_OPTION,Status_Type.OK,option,{title:Config.TITLE}));
                     if(option.field){
-                         response.messages.push(Response_Logic.get_message(Data_Response_Field.OPTION_FIELD,Status_Type.OK,option.field,{title:Config.TITLE}));
+                         response.messages.push(Response_Logic.get_message(Data_Response_Field.PARAM_OPTION_FIELD,Status_Type.OK,option.field,{title:Config.TITLE}));
                     }
                 },
                 async function(call) {
@@ -327,7 +327,7 @@ class Data {
                 async function(call){
                     if(option.cache_delete){
                         const biz_data = await Adapter.delete_item_cache(database,cache,data.table,data.id,option);
-                        response.messages.push(Response_Logic.get_message(Data_Response_Field.OPTION_CACHE_DELETE,Status_Type.OK,true,{title:Config.TITLE}));
+                        response.messages.push(Response_Logic.get_message(Data_Response_Field.PARAM_OPTION_CACHE_DELETE,Status_Type.OK,true,{title:Config.TITLE}));
                     }
                 },
                 //item_by_id
@@ -339,13 +339,13 @@ class Data {
                         }else{
                             data = biz_data;
                             data[option.title] = Obj.merge({},biz_data);;
-                            response.messages.push(Response_Logic.get_message(Data_Response_Field.OPTION_TITLE,Status_Type.OK,option.title,{title:Config.TITLE}));
+                            response.messages.push(Response_Logic.get_message(Data_Response_Field.PARAM_OPTION_TITLE,Status_Type.OK,option.title,{title:Config.TITLE}));
                         }
                 },
                 //9_get_join 9_join
                 function(call){
                     if(option.joins){
-                        response.messages.push(Response_Logic.get_message(Data_Response_Field.OPTION_JOINS,Status_Type.OK,option.joins,{title:Config.TITLE}));
+                        response.messages.push(Response_Logic.get_message(Data_Response_Field.PARAM_OPTION_JOINS,Status_Type.OK,option.joins,{title:Config.TITLE}));
                         Join.get_data(database,cache,option).then(([biz_response,biz_data])=>{
                             for(const search_item of biz_data){
                                 data[search_item.title+"_"+Data_Type.JOIN] = search_item.data;
@@ -366,7 +366,7 @@ class Data {
                 //9_foreign 9_item_foreign
                 async function(call){
                     if(option.foreigns && !Str.check_is_null(data.id)){
-                        response.messages.push(Response_Logic.get_message(Data_Response_Field.OPTION_FOREIGNS,Status_Type.OK,option.foreigns,{title:Config.TITLE}));
+                        response.messages.push(Response_Logic.get_message(Data_Response_Field.PARAM_OPTION_FOREIGNS,Status_Type.OK,option.foreigns,{title:Config.TITLE}));
                         const biz_data = await Foreign.get_data(database,cache,[data],option);
                         data = biz_data[0];
                     }
@@ -416,7 +416,7 @@ class Data {
                 //clean
                 function(call){
                     if(option.clean){
-                        response.messages.push(Response_Logic.get_message(Data_Response_Field.OPTION_CLEAN,Status_Type.OK,true,{title:Config.TITLE}));
+                        response.messages.push(Response_Logic.get_message(Data_Response_Field.PARAM_OPTION_CLEAN,Status_Type.OK,true,{title:Config.TITLE}));
                         let new_data = {};
                         for(const field in data){
                             if(!Obj.check_is_array(data[field]) &&
@@ -436,7 +436,7 @@ class Data {
                 //delete cache item
                 async function(call){
                     if(option.cache_delete || option.overwrite){
-                        response.messages.push(Response_Logic.get_message(Data_Response_Field.OPTION_CACHE_DELETE,Status_Type.OK,true,{title:Config.TITLE}));
+                        response.messages.push(Response_Logic.get_message(Data_Response_Field.PARAM_OPTION_CACHE_DELETE,Status_Type.OK,true,{title:Config.TITLE}));
                         const biz_data = await Adapter.delete_item_cache(database,cache,table,data.id);
                     }
                 },
@@ -447,7 +447,7 @@ class Data {
                 //reset
                 async function(call){
                     if(option.reset && data.id){
-                        response.messages.push(Response_Logic.get_message(Data_Response_Field.OPTION_RESET,Status_Type.OK,true,{title:Config.TITLE}));
+                        response.messages.push(Response_Logic.get_message(Data_Response_Field.PARAM_OPTION_RESET,Status_Type.OK,true,{title:Config.TITLE}));
                         const biz_data = await Adapter.get_item(database,cache,data.table,data.id);
                         data = biz_data;
                     }
@@ -550,7 +550,7 @@ class Data {
                 async function(call){
                     if(option.joins){
                         const [biz_response,biz_data] = await Join.get_data(database,cache,option);
-                            response.messages.push(Response_Logic.get_message(Data_Response_Field.OPTION_JOINS,Status_Type.SUCCESS,option.joins,{title:Config.TITLE}));
+                            response.messages.push(Response_Logic.get_message(Data_Response_Field.PARAM_OPTION_JOINS,Status_Type.OK,option.joins,{title:Config.TITLE}));
                             for(const search_item of biz_data){
                                 data[search_item.title+"_"+Data_Type.JOIN] = search_item.data;
                                 if(search_item.value_type == Data_Value_Type.ITEMS){
@@ -561,17 +561,18 @@ class Data {
                             }
                     }
                 },
-                //9_foreigns //9_items_foreign
+                //9_foreigns //9_items_foreign 9_search_foreigns
                 async function(call){
                     if(option.foreigns && data[Data_Field.ITEMS].length > 0){
-                        const biz_data = await Foreign.get_data(database,cache,data[Data_Field.ITEMS],option);
+                        response.messages.push(Response_Logic.get_message(Data_Response_Field.PARAM_OPTION_FOREIGNS,Status_Type.OK,option.foreigns,{title:Config.TITLE}));
+                            const biz_data = await Foreign.get_data(database,cache,data[Data_Field.ITEMS],option);
                         data[Data_Field.ITEMS] = biz_data;
-                        response.messages.push(Response_Logic.get_message(Data_Field.RESPONSE_FOREIGNS,Status_Type.SUCCESS,option.foreigns),{title:Config.TITLE});
                     }
                 },
                 async function(call){
                     if(data.items){
                         response.messages.push(Response_Logic.get_message(Data_Response_Field.ITEMS_SEARCH_CONFIRM,Status_Type.SUCCESS,Data_Logic.get_message_by_response_field(Data_Response_Field.ITEMS_SEARCH_CONFIRM),{title:Config.TITLE}));
+
                     }else{
                         response.messages.push(Response_Logic.get_message(Data_Response_Field.ITEMS_SEARCH_FAIL,Status_Type.FAIL,Data_Logic.get_message_by_response_field(Data_Response_Field.ITEMS_SEARCH_FAIL),{title:Config.TITLE}));
                     }
