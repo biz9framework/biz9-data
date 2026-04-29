@@ -6,8 +6,7 @@ Description: BiZ9 Framework: Data - Test
 */
 const async = require('async');
 const assert = require('node:assert');
-const {Config}=require('./project');
-BIZ9_CONFIG=Config.get_biz9_config();
+const {Config,Data_Config,Project_Table}=require('./constant');
 const {Database,Data} = require(".");
 const {Log,Str,Obj,Response_Logic,Response_Field,Status_Type,Num}=require("/home/think1/www/doqbox/biz9-framework/biz9-utility/source");
 const {Store_Field,Store_Type,Store_Table,Store_Logic}=require("/home/think1/www/doqbox/biz9-framework/biz9-store/source");
@@ -26,34 +25,6 @@ const {Data_Logic,Data_Value_Type,Data_Table,Data_Field,Data_Response_Field}=req
 -- data_post_items
 -- data_search
 */
-/* --- TEST CONFIG START --- */
-const APP_ID = 'test-stage-april';
-/* --- TEST CONFIG END --- */
-
-/* --- DATA CONFIG START --- */
-const DATA_CONFIG ={
-    APP_ID:APP_ID,
-    MONGO_IP:'0.0.0.0',
-    MONGO_USERNAME_PASSWORD:'',
-    MONGO_PORT_ID:"27019",
-    MONGO_SERVER_USER:'admin',
-    MONGO_CONFIG_FILE_PATH:'/etc/mongod.conf',
-    MONGO_SSH_KEY:"",
-    REDIS_URL:"0.0.0.0",
-    REDIS_PORT_ID:"27019"
-};
-class Project_Table{
-    static BLANK = 'blank_biz';
-    static BLOG_POST = 'blog_post_biz';
-    static PRODUCT = 'product_biz';
-    static CATEGORY = 'category_biz';
-    static PAGE = 'page_biz';
-    static ORDER = 'order_biz';
-    static USER = 'user_biz';
-    static GROUP = 'group_biz';
-    static IMAGE = 'image_biz';
-    static IMAGE_GALLERY = 'image_gallery_biz';
-}
 /* --- DATA CONFIG END --- */
 //9_connect - 9_test_connect
 describe('connect', function(){ this.timeout(25000);
@@ -64,7 +35,7 @@ describe('connect', function(){ this.timeout(25000);
         let data = {};
         async.series([
             async function(call){
-                const [biz_response,biz_data] = await Database.get(DATA_CONFIG);
+                const [biz_response,biz_data] = await Database.get(Data_Config);
                 database = biz_data;
             },
             async function(call){
@@ -89,7 +60,7 @@ describe('data_count', function(){ this.timeout(25000);
         let option = {};
         async.series([
             async function(call){
-                const [biz_response,biz_data] = await Database.get(DATA_CONFIG);
+                const [biz_response,biz_data] = await Database.get(Data_Config);
                 database = biz_data;
             },
             async function(call){
@@ -121,7 +92,7 @@ describe('data_copy', function(){ this.timeout(25000);
         let post_data = Data_Logic.get(Project_Table.PRODUCT,'69f18aaf4f3f5c9a67c9d13d');
         async.series([
             async function(call){
-                const [biz_response,biz_data] = await Database.get(DATA_CONFIG);
+                const [biz_response,biz_data] = await Database.get(Data_Config);
                 database = biz_data;
             },
             async function(call){
@@ -150,7 +121,7 @@ describe('data_delete', function(){ this.timeout(25000);
         let post_data = Data_Logic.get(Project_Table.PRODUCT,'69f18aaf4f3f5c9a67c9d13d');
         async.series([
             async function(call){
-                const [biz_response,biz_data] = await Database.get(DATA_CONFIG);
+                const [biz_response,biz_data] = await Database.get(Data_Config);
                 database = biz_data;
             },
             async function(call){
@@ -179,7 +150,7 @@ describe('data_many_delete_search', function(){ this.timeout(25000);
         let post_search = Data_Logic.get_search(Project_Table.PRODUCT,{},{},1,0,{});
         async.series([
             async function(call){
-                const [biz_response,biz_data] = await Database.get(DATA_CONFIG);
+                const [biz_response,biz_data] = await Database.get(Data_Config);
                 database = biz_data;
             },
             async function(call){
@@ -210,7 +181,7 @@ describe('data_get', function(){ this.timeout(25000);
        let parent = {};
         async.series([
             async function(call){
-                const [biz_response,biz_data] = await Database.get(DATA_CONFIG);
+                const [biz_response,biz_data] = await Database.get(Data_Config);
                 database = biz_data;
             },
             async function(call){
@@ -297,7 +268,7 @@ describe('data_post', function(){ this.timeout(25000);
         let option = {};
         async.series([
             async function(call){
-                const [biz_response,biz_data] = await Database.get(DATA_CONFIG);
+                const [biz_response,biz_data] = await Database.get(Data_Config);
                 database = biz_data;
             },
             async function(call){
@@ -336,7 +307,7 @@ describe('data_many_post_items', function(){ this.timeout(25000);
         post_data = Obj.merge_items(Store_Logic.get_test_products(),post_data);
         async.series([
             async function(call){
-                const [biz_response,biz_data] = await Database.get(DATA_CONFIG);
+                const [biz_response,biz_data] = await Database.get(Data_Config);
                 database = biz_data;
             },
             async function(call){
@@ -365,7 +336,7 @@ describe('data_search', function(){ this.timeout(25000);
         let option = {};
        async.series([
             async function(call){
-                const [biz_response,biz_data] = await Database.get(DATA_CONFIG);
+                const [biz_response,biz_data] = await Database.get(Data_Config);
                 database = biz_data;
             },
             async function(call){
@@ -442,7 +413,7 @@ describe('data_blank', function(){ this.timeout(25000);
         let post_search = Data_Logic.get_search(Project_Table.PRODUCT,{},{},1,0,{});
         async.series([
             async function(call){
-                const [biz_response,biz_data] = await Database.get(DATA_CONFIG);
+                const [biz_response,biz_data] = await Database.get(Data_Config);
                 database = biz_data;
             },
             async function(call){
@@ -460,5 +431,3 @@ describe('data_blank', function(){ this.timeout(25000);
             });
     });
 });
-
-

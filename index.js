@@ -14,6 +14,15 @@ const {Foreign} = require('./foreign.js');
 const {Join} = require('./join.js');
 const {Adapter}  = require('./adapter.js');
 class Database {
+    /* - 9_define -
+     * -- count
+     * -- copy
+     * -- delete
+     * -- delete_search
+     * -- get
+     * -- post
+     * -- search
+    */
     static get = async (data_config,option) => {
         /* options
         - none
