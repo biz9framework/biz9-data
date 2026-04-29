@@ -303,7 +303,7 @@ class Data {
             option = !Obj.check_is_empty(option) ? option : {};
             async.series([
                 async function(call) {
-                    response.messages.push(Response_Logic.get_message(Data_Response_Field.PARAM_APP_ID,Status_Type.OK,database.data_config.APP_ID));
+                    response.messages.push(Response_Logic.get_message(Data_Response_Field.PARAM_APP_ID,Status_Type.OK,database.data_config.APP_ID,{title:Config.TITLE}));
                     response.messages.push(Response_Logic.get_message(Data_Response_Field.PARAM_TABLE,Status_Type.OK,table,{title:Config.TITLE}));
                     response.messages.push(Response_Logic.get_message(Data_Response_Field.PARAM_ID,Status_Type.OK,id,{title:Config.TITLE}));
                     response.messages.push(Response_Logic.get_message(Data_Response_Field.PARAM_OPTION,Status_Type.OK,option,{title:Config.TITLE}));
@@ -364,9 +364,9 @@ class Data {
                 },
                 async function(call){
                         if(!Str.check_is_null(data.id)){
-                            response.messages.push(Response_Logic.get_message(Response_Field.GET_CONFIRM,Status_Type.SUCCESS,Data_Logic.get_message_by_response_field(Response_Field.GET_CONFIRM,{title:Config.TITLE})));
+                            response.messages.push(Response_Logic.get_message(Response_Field.GET_CONFIRM,Status_Type.SUCCESS,Data_Logic.get_message_by_response_field(Response_Field.GET_CONFIRM),{title:Config.TITLE}));
                         }else{
-                            response.messages.push(Response_Logic.get_message(Response_Field.GET_FAIL,Status_Type.FAIL,Data_Logic.get_message_by_response_field(Response_Field.GET_FAIL,{title:Config.TITLE})));
+                            response.messages.push(Response_Logic.get_message(Response_Field.GET_CONFIRM,Status_Type.FAIL,Data_Logic.get_message_by_response_field(Response_Field.GET_FAIL),{title:Config.TITLE}));
                         }
 
                     response = Response_Logic.get_status(response);

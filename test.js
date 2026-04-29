@@ -118,7 +118,7 @@ describe('data_copy', function(){ this.timeout(25000);
         let database = {};
         let data = {};
         let option = {};
-        let post_data = Data_Logic.get(Project_Table.PRODUCT,'69f18aaf4f3f5c3a6h343134');
+        let post_data = Data_Logic.get(Project_Table.PRODUCT,'69f18aaf4f3f5c9a67c9d13d');
         async.series([
             async function(call){
                 const [biz_response,biz_data] = await Database.get(DATA_CONFIG);
@@ -147,7 +147,7 @@ describe('data_delete', function(){ this.timeout(25000);
         let database = {};
         let data = {};
         let option = {};
-        let post_data = Data_Logic.get(Project_Table.PRODUCT,'69f18aaf4f3f5c9a67c9d13f');
+        let post_data = Data_Logic.get(Project_Table.PRODUCT,'69f18aaf4f3f5c9a67c9d13d');
         async.series([
             async function(call){
                 const [biz_response,biz_data] = await Database.get(DATA_CONFIG);
@@ -215,7 +215,7 @@ describe('data_get', function(){ this.timeout(25000);
             },
             async function(call){
                 // -- GET-START --
-                parent = Data_Logic.get(Project_Table.PRODUCT,'69f117bffd2c4642efcaa8b8');
+                parent = Data_Logic.get(Project_Table.PRODUCT,'69f18aaf4f3f5c9a67c9d13d');
                 const [biz_response,biz_data] = await Data.get(database,parent.table,parent.id,option);
                 Log.w('99_biz_response',biz_response);
                 Log.w('99_biz_data',biz_data);
