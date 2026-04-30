@@ -14,14 +14,16 @@ const {Foreign} = require('./foreign.js');
 const {Join} = require('./join.js');
 const {Adapter}  = require('./adapter.js');
 class Database {
-    /* - 9_define -
-     * -- count
-     * -- copy
-     * -- delete
-     * -- delete_search
-     * -- get
-     * -- post
-     * -- search
+    /* - 9_DEFINE -
+     * -- METHODS  --
+     * count / (database,table,search_filter)
+     * copy / (database,table,id,option)
+     * delete / (database,table,id,option)
+     * delete_search / (database,table,filter,option)
+     * get / (database,table,id,option)
+     * post / (database,table,data,option)
+     * post_items / (database,table,data,option)
+     * search / (database,table,filter,sort_by,page_current,page_size,option)
     */
     static get = async (data_config,option) => {
         /* options
@@ -187,7 +189,7 @@ class Data {
         });
     };
     //9_delete
-    static delete = async(database,table,id,option) => {
+    static delete = (database,table,id,option) => {
         /* requried
          * - table
          * - id
@@ -233,7 +235,7 @@ class Data {
         });
     };
     //9_delete_search
-    static delete_search = async (database,table,filter,option) => {
+    static delete_search = (database,table,filter,option) => {
         /* requried
          * - table
          * - search_filter
@@ -292,7 +294,7 @@ class Data {
         });
     };
     //9_get
-    static get = async(database,table,id,option) => {
+    static get = (database,table,id,option) => {
      /* requried
           - table
           - id
@@ -388,7 +390,7 @@ class Data {
         });
     };
     //9_post
-    static post = async (database,table,data,option) => {
+    static post = (database,table,data,option) => {
         /* requried
           - table
           - data / obj
