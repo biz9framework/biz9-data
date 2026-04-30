@@ -454,7 +454,7 @@ class Data {
                 },
                 async function(call){
                     if(!Str.check_is_null(data.id)){
-                        response.messages.push(Response_Logic.get_message(Response_Field.POST_CONFIRM,Status_Type.SUCCESS,Data_Logic.get_message_by_response_field(Response_Field.POST_CONFIRM,{title:Config.TITLE})));
+                        response.messages.push(Response_Logic.get_message(Response_Field.POST_CONFIRM,Status_Type.SUCCESS,Data_Logic.get_message_by_response_field(Response_Field.POST_CONFIRM),{title:Config.TITLE}));
                         }else{
                         response.messages.push(Response_Logic.get_message(Response_Field.POST_FAIL,Status_Type.FAIL,Data_Logic.get_message_by_response_field(Response_Field.POST_FAIL,{title:Config.TITLE})));
                         }

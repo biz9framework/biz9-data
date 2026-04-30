@@ -318,7 +318,7 @@ describe('data_search', function(){ this.timeout(25000);
             },
             async function(call){
                 // -- SEARCH-START --
-                let search = Data_Logic.get_search(Project_Table.PRODUCT,{},{},1,3,{});
+                //let search = Data_Logic.get_search(Project_Table.PRODUCT,{},{},1,3,{});
                 // -- foreigns
                 //let foreign_search_1 = Data_Logic.get_foreign(Data_Value_Type.ITEMS,Project_Table.CATEGORY,Form_Field.TITLE,Form_Field.CATEGORY,{title:'foreign_search_1'});
                 //option = {foreigns:[foreign_search_1]};
@@ -326,11 +326,18 @@ describe('data_search', function(){ this.timeout(25000);
                 //let join_1 = Data_Logic.get_join(Data_Value_Type.ITEMS,Data_Logic.get_search(Project_Table.PRODUCT,{},{view_count:-1},1,12),{title:'popular_products'});
                 //option = {joins:[join_1]};
                 // -- field
-                option = {field:{title:0}};
+                //option = {};
+                // -- custom_1
+                let product_1 = Data_Logic.get(Project_Table.PRODUCT,'69f356eb877ecbb2fbba06ec');
+                let sub_product_1 = Data_Logic.get(Project_Table.PRODUCT,'69f356eb877ecbb2fbba06ed');
+                let sub_product_2 = Data_Logic.get(Project_Table.PRODUCT,'69f356eb877ecbb2fbba06ee');
+                let query = { $or: [{id:product_1.id},{id:sub_product_1.id},{id:sub_product_2.id}]};
+                Log.w('33',query);
+                let search = Data_Logic.get_search(Project_Table.PRODUCT,query,{},1,0);
 
                 const [biz_response,biz_data] = await Data.search(database,search.table,search.filter,search.sort_by,search.page_current,search.page_size,option);
-                Log.w('biz_data',biz_data);
                 Log.w('biz_response',biz_response);
+                Log.w('biz_data',biz_data);
                 //Log.w('biz_data_items',biz_data.items);
                 //Log.w('biz_data_length',biz_data.items.length);
                 // -- SEARCH-END --
