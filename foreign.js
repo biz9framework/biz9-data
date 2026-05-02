@@ -186,7 +186,7 @@ class Foreign {
                                     }
                                     sub_data_item[sub_search_item.title] = match_items[0];
                                 }else{
-                                    sub_data_item[sub_search_item.title] = Foreign.get_not_found(sub_search_item.not_found,search_item.foreign_table,0);
+                                    sub_data_item[sub_search_item.title] = Foreign.get_not_found(sub_search_item.not_found,sub_search_item.foreign_table,0);
                                 }
                             }
                         }

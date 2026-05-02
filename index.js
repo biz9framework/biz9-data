@@ -21,8 +21,8 @@ class Database {
      * delete / (database,table,id,option)
      * delete_search / (database,table,filter,option)
      * get / (database,table,id,option)
-     * post / (database,table,data,option)
-     * post_items / (database,table,data,option)
+     * post / (database,table,data_obj,option)
+     * post_items / (database,table,data_obj,option)
      * search / (database,table,filter,sort_by,page_current,page_size,option)
     */
     static get = async (data_config,option) => {
@@ -406,6 +406,7 @@ class Data {
             option = !Obj.check_is_empty(option) ? option : {};
             async.series([
             async function(call) {
+                // -- response-params
                     response.messages.push(Response_Logic.get_message(Data_Response_Field.PARAM_APP_ID,Status_Type.OK,database.data_config.APP_ID,{title:Config.TITLE}));
                     response.messages.push(Response_Logic.get_message(Data_Response_Field.PARAM_TABLE,Status_Type.OK,table,{title:Config.TITLE}));
                     response.messages.push(Response_Logic.get_message(Data_Response_Field.PARAM_DATA,Status_Type.OK,data,{title:Config.TITLE}));
@@ -415,8 +416,8 @@ class Data {
                     const biz_data = await Cache.get(database.data_config);
                     cache = biz_data;
                 },
-                //clean
                 function(call){
+                    // -- option-clean
                     if(option.clean){
                         response.messages.push(Response_Logic.get_message(Data_Response_Field.PARAM_OPTION_CLEAN,Status_Type.OK,true,{title:Config.TITLE}));
                         let new_data = {};
@@ -435,19 +436,20 @@ class Data {
                         call();
                     }
                 },
-                //delete cache item
                 async function(call){
+                    // -- option-delete-item
                     if(option.cache_delete || option.overwrite){
                         response.messages.push(Response_Logic.get_message(Data_Response_Field.PARAM_OPTION_CACHE_DELETE,Status_Type.OK,true,{title:Config.TITLE}));
                         const biz_data = await Adapter.delete_item_cache(database,cache,table,data.id);
                     }
                 },
                 async function(call){
+                    // -- post-item
                     const biz_data = await Adapter.post_item(database,cache,table,data,option);
                     data = biz_data;
                 },
-                //reset
                 async function(call){
+                    // -- option-reset
                     if(option.reset && data.id){
                         response.messages.push(Response_Logic.get_message(Data_Response_Field.PARAM_OPTION_RESET,Status_Type.OK,true,{title:Config.TITLE}));
                         const biz_data = await Adapter.get_item(database,cache,data.table,data.id);
@@ -455,6 +457,7 @@ class Data {
                     }
                 },
                 async function(call){
+                    // -- response-status
                     if(!Str.check_is_null(data.id)){
                         response.messages.push(Response_Logic.get_message(Response_Field.POST_CONFIRM,Status_Type.SUCCESS,Data_Logic.get_message_by_response_field(Response_Field.POST_CONFIRM),{title:Config.TITLE}));
                         }else{
